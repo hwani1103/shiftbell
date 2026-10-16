@@ -1,4 +1,9 @@
+import 'widgets/app_ui_feedback.dart';
 import 'services/operations_analytics.dart';
+import 'theme/app_ui_theme.dart';
+import 'widgets/app_ui_theme_scope.dart';
+import 'widgets/calendar_app_frame.dart';
+import 'theme/calendar_reading_palette.dart';
 import 'services/holiday_sync_service.dart';
 import 'services/friend_sync_service.dart';
 import 'services/restore_coordinator.dart';
@@ -417,7 +422,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 // 여전히 보인다는 피드백을 받아서, 아예 같은 흰색으로 통일해
                 // 이 깜빡임의 근본 원인 자체를 없앰.
                 builder: (context, child) {
-                  return AppContentFrame(child: child!);
+                  return AppUiThemeScope(
+                    preserveTextGeometry: true,
+                    builder: (context) => AppContentFrame(child: child!),
+                  );
                 },
                 home: const InitialRouter(),
                 routes: {
@@ -592,8 +600,8 @@ class _MainScreenState extends ConsumerState<MainScreen>
         builder: (context, ref, _) {
           final calendarTheme =
               context.availableCalendarTheme(ref.watch(calendarThemeProvider));
-          return Theme(
-            data: AppTheme.forCalendar(calendarTheme),
+          return CalendarDesignTheme(
+            theme: calendarTheme,
             child: CalendarTab(),
           );
         },
@@ -603,7 +611,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
       // 끼워 넣음.
       // 탭 인덱스는 두 언어에서 동일하게 유지한다. 사용자 숨김 설정은
       // _visibleTabIndices에서 처리한다.
-      context.usesKoreanFeatures
+      context.supportsSleepFeatures
           ? ConditionTab(
               onDisabled: () =>
                   setState(() => _currentIndex = kCalendarTabIndex),
@@ -645,7 +653,8 @@ class _MainScreenState extends ConsumerState<MainScreen>
     // 가능성이 높아짐(첫 진입 시 완전히 안 보인다는 보장은 아니지만 체감
     // 지연은 크게 줄어듦).
     // 수면 기록 및 관련 판정은 한국어에서만 준비한다.
-    if (context.usesKoreanFeatures) {
+    if (context.supportsSleepFeatures &&
+        ref.read(context.sleepTabEnabledProvider)) {
       ref.read(sleepRecordProvider);
       // ⭐ 2026-09-15 - 점수·건강 Tip 삭제 후: "오늘의 컨디션"이 쓰는 입력(판정·수면 기록·미니 달력)만 미리 로딩
       // (recoveryBriefingProvider 자체는 1분 시계를 쓰는 autoDispose라 화면이 볼 때만 만든다)
@@ -674,7 +683,8 @@ class _MainScreenState extends ConsumerState<MainScreen>
       OperationsAnalytics.report();
       // 한국어 화면은 자체 lifecycle observer가 새 기록을 읽는다. 영어 화면도
       // 네이티브 수면 감지가 앱 밖에서 쓴 기록을 복귀 시 반영해야 한다.
-      if (context.usesKoreanFeatures) {
+      if (context.supportsSleepFeatures &&
+          ref.read(context.sleepTabEnabledProvider)) {
         ref.read(sleepRecordProvider.notifier).refresh();
       }
       // ⭐ 2026-09-14 (T10 연결, G2-01) - 재개될 때마다 친구공유 대기 작업(dirty/stop_pending) 재시도
@@ -780,8 +790,8 @@ class _MainScreenState extends ConsumerState<MainScreen>
             // ⭐ 2026-09-07 - 컨디션 탭은 항상 "달력 바로 다음"에 위치함.
             // 사용자가 설정에서 꺼놨으면(conditionTabEnabledProvider) 그 탭 자체가 네비게이션에
             // 없으니 다음알람 탭(0)으로 안전하게 대체.
-            final conditionVisible = context.usesKoreanFeatures &&
-                ref.read(conditionTabEnabledProvider);
+            final conditionVisible = context.supportsSleepFeatures &&
+                ref.read(context.sleepTabEnabledProvider);
             _currentIndex = conditionVisible ? kCalendarTabIndex + 1 : 0;
           } else {
             _currentIndex = tabIndex;
@@ -813,8 +823,8 @@ class _MainScreenState extends ConsumerState<MainScreen>
   List<int> get _visibleTabIndices {
     final scheduleVisible =
         context.usesKoreanFeatures && ref.watch(scheduleTabEnabledProvider);
-    final conditionVisible =
-        context.usesKoreanFeatures && ref.watch(conditionTabEnabledProvider);
+    final conditionVisible = context.supportsSleepFeatures &&
+        ref.watch(context.sleepTabEnabledProvider);
     return [
       0,
       if (scheduleVisible) kScheduleManagementTabIndex,
@@ -844,9 +854,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
             icon: NavIconEmphasis(
                 icon: Icons.self_improvement,
                 sequence: _emphasizedTab == 3 ? _emphasisSequence : 0),
-            label: Localizations.localeOf(context).languageCode == 'ko'
-                ? '수면·회복'
-                : 'Sleep');
+            label: context.l10n.sleepText000);
       case 4:
         return BottomNavigationBarItem(
             icon: const Icon(Icons.settings), label: context.l10n.navSettings);
@@ -886,6 +894,14 @@ class _MainScreenState extends ConsumerState<MainScreen>
       });
     });
     final visibleTabIndices = _visibleTabIndices;
+    final calendarTheme =
+        context.availableCalendarTheme(ref.watch(calendarThemeProvider));
+    final calendarFrameEnabled = _currentIndex == kCalendarTabIndex &&
+        calendarUsesAppFrame(calendarTheme,
+            includeLegend: context.usesKoreanFeatures);
+    // The next-alarm body and its bottom navigation share one screen palette.
+    final appFrameEnabled =
+        calendarFrameEnabled || _currentIndex != kCalendarTabIndex;
     // ⭐ 방금 이 탭이 꺼졌는데(다른 경로로, 혹은 아직 반영 전 프레임에) 지금
     // 하필 그 탭을 보고 있었다면 안전한 탭(달력)으로 옮김 - DisableTabButton의
     // onDisabled가 이미 즉시 처리하지만, 이건 그 경로를 놓쳤을 때의 안전망.
@@ -896,83 +912,102 @@ class _MainScreenState extends ConsumerState<MainScreen>
         }
       });
     }
-    return PopScope(
-      canPop: _currentIndex == kCalendarTabIndex, // 달력탭이면 앱 종료 허용
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _currentIndex != kCalendarTabIndex) {
-          // 달력탭이 아니면 달력탭으로 이동
-          setState(() => _currentIndex = kCalendarTabIndex);
-        }
-      },
-      child: Scaffold(
-        // ⭐ 2026-08-24 - AppTheme.lightTheme.scaffoldBackgroundColor(현재 흰색)와
-        // 같은 값을 여기 인스턴스에도 직접 명시함(hot reload에도 안전하게 -
-        // onboarding_screen.dart의 같은 패턴 참고).
-        backgroundColor: Colors.white,
-        // ⭐ 2026-08-24 추가 - 배너 광고 자리(BannerAdSlot)를 탭 화면 바깥,
-        // BottomNavigationBar 바로 위에 둠. Column으로 감싸서 "탭 컨텐츠(Expanded)
-        // + 광고 슬롯" 순서로 쌓았고, 광고 슬롯은 Offstage로 감싸 달력 탭(index 1)일
-        // 때만 자리를 차지하게 함.
-        //
-        // 왜 _tabs[_currentIndex]처럼 탭 안에 안 넣고 여기 두는가: 이 화면은
-        // IndexedStack이 아니라 `_tabs[_currentIndex]` 하나만 트리에 올리는 구조라,
-        // 탭을 옮기면 이전 탭 위젯이 통째로 dispose됨. 광고를 달력 탭 위젯 안에
-        // 넣으면 달력 탭을 떠났다 돌아올 때마다 BannerAd와 그 안드로이드 플랫폼
-        // 뷰가 매번 새로 생성돼서 (1) 탭 전환마다 버벅이고 (2) 광고가 매번 새로
-        // 요청됨. Offstage는 자식을 계속 mount된 채로 유지하면서(=BannerAd/플랫폼
-        // 뷰가 살아있음) 화면에서 크기·렌더링만 뺀다 - 그래서 탭을 몇 번을 오가도
-        // 광고는 앱 시작 시 딱 한 번만 로드되고, 달력 탭으로 돌아오면 다시
-        // "짠" 나타나기만 함(재생성 없음).
-        resizeToAvoidBottomInset: false,
-        body: Column(
-          children: [
-            Expanded(child: _tabs[_currentIndex]),
-            // ⭐ 2026-08-25 - 일정관리 탭뿐 아니라 달력 탭에서도 항상 자리를
-            // 차지하도록 확장 - "일정관리도 광고를 고정으로 보여주자" 요청.
-            // 2026-09-01 후속14 - 컨디션 탭(index 3)도 동일하게 추가(사용자 요청 -
-            // "달력/일정관리와 똑같은 위치·로직으로"). 다른 탭에선 여전히 높이 0.
-            // ⭐ 2026-09-04 - 탭 순서를 다음알람/일정관리/달력/컨디션/설정으로
-            // 바꾸면서 일정관리·달력의 인덱스가 서로 맞바뀌었을 뿐(1,2 두 값은
-            // 그대로) 이 조건식 자체는 안 바뀜 - kCalendarTabIndex(=2)와 일정관리
-            // 인덱스(=1)를 그대로 씀.
-            // 사용자 설정으로 숨긴 탭은 _visibleTabIndices에서 빠진다.
-            // ⭐ 2026-09-13(2차) - "OO 화면 사용하지 않기" 버튼을 여기(광고
-            // 바로 위, 항상 고정 위치)에서 각 탭 자신의 스크롤 콘텐츠 맨
-            // 아래로 옮김(사용자 요청 - "진짜 필요할 때만 누르는 버튼이니
-            // 스크롤을 끝까지 내려야 보이게"). 콜백(onDisabled/onConfirmed -
-            // 일정 알림 일괄 취소/수면 위젯 즉시 갱신 등, 탭 숨김의 우회
-            // 경로를 막는 로직)은 그대로 두고 ScheduleManagementTab/
-            // ConditionTab 생성자로 내려보냄(_setupTabsAndPrewarm 참고) -
-            // 동작 자체는 안 바뀌고 버튼이 그려지는 위치만 바뀜.
-            Offstage(
-              offstage: _currentIndex != 1 &&
-                  _currentIndex != kCalendarTabIndex &&
-                  _currentIndex != 3,
-              child: const BannerAdSlot(),
-            ),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          // ⭐ 2026-09-13 - BottomNavigationBar의 currentIndex/items는 실제
-          // _tabs 인덱스가 아니라 "보이는 탭들 중 몇 번째인지"를 써야 함(예:
-          // 일정관리를 껐으면 [0, 2, 3, 4] 중 _currentIndex(=2, 달력)의
-          // 위치는 1) - 안 그러면 숨긴 탭 자리만큼 나머지 항목들이 밀려
-          // 보인다. indexOf가 -1이면(과도기 프레임에서 _currentIndex가 막
-          // 숨겨진 탭을 가리키는 순간, 위 build() 시작의 안전망이 다음
-          // 프레임에 고쳐주기 전) 0으로 방어.
-          currentIndex: () {
-            final idx = visibleTabIndices.indexOf(_currentIndex);
-            return idx < 0 ? 0 : idx;
-          }(),
-          onTap: (visibleIndex) {
-            final tab = visibleTabIndices[visibleIndex];
-            setState(() => _currentIndex = tab);
-          },
-          items: [for (final i in visibleTabIndices) _navItemFor(i, context)],
-        ),
-      ),
-    );
+    return AppUiThemeScope(
+        enabled: appFrameEnabled,
+        preserveTextGeometry: true,
+        paletteTransform: context.usesKoreanFeatures &&
+                calendarFrameEnabled &&
+                CalendarThemeRollout.usesReading(calendarTheme)
+            ? CalendarReadingPalette.framePalette
+            : null,
+        inactiveSystemUiStyle: ref.watch(calendarThemeProvider).isDark
+            ? SystemUiOverlayStyle.light
+            : SystemUiOverlayStyle.dark,
+        builder: (frameContext) => PopScope(
+              canPop: _currentIndex == kCalendarTabIndex, // 달력탭이면 앱 종료 허용
+              onPopInvokedWithResult: (didPop, result) {
+                if (!didPop && _currentIndex != kCalendarTabIndex) {
+                  // 달력탭이 아니면 달력탭으로 이동
+                  setState(() => _currentIndex = kCalendarTabIndex);
+                }
+              },
+              child: Scaffold(
+                // ⭐ 2026-08-24 - AppTheme.lightTheme.scaffoldBackgroundColor(현재 흰색)와
+                // 같은 값을 여기 인스턴스에도 직접 명시함(hot reload에도 안전하게 -
+                // onboarding_screen.dart의 같은 패턴 참고).
+                backgroundColor: appFrameEnabled
+                    ? AppUiPalette.of(frameContext).background
+                    : Colors.white,
+                // ⭐ 2026-08-24 추가 - 배너 광고 자리(BannerAdSlot)를 탭 화면 바깥,
+                // BottomNavigationBar 바로 위에 둠. Column으로 감싸서 "탭 컨텐츠(Expanded)
+                // + 광고 슬롯" 순서로 쌓았고, 광고 슬롯은 Offstage로 감싸 달력 탭(index 1)일
+                // 때만 자리를 차지하게 함.
+                //
+                // 왜 _tabs[_currentIndex]처럼 탭 안에 안 넣고 여기 두는가: 이 화면은
+                // IndexedStack이 아니라 `_tabs[_currentIndex]` 하나만 트리에 올리는 구조라,
+                // 탭을 옮기면 이전 탭 위젯이 통째로 dispose됨. 광고를 달력 탭 위젯 안에
+                // 넣으면 달력 탭을 떠났다 돌아올 때마다 BannerAd와 그 안드로이드 플랫폼
+                // 뷰가 매번 새로 생성돼서 (1) 탭 전환마다 버벅이고 (2) 광고가 매번 새로
+                // 요청됨. Offstage는 자식을 계속 mount된 채로 유지하면서(=BannerAd/플랫폼
+                // 뷰가 살아있음) 화면에서 크기·렌더링만 뺀다 - 그래서 탭을 몇 번을 오가도
+                // 광고는 앱 시작 시 딱 한 번만 로드되고, 달력 탭으로 돌아오면 다시
+                // "짠" 나타나기만 함(재생성 없음).
+                resizeToAvoidBottomInset: false,
+                body: Column(
+                  children: [
+                    Expanded(child: _tabs[_currentIndex]),
+                    // ⭐ 2026-08-25 - 일정관리 탭뿐 아니라 달력 탭에서도 항상 자리를
+                    // 차지하도록 확장 - "일정관리도 광고를 고정으로 보여주자" 요청.
+                    // 2026-09-01 후속14 - 컨디션 탭(index 3)도 동일하게 추가(사용자 요청 -
+                    // "달력/일정관리와 똑같은 위치·로직으로"). 다른 탭에선 여전히 높이 0.
+                    // ⭐ 2026-09-04 - 탭 순서를 다음알람/일정관리/달력/컨디션/설정으로
+                    // 바꾸면서 일정관리·달력의 인덱스가 서로 맞바뀌었을 뿐(1,2 두 값은
+                    // 그대로) 이 조건식 자체는 안 바뀜 - kCalendarTabIndex(=2)와 일정관리
+                    // 인덱스(=1)를 그대로 씀.
+                    // 사용자 설정으로 숨긴 탭은 _visibleTabIndices에서 빠진다.
+                    // ⭐ 2026-09-13(2차) - "OO 화면 사용하지 않기" 버튼을 여기(광고
+                    // 바로 위, 항상 고정 위치)에서 각 탭 자신의 스크롤 콘텐츠 맨
+                    // 아래로 옮김(사용자 요청 - "진짜 필요할 때만 누르는 버튼이니
+                    // 스크롤을 끝까지 내려야 보이게"). 콜백(onDisabled/onConfirmed -
+                    // 일정 알림 일괄 취소/수면 위젯 즉시 갱신 등, 탭 숨김의 우회
+                    // 경로를 막는 로직)은 그대로 두고 ScheduleManagementTab/
+                    // ConditionTab 생성자로 내려보냄(_setupTabsAndPrewarm 참고) -
+                    // 동작 자체는 안 바뀌고 버튼이 그려지는 위치만 바뀜.
+                    Offstage(
+                      offstage: _currentIndex != 1 &&
+                          _currentIndex != kCalendarTabIndex &&
+                          _currentIndex != 3,
+                      child: BannerAdSlot(
+                        showTopBorder: _currentIndex != kCalendarTabIndex ||
+                            calendarTheme != CalendarThemeId.mainWhite,
+                      ),
+                    ),
+                  ],
+                ),
+                bottomNavigationBar: BottomNavigationBar(
+                  type: BottomNavigationBarType.fixed,
+                  // ⭐ 2026-09-13 - BottomNavigationBar의 currentIndex/items는 실제
+                  // _tabs 인덱스가 아니라 "보이는 탭들 중 몇 번째인지"를 써야 함(예:
+                  // 일정관리를 껐으면 [0, 2, 3, 4] 중 _currentIndex(=2, 달력)의
+                  // 위치는 1) - 안 그러면 숨긴 탭 자리만큼 나머지 항목들이 밀려
+                  // 보인다. indexOf가 -1이면(과도기 프레임에서 _currentIndex가 막
+                  // 숨겨진 탭을 가리키는 순간, 위 build() 시작의 안전망이 다음
+                  // 프레임에 고쳐주기 전) 0으로 방어.
+                  currentIndex: () {
+                    final idx = visibleTabIndices.indexOf(_currentIndex);
+                    return idx < 0 ? 0 : idx;
+                  }(),
+                  onTap: (visibleIndex) {
+                    final tab = visibleTabIndices[visibleIndex];
+                    setState(() => _currentIndex = tab);
+                  },
+                  items: [
+                    for (final i in visibleTabIndices)
+                      _navItemFor(i, frameContext)
+                  ],
+                ),
+              ),
+            ));
   }
 }
 
@@ -1027,18 +1062,18 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
 
     if (granted && overlayPermission) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('✅ 모든 권한 허용 완료')),
+        const AppUiSnackBar(content: Text('✅ 모든 권한 허용 완료')),
       );
     } else if (granted && !overlayPermission) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        const AppUiSnackBar(
           content: Text('⚠️ "다른 앱 위에 표시" 권한이 필요합니다'),
           duration: Duration(seconds: 4),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        AppUiSnackBar(
           content: const Text('⚠️ 권한이 필요합니다'),
           action: SnackBarAction(
             label: '설정',
@@ -1053,7 +1088,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
     await AlarmService().requestOverlayPermission();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      const AppUiSnackBar(
         content: Text('⏳ 권한 설정 후 뒤로가기를 눌러주세요'),
         duration: Duration(seconds: 5),
       ),
@@ -1094,7 +1129,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
   Future<void> _scheduleAlarm() async {
     if (!permissionsGranted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('⚠️ 먼저 권한을 허용해주세요')),
+        const AppUiSnackBar(content: Text('⚠️ 먼저 권한을 허용해주세요')),
       );
       return;
     }
@@ -1108,14 +1143,14 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        AppUiSnackBar(
           content: Text('✅ 알람 등록 완료!\n${_formatDateTime(selectedDateTime)}'),
           duration: const Duration(seconds: 3),
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ 알람 등록 실패: $e')),
+        AppUiSnackBar(content: Text('❌ 알람 등록 실패: $e')),
       );
     }
   }
@@ -1123,7 +1158,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
   Future<void> _scheduleTestAlarm() async {
     if (!permissionsGranted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('⚠️ 먼저 권한을 허용해주세요')),
+        const AppUiSnackBar(content: Text('⚠️ 먼저 권한을 허용해주세요')),
       );
       return;
     }
@@ -1134,7 +1169,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      AppUiSnackBar(
         content: Text(overlayPermissionGranted
             ? '🧪 5초 후 작은 팝업창이 뜹니다!'
             : '🧪 5초 후 전체 화면이 뜹니다!\n(Overlay 권한 없음)'),
@@ -1146,7 +1181,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
   Future<void> _cancelAlarm() async {
     await AlarmService().cancelAlarm(1);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('🗑️ 알람 취소됨')),
+      const AppUiSnackBar(content: Text('🗑️ 알람 취소됨')),
     );
   }
 

@@ -1,0 +1,82 @@
+메인·심플라인·소프트카드 — 공통 레이아웃 설계도 (2026-10-15)
+
+사용자 계약
+- UI47~58의 조사/개별 수정 증거를 보존. 사용자가 만족한 현재 세 테마의 배치/크기 비율을 기준 자료로 사용한다.
+- 고정 기기 좌표나 기기명/해상도 분기 없이 실제 가용 영역으로 계산. 비슷한 화면비의 다른 크기에서도 같은 인상을 유지.
+- 메모/음력/공휴일은 같은 테마 안에서 최종 글자 크기·line-height를 통일. 이 항목은 기존 불일치를 그대로 보존하지 않는다.
+- 이번 적용 범위는 실제 한글 mainWhite/minimal/materialCard. 나머지 달력/외국어/미리보기는 차기 적용 대상이며 기존 경로 유지. mainDark는 이전 고정 배색/삭제 예정 계약 유지.
+
+A. 좌표의 소유권
+1) CalendarViewportScope: LayoutBuilder 부모 실제 폭에서 SafeArea 좌우 inset을 뺀 W를 입력으로 사용. frame unit F=W/360.
+2) 헤더44F,요일28F. 광고/하단 탭 공간은 MainScreen이 먼저 예약. 달력은 나머지 높이 Hgrid를 받아 R=(Hgrid-28F)/6,셀 폭 C=W/7.
+3) Cell unit U=C/(360/7). 기존 디자인360 단위의 비율 정의이며 기기 크기를 박제한 숫자가 아님. 실제 기기 ID/해상도/폴더블 모델명 조건 없음.
+4) 메인6행 요약의3:3:4 배분과 심플/소프트6행 날짜·버튼 배치 유지. 헤더/요일/요약/버튼은 같은 F 단위, 각 날짜는 실제 C/R을 받음.
+5) 1dp 표 선은 얇은 경계 역할로 유지. 날짜/칩/카드/메모의 기하는 공통 모델이 계산하고 그림만 위젯에 전달한다.
+
+B. 테마별 디자인 프로필
+CalendarLayoutProfile(원 디자인단위에 대한 비율 계수)
+역할                     메인       심플라인      소프트카드
+칩 배경 높이/U           18         16.5          15.4
+날짜 font/U              16         12.2          11.7
+날짜 leading             1          1.43          1.43
+정보 선호 font/U         9.3        9             8
+정보 leading             1          1.15          1
+셀 외부/내부 inset/U     2          좌측1         카드 사방2
+메모 줄 간격/U           .5         .15           1.5
+- 칩 높이는 폰트 측정값에서 역산하지 않는다. 위 계수는 변경 전 승인 화면의 실제 칩 배경 비율을 보존한 디자인 명세.
+- 칩 안 근무명:공통 ShiftChipLabel,높이80%/좌우각5%,글자의 실제 폭 초과 때만 축소. 임의 글자 수별 크기 단계 없음.
+- 보통 공간에서 메인 날짜는 남은 본문 중앙,3메모일 때 기존처럼 위로 이동하되 annotation/메모와의 경계 내 clamp. 심플 메모는 남은 공간 중앙,소프트 메모는 annotation 아래부터 시작. 남은 빈 공간도 테마 역할에 따라 배분.
+
+C. 정보 텍스트 한 규칙
+- CalendarInformationMetrics가 셀별 공통 최종 font를 한번 결정. 메모 수/개별 문자열/공휴일 유무에 영향받지 않는다.
+- 공통 안전폭은 실제 셀 폭에서 각 테마 inset/여백/guard를 뺀 값.6글자 한글 샘플의 실제 폭을 w500/600/700 모두 측정해 공통 font를 선택한다.
+- 날짜 셀의 공휴일명/음력/각 메모는 같은 최종 fontSize와 테마별 같은 leading을 사용. 색상/강조 굵기는 역할상 구분하며 메모는 기존 실측 일반 굵기 유지.
+- 긴 메모/공휴일은 CompleteCellMemoText에서 온전한 grapheme 접두부만 표시. 개별 문자열에 맞춰 font를 또 축소하지 않고 말줄임표/반쪽 글자 없음.6글자는 측정 기준이며 실제 좁은 글자는 더 표시 가능.
+- 측정 캐시는 스타일/방향/로케일/선호크기/leading/실제 안전폭 키,최대256개. 팔레트 색만 바뀌어도 기하가 바뀌지 않도록 색을 측정 키에서 정규화.
+
+D. 공간 부족 처리
+- ContractCalendarCell은 기존 _fitOriginalThemeCell/메모 개수별 확대/별도 WideCalendarCell 경로로 들어가지 않는다.
+- CalendarCellGeometry.requiredHeight는 실제 그리는 칩/날짜/annotation/3메모/간격/하단의 동일 항을 합산. 별도의 과거 font 숫자로 추정하지 않음.
+- 최소 예산은 모든 날짜에서3메모·오늘 배지까지 예약. 오늘/첫행/6행/메모0·1·2·3 때문에 단위가 달라지지 않음.
+- 여유가 있으면 U 유지/여백 배분. 실제 R이 최소 예산보다 작을 때만 공통 밀도 D(0<D<=1)를 사전 계산,실제 drawing unit=U*D.
+- 작은 영역에서도 카드의 실제 폭은 유지하고,각 요소 크기를 계획 단계에서 결정. 셀 전체를 FittedBox/Transform.scale로 뒤늦게 축소하지 않음. 날짜와 정보가 겹치지 않게 rect 예약 및 clamp.
+- 극단적인 Fold 모양에서 D가 얼마나 줄어드는지는 후속 실물 검토로 테마 계수를 조정할 수 있으며 이미 전 기기 시각 완료로 표현하지 않음.
+
+E. 그림/데이터 분리
+- ContractCalendarCell은 schedule/provider를 저장하거나 수정하지 않음. 기존 _themedCellData/근무색·변경 상태/오늘·전후달/선택·메모/공휴일 값을 전달받아 그리기만 함.
+- 근무명 변경·커스텀 색상·선택·길게누르기·월 이동·요일 시작일·날짜 팝업은 기존 CalendarTab 흐름 유지.
+- main 표는 CalendarMergedSummaryBorder,심플은 CalendarDateGrid,소프트는 독립 카드 foreground 선 소유.셀 기하를 바꿔도 표 선은 셀 전체 축소에 섞이지 않음.
+- 소프트의 UI55/56 카드 배경·오늘 선·요일12 및 양쪽 요약 버튼 스타일 유지.칩 테두리를 임의로 새로 추가하지 않음.
+
+F. 기준 자료와 검증
+- artifacts/calendar_layout_contract_2026_10_15/before:수정 전 소스 SHA 및 기기와 같은 비율411.428571x891.428571의 호스트3테마×6색 화면/텍스트 좌표 보존.
+- after/geometry_comparison.json:새 경로 첫 비교.날짜/근무명 크기·위치는 기초 비교에서 거의 동일,정보 font 통일은 의도한 변화.첫 비교의 추가 칩 outline은 기존 null 계약에 맞춰 후속 제거했다.
+- 동일 비율360→480의 칩 기하 확대,모든 memo count·오늘 여부의 단위 일치,실제 정보 글자 size/leading 동일,긴 근무명 안전폭,짧고 넓은 셀 안의 모든 row 경계를 새 검사로 검증.
+- 320x640/360x780/480x960/760x700 전체프레임에서 세 테마×6색/근무 표시/광고 state/오늘 이동12PASS(후속 최종 예산 수정 후 재검사도 별도 로그 연결).
+- 후속 전체테마 회귀/정적 분석/dev debug 빌드·설치 결과는 아래 완료 증거에 누적.호스트 검사와 실기기 모든기기PASS를 구분.
+
+G. 다음 테마 적용 방법
+- 새 테마는 프로필·실제 영역/색상 역할을 추가하고 같은 공통 계산을 사용. 화면마다 별도 w/h/sp/font·최소높이 추정 수식을 추가하지 않음.
+- 기준폰 한글의 나머지 테마→동일폰 외국어→Fold 실물 순서 유지. 완성된 세 테마는 이후 공통 정책 변경 시 기준 화면/좌표 회귀 대상으로 유지.
+- 메모 font/행높이/날짜/칩/부족정책 중 하나가 바뀌면 관련 공통 프로필과 검사·설계도를 함께 갱신.
+
+완료 증거 1 — 구조/레이아웃 검사
+- final_layout_tests.log:전체 가용 테마/새 규격/표 선/칩/색상/편집 모달44PASS.
+- final_viewports_entry.log:최종320x640,411.428571x891.428571,760x700의3테마9검사 + 400x850/800x850·주간/밤 탭 복귀12검사=21PASS.
+- analyze_final.log:오류/경고0,기존 코드의 info 안내106개로 analyzer 종료1. 전체 분석 무문제로 표현하지 않음.
+- final_geometry_comparison.json:기준411.428571x891.428571의 첫 일반 날짜/근무명 글자 크기 변화 약0,중심 좌표 변화 메인/소프트 약0·심플 가로0.07143dp. 이는 해당 기준 anchor 측정치이며 모든 픽셀이100%동일하다는 뜻이 아님.
+- 정보 실제 font(음력/공휴일/메모 순) 메인10.286/10.629/7.867→7.92683/7.92683/7.92683,심플8.629/8.629/8.248→8.11748 공통,소프트8.03376→7.92676 공통. 사용자 승인된 통일 변화이며 다른 기기 고정 font값으로 넣은 것이 아님.
+- mainWhite/minimal/materialCard_final_comparison.png 변경 전후 최종 이미지 시각 검토. 텍스트 통일 이외의 카드/칩·날짜/표·버튼 배치와 색상 스타일 유지.
+- device_before_install/기존 DP DB+WAL/SHM·Flutter설정 읽기전용 복사,quick_check OK,17개 표 행수/지문 기록. 기기 DB 쓰기 없음.
+
+완료 증거 2 — 빌드/설치/데이터
+- tools/check_critical_release.ps1 -Build 종료0/P0 automated checks passed. Flutter 기능·언어 범위·DB·광고,Android native 기능/DB 검사,dev debug APK 및 웹 빌드 PASS. release 빌드/운영 배포 없음.
+- APK:artifacts/calendar_layout_contract_2026_10_15/app-dev-debug.apk
+- SHA256:a4f5f0b99e4ccb4215ce0cb21e9efadd2f26de6cf83968d4cb691f5d0ac856be
+- SM-S948N(R5KL20DHWAE)에 adb install -r -t Success. com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.MainActivity 새 실행,PID5882/versionName1.0.25-dev/versionCode28.
+- installed_device.png:현재 사용자 선택 새벽색 소프트카드의 새 빌드 화면 확인. 일반 카드/전후달/오늘·근무칩·메모/6행버튼/요약 양쪽 여백/시스템 검정 버튼영역 표시. 실제 모든 테마·모든 Fold 시각검증 완료로 확대하지 않음.
+- installed_runtime.log:새 PID의 FATAL EXCEPTION/RenderFlex overflow/렌더링·위젯 예외0. 해당 실행 관측 범위이며 모든 기능의 실기기PASS로 표현하지 않음.
+- device_data_comparison.json:설치 직전/새 실행 후 quick_check OK,17개 표의 행수 및 모든 행 지문 동일,changedTables=[]. 기존 근무표/메모/알람 등의 데이터 보존.
+- preference_comparison.json:Flutter 설정 변경 키 수0.
+- 이후 핫리로드를 위해 새 앱에 flutter attach 재연결. 이전 VM 연결 종료는 APK 교체에 따른 정상 종료.
+- 기존 UPDATE-01 Play 실측·Fold 실물/잠금 알람 등 출시 잔여를 이번 UI 자동 검사로 PASS 처리하지 않음.

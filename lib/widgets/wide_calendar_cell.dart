@@ -1,8 +1,9 @@
+import 'calendar_shift_change.dart';
+import '../theme/calendar_reading_palette.dart';
+import 'shift_chip_label.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'english_calendar_label.dart';
 import '../models/calendar_theme.dart';
-import 'fold_calendar_text_scale.dart';
 import 'complete_cell_memo_text.dart';
 import '../l10n/l10n_extensions.dart';
 
@@ -20,10 +21,14 @@ class WideCalendarCell extends StatelessWidget {
       required this.isToday,
       required this.isOutside,
       required this.isRed,
+      this.reading,
+      this.sharedGrid = false,
       this.annotation,
       this.isHoliday = false,
       this.isSelected = false});
 
+  final CalendarReadingPalette? reading;
+  final bool sharedGrid;
   final CalendarThemeId theme;
   final int day;
   final String shift;
@@ -45,8 +50,9 @@ class WideCalendarCell extends StatelessWidget {
     final wrapAnnotations = usesWrappedAnnotations(media.size);
     final korean = context.usesKoreanFeatures;
     final scaler = media.textScaler.clamp(maxScaleFactor: 1.3);
-    final shiftScaler = calendarShiftTextScaler(theme, scaler);
-    final colors = Theme.of(context).colorScheme;
+    const shiftScaler = TextScaler.noScaling;
+    final colors = reading?.scheme(Theme.of(context).colorScheme) ??
+        Theme.of(context).colorScheme;
     final dark = theme == CalendarThemeId.mainDark;
     final diary = theme == CalendarThemeId.diary;
     final card = theme == CalendarThemeId.materialCard;
@@ -56,24 +62,28 @@ class WideCalendarCell extends StatelessWidget {
     final underline = theme == CalendarThemeId.underline;
     final editorial = theme == CalendarThemeId.editorial;
     final plain = theme == CalendarThemeId.minimal;
-    final ink = dark
-        ? Colors.white
-        : diary
-            ? const Color(0xFF4A4038)
-            : colors.onSurface;
-    final muted = dark
-        ? Colors.white70
-        : diary
-            ? const Color(0xFF766657)
-            : colors.onSurfaceVariant;
-    final red = dark ? Colors.red.shade200 : Colors.red.shade400;
-    final frame = bold
-        ? Colors.grey.shade600
-        : diary
-            ? const Color(0xFFE4D9C9)
-            : dark
-                ? Colors.white24
-                : Colors.grey.shade200;
+    final ink = reading?.text ??
+        (dark
+            ? Colors.white
+            : diary
+                ? const Color(0xFF4A4038)
+                : colors.onSurface);
+    final muted = reading?.muted ??
+        (dark
+            ? Colors.white70
+            : diary
+                ? const Color(0xFF766657)
+                : colors.onSurfaceVariant);
+    final red = (card ? reading?.cardHoliday(isOutside) : reading?.holiday) ??
+        (dark ? Colors.red.shade200 : Colors.red.shade400);
+    final frame = reading?.line ??
+        (bold
+            ? Colors.grey.shade600
+            : diary
+                ? const Color(0xFFE4D9C9)
+                : dark
+                    ? Colors.white24
+                    : Colors.grey.shade200);
     final radius = BorderRadius.circular(pill
         ? 4
         : diary
@@ -89,14 +99,9 @@ class WideCalendarCell extends StatelessWidget {
             bool fixed = false,
             int maxLines = 1}) =>
         key == const ValueKey('shift-badge-text')
-            ? EnglishCalendarLabel(value,
-                style: TextStyle(
-                    fontSize: size,
-                    height: 1.15,
-                    color: color,
-                    fontWeight: weight),
-                textScaler: shiftScaler,
-                textKey: key)
+            ? Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+                child: ShiftChipLabel(label: value, color: color, textKey: key))
             : Text(value,
                 key: key,
                 maxLines: maxLines,
@@ -244,73 +249,91 @@ class WideCalendarCell extends StatelessWidget {
                 : plain
                     ? shiftColor.withValues(alpha: .85)
                     : shiftColor;
+        final cellSurface =
+            isSelected ? reading?.selectedSurface : reading?.surface;
         final bandInk = outlined ? ink : shiftTextColor;
-        final outsideInk = ink.withValues(alpha: .45);
+        final outsideInk = reading?.outside ?? ink.withValues(alpha: .45);
         final dateInk = isOutside
             ? outsideInk
             : isRed
                 ? red
                 : ink;
-        final todayColor = diary
-            ? const Color(0xFFCD8A4A)
-            : bold
-                ? const Color(0xFF263238)
-                : Colors.indigo.shade400;
+        final todayColor = reading?.today ??
+            (diary
+                ? const Color(0xFFCD8A4A)
+                : bold
+                    ? const Color(0xFF263238)
+                    : Colors.indigo.shade400);
         final solidToday = !plain && !underline && !editorial && !initial;
 
-        final band = Container(
-          key: const ValueKey('wide-shift-band'),
-          height: bandHeight,
-          padding: EdgeInsets.symmetric(horizontal: editorial ? 0 : 3),
-          decoration: BoxDecoration(
-              color: initial ? Colors.transparent : bandColor,
-              borderRadius: diary
-                  ? const BorderRadius.only(topRight: Radius.circular(6))
-                  : pill || card || initial
-                      ? radius
-                      : null),
-          foregroundDecoration: BoxDecoration(
-              border: underline
-                  ? Border(
-                      bottom: BorderSide(
-                          color: shiftColor, width: shift.isEmpty ? 0 : 2))
-                  : null),
-          child: shift.isEmpty
-              ? null
-              : Stack(alignment: Alignment.center, children: [
-                  if (editorial)
-                    Positioned(
-                        left: 0,
-                        top: 0,
-                        child: ClipPath(
-                            key: const ValueKey('wide-editorial-corner'),
-                            clipper: _CornerClipper(),
-                            child: SizedBox(
-                                width: bandHeight,
-                                height: bandHeight,
-                                child: ColoredBox(color: shiftColor)))),
-                  Center(
-                      key: const ValueKey('shift-badge-content'),
-                      child: initial
-                          ? Container(
-                              key: const ValueKey('wide-initial-circle'),
-                              width: bandHeight,
-                              height: bandHeight,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: shiftColor, shape: BoxShape.circle),
-                              child: label(shift.characters.first, shiftSize,
-                                  shiftTextColor,
-                                  key: const ValueKey('shift-badge-text'),
-                                  weight: FontWeight.bold))
-                          : Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: editorial ? bandHeight : 0),
-                              child: label(shift, shiftSize, bandInk,
-                                  key: const ValueKey('shift-badge-text'),
-                                  weight: FontWeight.bold))),
-                ]),
-        );
+        final band = CalendarShiftChange(
+            background: bandColor,
+            foreground: bandInk,
+            enabled: !outlined && !initial && shift.isNotEmpty,
+            surface: cellSurface ?? colors.surface,
+            originalBackground: (color) =>
+                plain ? color.withValues(alpha: .85) : color,
+            builder: (bg, fg) => Container(
+                  key: const ValueKey('wide-shift-band'),
+                  height: bandHeight,
+                  padding: EdgeInsets.symmetric(horizontal: editorial ? 0 : 3),
+                  decoration: BoxDecoration(
+                      color: initial ? Colors.transparent : bg,
+                      borderRadius: diary
+                          ? const BorderRadius.only(
+                              topRight: Radius.circular(6))
+                          : pill || card || initial
+                              ? radius
+                              : null),
+                  foregroundDecoration: BoxDecoration(
+                      border: underline
+                          ? Border(
+                              bottom: BorderSide(
+                                  color: shiftColor,
+                                  width: shift.isEmpty ? 0 : 2))
+                          : null),
+                  child: shift.isEmpty
+                      ? null
+                      : Stack(alignment: Alignment.center, children: [
+                          if (editorial)
+                            Positioned(
+                                left: 0,
+                                top: 0,
+                                child: ClipPath(
+                                    key:
+                                        const ValueKey('wide-editorial-corner'),
+                                    clipper: _CornerClipper(),
+                                    child: SizedBox(
+                                        width: bandHeight,
+                                        height: bandHeight,
+                                        child: ColoredBox(color: shiftColor)))),
+                          Center(
+                              key: const ValueKey('shift-badge-content'),
+                              child: initial
+                                  ? Container(
+                                      key:
+                                          const ValueKey('wide-initial-circle'),
+                                      width: bandHeight,
+                                      height: bandHeight,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                          color: shiftColor,
+                                          shape: BoxShape.circle),
+                                      child: label(shift.characters.first,
+                                          shiftSize, shiftTextColor,
+                                          key: const ValueKey(
+                                              'shift-badge-text'),
+                                          weight: FontWeight.bold))
+                                  : Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal:
+                                              editorial ? bandHeight : 0),
+                                      child: label(shift, shiftSize, fg,
+                                          key: const ValueKey(
+                                              'shift-badge-text'),
+                                          weight: FontWeight.bold))),
+                        ]),
+                ));
         final dateDiameter = lineHeight(dateSize, fixed: wrapAnnotations) + 2;
         final dateLabel = Container(
             key: const ValueKey('wide-date-label'),
@@ -335,8 +358,16 @@ class WideCalendarCell extends StatelessWidget {
                             ? null
                             : Border.all(color: todayColor, width: 1.2))
                 : null,
-            child: label('$day', dateSize,
-                isToday && solidToday ? Colors.white : dateInk,
+            child: label(
+                '$day',
+                dateSize,
+                isToday && solidToday
+                    ? (reading == null
+                        ? Colors.white
+                        : isRed
+                            ? reading!.todayHoliday
+                            : reading!.onToday)
+                    : dateInk,
                 fixed: wrapAnnotations,
                 weight: isToday || bold ? FontWeight.bold : FontWeight.w600));
         final annotationLabel = SizedBox(
@@ -344,8 +375,15 @@ class WideCalendarCell extends StatelessWidget {
             child: Center(
                 child: annotation == null
                     ? null
-                    : label(annotationText!, annotationSize,
-                        isHoliday ? red : muted,
+                    : label(
+                        annotationText!,
+                        annotationSize,
+                        isHoliday
+                            ? red
+                            : ((card
+                                    ? reading?.cardLunar(isOutside)
+                                    : reading?.lunar) ??
+                                CalendarContrast.lunarInk(ink, colors.surface)),
                         key: const ValueKey('wide-annotation'),
                         fixed: true,
                         maxLines: wrapAnnotations && isHoliday ? 2 : 1)));
@@ -359,28 +397,43 @@ class WideCalendarCell extends StatelessWidget {
           padding:
               EdgeInsets.symmetric(horizontal: card || diary || pill ? 2 : 0),
           decoration: BoxDecoration(
-              color: bold
-                  ? (isOutside
-                      ? colors.surfaceContainerHighest.withValues(alpha: .3)
-                      : Colors.white)
-                  : dark
-                      ? const Color(0xFF20232B)
-                      : diary
-                          ? const Color(0xFFFFFBF4)
-                          : card
-                              ? const Color(0xFFF0F7FF)
-                              : null,
+              color: (card ? reading?.cardSurface(isOutside) : null) ??
+                  cellSurface ??
+                  (bold
+                      ? (isOutside
+                          ? colors.surfaceContainerHighest.withValues(alpha: .3)
+                          : Colors.white)
+                      : dark
+                          ? const Color(0xFF20232B)
+                          : diary
+                              ? const Color(0xFFFFFBF4)
+                              : card
+                                  ? const Color(0xFFF0F7FF)
+                                  : null),
               borderRadius: card || diary || initial ? radius : null),
           foregroundDecoration: BoxDecoration(
               borderRadius: card || diary || initial ? radius : null,
               border: initial && isToday
                   ? Border.all(color: Colors.indigo.shade400, width: 1.4)
                   : isSelected
-                      ? Border.all(color: colors.secondary, width: 1)
+                      ? Border.all(
+                          color: reading?.selection ?? colors.secondary,
+                          width: 1)
                       : card || diary || bold || initial
-                          ? Border.all(color: frame, width: .6)
+                          ? Border.all(
+                              color: sharedGrid && (bold || editorial)
+                                  ? Colors.transparent
+                                  : (card
+                                          ? reading?.cardLine(isOutside)
+                                          : null) ??
+                                      frame,
+                              width: card && reading != null ? 1 : .6)
                           : plain
-                              ? Border(left: BorderSide(color: frame))
+                              ? Border(
+                                  left: BorderSide(
+                                      color: sharedGrid
+                                          ? Colors.transparent
+                                          : frame))
                               : null),
           // Draw borders over content: decoration padding must not steal the
           // measured body height at the largest font setting.

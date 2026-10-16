@@ -1,0 +1,32 @@
+{
+  "sourceBytes": 10414588,
+  "fontBytes": 88668,
+  "requiredCodepoints": 305,
+  "missingCodepoints": [],
+  "existingFallbackCodepoints": [],
+  "fontAxes": [
+    {
+      "tag": "wght",
+      "minimum": 100.0,
+      "maximum": 900.0
+    }
+  ],
+  "assetBytes": 134938,
+  "assetBudgetBytes": 500000,
+  "compiledCodeIncluded": false,
+  "assets": [
+    {
+      "path": "packages\\sync_path_ui\\assets\\fonts\\GameSansSubset.ttf",
+      "bytes": 88668
+    },
+    {
+      "path": "examples\\sync_path_lab\\assets\\pilot_copy.json",
+      "bytes": 22024
+    },
+    {
+      "path": "examples\\sync_path_lab\\assets\\pilot_levels.json",
+      "bytes": 24246
+    }
+  ],
+  "fontSha256": "921d53bf432f6c7bb9c3373c6417a586320be4e2b9bf575829c8e098a43fde02"
+}

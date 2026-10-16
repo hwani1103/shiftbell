@@ -1,0 +1,9 @@
+{
+  "outcome": "invalidPlan",
+  "issues": [
+    {
+      "code": "staleLevelIdentity",
+      "path": "levelIdentity"
+    }
+  ]
+}

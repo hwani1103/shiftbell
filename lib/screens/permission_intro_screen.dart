@@ -1,7 +1,9 @@
+import '../widgets/app_ui_theme_scope.dart';
 import '../widgets/adaptive_layout.dart';
 import '../widgets/permission_panel.dart';
 import 'package:flutter/material.dart';
-import '../widgets/shift_editor_dialog.dart';
+import '../widgets/app_ui_components.dart';
+import '../theme/app_ui_theme.dart';
 import '../services/permission_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/l10n_extensions.dart';
@@ -22,10 +24,14 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> {
   bool _checking = false;
   bool _warningOpen = false;
   bool _allSatisfied = false;
+  bool _hasSnapshot = false;
 
   void _permissionsChanged(PermissionSnapshot state) {
     if (!mounted) return;
-    setState(() => _allSatisfied = state.allSatisfied);
+    setState(() {
+      _hasSnapshot = true;
+      _allSatisfied = state.allSatisfied;
+    });
     if (!state.allSatisfied) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted &&
@@ -37,51 +43,65 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-      body: AdaptiveFormBody(
-          child: SafeArea(
-              child: LayoutBuilder(
-                  builder: (context, constraints) => SingleChildScrollView(
-                      child: ConstrainedBox(
+  Widget build(BuildContext context) => AppUiThemeScope(builder: _buildIntro);
+
+  Widget _buildIntro(BuildContext context) => Theme(
+        data:
+            AppUiTheme.withPalette(Theme.of(context), AppUiPalette.of(context)),
+        child: Builder(
+            builder: (uiContext) => Scaffold(
+                  // Keep the panel mounted for its initial read, but expose no
+                  // temporary controls. Already satisfied permissions proceed
+                  // without flashing the intro before the destination is ready.
+                  body: Offstage(
+                      offstage: !_hasSnapshot || _allSatisfied,
+                      child: AdaptiveFormBody(
+                          child: SafeArea(
+                              child: LayoutBuilder(
+                        builder: (context, constraints) =>
+                            SingleChildScrollView(
+                                child: ConstrainedBox(
                           constraints:
                               BoxConstraints(minHeight: constraints.maxHeight),
                           child: Padding(
-                              padding:
-                                  const EdgeInsets.fromLTRB(24, 40, 24, 16),
-                              child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                              context.l10n.permissionGetStarted,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .headlineMedium),
-                                          const SizedBox(height: 12),
-                                          Text(context.l10n.permissionIntro),
-                                          const SizedBox(height: 24),
-                                          PermissionPanel(
-                                              actionRequiredOnly: true,
-                                              continueAfterGrant: true,
-                                              onChanged: _permissionsChanged),
-                                        ]),
-                                    if (!_allSatisfied)
-                                      Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 24),
-                                          child: TextButton(
-                                              onPressed: _checking
-                                                  ? null
-                                                  : _skipPermissions,
-                                              child: Text(
-                                                  context.l10n.commonNotNow))),
-                                  ]))))))));
+                            padding: const EdgeInsets.fromLTRB(20, 32, 20, 20),
+                            child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        AppUiText(
+                                            uiContext.l10n.permissionGetStarted,
+                                            role: AppTextRole.title),
+                                        const SizedBox(height: 8),
+                                        AppUiText(
+                                            uiContext.l10n.permissionIntro,
+                                            tone: AppTextTone.secondary),
+                                        const SizedBox(height: 24),
+                                        PermissionPanel(
+                                            actionRequiredOnly: true,
+                                            continueAfterGrant: true,
+                                            onChanged: _permissionsChanged),
+                                      ]),
+                                  if (!_allSatisfied)
+                                    Padding(
+                                        padding: const EdgeInsets.only(top: 24),
+                                        child: AppUiButton(
+                                            label: uiContext.l10n.commonNotNow,
+                                            action: AppUiAction.quiet,
+                                            onPressed: _checking
+                                                ? null
+                                                : _skipPermissions)),
+                                ]),
+                          ),
+                        )),
+                      )))),
+                )),
+      );
 
   Future<void> _continue() async {
     if (_checking || _isNavigating || _warningOpen) return;
@@ -116,61 +136,41 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> {
   void _showPermissionWarning() {
     if (_warningOpen || !mounted) return;
     _warningOpen = true;
-    final colorScheme = Theme.of(context).colorScheme;
-    showDialog(
+    showAppUiDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => ShiftEditorDialog(
-        title: Row(
-          children: [
-            Icon(Icons.warning_amber_rounded,
-                color: colorScheme.tertiary, size: 28.0),
-            SizedBox(width: 8.0),
-            Flexible(
-              child: Text(
-                context.l10n.permissionSomeDenied,
-                style: TextStyle(fontSize: 16.0),
-              ),
-            ),
+      builder: (dialogContext) => Theme(
+        data: AppUiTheme.withPalette(
+            Theme.of(dialogContext), AppUiPalette.of(dialogContext)),
+        child: AppUiDialog(
+          showClose: false,
+          title: dialogContext.l10n.permissionSomeDenied,
+          content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppUiText(dialogContext.l10n.permissionSomeDeniedDesc),
+                const SizedBox(height: 16),
+                AppUiText(dialogContext.l10n.permissionCanAllowLater,
+                    role: AppTextRole.supporting, tone: AppTextTone.secondary),
+              ]),
+          actions: [
+            AppUiButton(
+                label: dialogContext.l10n.commonGoToSettings,
+                onPressed: () async {
+                  Navigator.of(dialogContext).pop();
+                  if (dialogContext.mounted)
+                    await showPermissionSettings(dialogContext);
+                }),
+            AppUiButton(
+                label: dialogContext.l10n.commonContinue,
+                action: AppUiAction.quiet,
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  _navigateToOnboarding();
+                }),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n.permissionSomeDeniedDesc,
-              style: TextStyle(fontSize: 14.0, height: 1.5),
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              context.l10n.permissionCanAllowLater,
-              style: TextStyle(
-                fontSize: 13.0,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              if (context.mounted) await showPermissionSettings(context);
-            },
-            child: Text(context.l10n.commonGoToSettings),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _navigateToOnboarding();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: colorScheme.onSurfaceVariant,
-            ),
-            child: Text(context.l10n.commonContinue),
-          ),
-        ],
       ),
     ).whenComplete(() {
       _warningOpen = false;

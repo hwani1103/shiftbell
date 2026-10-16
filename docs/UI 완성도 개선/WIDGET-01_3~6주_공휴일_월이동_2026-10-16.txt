@@ -1,0 +1,72 @@
+WIDGET-01 — 세로 3~6주 / 6주 전체 월 달력 / 한국어 공휴일 이름
+2026-10-16. 사용자 최종 지시: 이 세션에서는 빌드·설치하지 않는다. 다른 세션의 합본 빌드로 검증한다.
+
+적용 계약
+- 기존 CalendarWidgetProvider 컴포넌트를 유지하여 이미 설치된 위젯도 업데이트를 받는다.
+- 최소 3주, 세로 확대에 따라 4/5/6주. 런처가 전달하는 실제 콘텐츠 높이 기준: 330dp 미만3주, 330~399dp4주, 400~469dp5주, 470dp 이상6주. 최대6행.
+- 3~5주는 오늘이 포함된 주의 직전 주부터 표시. 월 이동 버튼을 숨기고 다른 월 선택을 사용하지 않는다. 축소 옵션 변경 시 저장 월을 초기화한다.
+- 6주는 해당 월 1일이 포함된 주부터 42칸을 표시한다. 한국/지역별 기존 주 시작 요일 유지. 월이 바뀌어도 1일부터 말일까지 모두 포함된다.
+- 기존 낮/밤 정원 디자인과 년월 표시 유지. 년월 오른쪽, 그림 왼쪽에 이전/다음 버튼. 6주에서만 활성화한다.
+- 6주의 전달/다음달 셀은 alpha0.58. 오늘 강조는 유지한다.
+- 월 이동 외 영역은 기존 MainActivity/openTab=2(달력) 실행 유지. 월 이동은 별도 non-exported receiver + immutable explicit PendingIntent.
+- 위젯 인스턴스별 월을 저장한다. 잘못된 방향, 타 위젯/1주 위젯, 3~5주 크기, 삭제된 위젯, 이미 처리한 이전 화면의 중복 클릭은 차단한다.
+
+공휴일/메모
+- 최종 추가 지시 적용: 한국어 3~6주만 공휴일 이름. 한국어 외 모든 언어는 기존 달력과 같은 국가별 빨간 날짜 숫자만 유지한다. 1주에는 어느 언어도 이름을 추가하지 않는다.
+- 1주 생성 XML은 작업 전 백업과 동일함을 정적 검사로 확인. 기존 1주 메모 크기/여백 계산도 유지.
+- 한국어 다중 주: 공휴일을 메모 위에 표시, 최대3메모 유지. 공휴일과 메모는 동일한 최종 글자 크기/줄 높이를 공유하고 줄 사이 추가 여백은0. 기존 메모 최대9.5dp를 유지하며 실제 행 높이가 좁을 때 함께 축소한다. 물리적으로 작은 3주에서 읽기 크기는 런처 실기기 확인 필요.
+- 이름은 lib/utils/holiday_util.dart의 검토된 한국어 고정/변동 공휴일에서 생성한 로컬 JSON 사용. 이름과 네이티브 빨간날 날짜 집합 일치 검사 추가.
+- 기존 HolidaySyncService의 add/remove 전달에 names만 추가. 기존 원격 조회 주기/Firestore 동작 변경 없음. 원격 add 이름과 remove 반영. 한국어 전용 fallback 문구는 native values/korean_only.xml에 격리.
+
+캐시/전환
+- 현재 월과 전후 월의 42칸 범위를 로컬 DB에서 한 번 읽어 메모/근무 스냅샷 캐시. 프로세스 메모리 캐시 최대4개,30분 유효, 언어/시간대별 구분.
+- 첫 인접 월 이동은 이미 읽은 범위 사용. 새 페이지를 게시한 뒤 바깥 인접 월을 다시 준비한다.
+- 앱 저장/정기 새로고침/언어 및 크기 변경의 기존 requestUpdate에서 캐시 무효화. 종료된 프로세스에서는 로컬 DB에서 재구성하며 Firebase 추가 요청 없음.
+- 월 이동은 goAsync 백그라운드 직렬 처리. 갱신과 월 이동은 같은 lock으로 순서를 보호.
+- ViewFlipper 180ms 짧은 fade. 시스템 animator/transition scale이0이면 전환 애니메이션 없이 한 페이지 게시.
+- Android SDK33 소스에서 View.setAlpha의 RemotableViewMethod 및 RemoteViews.setDisplayedChild API 확인. 지원 API 확인은 실제 런처 성공 증거가 아니다.
+
+변경 위치
+- CalendarWidgetProvider.kt, CalendarWidgetMonths.kt, CalendarWidgetNavigationReceiver.kt, CalendarWidgetHolidays.kt
+- MainActivity.kt의 setHolidayOverrides 인수만 추가; lib/services/holiday_sync_service.dart names 인수 추가.
+- AndroidManifest.xml에 private 월 이동 receiver 추가. 알람 receiver/권한 코드는 변경하지 않음.
+- tools/generate_calendar_widget_layouts.py 및 calendar_widget.xml/calendar_widget_grid.xml, widget info resizeMode, anim2개.
+- 공통5언어 이전/다음 문구와 위젯 설명. Korean-only fallback1개, 공휴일 JSON 생성기와 결과파일.
+- check_critical_release.ps1에 생성된 공휴일 이름 parity 검사 추가. 기존 기능 검사 삭제 없음.
+
+완료한 검사 (빌드 없음)
+- python tools/check_calendar_widget_sources.py: 7 PASS. 42칸 ID/행 표시/1주 유지/receiver 비공개/세로 리사이즈/한국어 이름 범위/번역/로컬 데이터 연결의 소스 구조 확인.
+- python tools/generate_calendar_widget_layouts.py --check: PASS.
+- python tools/generate_widget_holiday_names.py --check: PASS.
+- python tools/generate_national_holidays.py --check: PASS.
+- python tools/audit_l10n_resources.py --output artifacts/widget_month_2026_10_16/resource_audit.json: errors0.
+- 전후 자료: artifacts/widget_month_2026_10_16/before/. 정적 결과: static_checks.log, resource_audit.json.
+
+통합 세션에 남긴 검증 (아직 실행하지 않음)
+- CalendarWidgetMonthsTest 추가: 3~6 경계, 5년치 모든 월/윤년/일월 시작 42칸, 작은 크기 월 선택 차단, 공휴일+3메모 글자 일치, 비한국어 이름 미표시, 동작 줄이기, 월 이동 인스턴스 분리/중복 차단/축소 초기화/앱 진입.
+- CalendarWidgetRefreshTest: 인접 월 캐시 재사용 + 기존 앱 수정 뒤 양쪽 위젯 갱신.
+- CalendarWidgetsTest: 기존3주 전제는 숨겨진 추가 행 검증으로 갱신. 근무명 최대 폰트 단언은 생산 코드의 기존12dp와 일치시킴.
+- CalendarWidgetDesignRender: 1주/3~6주, 한국어·독일어·힌디어, 낮밤, 공휴일+3메모 렌더 준비. 출력 artifacts/widget_month_2026_10_16/render/ (아직 생성하지 않음).
+- android 디렉터리에서 .\gradlew.bat :app:testDevDebugUnitTest --tests com.hwani1103.shiftbell.CalendarWidgetMonthsTest --tests com.hwani1103.shiftbell.CalendarWidgetRefreshTest --tests com.hwani1103.shiftbell.CalendarWidgetsTest --tests com.hwani1103.shiftbell.CalendarWidgetDesignRender --console=plain
+- 이후 tools/check_critical_release.ps1 -Build (사용자가 빌드 권한을 준 통합 담당 세션). 위젯 테스트/렌더는 위 별도 명령이 필요하며 기존 critical script의 전체 레이아웃 검사로 간주하지 않는다.
+- 이번 변경은 native 리소스/기능 변경이다. 필수 전체 회귀는 미완료. 위 명령은 native/Flutter 컴파일을 유발할 수 있어 사용자 빌드 금지 지시에 따라 이 세션에서 실행하지 않았다. 과거 합본 PASS를 이번 변경의 PASS로 전용하지 않는다.
+- 실기기: 기존 핀 위젯 업데이트/3→4→5→6→3 변경, 6주 연말↔연초·2월, 인접 월 연속 클릭, 선택 월의 메모 수정 후 앱 복귀, 모든 비버튼 영역 앱 실행, 1주 이름 없음, 비한국어 숫자만 빨강, 한국어 공휴일+3메모 잘림 및 동작 줄이기 확인. 실제 월 전환 체감 성능/폴더블/런처별 배치 검증 미실시.
+
+통합 담당 UI69 세션 후속(검증 중)
+- 사용자 합본 지시에 따라 별도4클래스 native 검사 실행. 첫14검사 중12PASS/2FAIL, 최초 전체 Kotlin 컴파일 포함7m58s. artifacts/calendar_ot_2026_10_16/widget_tests_first.log 및 widget_first_results/ 보존.
+- CalendarWidgetMonthsTest: Robolectric4.14.1 createWidget은 View만 만들고 AppWidgetProviderInfo를 채우지 않아 생산의 provider 일치 방어에 걸림. 로컬 shadows-framework bytecode 확인 후 addBoundWidget과 실제 ComponentName/initialLayout 등록으로 테스트를 보완. 생산의 타위젯/미등록 인스턴스 차단은 제거하지 않음.
+- CalendarWidgetsTest: 메모 실제 glyph 렌더 실패. RemoteViews addView가 첫 페이지를 이미 선택한 뒤 setDisplayedChild(0)를 다시 호출하면서 첫 화면에도 enter animation이 걸렸음. 일반 갱신 및 시스템 동작줄이기 때는 중복 선택 호출을 생략하고 실제 월 이동(두 페이지)에서만 setDisplayedChild(1) 호출. Android33 ViewAnimator.addView/showOnly/removeAllViews 로컬 SDK 소스 확인. 이는 제품 첫 화면 깜빡임 수정임.
+- pageTransition 검사에 일반 첫 화면/동작줄이기에서 animation null, 실제 월 이동에서는 animation 존재 검증을 추가.
+- 재검사 후 전체 critical -Build 순차 진행 중. 로그 artifacts/calendar_ot_2026_10_16/widget_tests_retry.log, critical_build.log. 기존 미실시/정적 결과를 실기기 PASS로 바꾸지 않음.
+
+추가 조사 정정
+- 앞서 메모 픽셀 실패를 첫 화면 애니메이션 탓으로 기록한 추정은 재검사에서 배제됨. 픽셀 검사는 화면을262dp 높이로 그리면서 새 높이 인자를 생략해228dp로 글꼴 예산을 계산했다. 실제 런처 전달 높이와 같도록 테스트에262dp를 명시하고 원래 픽셀 가시성 단언은 유지한다. 작은228dp의 실기기 가독성 한계는 별개.
+- 애니메이션 세부 단언으로 실제 월 이동의 첫 전환도 animateFirstView=false에 억제되는 문제를 추가 확인. animate일 때만 이전페이지0을 무애니메이션 선택 후 새페이지1로 전환하도록 수정. 일반 새로고침/동작줄이기는 한 페이지를 그대로 유지.
+- 기존 CalendarWidgetsTest의 과거 폴더 출력은 이번 검증에서도 사용되어 일부 PNG가 현재 렌더로 덮어써졌다. 해당 폴더를 당시 원본으로 확대하지 않으며 앞으로는 이번 artifacts/calendar_ot_2026_10_16/widget_regression/에 분리한다. 원래 문서/원장은 보존.
+
+최종 인계 정정 — 2026-10-16 14:43 이후
+- 최신4클래스14검사는12PASS/2FAIL. widget_third_results/ XML 보존. 빌드 보류 때문에 상위 pipeline 로그는 중간에 끊겼으나 자식 Gradle 검사는14:42:48 완료했다.
+- pageTransition line144의 animation notNull 실패: Robolectric4.14.1 ShadowViewAnimator는 setDisplayedChild에서 currentChild/visibility만 변경하며 실제 애니메이션을 실행하지 않는다. javap 증거 artifacts/calendar_ot_2026_10_16/ShadowViewAnimator.txt. 이 단언으로 제품 애니메이션 실패를 확정할 수 없음. 앞선 실제 첫 월전환 문제 확정 표현은 SDK 동작 분석에 따른 추정으로 정정한다. 현재 생산0→1 보완은 남겨 두었지만 기기 확인/검사 방식 보완 필요.
+- 메모 픽셀 단언은 높이262dp 정합 후 ko-KR-three 렌더에서 통과. 다음 좁은폭/단일주 조합의 line112 기대 Memo one / 실제 Memo (끝공백) 비교 실패가 새로 드러남. 정확한 조건/완전글자 prefix 계약/기존1주 동작을 대조해야 하며 아직 미분류.
+- DesignRender1/Refresh1 PASS, 대표 한국어500dp6주/262dp3주 렌더 가시성 검토. 런처 기기 검증 아님.
+- 사용자 추가작업 지시로 새 APK/웹 빌드·설치 없음. 다음세션_인계_2026-10-16_OT_알람_위젯.txt에 정확한 잔여/재개 절차 연결.

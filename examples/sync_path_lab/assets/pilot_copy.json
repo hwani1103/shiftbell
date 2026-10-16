@@ -1,0 +1,1202 @@
+{
+  "L01": {
+    "hintsKo": [
+      "공마다 따로 이어진 길을 따라 도착점까지 보내 보세요.",
+      "밝게 표시된 칸을 탭하고, 경로가 완성되면 다음 공을 골라 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 2칸 → 오른쪽 2칸\n빨간 줄무늬 공: 아래 2칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Follow the separate corridors.",
+      "Adjust the blue dotted ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 2 down → 2 right\nred striped ball: 2 down → 2 left"
+    ]
+  },
+  "L02": {
+    "hintsKo": [
+      "윗길에서 동시에 만나지 않도록 서로 다른 통로를 골라 보세요.",
+      "파란 원무늬 공의 길부터 조정해 보세요. 다른 공과 만나는 통로를 바꿀 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 2칸 → 아래 2칸\n빨간 줄무늬 공: 아래 2칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the blue dotted ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 2 right → 2 down\nred striped ball: 2 down → 2 left"
+    ]
+  },
+  "L03": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "빨간 줄무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 오른쪽 3칸\n빨간 줄무늬 공: 왼쪽 1칸 → 아래 2칸 → 오른쪽 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the red striped ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 3 right\nred striped ball: 1 left → 2 down → 3 right"
+    ]
+  },
+  "L04": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "파란 원무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 왼쪽 1칸 → 오른쪽 4칸\n빨간 줄무늬 공: 아래 2칸 → 오른쪽 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the blue dotted ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 1 left → 4 right\nred striped ball: 2 down → 2 right"
+    ]
+  },
+  "L05": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "빨간 줄무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 왼쪽 1칸 → 아래 3칸\n빨간 줄무늬 공: 오른쪽 1칸 → 왼쪽 3칸 → 아래 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the red striped ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 1 left → 3 down\nred striped ball: 1 right → 3 left → 3 down"
+    ]
+  },
+  "L06": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "빨간 줄무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 3칸 → 아래 1칸\n빨간 줄무늬 공: 위 1칸 → 아래 2칸 → 오른쪽 2칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the red striped ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 3 right → 1 down\nred striped ball: 1 up → 2 down → 2 right → 1 down"
+    ]
+  },
+  "L07": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "빨간 줄무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 → 위 3칸\n빨간 줄무늬 공: 아래 1칸 → 위 2칸 → 오른쪽 4칸 → 위 1칸\n보라 십자무늬 공: 오른쪽 4칸 → 위 1칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the red striped ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 1 up → 1 right → 3 up\nred striped ball: 1 down → 2 up → 4 right → 1 up\npurple cross ball: 4 right → 1 up → 1 right"
+    ]
+  },
+  "L08": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "파란 원무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 위 1칸 → 왼쪽 1칸 → 위 3칸\n빨간 줄무늬 공: 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸\n보라 십자무늬 공: 오른쪽 1칸 → 위 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the blue dotted ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 1 up → 1 left → 3 up\nred striped ball: 1 left → 1 up → 2 left\npurple cross ball: 1 right → 3 up"
+    ]
+  },
+  "L09": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "보라 십자무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 2칸 → 오른쪽 2칸 → 아래 1칸\n빨간 줄무늬 공: 위 2칸 → 왼쪽 2칸 → 위 1칸\n보라 십자무늬 공: 오른쪽 1칸 → 왼쪽 1칸 → 오른쪽 4칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the purple cross ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 2 up → 2 right → 1 down\nred striped ball: 2 up → 2 left → 1 up\npurple cross ball: 1 right → 1 left → 4 right → 1 down"
+    ]
+  },
+  "L10": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "빨간 줄무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 오른쪽 3칸 → 아래 3칸\n빨간 줄무늬 공: 오른쪽 1칸 → 위 3칸 → 오른쪽 2칸 → 아래 3칸\n보라 십자무늬 공: 오른쪽 2칸 → 아래 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the red striped ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 3 right → 3 down\nred striped ball: 1 right → 3 up → 2 right → 3 down\npurple cross ball: 2 right → 3 down"
+    ]
+  },
+  "L11": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "파란 원무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 3칸 → 오른쪽 4칸 → 아래 6칸 → 왼쪽 2칸\n빨간 줄무늬 공: 오른쪽 3칸 → 아래 6칸 → 왼쪽 2칸\n보라 십자무늬 공: 위 1칸 → 오른쪽 4칸 → 아래 6칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the blue dotted ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 3 up → 4 right → 6 down → 2 left\nred striped ball: 3 right → 6 down → 2 left\npurple cross ball: 1 up → 4 right → 6 down → 2 left"
+    ]
+  },
+  "L12": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "보라 십자무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 4칸 → 오른쪽 1칸 → 아래 1칸\n빨간 줄무늬 공: 위 1칸 → 왼쪽 1칸 → 아래 4칸 → 오른쪽 1칸 → 아래 1칸\n보라 십자무늬 공: 위 2칸 → 왼쪽 2칸 → 아래 4칸 → 오른쪽 1칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the purple cross ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 4 down → 1 right → 1 down\nred striped ball: 1 up → 1 left → 4 down → 1 right → 1 down\npurple cross ball: 2 up → 2 left → 4 down → 1 right → 1 down"
+    ]
+  },
+  "L13": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "파란 원무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 1칸 → 위 3칸 → 왼쪽 2칸 → 아래 3칸\n빨간 줄무늬 공: 오른쪽 1칸 → 아래 1칸 → 왼쪽 2칸 → 아래 3칸\n보라 십자무늬 공: 왼쪽 2칸 → 아래 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the blue dotted ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 left → 3 up → 2 left → 3 down\nred striped ball: 1 right → 1 down → 2 left → 3 down\npurple cross ball: 2 left → 3 down"
+    ]
+  },
+  "L14": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "파란 원무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 아래 2칸 → 위 4칸 → 왼쪽 1칸\n빨간 줄무늬 공: 위 1칸 → 오른쪽 1칸 → 위 1칸 → 왼쪽 3칸\n보라 십자무늬 공: 위 1칸 → 왼쪽 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the blue dotted ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 2 down → 4 up → 1 left\nred striped ball: 1 up → 1 right → 1 up → 3 left\npurple cross ball: 1 up → 3 left"
+    ]
+  },
+  "L15": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "파란 원무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 3칸 → 오른쪽 2칸 → 위 3칸 → 오른쪽 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 왼쪽 1칸 → 위 4칸 → 오른쪽 1칸\n보라 십자무늬 공: 위 1칸 → 오른쪽 1칸 → 위 2칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the blue dotted ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 3 left → 2 right → 3 up → 1 right\nred striped ball: 1 right → 1 left → 4 up → 1 right\npurple cross ball: 1 up → 1 right → 2 up → 1 right"
+    ]
+  },
+  "L16": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "빨간 줄무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 3칸 → 아래 1칸 → 오른쪽 1칸\n빨간 줄무늬 공: 아래 1칸 → 위 2칸 → 오른쪽 3칸 → 위 1칸\n보라 십자무늬 공: 아래 1칸 → 오른쪽 3칸 → 위 1칸\n초록 마름모무늬 공: 위 2칸 → 오른쪽 3칸 → 아래 1칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the red striped ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 3 right → 1 down → 1 right\nred striped ball: 1 down → 2 up → 3 right → 1 up\npurple cross ball: 1 down → 3 right → 1 up\ngreen diamond ball: 2 up → 3 right → 1 down → 1 right"
+    ]
+  },
+  "L17": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "파란 원무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 1칸 → 오른쪽 1칸 → 아래 3칸 → 왼쪽 1칸\n빨간 줄무늬 공: 왼쪽 1칸 → 아래 2칸 → 왼쪽 1칸\n보라 십자무늬 공: 오른쪽 1칸 → 왼쪽 4칸 → 위 1칸\n초록 마름모무늬 공: 위 1칸 → 왼쪽 2칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the blue dotted ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 left → 1 right → 3 down → 1 left\nred striped ball: 1 left → 2 down → 1 left\npurple cross ball: 1 right → 4 left → 1 up\ngreen diamond ball: 1 up → 2 left → 1 up"
+    ]
+  },
+  "L18": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "초록 마름모무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 오른쪽 6칸 → 위 2칸\n빨간 줄무늬 공: 왼쪽 3칸 → 위 4칸 → 오른쪽 4칸 → 위 2칸\n보라 십자무늬 공: 아래 1칸 → 위 2칸 → 오른쪽 6칸 → 위 2칸\n초록 마름모무늬 공: 왼쪽 3칸 → 위 4칸 → 오른쪽 6칸 → 위 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the green diamond ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 6 right → 2 up\nred striped ball: 3 left → 4 up → 4 right → 2 up\npurple cross ball: 1 down → 2 up → 6 right → 2 up\ngreen diamond ball: 3 left → 4 up → 6 right → 2 up"
+    ]
+  },
+  "L19": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "초록 마름모무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 왼쪽 5칸 → 위 2칸 → 오른쪽 1칸\n빨간 줄무늬 공: 위 3칸 → 왼쪽 3칸 → 아래 3칸\n보라 십자무늬 공: 아래 1칸 → 오른쪽 1칸 → 위 3칸 → 왼쪽 3칸 → 아래 3칸\n초록 마름모무늬 공: 위 2칸 → 아래 2칸 → 위 2칸 → 왼쪽 4칸 → 아래 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the green diamond ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 5 left → 2 up → 1 right\nred striped ball: 3 up → 3 left → 3 down\npurple cross ball: 1 down → 1 right → 3 up → 3 left → 3 down\ngreen diamond ball: 2 up → 2 down → 2 up → 4 left → 3 down"
+    ]
+  },
+  "L20": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "초록 마름모무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 오른쪽 2칸 → 위 5칸\n빨간 줄무늬 공: 오른쪽 1칸 → 아래 2칸 → 오른쪽 2칸 → 위 5칸\n보라 십자무늬 공: 왼쪽 2칸 → 오른쪽 5칸 → 위 5칸\n초록 마름모무늬 공: 왼쪽 1칸 → 아래 2칸 → 오른쪽 6칸 → 위 5칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the green diamond ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 right → 5 up\nred striped ball: 1 right → 2 down → 2 right → 5 up\npurple cross ball: 2 left → 5 right → 5 up\ngreen diamond ball: 1 left → 2 down → 6 right → 5 up"
+    ]
+  },
+  "L21": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "빨간 줄무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 왼쪽 1칸 → 오른쪽 3칸 → 위 4칸\n빨간 줄무늬 공: 오른쪽 1칸 → 아래 4칸 → 오른쪽 2칸 → 위 4칸\n보라 십자무늬 공: 오른쪽 2칸 → 왼쪽 1칸 → 위 4칸\n초록 마름모무늬 공: 아래 1칸 → 왼쪽 2칸 → 위 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the red striped ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 1 left → 3 right → 4 up\nred striped ball: 1 right → 4 down → 2 right → 4 up\npurple cross ball: 2 right → 1 left → 4 up\ngreen diamond ball: 1 down → 2 left → 2 up"
+    ]
+  },
+  "L22": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "초록 마름모무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 위 2칸 → 오른쪽 4칸 → 아래 2칸 → 왼쪽 1칸\n빨간 줄무늬 공: 아래 2칸 → 위 3칸 → 왼쪽 2칸 → 아래 4칸 → 왼쪽 1칸\n보라 십자무늬 공: 아래 1칸 → 왼쪽 2칸 → 아래 4칸 → 왼쪽 1칸\n초록 마름모무늬 공: 위 3칸 → 아래 4칸 → 오른쪽 4칸 → 아래 2칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the green diamond ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 up → 4 right → 2 down → 1 left\nred striped ball: 2 down → 3 up → 2 left → 4 down → 1 left\npurple cross ball: 1 down → 2 left → 4 down → 1 left\ngreen diamond ball: 3 up → 4 down → 4 right → 2 down → 1 left"
+    ]
+  },
+  "L23": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "보라 십자무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 3칸 → 아래 4칸\n빨간 줄무늬 공: 오른쪽 1칸 → 위 4칸 → 오른쪽 2칸 → 아래 4칸\n보라 십자무늬 공: 아래 1칸 → 위 6칸 → 오른쪽 2칸 → 아래 4칸\n초록 마름모무늬 공: 위 1칸 → 오른쪽 4칸 → 아래 4칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the purple cross ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 3 right → 4 down\nred striped ball: 1 right → 4 up → 2 right → 4 down\npurple cross ball: 1 down → 6 up → 2 right → 4 down\ngreen diamond ball: 1 up → 4 right → 4 down"
+    ]
+  },
+  "L24": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "초록 마름모무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 위 4칸 → 왼쪽 2칸 → 위 2칸\n빨간 줄무늬 공: 오른쪽 1칸 → 아래 4칸 → 위 2칸 → 오른쪽 2칸 → 위 4칸\n보라 십자무늬 공: 오른쪽 3칸 → 위 4칸 → 왼쪽 2칸 → 위 2칸\n초록 마름모무늬 공: 오른쪽 4칸 → 왼쪽 3칸 → 위 2칸 → 오른쪽 2칸 → 위 4칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the green diamond ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 4 up → 2 left → 2 up\nred striped ball: 1 right → 4 down → 2 up → 2 right → 4 up\npurple cross ball: 3 right → 4 up → 2 left → 2 up\ngreen diamond ball: 4 right → 3 left → 2 up → 2 right → 4 up"
+    ]
+  },
+  "L25": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "초록 마름모무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 위 3칸\n빨간 줄무늬 공: 오른쪽 1칸 → 왼쪽 3칸 → 오른쪽 1칸 → 위 3칸\n보라 십자무늬 공: 오른쪽 1칸 → 왼쪽 4칸 → 위 1칸\n초록 마름모무늬 공: 위 4칸 → 아래 3칸 → 왼쪽 2칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the green diamond ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 3 up\nred striped ball: 1 right → 3 left → 1 right → 3 up\npurple cross ball: 1 right → 4 left → 1 up\ngreen diamond ball: 4 up → 3 down → 2 left → 1 up"
+    ]
+  },
+  "L26": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "파란 원무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 위 2칸 → 왼쪽 6칸 → 오른쪽 2칸 → 위 3칸\n빨간 줄무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 위 4칸 → 오른쪽 2칸 → 위 1칸\n보라 십자무늬 공: 왼쪽 1칸 → 오른쪽 2칸 → 위 2칸 → 왼쪽 4칸 → 위 3칸\n초록 마름모무늬 공: 아래 1칸 → 왼쪽 4칸 → 위 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the blue dotted ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 up → 6 left → 2 right → 3 up\nred striped ball: 1 right → 2 left → 4 up → 2 right → 1 up\npurple cross ball: 1 left → 2 right → 2 up → 4 left → 3 up\ngreen diamond ball: 1 down → 4 left → 3 up"
+    ]
+  },
+  "L27": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "보라 십자무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 위 2칸 → 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸\n빨간 줄무늬 공: 위 1칸 → 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸\n보라 십자무늬 공: 위 1칸 → 오른쪽 3칸 → 왼쪽 3칸 → 위 3칸 → 왼쪽 1칸\n초록 마름모무늬 공: 오른쪽 2칸 → 아래 2칸 → 위 4칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the purple cross ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 2 up → 1 left → 1 up → 2 left\nred striped ball: 1 up → 1 left → 1 up → 2 left\npurple cross ball: 1 up → 3 right → 3 left → 3 up → 1 left\ngreen diamond ball: 2 right → 2 down → 4 up → 1 left"
+    ]
+  },
+  "L28": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "보라 십자무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 오른쪽 4칸 → 위 1칸 → 오른쪽 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 위 1칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 1칸\n보라 십자무늬 공: 왼쪽 4칸 → 오른쪽 3칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸\n초록 마름모무늬 공: 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the purple cross ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 2 left → 4 right → 1 up → 1 right\nred striped ball: 1 right → 1 up → 2 left → 2 up → 1 right\npurple cross ball: 4 left → 3 right → 1 left → 2 up → 1 right\ngreen diamond ball: 2 up → 1 right → 1 up → 1 right"
+    ]
+  },
+  "L29": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "보라 십자무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 3칸\n빨간 줄무늬 공: 위 3칸 → 오른쪽 3칸 → 왼쪽 1칸 → 아래 1칸 → 오른쪽 3칸\n보라 십자무늬 공: 위 2칸 → 아래 5칸 → 오른쪽 2칸 → 위 1칸 → 오른쪽 3칸\n초록 마름모무늬 공: 위 1칸 → 아래 1칸 → 오른쪽 3칸 → 위 1칸 → 오른쪽 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the purple cross ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 2 right → 1 down → 3 right\nred striped ball: 3 up → 3 right → 1 left → 1 down → 3 right\npurple cross ball: 2 up → 5 down → 2 right → 1 up → 3 right\ngreen diamond ball: 1 up → 1 down → 3 right → 1 up → 3 right"
+    ]
+  },
+  "L30": {
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "초록 마름모무늬 공의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 왼쪽 2칸\n빨간 줄무늬 공: 왼쪽 3칸 → 오른쪽 2칸 → 왼쪽 1칸 → 아래 3칸 → 왼쪽 2칸\n보라 십자무늬 공: 위 1칸 → 아래 3칸 → 왼쪽 1칸 → 아래 2칸 → 왼쪽 2칸\n초록 마름모무늬 공: 왼쪽 2칸 → 오른쪽 3칸 → 왼쪽 4칸 → 아래 2칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust the green diamond ball first, then fit the other routes around it.",
+      "One safe complete plan:\nblue dotted ball: 2 down → 1 right → 2 down → 2 left\nred striped ball: 3 left → 2 right → 1 left → 3 down → 2 left\npurple cross ball: 1 up → 3 down → 1 left → 2 down → 2 left\ngreen diamond ball: 2 left → 3 right → 4 left → 2 down → 2 left"
+    ]
+  },
+  "L31": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 오른쪽 2칸 → 위 3칸\n빨간 줄무늬 공: 왼쪽 1칸 → 위 1칸 → 오른쪽 6칸 → 위 3칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 2 left → 2 right → 3 up\nred striped ball: 1 left → 1 up → 6 right → 3 up"
+    ]
+  },
+  "L32": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 왼쪽 1칸 → 오른쪽 2칸 → 위 2칸\n빨간 줄무늬 공: 아래 2칸 → 위 1칸 → 오른쪽 3칸 → 위 2칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 1 left → 2 right → 2 up\nred striped ball: 2 down → 1 up → 3 right → 2 up"
+    ]
+  },
+  "L33": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 2칸 → 위 2칸 → 왼쪽 3칸\n빨간 줄무늬 공: 위 2칸 → 왼쪽 3칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 2 right → 2 up → 3 left\nred striped ball: 2 up → 3 left"
+    ]
+  },
+  "L34": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 아래 1칸 → 위 1칸 → 아래 5칸\n빨간 줄무늬 공: 아래 1칸 → 오른쪽 4칸 → 위 1칸\n보라 십자무늬 공: 오른쪽 1칸 → 아래 2칸 → 오른쪽 2칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 1 down → 1 up → 5 down\nred striped ball: 1 down → 4 right → 1 up\npurple cross ball: 1 right → 2 down → 2 right → 1 down"
+    ]
+  },
+  "L35": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 오른쪽 2칸 → 아래 2칸 → 오른쪽 1칸\n빨간 줄무늬 공: 아래 2칸 → 위 2칸 → 아래 3칸 → 왼쪽 3칸\n보라 십자무늬 공: 아래 1칸 → 오른쪽 4칸 → 위 2칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 right → 2 down → 1 right\nred striped ball: 2 down → 2 up → 3 down → 3 left\npurple cross ball: 1 down → 4 right → 2 up → 1 left"
+    ]
+  },
+  "L36": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 2칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 1칸\n빨간 줄무늬 공: 위 2칸 → 아래 1칸 → 오른쪽 2칸 → 아래 2칸\n보라 십자무늬 공: 아래 2칸 → 오른쪽 1칸 → 아래 2칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 2 down → 1 left → 1 down → 1 left\nred striped ball: 2 up → 1 down → 2 right → 2 down\npurple cross ball: 2 down → 1 right → 2 down"
+    ]
+  },
+  "L37": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 6칸 → 아래 2칸\n빨간 줄무늬 공: 위 1칸 → 오른쪽 2칸 → 아래 2칸 → 오른쪽 2칸 → 위 4칸\n보라 십자무늬 공: 왼쪽 1칸 → 오른쪽 4칸 → 아래 2칸 → 오른쪽 2칸 → 위 4칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 2 left → 2 up → 6 right → 2 down\nred striped ball: 1 up → 2 right → 2 down → 2 right → 4 up\npurple cross ball: 1 left → 4 right → 2 down → 2 right → 4 up"
+    ]
+  },
+  "L38": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 2칸 → 위 4칸 → 왼쪽 2칸\n빨간 줄무늬 공: 오른쪽 2칸 → 위 4칸 → 오른쪽 2칸\n보라 십자무늬 공: 위 2칸 → 오른쪽 6칸 → 아래 2칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 2 right → 4 up → 2 left\nred striped ball: 2 right → 4 up → 2 right\npurple cross ball: 2 up → 6 right → 2 down → 2 left"
+    ]
+  },
+  "L39": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 1칸 → 아래 3칸 → 오른쪽 1칸 → 아래 1칸\n빨간 줄무늬 공: 왼쪽 1칸 → 오른쪽 2칸 → 아래 4칸 → 오른쪽 1칸\n보라 십자무늬 공: 오른쪽 2칸 → 위 2칸 → 오른쪽 2칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 left → 3 down → 1 right → 1 down\nred striped ball: 1 left → 2 right → 4 down → 1 right\npurple cross ball: 2 right → 2 up → 2 right"
+    ]
+  },
+  "L40": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 위 1칸 → 왼쪽 5칸 → 위 1칸\n빨간 줄무늬 공: 왼쪽 2칸 → 위 1칸 → 왼쪽 2칸 → 아래 1칸\n보라 십자무늬 공: 왼쪽 1칸 → 위 1칸 → 왼쪽 3칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 1 up → 5 left → 1 up\nred striped ball: 2 left → 1 up → 2 left → 1 down\npurple cross ball: 1 left → 1 up → 3 left → 1 up"
+    ]
+  },
+  "L41": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 2칸 → 아래 2칸 → 오른쪽 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 왼쪽 1칸 → 아래 2칸 → 오른쪽 3칸\n보라 십자무늬 공: 오른쪽 4칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 2 left → 2 down → 1 right\nred striped ball: 1 right → 1 left → 2 down → 3 right\npurple cross ball: 4 right → 2 left → 2 up → 1 right"
+    ]
+  },
+  "L42": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 아래 4칸 → 오른쪽 4칸 → 위 1칸\n빨간 줄무늬 공: 위 1칸 → 아래 4칸 → 오른쪽 6칸 → 위 1칸\n보라 십자무늬 공: 아래 1칸 → 위 4칸 → 오른쪽 2칸 → 아래 5칸\n초록 마름모무늬 공: 오른쪽 1칸 → 위 2칸 → 오른쪽 2칸 → 아래 5칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 4 down → 4 right → 1 up\nred striped ball: 1 up → 4 down → 6 right → 1 up\npurple cross ball: 1 down → 4 up → 2 right → 5 down\ngreen diamond ball: 1 right → 2 up → 2 right → 5 down"
+    ]
+  },
+  "L43": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 오른쪽 2칸 → 위 4칸 → 왼쪽 2칸\n빨간 줄무늬 공: 아래 1칸 → 위 6칸 → 오른쪽 4칸\n보라 십자무늬 공: 왼쪽 1칸 → 오른쪽 2칸 → 위 6칸 → 왼쪽 2칸\n초록 마름모무늬 공: 왼쪽 1칸 → 위 4칸 → 오른쪽 4칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 right → 4 up → 2 left\nred striped ball: 1 down → 6 up → 4 right\npurple cross ball: 1 left → 2 right → 6 up → 2 left\ngreen diamond ball: 1 left → 4 up → 4 right"
+    ]
+  },
+  "L44": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 위 6칸 → 오른쪽 1칸\n빨간 줄무늬 공: 아래 1칸 → 왼쪽 2칸 → 위 6칸 → 오른쪽 1칸\n보라 십자무늬 공: 위 1칸 → 왼쪽 2칸 → 위 2칸 → 왼쪽 1칸\n초록 마름모무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 위 4칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 6 up → 1 right\nred striped ball: 1 down → 2 left → 6 up → 1 right\npurple cross ball: 1 up → 2 left → 2 up → 1 left\ngreen diamond ball: 1 right → 2 left → 4 up → 1 left"
+    ]
+  },
+  "L45": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 아래 2칸 → 오른쪽 2칸\n빨간 줄무늬 공: 오른쪽 1칸 → 아래 2칸 → 왼쪽 2칸\n보라 십자무늬 공: 오른쪽 2칸 → 왼쪽 3칸 → 아래 2칸 → 오른쪽 2칸\n초록 마름모무늬 공: 위 1칸 → 아래 4칸 → 오른쪽 2칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 2 down → 2 right\nred striped ball: 1 right → 2 down → 2 left\npurple cross ball: 2 right → 3 left → 2 down → 2 right\ngreen diamond ball: 1 up → 4 down → 2 right"
+    ]
+  },
+  "L46": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 위 1칸 → 오른쪽 2칸 → 위 3칸\n빨간 줄무늬 공: 위 5칸 → 아래 2칸 → 왼쪽 2칸 → 위 2칸\n보라 십자무늬 공: 위 1칸 → 오른쪽 3칸 → 위 2칸 → 오른쪽 1칸\n초록 마름모무늬 공: 아래 1칸 → 위 3칸 → 오른쪽 2칸 → 위 3칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 1 up → 2 right → 3 up\nred striped ball: 5 up → 2 down → 2 left → 2 up\npurple cross ball: 1 up → 3 right → 2 up → 1 right\ngreen diamond ball: 1 down → 3 up → 2 right → 3 up"
+    ]
+  },
+  "L47": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 왼쪽 4칸 → 위 6칸 → 오른쪽 2칸\n빨간 줄무늬 공: 위 1칸 → 아래 2칸 → 왼쪽 4칸 → 위 2칸\n보라 십자무늬 공: 왼쪽 1칸 → 오른쪽 2칸 → 왼쪽 4칸 → 위 4칸\n초록 마름모무늬 공: 왼쪽 1칸 → 아래 2칸 → 왼쪽 2칸 → 위 2칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 4 left → 6 up → 2 right\nred striped ball: 1 up → 2 down → 4 left → 2 up\npurple cross ball: 1 left → 2 right → 4 left → 4 up\ngreen diamond ball: 1 left → 2 down → 2 left → 2 up"
+    ]
+  },
+  "L48": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 2칸 → 위 1칸 → 아래 4칸 → 오른쪽 1칸\n빨간 줄무늬 공: 왼쪽 3칸 → 오른쪽 4칸 → 아래 4칸 → 오른쪽 1칸\n보라 십자무늬 공: 위 1칸 → 오른쪽 3칸 → 아래 1칸 → 오른쪽 1칸\n초록 마름모무늬 공: 왼쪽 3칸 → 오른쪽 2칸 → 아래 4칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 2 left → 1 up → 4 down → 1 right\nred striped ball: 3 left → 4 right → 4 down → 1 right\npurple cross ball: 1 up → 3 right → 1 down → 1 right\ngreen diamond ball: 3 left → 2 right → 4 down → 1 right"
+    ]
+  },
+  "L49": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 2칸 → 위 2칸 → 오른쪽 4칸 → 위 1칸\n빨간 줄무늬 공: 위 2칸 → 오른쪽 2칸 → 위 1칸\n보라 십자무늬 공: 위 1칸 → 왼쪽 3칸 → 오른쪽 6칸 → 위 1칸\n초록 마름모무늬 공: 오른쪽 1칸 → 왼쪽 1칸 → 오른쪽 1칸 → 위 4칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 2 down → 2 up → 4 right → 1 up\nred striped ball: 2 up → 2 right → 1 up\npurple cross ball: 1 up → 3 left → 6 right → 1 up\ngreen diamond ball: 1 right → 1 left → 1 right → 4 up"
+    ]
+  },
+  "L50": {
+    "hintsKo": [
+      "열쇠를 지나면 같은 색의 문이 열려요. 오른쪽 점이 남은 시간을 보여줘요.",
+      "다른 공이 문을 통과할 때 열려 있도록 열쇠까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 아래 1칸 → 위 2칸 → 오른쪽 5칸\n빨간 줄무늬 공: 왼쪽 2칸 → 아래 4칸 → 오른쪽 1칸\n보라 십자무늬 공: 오른쪽 3칸 → 왼쪽 3칸 → 아래 2칸 → 오른쪽 5칸\n초록 마름모무늬 공: 왼쪽 2칸 → 오른쪽 2칸 → 아래 4칸 → 오른쪽 3칸"
+    ],
+    "hintsEn": [
+      "Cross a key to open its matching gate. The dots on the right show time remaining.",
+      "Plan when one ball crosses the key so another can pass through.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 1 down → 2 up → 5 right\nred striped ball: 2 left → 4 down → 1 right\npurple cross ball: 3 right → 3 left → 2 down → 5 right\ngreen diamond ball: 2 left → 2 right → 4 down → 3 right"
+    ]
+  },
+  "L51": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "출구를 비우는 시각을 맞춰 보세요. 가까운 길이 항상 안전한 길은 아니에요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 아래 4칸 (포탈) → 왼쪽 1칸 → 아래 2칸 → 오른쪽 2칸\n빨간 줄무늬 공: 아래 1칸 (포탈) → 왼쪽 1칸 → 아래 1칸 → 아래 1칸 → 오른쪽 2칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Leave the exit clear when the next ball arrives.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 4 down (portal) → 1 left → 2 down → 2 right\nred striped ball: 1 down (portal) → 1 left → 1 down → 1 down → 2 right"
+    ]
+  },
+  "L52": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "출구를 비우는 시각을 맞춰 보세요. 가까운 길이 항상 안전한 길은 아니에요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 (포탈) → 오른쪽 1칸 → 오른쪽 1칸 → 위 1칸\n빨간 줄무늬 공: 왼쪽 1칸 → 왼쪽 2칸 (포탈) → 오른쪽 2칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Leave the exit clear when the next ball arrives.",
+      "One safe complete plan:\nblue dotted ball: 1 down (portal) → 1 right → 1 right → 1 up\nred striped ball: 1 left → 2 left (portal) → 2 right → 1 up"
+    ]
+  },
+  "L53": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "출구를 비우는 시각을 맞춰 보세요. 가까운 길이 항상 안전한 길은 아니에요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 (포탈) → 오른쪽 1칸 → 오른쪽 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 왼쪽 2칸 (포탈) → 오른쪽 2칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Leave the exit clear when the next ball arrives.",
+      "One safe complete plan:\nblue dotted ball: 1 right (portal) → 1 right → 1 right\nred striped ball: 1 right → 2 left (portal) → 2 right"
+    ]
+  },
+  "L54": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "출구를 비우는 시각을 맞춰 보세요. 가까운 길이 항상 안전한 길은 아니에요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 (포탈) → 오른쪽 1칸 → 오른쪽 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 위 4칸 → 왼쪽 1칸\n보라 십자무늬 공: 오른쪽 1칸 → 왼쪽 2칸 (포탈) → 오른쪽 2칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Leave the exit clear when the next ball arrives.",
+      "One safe complete plan:\nblue dotted ball: 1 down (portal) → 1 right → 1 right\nred striped ball: 1 right → 4 up → 1 left\npurple cross ball: 1 right → 2 left (portal) → 2 right"
+    ]
+  },
+  "L55": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "출구를 비우는 시각을 맞춰 보세요. 가까운 길이 항상 안전한 길은 아니에요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 아래 3칸 → 왼쪽 2칸\n빨간 줄무늬 공: 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸\n보라 십자무늬 공: 왼쪽 1칸 (포탈) → 왼쪽 1칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Leave the exit clear when the next ball arrives.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 3 down → 2 left\nred striped ball: 1 left → 1 up → 2 left\npurple cross ball: 1 left (portal) → 1 left → 1 left"
+    ]
+  },
+  "L56": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "출구를 비우는 시각을 맞춰 보세요. 가까운 길이 항상 안전한 길은 아니에요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 2칸 → 오른쪽 4칸 → 위 1칸\n빨간 줄무늬 공: 아래 1칸 → 위 2칸 (포탈) → 위 2칸\n보라 십자무늬 공: 아래 1칸 (포탈) → 위 1칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Leave the exit clear when the next ball arrives.",
+      "One safe complete plan:\nblue dotted ball: 2 down → 4 right → 1 up\nred striped ball: 1 down → 2 up (portal) → 2 up\npurple cross ball: 1 down (portal) → 1 up → 1 up"
+    ]
+  },
+  "L57": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "출구를 비우는 시각을 맞춰 보세요. 가까운 길이 항상 안전한 길은 아니에요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 1칸 → 왼쪽 1칸 → 왼쪽 1칸 → 아래 3칸\n빨간 줄무늬 공: 위 1칸 → 왼쪽 1칸 → 왼쪽 2칸 (포탈) → 아래 3칸\n보라 십자무늬 공: 오른쪽 1칸 → 아래 1칸 → 왼쪽 3칸 → 아래 3칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Leave the exit clear when the next ball arrives.",
+      "One safe complete plan:\nblue dotted ball: 1 left → 1 left → 1 left → 3 down\nred striped ball: 1 up → 1 left → 2 left (portal) → 3 down\npurple cross ball: 1 right → 1 down → 3 left → 3 down"
+    ]
+  },
+  "L58": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "출구를 비우는 시각을 맞춰 보세요. 가까운 길이 항상 안전한 길은 아니에요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 아래 1칸 → 오른쪽 4칸 → 위 1칸\n빨간 줄무늬 공: 위 2칸 (포탈) → 아래 1칸 → 오른쪽 4칸 → 위 1칸\n보라 십자무늬 공: 위 1칸 → 오른쪽 1칸 → 오른쪽 2칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Leave the exit clear when the next ball arrives.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 1 down → 4 right → 1 up\nred striped ball: 2 up (portal) → 1 down → 4 right → 1 up\npurple cross ball: 1 up → 1 right → 2 right → 1 up"
+    ]
+  },
+  "L59": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "출구를 비우는 시각을 맞춰 보세요. 가까운 길이 항상 안전한 길은 아니에요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 2칸 → 오른쪽 2칸 → 아래 3칸 → 왼쪽 3칸\n빨간 줄무늬 공: 위 1칸 → 오른쪽 1칸 → 오른쪽 1칸 (포탈) → 왼쪽 3칸\n보라 십자무늬 공: 왼쪽 1칸 → 위 1칸 → 아래 3칸 → 왼쪽 3칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Leave the exit clear when the next ball arrives.",
+      "One safe complete plan:\nblue dotted ball: 2 left → 2 right → 3 down → 3 left\nred striped ball: 1 up → 1 right → 1 right (portal) → 3 left\npurple cross ball: 1 left → 1 up → 3 down → 3 left"
+    ]
+  },
+  "L60": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 1칸 → 아래 1칸 (포탈) → 아래 1칸 → 아래 2칸\n빨간 줄무늬 공: 위 1칸 → 아래 2칸 → 왼쪽 4칸 → 위 1칸\n보라 십자무늬 공: 위 1칸 → 아래 1칸 → 아래 2칸 (포탈) → 아래 3칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 1 left → 1 down (portal) → 1 down → 2 down\nred striped ball: 1 up → 2 down → 4 left → 1 up\npurple cross ball: 1 up → 1 down → 2 down (portal) → 3 down"
+    ]
+  },
+  "L61": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 아래 2칸 → 위 1칸 → 왼쪽 4칸\n빨간 줄무늬 공: 오른쪽 1칸 → 위 2칸 → 아래 4칸 → 왼쪽 3칸\n보라 십자무늬 공: 위 1칸 → 왼쪽 4칸 (포탈) → 아래 1칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 down → 1 up → 4 left\nred striped ball: 1 right → 2 up → 4 down → 3 left\npurple cross ball: 1 up → 4 left (portal) → 1 down → 1 left"
+    ]
+  },
+  "L62": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 3칸 → 위 2칸 → 왼쪽 2칸 → 아래 3칸\n빨간 줄무늬 공: 위 1칸 → 왼쪽 2칸 (포탈) → 왼쪽 3칸 → 위 1칸\n보라 십자무늬 공: 왼쪽 1칸 → 위 2칸 → 왼쪽 2칸 → 아래 3칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 3 left → 2 up → 2 left → 3 down\nred striped ball: 1 up → 2 left (portal) → 3 left → 1 up\npurple cross ball: 1 left → 2 up → 2 left → 3 down"
+    ]
+  },
+  "L63": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 오른쪽 2칸 (포탈) → 왼쪽 1칸 → 위 2칸\n빨간 줄무늬 공: 왼쪽 3칸 → 아래 2칸 → 오른쪽 4칸 → 아래 2칸\n보라 십자무늬 공: 위 2칸 → 아래 5칸 → 왼쪽 2칸 → 위 2칸\n초록 마름모무늬 공: 왼쪽 1칸 → 아래 2칸 → 오른쪽 4칸 → 아래 2칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 right (portal) → 1 left → 2 up\nred striped ball: 3 left → 2 down → 4 right → 2 down\npurple cross ball: 2 up → 5 down → 2 left → 2 up\ngreen diamond ball: 1 left → 2 down → 4 right → 2 down"
+    ]
+  },
+  "L64": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 3칸 → 아래 4칸 → 오른쪽 2칸 (포탈) → 아래 2칸\n빨간 줄무늬 공: 오른쪽 1칸 → 아래 1칸 → 아래 1칸 (포탈) → 아래 2칸\n보라 십자무늬 공: 아래 1칸 → 위 2칸 → 오른쪽 2칸 (포탈) → 아래 2칸\n초록 마름모무늬 공: 위 1칸 → 오른쪽 2칸 → 아래 4칸 (포탈) → 아래 2칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 3 up → 4 down → 2 right (portal) → 2 down\nred striped ball: 1 right → 1 down → 1 down (portal) → 2 down\npurple cross ball: 1 down → 2 up → 2 right (portal) → 2 down\ngreen diamond ball: 1 up → 2 right → 4 down (portal) → 2 down"
+    ]
+  },
+  "L65": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 3칸 → 아래 2칸 → 오른쪽 2칸 → 아래 2칸 → 오른쪽 3칸\n빨간 줄무늬 공: 아래 1칸 → 아래 2칸 → 왼쪽 2칸 → 아래 2칸 → 오른쪽 1칸\n보라 십자무늬 공: 위 3칸 → 아래 4칸 → 오른쪽 2칸 → 아래 2칸 → 오른쪽 3칸\n초록 마름모무늬 공: 위 1칸 (포탈) → 왼쪽 1칸 → 왼쪽 1칸 → 아래 2칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 3 up → 2 down → 2 right → 2 down → 3 right\nred striped ball: 1 down → 2 down → 2 left → 2 down → 1 right\npurple cross ball: 3 up → 4 down → 2 right → 2 down → 3 right\ngreen diamond ball: 1 up (portal) → 1 left → 1 left → 2 down → 1 right"
+    ]
+  },
+  "L66": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 2칸\n빨간 줄무늬 공: 아래 2칸 → 왼쪽 1칸 → 위 4칸 → 오른쪽 2칸\n보라 십자무늬 공: 아래 1칸 → 위 1칸 → 위 3칸 → 오른쪽 2칸\n초록 마름모무늬 공: 위 1칸 → 왼쪽 1칸 → 아래 2칸 (포탈) → 오른쪽 2칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 1 right → 1 up → 2 right\nred striped ball: 2 down → 1 left → 4 up → 2 right\npurple cross ball: 1 down → 1 up → 3 up → 2 right\ngreen diamond ball: 1 up → 1 left → 2 down (portal) → 2 right"
+    ]
+  },
+  "L67": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 위 4칸 → 오른쪽 2칸 → 위 2칸 → 왼쪽 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 위 2칸 → 아래 2칸 → 위 6칸 → 왼쪽 1칸\n보라 십자무늬 공: 위 1칸 → 왼쪽 2칸 → 아래 1칸 (포탈) → 위 4칸 → 왼쪽 1칸\n초록 마름모무늬 공: 오른쪽 1칸 → 위 2칸 → 오른쪽 2칸 → 위 2칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 4 up → 2 right → 2 up → 1 left\nred striped ball: 1 right → 2 up → 2 down → 6 up → 1 left\npurple cross ball: 1 up → 2 left → 1 down (portal) → 4 up → 1 left\ngreen diamond ball: 1 right → 2 up → 2 right → 2 up → 1 left"
+    ]
+  },
+  "L68": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 5칸 → 오른쪽 2칸 → 아래 1칸 (포탈) → 오른쪽 2칸\n빨간 줄무늬 공: 오른쪽 3칸 → 왼쪽 2칸 → 위 1칸 (포탈) → 오른쪽 2칸\n보라 십자무늬 공: 위 2칸 → 오른쪽 2칸 → 위 2칸 → 오른쪽 3칸\n초록 마름모무늬 공: 위 1칸 → 왼쪽 1칸 (포탈) → 왼쪽 1칸 → 오른쪽 3칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 5 left → 2 right → 1 down (portal) → 2 right\nred striped ball: 3 right → 2 left → 1 up (portal) → 2 right\npurple cross ball: 2 up → 2 right → 2 up → 3 right\ngreen diamond ball: 1 up → 1 left (portal) → 1 left → 3 right"
+    ]
+  },
+  "L69": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 (포탈) → 위 1칸 → 위 1칸 → 아래 2칸 → 오른쪽 2칸\n빨간 줄무늬 공: 위 1칸 → 아래 4칸 → 오른쪽 2칸 → 아래 2칸 → 왼쪽 2칸\n보라 십자무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 오른쪽 2칸 → 위 2칸 (포탈) → 오른쪽 2칸\n초록 마름모무늬 공: 오른쪽 1칸 → 아래 2칸 → 오른쪽 2칸 → 아래 2칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 1 up (portal) → 1 up → 1 up → 2 down → 2 right\nred striped ball: 1 up → 4 down → 2 right → 2 down → 2 left\npurple cross ball: 1 right → 2 left → 2 right → 2 up (portal) → 2 right\ngreen diamond ball: 1 right → 2 down → 2 right → 2 down → 2 left"
+    ]
+  },
+  "L70": {
+    "hintsKo": [
+      "입구를 끝점으로 탭하면 출구로 즉시 이동해요. 입구를 그냥 지나치면 이동하지 않아요.",
+      "포탈로 줄어든 이동 시간을 이용해 다른 공이 지날 문을 열어 주세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 오른쪽 5칸 → 왼쪽 3칸 → 아래 1칸\n빨간 줄무늬 공: 왼쪽 1칸 → 위 1칸 → 왼쪽 1칸 → 왼쪽 1칸\n보라 십자무늬 공: 아래 3칸 → 오른쪽 2칸 → 아래 1칸 (포탈) → 왼쪽 2칸\n초록 마름모무늬 공: 왼쪽 2칸 → 오른쪽 1칸 → 아래 1칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.",
+      "Use the shortcut to open a gate in time for another ball.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 5 right → 3 left → 1 down\nred striped ball: 1 left → 1 up → 1 left → 1 left\npurple cross ball: 3 down → 2 right → 1 down (portal) → 2 left\ngreen diamond ball: 2 left → 1 right → 1 down → 2 left"
+    ]
+  },
+  "L71": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 위 1칸 → 왼쪽 2칸 → 위 2칸 → 왼쪽 1칸 → 위 2칸\n빨간 줄무늬 공: 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸 → 위 3칸 → 오른쪽 1칸 → 위 2칸\n보라 십자무늬 공: 위 1칸 → 왼쪽 2칸 → 아래 1칸 → 위 4칸 → 오른쪽 1칸 → 위 2칸\n초록 마름모무늬 공: 아래 1칸 → 오른쪽 1칸 (포탈) → 아래 1칸 → 위 2칸 → 왼쪽 1칸 → 위 2칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 1 up → 2 left → 2 up → 1 left → 2 up\nred striped ball: 1 left → 1 up → 2 left → 3 up → 1 right → 2 up\npurple cross ball: 1 up → 2 left → 1 down → 4 up → 1 right → 2 up\ngreen diamond ball: 1 down → 1 right (portal) → 1 down → 2 up → 1 left → 2 up"
+    ]
+  },
+  "L72": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 2칸 → 아래 2칸 → 위 2칸 → 왼쪽 1칸 → 위 1칸 → 왼쪽 3칸\n빨간 줄무늬 공: 위 1칸 → 왼쪽 3칸 → 오른쪽 2칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 3칸\n보라 십자무늬 공: 위 1칸 → 왼쪽 3칸 → 아래 2칸 → 왼쪽 2칸 (포탈) → 왼쪽 1칸\n초록 마름모무늬 공: 위 1칸 → 아래 2칸 → 왼쪽 1칸 → 오른쪽 2칸 → 왼쪽 3칸 (포탈) → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 2 left → 2 down → 2 up → 1 left → 1 up → 3 left\nred striped ball: 1 up → 3 left → 2 right → 2 left → 1 up → 3 left\npurple cross ball: 1 up → 3 left → 2 down → 2 left (portal) → 1 left\ngreen diamond ball: 1 up → 2 down → 1 left → 2 right → 3 left (portal) → 1 left"
+    ]
+  },
+  "L73": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 2칸 → 오른쪽 2칸 → 왼쪽 6칸 → 아래 4칸 → 오른쪽 1칸\n빨간 줄무늬 공: 왼쪽 3칸 → 오른쪽 3칸 → 아래 2칸 → 왼쪽 4칸 → 아래 4칸 → 오른쪽 1칸\n보라 십자무늬 공: 왼쪽 1칸 → 위 2칸 → 왼쪽 5칸 → 아래 2칸 → 오른쪽 1칸\n초록 마름모무늬 공: 위 1칸 → 오른쪽 1칸 → 위 2칸 → 왼쪽 4칸 → 아래 4칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 2 up → 2 right → 6 left → 4 down → 1 right\nred striped ball: 3 left → 3 right → 2 down → 4 left → 4 down → 1 right\npurple cross ball: 1 left → 2 up → 5 left → 2 down → 1 right\ngreen diamond ball: 1 up → 1 right → 2 up → 4 left → 4 down → 1 right"
+    ]
+  },
+  "L74": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 왼쪽 1칸 → 오른쪽 2칸 → 아래 1칸\n빨간 줄무늬 공: 위 1칸 → 오른쪽 6칸 → 아래 4칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 1칸\n보라 십자무늬 공: 아래 2칸 → 오른쪽 4칸 → 아래 4칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 1칸\n초록 마름모무늬 공: 위 1칸 → 오른쪽 2칸 → 아래 4칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 1 left → 2 right → 1 down\nred striped ball: 1 up → 6 right → 4 down → 2 left → 1 up → 1 left\npurple cross ball: 2 down → 4 right → 4 down → 2 left → 1 up → 1 left\ngreen diamond ball: 1 up → 2 right → 4 down → 2 left → 1 up → 1 left"
+    ]
+  },
+  "L75": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 (포탈) → 위 1칸 → 오른쪽 4칸 → 아래 1칸\n빨간 줄무늬 공: 왼쪽 2칸 → 위 2칸 → 오른쪽 1칸 (포탈) → 위 1칸 → 오른쪽 4칸 → 아래 1칸\n보라 십자무늬 공: 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸 (포탈) → 위 1칸 → 오른쪽 4칸 → 아래 1칸\n초록 마름모무늬 공: 위 1칸 → 아래 1칸 → 오른쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 1 up → 1 right (portal) → 1 up → 4 right → 1 down\nred striped ball: 2 left → 2 up → 1 right (portal) → 1 up → 4 right → 1 down\npurple cross ball: 1 left → 2 up → 1 right (portal) → 1 up → 4 right → 1 down\ngreen diamond ball: 1 up → 1 down → 1 right → 2 down → 1 right → 1 down"
+    ]
+  },
+  "L76": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 1칸 → 오른쪽 2칸 → 아래 5칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 4칸 → 아래 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 위 1칸 → 아래 4칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 4칸 → 아래 1칸\n보라 십자무늬 공: 아래 2칸 → 왼쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 왼쪽 2칸 → 아래 1칸\n초록 마름모무늬 공: 위 1칸 → 아래 2칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 4칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 left → 2 right → 5 down → 2 left → 1 up → 4 left → 1 down\nred striped ball: 1 right → 1 up → 4 down → 2 left → 1 up → 4 left → 1 down\npurple cross ball: 2 down → 1 left → 2 down → 1 right → 2 left → 1 down\ngreen diamond ball: 1 up → 2 down → 2 left → 1 up → 4 left → 1 down"
+    ]
+  },
+  "L77": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 아래 1칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 3칸 → 아래 1칸\n빨간 줄무늬 공: 왼쪽 2칸 → 오른쪽 2칸 → 왼쪽 1칸 → 위 1칸 (포탈) → 아래 3칸 → 오른쪽 3칸 → 아래 1칸\n보라 십자무늬 공: 왼쪽 2칸 → 위 3칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 3칸 → 아래 1칸\n초록 마름모무늬 공: 왼쪽 1칸 → 아래 1칸 → 위 1칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 3칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 1 down → 2 right → 1 down → 3 right → 1 down\nred striped ball: 2 left → 2 right → 1 left → 1 up (portal) → 3 down → 3 right → 1 down\npurple cross ball: 2 left → 3 up → 2 right → 1 down → 3 right → 1 down\ngreen diamond ball: 1 left → 1 down → 1 up → 2 right → 1 down → 3 right → 1 down"
+    ]
+  },
+  "L78": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 왼쪽 2칸 → 아래 1칸 → 왼쪽 4칸 → 위 1칸\n빨간 줄무늬 공: 위 1칸 → 왼쪽 2칸 → 오른쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 왼쪽 4칸 → 위 1칸\n보라 십자무늬 공: 아래 1칸 (포탈) → 왼쪽 2칸 → 오른쪽 1칸 → 왼쪽 1칸 → 위 2칸 → 왼쪽 3칸 → 위 1칸\n초록 마름모무늬 공: 오른쪽 1칸 → 왼쪽 2칸 (포탈) → 오른쪽 1칸 → 왼쪽 3칸 → 위 2칸 → 왼쪽 3칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 left → 1 down → 4 left → 1 up\nred striped ball: 1 up → 2 left → 1 right → 2 up → 1 right → 4 left → 1 up\npurple cross ball: 1 down (portal) → 2 left → 1 right → 1 left → 2 up → 3 left → 1 up\ngreen diamond ball: 1 right → 2 left (portal) → 1 right → 3 left → 2 up → 3 left → 1 up"
+    ]
+  },
+  "L79": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 위 1칸 → 아래 3칸 → 위 3칸 → 아래 2칸 → 오른쪽 5칸 → 아래 4칸\n빨간 줄무늬 공: 위 2칸 → 아래 2칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 5칸 → 아래 4칸\n보라 십자무늬 공: 오른쪽 1칸 → 위 1칸 → 오른쪽 2칸 (포탈) → 오른쪽 1칸 → 아래 6칸\n초록 마름모무늬 공: 아래 1칸 → 위 2칸 → 오른쪽 1칸 → 위 2칸 (포탈) → 오른쪽 1칸 → 아래 6칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 1 up → 3 down → 3 up → 2 down → 5 right → 4 down\nred striped ball: 2 up → 2 down → 2 up → 1 right → 1 up → 5 right → 4 down\npurple cross ball: 1 right → 1 up → 2 right (portal) → 1 right → 6 down\ngreen diamond ball: 1 down → 2 up → 1 right → 2 up (portal) → 1 right → 6 down"
+    ]
+  },
+  "L80": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 아래 4칸 → 오른쪽 1칸 → 아래 2칸 → 왼쪽 3칸 → 오른쪽 4칸\n빨간 줄무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 아래 4칸 → 오른쪽 3칸 → 아래 2칸 → 왼쪽 1칸\n보라 십자무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 오른쪽 3칸 → 아래 3칸 → 오른쪽 1칸 → 아래 2칸 → 오른쪽 1칸\n초록 마름모무늬 공: 왼쪽 1칸 → 아래 2칸 → 오른쪽 3칸 → 위 3칸 → 아래 5칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 4 down → 1 right → 2 down → 3 left → 4 right\nred striped ball: 1 right → 2 left → 4 down → 3 right → 2 down → 1 left\npurple cross ball: 1 right → 2 left → 3 right → 3 down → 1 right → 2 down → 1 right\ngreen diamond ball: 1 left → 2 down → 3 right → 3 up → 5 down → 1 left"
+    ]
+  },
+  "L81": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 아래 1칸 (포탈) → 왼쪽 1칸 (포탈) → 위 2칸 → 왼쪽 2칸 → 아래 1칸\n빨간 줄무늬 공: 아래 1칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 2칸 → 왼쪽 1칸 → 아래 2칸 → 왼쪽 1칸 → 아래 1칸\n보라 십자무늬 공: 오른쪽 1칸 → 아래 1칸 → 오른쪽 2칸 → 위 2칸 → 왼쪽 1칸 (포탈) → 위 2칸 → 왼쪽 2칸 → 아래 1칸\n초록 마름모무늬 공: 위 1칸 → 왼쪽 2칸 → 오른쪽 3칸 → 왼쪽 3칸 → 위 1칸 → 왼쪽 2칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 1 down (portal) → 1 left (portal) → 2 up → 2 left → 1 down\nred striped ball: 1 down → 1 right → 1 down → 2 right → 1 left → 2 down → 1 left → 1 down\npurple cross ball: 1 right → 1 down → 2 right → 2 up → 1 left (portal) → 2 up → 2 left → 1 down\ngreen diamond ball: 1 up → 2 left → 3 right → 3 left → 1 up → 2 left → 1 down"
+    ]
+  },
+  "L82": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 왼쪽 1칸 (포탈) → 아래 3칸 → 왼쪽 1칸 → 아래 2칸 → 오른쪽 2칸 → 아래 1칸\n빨간 줄무늬 공: 아래 2칸 → 왼쪽 1칸 → 아래 1칸 → 위 1칸 → 아래 2칸 → 오른쪽 2칸 → 아래 1칸\n보라 십자무늬 공: 아래 1칸 → 위 1칸 → 아래 4칸 → 위 2칸 → 왼쪽 2칸 → 아래 1칸 → 왼쪽 1칸 → 아래 1칸\n초록 마름모무늬 공: 왼쪽 1칸 (포탈) → 아래 3칸 → 오른쪽 1칸 → 왼쪽 2칸 → 아래 2칸 → 오른쪽 2칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 1 left (portal) → 3 down → 1 left → 2 down → 2 right → 1 down\nred striped ball: 2 down → 1 left → 1 down → 1 up → 2 down → 2 right → 1 down\npurple cross ball: 1 down → 1 up → 4 down → 2 up → 2 left → 1 down → 1 left → 1 down\ngreen diamond ball: 1 left (portal) → 3 down → 1 right → 2 left → 2 down → 2 right → 1 down"
+    ]
+  },
+  "L83": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 왼쪽 1칸 (포탈) → 오른쪽 1칸 → 아래 1칸 → 위 3칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 아래 1칸 → 왼쪽 3칸 → 위 1칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸\n보라 십자무늬 공: 왼쪽 1칸 (포탈) → 오른쪽 1칸 → 위 2칸 → 왼쪽 1칸 → 오른쪽 1칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸\n초록 마름모무늬 공: 위 3칸 → 아래 3칸 → 위 1칸 → 왼쪽 3칸 → 위 1칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 1 left (portal) → 1 right → 1 down → 3 up → 1 left → 2 up → 1 right\nred striped ball: 1 right → 2 left → 1 down → 3 left → 1 up → 1 left → 2 up → 1 right\npurple cross ball: 1 left (portal) → 1 right → 2 up → 1 left → 1 right → 1 left → 2 up → 1 right\ngreen diamond ball: 3 up → 3 down → 1 up → 3 left → 1 up → 1 left → 2 up → 1 right"
+    ]
+  },
+  "L84": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 왼쪽 1칸 → 오른쪽 1칸 → 왼쪽 3칸 → 아래 1칸 → 왼쪽 1칸\n빨간 줄무늬 공: 아래 1칸 → 위 4칸 → 왼쪽 1칸 → 위 2칸 → 왼쪽 2칸 → 아래 1칸 → 왼쪽 1칸\n보라 십자무늬 공: 아래 1칸 → 위 3칸 → 왼쪽 2칸 → 오른쪽 1칸 → 위 2칸 → 왼쪽 2칸 → 아래 1칸 → 왼쪽 1칸\n초록 마름모무늬 공: 아래 2칸 → 왼쪽 1칸 (포탈) → 위 4칸 → 왼쪽 1칸 → 위 2칸 → 왼쪽 2칸 → 아래 1칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 2 up → 1 right → 1 left → 1 right → 3 left → 1 down → 1 left\nred striped ball: 1 down → 4 up → 1 left → 2 up → 2 left → 1 down → 1 left\npurple cross ball: 1 down → 3 up → 2 left → 1 right → 2 up → 2 left → 1 down → 1 left\ngreen diamond ball: 2 down → 1 left (portal) → 4 up → 1 left → 2 up → 2 left → 1 down → 1 left"
+    ]
+  },
+  "L85": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 3칸 → 위 1칸 → 왼쪽 1칸 → 위 2칸 → 왼쪽 1칸\n빨간 줄무늬 공: 위 1칸 → 아래 2칸 → 오른쪽 1칸 → 왼쪽 3칸 → 위 1칸 → 왼쪽 1칸 → 위 2칸 → 왼쪽 1칸\n보라 십자무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 위 2칸 → 아래 2칸 → 위 3칸 → 왼쪽 1칸 → 위 2칸 → 왼쪽 1칸\n초록 마름모무늬 공: 오른쪽 1칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 → 위 2칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 3 left → 1 up → 1 left → 2 up → 1 left\nred striped ball: 1 up → 2 down → 1 right → 3 left → 1 up → 1 left → 2 up → 1 left\npurple cross ball: 1 right → 2 left → 2 up → 2 down → 3 up → 1 left → 2 up → 1 left\ngreen diamond ball: 1 right → 1 left → 2 up → 1 right → 1 up → 1 right → 2 up → 1 left"
+    ]
+  },
+  "L86": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 2칸 → 위 2칸 → 오른쪽 1칸\n빨간 줄무늬 공: 왼쪽 1칸 → 위 2칸 → 아래 1칸 → 왼쪽 1칸 (포탈) → 오른쪽 2칸 → 아래 1칸 → 오른쪽 2칸 → 위 2칸 → 오른쪽 1칸\n보라 십자무늬 공: 위 1칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 2칸 → 위 2칸 → 오른쪽 1칸\n초록 마름모무늬 공: 오른쪽 1칸 → 위 1칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 2칸 → 아래 2칸 → 위 3칸 → 오른쪽 1칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 1 right → 1 up → 2 right → 1 down → 2 right → 2 up → 1 right\nred striped ball: 1 left → 2 up → 1 down → 1 left (portal) → 2 right → 1 down → 2 right → 2 up → 1 right\npurple cross ball: 1 up → 2 right → 1 down → 2 right → 2 up → 1 right\ngreen diamond ball: 1 right → 1 up → 2 right → 1 down → 2 right → 2 down → 3 up → 1 right → 1 up"
+    ]
+  },
+  "L87": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 위 4칸 → 오른쪽 1칸 (포탈) → 아래 2칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 1칸\n빨간 줄무늬 공: 아래 1칸 → 오른쪽 1칸 (포탈) → 아래 2칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 1칸\n보라 십자무늬 공: 아래 1칸 → 오른쪽 2칸 → 왼쪽 2칸 → 오른쪽 4칸 → 왼쪽 1칸 → 위 2칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 1칸\n초록 마름모무늬 공: 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸 (포탈) → 아래 2칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 4 up → 1 right (portal) → 2 down → 1 left → 1 down → 2 left → 2 up → 1 right\nred striped ball: 1 down → 1 right (portal) → 2 down → 1 left → 1 down → 2 left → 2 up → 1 right\npurple cross ball: 1 down → 2 right → 2 left → 4 right → 1 left → 2 up → 2 left → 2 up → 1 right\ngreen diamond ball: 1 left → 2 up → 1 right (portal) → 2 down → 1 left → 1 down → 2 left → 2 up → 1 right"
+    ]
+  },
+  "L88": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 1칸 → 위 1칸 → 왼쪽 1칸 → 위 1칸 → 왼쪽 3칸 → 위 3칸 → 오른쪽 2칸 → 위 1칸\n빨간 줄무늬 공: 위 1칸 → 오른쪽 1칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 3칸 → 위 3칸 → 오른쪽 2칸 → 위 1칸\n보라 십자무늬 공: 아래 2칸 → 위 1칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 3칸 → 위 3칸 → 오른쪽 2칸 → 위 1칸\n초록 마름모무늬 공: 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 → 위 2칸 → 아래 2칸 → 위 2칸 → 왼쪽 3칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 left → 1 up → 1 left → 1 up → 3 left → 3 up → 2 right → 1 up\nred striped ball: 1 up → 1 right → 2 left → 1 up → 3 left → 3 up → 2 right → 1 up\npurple cross ball: 2 down → 1 up → 2 left → 1 up → 3 left → 3 up → 2 right → 1 up\ngreen diamond ball: 1 left → 2 up → 1 right → 1 up → 1 right → 2 up → 2 down → 2 up → 3 left"
+    ]
+  },
+  "L89": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 2칸 → 아래 2칸 → 왼쪽 1칸 → 아래 2칸\n빨간 줄무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 오른쪽 2칸 → 왼쪽 3칸 → 위 3칸 → 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸 → 아래 2칸\n보라 십자무늬 공: 오른쪽 1칸 → 위 2칸 → 아래 3칸 → 위 3칸 → 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸 → 아래 2칸\n초록 마름모무늬 공: 위 1칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 2칸 → 아래 2칸 → 왼쪽 1칸 → 아래 2칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 1 left → 1 down → 2 left → 1 up → 2 left → 2 down → 1 left → 2 down\nred striped ball: 1 right → 2 left → 2 right → 3 left → 3 up → 1 left → 1 up → 2 left → 2 down\npurple cross ball: 1 right → 2 up → 3 down → 3 up → 1 left → 1 up → 2 left → 2 down\ngreen diamond ball: 1 up → 2 left → 1 up → 2 left → 2 down → 1 left → 2 down"
+    ]
+  },
+  "L90": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 위 2칸 → 아래 2칸 → 위 2칸 → 오른쪽 2칸 → 아래 3칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 1칸\n빨간 줄무늬 공: 위 1칸 → 아래 1칸 → 위 1칸 → 왼쪽 2칸 → 아래 3칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 1칸\n보라 십자무늬 공: 위 1칸 → 오른쪽 1칸 → 왼쪽 1칸 → 오른쪽 4칸 → 아래 3칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 1칸\n초록 마름모무늬 공: 위 1칸 → 오른쪽 2칸 → 아래 3칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 2 up → 2 down → 2 up → 2 right → 3 down → 1 left → 1 down → 1 left\nred striped ball: 1 up → 1 down → 1 up → 2 left → 3 down → 1 left → 1 down → 1 left\npurple cross ball: 1 up → 1 right → 1 left → 4 right → 3 down → 1 left → 1 down → 1 left\ngreen diamond ball: 1 up → 2 right → 3 down → 1 left → 1 down → 1 left"
+    ]
+  },
+  "L91": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 1칸 → 위 1칸 → 왼쪽 1칸 → 위 2칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸\n빨간 줄무늬 공: 왼쪽 2칸 → 아래 1칸 → 왼쪽 1칸 → 아래 3칸 → 위 1칸 → 왼쪽 3칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸\n보라 십자무늬 공: 위 1칸 → 왼쪽 2칸 → 오른쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸\n초록 마름모무늬 공: 왼쪽 1칸 → 위 2칸 → 아래 2칸 → 위 3칸 → 왼쪽 5칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 left → 1 up → 1 left → 2 up → 1 left → 2 up → 1 right → 1 up → 1 right\nred striped ball: 2 left → 1 down → 1 left → 3 down → 1 up → 3 left → 2 up → 1 right → 1 up → 1 right\npurple cross ball: 1 up → 2 left → 1 right → 2 up → 1 right → 2 left → 2 up → 1 right → 1 up → 1 right\ngreen diamond ball: 1 left → 2 up → 2 down → 3 up → 5 left → 2 up → 1 right → 1 up → 1 right"
+    ]
+  },
+  "L92": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 위 2칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 2칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸\n빨간 줄무늬 공: 아래 1칸 → 오른쪽 2칸 → 왼쪽 2칸 → 오른쪽 3칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸\n보라 십자무늬 공: 왼쪽 1칸 → 오른쪽 1칸 → 왼쪽 1칸 → 위 1칸 → 오른쪽 4칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸\n초록 마름모무늬 공: 아래 1칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 2칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 up → 2 right → 1 down → 1 right → 1 down → 2 right → 1 up → 1 right → 1 up\nred striped ball: 1 down → 2 right → 2 left → 3 right → 1 left → 2 up → 1 right → 1 up → 1 right → 1 up\npurple cross ball: 1 left → 1 right → 1 left → 1 up → 4 right → 2 up → 1 right → 1 up → 1 right → 1 up\ngreen diamond ball: 1 down → 2 right → 1 down → 1 right → 1 down → 2 right → 1 up → 1 right → 1 up"
+    ]
+  },
+  "L93": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 왼쪽 1칸 → 아래 1칸 → 왼쪽 3칸 → 위 3칸 → 오른쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 2칸 → 아래 1칸\n빨간 줄무늬 공: 아래 1칸 → 오른쪽 2칸 → 위 3칸 → 오른쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 2칸 → 아래 1칸\n보라 십자무늬 공: 아래 1칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 4칸 → 오른쪽 1칸 → 위 3칸 → 오른쪽 3칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸\n초록 마름모무늬 공: 아래 1칸 → 왼쪽 5칸 → 위 1칸 → 아래 1칸 → 오른쪽 2칸 → 위 3칸 → 오른쪽 3칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 left → 1 down → 3 left → 3 up → 1 right → 2 up → 1 right → 1 up → 2 right → 1 down\nred striped ball: 1 down → 2 right → 3 up → 1 right → 2 up → 1 right → 1 up → 2 right → 1 down\npurple cross ball: 1 down → 1 left → 1 down → 4 left → 1 right → 3 up → 3 right → 1 up → 1 right → 1 up\ngreen diamond ball: 1 down → 5 left → 1 up → 1 down → 2 right → 3 up → 3 right → 1 up → 1 right → 1 up"
+    ]
+  },
+  "L94": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 2칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 1칸 → 아래 2칸 → 위 1칸 → 오른쪽 2칸 → 위 3칸 → 왼쪽 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 아래 1칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 4칸 → 위 4칸 → 아래 2칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 1칸\n보라 십자무늬 공: 아래 1칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 4칸 → 위 2칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 1칸\n초록 마름모무늬 공: 왼쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 4칸 → 왼쪽 2칸 → 위 3칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 2 down → 1 right → 1 down → 1 right → 2 down → 1 up → 2 right → 3 up → 1 left\nred striped ball: 1 right → 1 down → 1 right → 1 down → 4 right → 4 up → 2 down → 2 left → 1 up → 1 left\npurple cross ball: 1 down → 1 right → 1 down → 1 right → 1 down → 4 right → 2 up → 2 left → 1 up → 1 left\ngreen diamond ball: 1 left → 2 down → 1 right → 1 down → 1 right → 1 down → 4 right → 2 left → 3 up → 1 left"
+    ]
+  },
+  "L95": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 위 1칸 → 오른쪽 2칸 → 아래 2칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 2칸\n빨간 줄무늬 공: 왼쪽 1칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 2칸 → 아래 2칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 2칸\n보라 십자무늬 공: 왼쪽 1칸 → 아래 2칸 → 위 2칸 → 오른쪽 3칸 → 위 1칸 → 오른쪽 2칸 → 아래 2칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 2칸\n초록 마름모무늬 공: 위 1칸 → 오른쪽 3칸 → 위 3칸 → 아래 3칸 → 위 1칸 → 왼쪽 1칸 → 아래 3칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 2 down → 1 right → 2 down → 1 up → 2 right → 2 down → 1 left → 1 down → 2 left\nred striped ball: 1 left → 1 right → 1 down → 2 right → 2 down → 1 left → 1 down → 2 left\npurple cross ball: 1 left → 2 down → 2 up → 3 right → 1 up → 2 right → 2 down → 1 left → 1 down → 2 left\ngreen diamond ball: 1 up → 3 right → 3 up → 3 down → 1 up → 1 left → 3 down → 1 left → 1 down → 2 left"
+    ]
+  },
+  "L96": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 위 1칸 → 아래 1칸 → 오른쪽 2칸 → 위 2칸 → 왼쪽 1칸 → 위 2칸 → 아래 1칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 2칸 → 위 1칸\n빨간 줄무늬 공: 오른쪽 3칸 → 위 2칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 2칸 → 왼쪽 2칸 → 아래 1칸 → 왼쪽 2칸 → 위 1칸 → 왼쪽 2칸 → 위 1칸\n보라 십자무늬 공: 왼쪽 1칸 → 위 1칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 위 2칸 (포탈) → 오른쪽 2칸 → 위 2칸 → 왼쪽 2칸 → 위 1칸\n초록 마름모무늬 공: 왼쪽 1칸 → 오른쪽 1칸 → 위 2칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸 → 위 2칸 (포탈) → 오른쪽 2칸 → 위 2칸 → 왼쪽 2칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 up → 1 down → 2 right → 2 up → 1 left → 2 up → 1 down → 2 left → 1 up → 2 left → 1 up\nred striped ball: 3 right → 2 up → 1 left → 2 up → 2 right → 2 left → 1 down → 2 left → 1 up → 2 left → 1 up\npurple cross ball: 1 left → 1 up → 1 left → 2 up → 1 right → 2 up (portal) → 2 right → 2 up → 2 left → 1 up\ngreen diamond ball: 1 left → 1 right → 2 up → 1 left → 2 up → 1 right → 2 up (portal) → 2 right → 2 up → 2 left → 1 up"
+    ]
+  },
+  "L97": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 4칸 → 아래 2칸 → 위 2칸 → 왼쪽 3칸 → 아래 2칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 1칸\n빨간 줄무늬 공: 아래 1칸 → 위 1칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 1칸\n보라 십자무늬 공: 아래 1칸 → 위 4칸 → 아래 2칸 → 오른쪽 2칸 → 위 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 1칸\n초록 마름모무늬 공: 왼쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 왼쪽 1칸 → 위 2칸 → 아래 2칸 → 왼쪽 2칸 → 아래 2칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 right → 1 down → 4 right → 2 down → 2 up → 3 left → 2 down → 1 right → 1 down → 1 right\nred striped ball: 1 down → 1 up → 1 left → 2 up → 2 right → 1 down → 1 right → 2 down → 1 right → 1 down → 1 right\npurple cross ball: 1 down → 4 up → 2 down → 2 right → 1 up → 2 down → 1 right → 2 down → 1 right → 1 down → 1 right\ngreen diamond ball: 1 left → 2 down → 1 right → 1 left → 2 up → 2 down → 2 left → 2 down → 1 right → 1 down → 1 right"
+    ]
+  },
+  "L98": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 아래 1칸 → 왼쪽 2칸 → 아래 1칸 → 위 2칸 → 왼쪽 2칸 → 아래 2칸 → 왼쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 왼쪽 1칸\n빨간 줄무늬 공: 왼쪽 1칸 → 아래 1칸 → 위 2칸 → 왼쪽 1칸 → 위 3칸 → 왼쪽 2칸 → 아래 2칸 → 왼쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 왼쪽 1칸\n보라 십자무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 위 3칸 → 왼쪽 1칸 → 위 3칸 → 왼쪽 2칸 → 아래 2칸 → 왼쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 왼쪽 1칸\n초록 마름모무늬 공: 위 2칸 → 아래 2칸 → 위 2칸 → 아래 2칸 → 위 2칸 → 왼쪽 5칸 → 아래 1칸 → 왼쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 down → 2 left → 1 down → 2 up → 2 left → 2 down → 1 left → 2 down → 1 right → 2 down → 1 left\nred striped ball: 1 left → 1 down → 2 up → 1 left → 3 up → 2 left → 2 down → 1 left → 2 down → 1 right → 2 down → 1 left\npurple cross ball: 1 right → 2 left → 3 up → 1 left → 3 up → 2 left → 2 down → 1 left → 2 down → 1 right → 2 down → 1 left\ngreen diamond ball: 2 up → 2 down → 2 up → 2 down → 2 up → 5 left → 1 down → 1 left → 2 down → 1 right → 2 down → 1 left"
+    ]
+  },
+  "L99": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 1칸 → 아래 2칸 → 왼쪽 1칸 → 아래 3칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 2칸 → 위 1칸 → 오른쪽 3칸 → 위 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸 → 아래 2칸 → 왼쪽 1칸 → 오른쪽 2칸 → 아래 2칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 3칸 → 위 1칸\n보라 십자무늬 공: 아래 1칸 → 왼쪽 3칸 → 위 1칸 → 왼쪽 3칸 → 오른쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 3칸 → 위 1칸\n초록 마름모무늬 공: 오른쪽 1칸 → 왼쪽 2칸 → 아래 2칸 → 왼쪽 1칸 → 아래 3칸 → 위 3칸 → 오른쪽 2칸 → 아래 2칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 3칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 1 right → 2 down → 1 left → 3 down → 1 right → 1 down → 2 right → 1 up → 3 right → 1 up\nred striped ball: 1 right → 1 left → 1 up → 2 left → 2 down → 1 left → 2 right → 2 down → 1 right → 1 down → 3 right → 1 up\npurple cross ball: 1 down → 3 left → 1 up → 3 left → 1 right → 2 down → 1 right → 2 down → 1 right → 1 down → 3 right → 1 up\ngreen diamond ball: 1 right → 2 left → 2 down → 1 left → 3 down → 3 up → 2 right → 2 down → 1 right → 1 down → 3 right → 1 up"
+    ]
+  },
+  "L100": {
+    "hintsKo": [
+      "먼저 두 열쇠와 문을 연결해서 보세요. 누가 문을 열고 누가 통과할지 함께 계획해야 해요.",
+      "짧은 길만으로는 풀리지 않아요. 왕복과 우회로 시간을 벌고, 다른 공의 다음 교차도 확인하세요.",
+      "한 가지 안전한 경로예요.\n파란 원무늬 공: 오른쪽 3칸 → 왼쪽 2칸 → 아래 2칸 → 왼쪽 2칸 → 오른쪽 3칸 → 아래 2칸 → 왼쪽 2칸 → 아래 3칸 → 오른쪽 2칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸\n빨간 줄무늬 공: 오른쪽 1칸 → 아래 1칸 → 오른쪽 1칸 → 아래 1칸 → 오른쪽 3칸 → 아래 2칸 → 왼쪽 2칸 → 아래 3칸 → 오른쪽 2칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸\n보라 십자무늬 공: 오른쪽 3칸 → 왼쪽 4칸 → 오른쪽 1칸 → 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 왼쪽 2칸 → 아래 3칸 → 오른쪽 2칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸\n초록 마름모무늬 공: 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 위 1칸 → 오른쪽 3칸 → 왼쪽 3칸 → 오른쪽 2칸 → 아래 2칸 → 오른쪽 2칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Pair both keys with their doors. Plan who opens each door and who crosses it.",
+      "Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.",
+      "One safe complete plan:\nblue dotted ball: 3 right → 2 left → 2 down → 2 left → 3 right → 2 down → 2 left → 3 down → 2 right → 1 up → 1 right → 1 up → 1 right → 1 up\nred striped ball: 1 right → 1 down → 1 right → 1 down → 3 right → 2 down → 2 left → 3 down → 2 right → 1 up → 1 right → 1 up → 1 right → 1 up\npurple cross ball: 3 right → 4 left → 1 right → 2 down → 1 right → 2 down → 2 left → 3 down → 2 right → 1 up → 1 right → 1 up → 1 right → 1 up\ngreen diamond ball: 2 down → 1 right → 2 down → 1 up → 3 right → 3 left → 2 right → 2 down → 2 right → 1 up → 1 right → 1 up → 1 right → 1 up"
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+심플라인 OT/주별 버튼 및 달력 높이 확보 (2026-10-15)
+
+기준/사용자 지시
+- UI47~53 규칙/당시 증거 보존. 현재 한글 심플라인부터 OT·주별 글자 크기를 유지하고 버튼 테두리 추가, 조금 아래로 이동해 달력 높이 확보.6행3버튼도 함께 이동.
+- 후속 정정: 주별 근무시간도 왼쪽 정렬.
+
+설계/수식
+- AppUiMetrics의 기존 controlRadius/팔레트 surface·border/1dp 선 역할 재사용. 두 항목을 각각 테두리 버튼으로 표시.
+- 글자 기존11.sp 및 OT w700/주별 w600 유지. 공통 calendarFooterLabelInset8.w, 두 버튼 모두 centerLeft 및 왼쪽 텍스트 정렬.
+- 푸터 기존3.h+5.h+24.h+5.h+5.h=42.h에서 top3.h + 버튼30.h + bottom2.h=35.h로 변경. 실제 텍스트가 최소높이를 넘으면 기존 자연 높이로 증가할 수 있음.
+- 정상 글자 높이에서7.h를 달력 Expanded에 반환. 요일28.h 유지, 날짜 행 R=(Hgrid-28.h)/6 자동 재계산.6행3버튼의 Positioned top=28.h+5R/height=R을 그대로 사용하므로 달력과 같이 아래로 이동/확장. UI53의 하단 정렬 유지.
+- 요약 글자 중심은 대략5.h 아래로 이동하며 화면별 강제 translate로 겹치게 만들지 않음.
+- CalendarFooterActions에 선택적 actionDecoration/actionPadding/weeklyAlignment 추가. 다른 테마는 기본값 유지. 새로운 화면별 텍스트 크기 분기 없음.
+
+외국어 자동 축소 설명
+- 외국어 CalendarFooterActions는 기존 _ShrinkableIntrinsicColumnWidth + 각 라벨 FittedBox(scaleDown)를 사용해 한 줄/자연 폭 선호를 유지하며 부족한 폭에서만 글자를 축소한다.두 항목 사이16dp 유지.
+- 이번 outlined 푸터는 preview=false/ko/minimal에만 적용. 외국어 변경이나 번역 리소스 변경 없음. 향후 확대 시 같은 축소 경로/안전 여백을 유지한다.
+
+검증
+- 핫리로드49/2162,2239ms 성공. 왼쪽 정렬 후8/2162,1385ms 성공.
+- artifacts/minimal_footer_buttons_2026_10_15/에 이전 소스/diff 및 test.log/test_final.log.
+- 최초 after.png는 사용자 선택 중인 설정 화면이며 달력 시각 PASS 근거로 사용하지 않음. 현재 화면 확인 범위는 후속 기록.
+- 기존 ko/minimal 회귀 검사 실행. 최종 test_final.log 및 확정 기록 참조.
+- P0 알람/권한/언어 기능 변경 없음. release/APK 빌드 없음.
+
+최종 확정: test_final.log ko/minimal 1 PASS, 종료0. final_device.png에서 사용자 선택 저녁 화면 색상의 심플라인 확인:OT/주별 개별 테두리 및 둘 다 왼쪽 정렬,6행3버튼 하단과 날짜 하단 정렬 유지,푸터/광고 사이 침범 없음. 다른 화면색 실기기 전수 PASS를 뜻하지 않음.

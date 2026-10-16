@@ -1,0 +1,60 @@
+{
+  "selection": "Mandatory move budget, mandatory total commands and mandatory detour; entropy is a secondary heuristic, not human difficulty.",
+  "earlierSearchThresholds": "Exploration targets only. Final curation uses the requested move/detour progression instead of treating an entropy score as a human-difficulty certificate.",
+  "finalLevel": {
+    "board": [
+      8,
+      8
+    ],
+    "allFourBallsRequireCommands": 14,
+    "totalCommands": 56,
+    "mandatoryExtraDistance": 24,
+    "maximumExtraDistanceAmongCollisionSafeBasePlans": 24,
+    "canonicalSolutions": 1
+  },
+  "candidates": [
+    {
+      "source": "best_95_parallel.json",
+      "sourceId": "L95",
+      "minimumTotalCommands": 38,
+      "minimumExtraDistance": 22,
+      "score": 54.99176095548918
+    },
+    {
+      "source": "best_96_parallel.json",
+      "sourceId": "L96",
+      "minimumTotalCommands": 43,
+      "minimumExtraDistance": 22,
+      "score": 57.02636729653407
+    },
+    {
+      "source": "best_97_parallel.json",
+      "sourceId": "L97",
+      "minimumTotalCommands": 44,
+      "minimumExtraDistance": 26,
+      "score": 62.5564443501656
+    },
+    {
+      "source": "best_98_parallel.json",
+      "sourceId": "L98",
+      "minimumTotalCommands": 46,
+      "minimumExtraDistance": 20,
+      "score": 55.86843384655207
+    },
+    {
+      "source": "best_99_parallel.json",
+      "sourceId": "L99",
+      "minimumTotalCommands": 47,
+      "minimumExtraDistance": 20,
+      "score": 53.95224438828577
+    },
+    {
+      "source": "boss100_refined.json",
+      "sourceId": "L100",
+      "minimumTotalCommands": 56,
+      "minimumExtraDistance": 24,
+      "score": 55.06640445210994
+    }
+  ],
+  "humanPlaytest": "NOT_TESTED"
+}

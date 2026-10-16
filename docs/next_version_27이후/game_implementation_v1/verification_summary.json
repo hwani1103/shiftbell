@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-13",
+  "ruleSetId": "shared-goal-v1",
+  "scope": "W00-W03 and W04 solver/certificate verification",
+  "coreTests": 89,
+  "toolsTests": 8,
+  "totalTests": 97,
+  "geometryPropertyPairs": 20000,
+  "geometrySeed": 20261013,
+  "pilotLevels": 12,
+  "spatialCombinations": 359,
+  "safeSolutions": 47,
+  "analyze": {
+    "tools": "PASS",
+    "lab": "PASS",
+    "core": "PASS"
+  },
+  "javascriptSmoke": "PASS",
+  "lab": {
+    "collision": "PASS",
+    "staleIdentity": "PASS",
+    "success": "PASS"
+  },
+  "w04Generator": "NOT_IMPLEMENTED",
+  "flutterUi": "NOT_IMPLEMENTED",
+  "androidBuild": "NOT_RUN",
+  "deviceInstall": "NOT_RUN",
+  "deviceCoexistence": "NOT_TESTED",
+  "humanPlaytest": "NOT_TESTED",
+  "existingAppGameIntegration": "NONE",
+  "gameTaskExistingAppFileEdits": "NONE",
+  "validationCommand": "docs/next_version_27이후/game_implementation_v1/check_game_engine.ps1 -Offline -Web"
+}

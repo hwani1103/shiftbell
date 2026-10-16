@@ -1,3 +1,6 @@
+import '../widgets/app_ui_feedback.dart';
+import '../theme/app_ui_theme.dart';
+import '../l10n/sleep_localization.dart';
 import '../l10n/l10n_extensions.dart';
 import '../widgets/unavailable_feature.dart';
 import '../widgets/adaptive_layout.dart';
@@ -33,7 +36,6 @@ import '../services/condition/recovery_briefing_engine.dart';
 import '../services/condition/shift_time_category.dart';
 import '../services/condition/sleep_by_category_stats.dart';
 import '../services/condition/sleep_day_slots.dart';
-import '../theme/app_colors.dart';
 import '../utils/sleep_format_util.dart';
 import '../widgets/disable_tab_button.dart';
 import '../widgets/onboarding_info_popups.dart';
@@ -57,18 +59,19 @@ class ConditionTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     final scheduleAsync = ref.watch(scheduleProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppUiPalette.of(context).surface,
       appBar: AppBar(
-        title: const Text(kSleepRecoveryTabLabel),
+        title: Text(context.l10n.sleepText000),
         centerTitle: true,
       ),
       body: scheduleAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('불러오지 못했습니다: $e')),
+        loading: () => const Center(child: AppUiLoading()),
+        error: (e, st) =>
+            Center(child: Text(context.l10n.sleepText001((e).toString()))),
         data: (schedule) {
           if (schedule == null) {
             return const _NoScheduleNotice();
@@ -88,14 +91,16 @@ class _NoScheduleNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
-    return const Center(
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
+    return Center(
       child: Padding(
         padding: EdgeInsets.all(24),
         child: Text(
-          '먼저 근무 스케줄을 설정해주세요.\n(달력 탭에서 설정할 수 있어요)',
+          context.l10n.sleepText002,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 15, color: Colors.black54),
+          style: TextStyle(
+              fontSize: AppFontSize.control,
+              color: AppUiPalette.of(context).secondaryText),
         ),
       ),
     );
@@ -142,11 +147,12 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     if (!_tutorialChecked) {
       _tutorialChecked = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && ref.read(optionalTabActivationProvider) == null) maybeShowConditionTabTutorial(context);
+        if (mounted && ref.read(optionalTabActivationProvider) == null)
+          maybeShowConditionTabTutorial(context);
       });
     }
 
@@ -174,13 +180,13 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
                           pending.take(_kMaxPendingCards).toList());
                   // ⭐ 2026-09-22 (B-2) - 이미 확정된 기록과 겹쳐 건너뛴 게 있으면 알림(카드는 그대로 남음)
                   if (skipped > 0 && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(AppUiSnackBar(
                         content: Text(
-                            '$skipped건은 이미 기록된 수면과 겹쳐서 확인하지 않았어요. 남은 카드에서 "기록하지 않기"나 "수정"을 눌러 주세요.')));
+                            context.l10n.sleepText003((skipped).toString()))));
                   }
                 },
                 icon: const Icon(Icons.done_all, size: 18),
-                label: const Text('보이는 기록 모두 확인'),
+                label: Text(context.l10n.sleepText004),
               ),
             ),
           for (final r in pending.take(_kMaxPendingCards))
@@ -189,8 +195,11 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
             Padding(
               padding: const EdgeInsets.only(left: 4, top: 2),
               child: Text(
-                '확인을 기다리는 자동 기록이 ${pending.length - _kMaxPendingCards}건 더 있어요. 위 카드를 처리하면 이어서 보여드려요.',
-                style: const TextStyle(fontSize: 12, color: Colors.black54),
+                context.l10n.sleepText005(
+                    (pending.length - _kMaxPendingCards).toString()),
+                style: TextStyle(
+                    fontSize: AppFontSize.meta,
+                    color: AppUiPalette.of(context).secondaryText),
               ),
             ),
           const SizedBox(height: 16),
@@ -202,7 +211,8 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
         if (setupNeeded) ...[
           if (AppLayout.of(context).isWide)
             const Column(mainAxisSize: MainAxisSize.min, children: [
-              _SleepOnlySummaryCard(), _SetupNeededCard(),
+              _SleepOnlySummaryCard(),
+              _SetupNeededCard(),
             ])
           else ...[
             const _SleepOnlySummaryCard(),
@@ -217,8 +227,8 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
         // ⭐ 2026-09-13 - 스크롤 맨 아래에 "사용하지 않기" 버튼
         const SizedBox(height: 28),
         DisableTabButton(
-          tabLabel: kSleepRecoveryTabLabel,
-          provider: conditionTabEnabledProvider,
+          tabLabel: context.l10n.sleepText000,
+          provider: context.sleepTabEnabledProvider,
           onConfirmed: widget.onConfirmed,
           onDisabled: widget.onDisabled,
         ),
@@ -234,24 +244,25 @@ class _SetupNeededCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '오늘의 컨디션을 보려면 근무시간이 필요해요',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            Text(
+              context.l10n.sleepText006,
+              style: TextStyle(
+                  fontSize: AppFontSize.control, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '쓰고 있는 근무 중 하나 이상의 출퇴근 시각을 입력하면, 근무 사이 회복시간과 퇴근 후 실제 수면을 바탕으로 '
-              '몇 시까지 잠자리에 들지·카페인을 언제 끊을지 같은 오늘 챙길 일을 알려드려요.\n'
-              '수면 기록은 지금도 아래 "최근 수면 기록"에서 남길 수 있어요.',
+            Text(
+              context.l10n.sleepText007,
               style: TextStyle(
-                  fontSize: 13.5, height: 1.45, color: Colors.black87),
+                  fontSize: AppFontSize.body,
+                  height: 1.45,
+                  color: AppUiPalette.of(context).text),
             ),
             const SizedBox(height: 12),
             Align(
@@ -262,7 +273,7 @@ class _SetupNeededCard extends StatelessWidget {
                       builder: (_) => const WorkHoursSettingsScreen()),
                 ),
                 icon: const Icon(Icons.schedule, size: 18),
-                label: const Text('근무시간 입력하기'),
+                label: Text(context.l10n.sleepText008),
               ),
             ),
           ],
@@ -287,8 +298,9 @@ class _TodayConditionCardState extends ConsumerState<_TodayConditionCard> {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
-    final briefing = ref.watch(recoveryBriefingProvider);
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
+    final briefing = ref.watch(localizedRecoveryBriefingProvider(
+        Localizations.localeOf(context).languageCode));
     if (briefing == null) return const SizedBox.shrink();
     final evidenceIds = briefing.evidenceIds;
     // ⭐ 2026-09-18 - "이 근무 패턴 자체가 구조적으로 EU/IOM 기준을 넘는지"는
@@ -297,10 +309,11 @@ class _TodayConditionCardState extends ConsumerState<_TodayConditionCard> {
     final loadProfile = ref.watch(scheduleLoadProfileProvider);
 
     return Card(
-      color: kAppMainAccent.withOpacity(0.06),
+      color: AppUiPalette.of(context).primary.withOpacity(0.06),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: kAppMainAccent.withOpacity(0.25)),
+        side: BorderSide(
+            color: AppUiPalette.of(context).primary.withOpacity(0.25)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -309,13 +322,13 @@ class _TodayConditionCardState extends ConsumerState<_TodayConditionCard> {
           children: [
             Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
-                    '오늘의 컨디션',
+                    context.l10n.sleepText009,
                     style: TextStyle(
-                        fontSize: 15,
+                        fontSize: AppFontSize.control,
                         fontWeight: FontWeight.w700,
-                        color: kAppMainAccent),
+                        color: AppUiPalette.of(context).primary),
                   ),
                 ),
                 _LevelChip(level: briefing.level),
@@ -324,36 +337,48 @@ class _TodayConditionCardState extends ConsumerState<_TodayConditionCard> {
             const SizedBox(height: 8),
             Text(
               briefing.situation,
-              style: const TextStyle(
-                  fontSize: 13.5,
+              style: TextStyle(
+                  fontSize: AppFontSize.body,
                   height: 1.35,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87),
+                  color: AppUiPalette.of(context).text),
             ),
             if (loadProfile != null) ...[
               const SizedBox(height: 4),
               Text(
-                loadProfile.note,
-                style: const TextStyle(
-                    fontSize: 11.5, height: 1.3, color: Colors.black45),
+                loadProfile.exceedsIomLimit
+                    ? context.l10n.sleepText151(fmtBriefingDuration(
+                        loadProfile.baselineWeeklyMinutes,
+                        localizations: context.l10n))
+                    : context.l10n.sleepText152(fmtBriefingDuration(
+                        loadProfile.baselineWeeklyMinutes,
+                        localizations: context.l10n)),
+                style: TextStyle(
+                    fontSize: AppFontSize.meta,
+                    height: 1.3,
+                    color: AppUiPalette.of(context).secondaryText),
               ),
             ],
             const SizedBox(height: 14),
-            const _SectionLabel('최근 근무·수면'),
+            _SectionLabel(context.l10n.sleepText010),
             const SizedBox(height: 6),
             if (briefing.facts.isEmpty)
-              const Text('아직 살펴볼 내용이 없어요.',
-                  style: TextStyle(fontSize: 13, color: Colors.black54))
+              Text(context.l10n.sleepText011,
+                  style: TextStyle(
+                      fontSize: AppFontSize.body,
+                      color: AppUiPalette.of(context).secondaryText))
             else
               for (final fact in briefing.facts) _FactRow(fact: fact),
             const SizedBox(height: 12),
-            const _SectionLabel('추천 행동'),
+            _SectionLabel(context.l10n.sleepText012),
             const SizedBox(height: 6),
             if (briefing.actions.isEmpty)
-              const Text(
-                '지금 따로 챙길 행동은 없어요. 평소 수면 리듬을 유지하세요.',
+              Text(
+                context.l10n.sleepText013,
                 style: TextStyle(
-                    fontSize: 13.5, height: 1.4, color: Colors.black87),
+                    fontSize: AppFontSize.body,
+                    height: 1.4,
+                    color: AppUiPalette.of(context).text),
               )
             else
               for (var i = 0; i < briefing.actions.length; i++)
@@ -374,8 +399,11 @@ class _TodayConditionCardState extends ConsumerState<_TodayConditionCard> {
                 icon: Icon(
                     _showEvidence ? Icons.expand_less : Icons.expand_more,
                     size: 18),
-                label: Text(_showEvidence ? '근거 접기' : '근거 보기',
-                    style: const TextStyle(fontSize: 12.5)),
+                label: Text(
+                    _showEvidence
+                        ? context.l10n.sleepText014
+                        : context.l10n.sleepText015,
+                    style: const TextStyle(fontSize: AppFontSize.body)),
               ),
               if (_showEvidence)
                 for (final id in evidenceIds) _EvidenceLine(id: id),
@@ -393,12 +421,21 @@ class _LevelChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     // 3단계 판정은 근무 일정 기반(ConditionRuleEngine) - 수면 기록 유무로 바뀌지 않는다
     final (String label, Color color) = switch (level) {
-      ConditionLevel.normal => ('근무 부담 보통', const Color(0xFF2E7D32)),
-      ConditionLevel.attention => ('주의가 필요한 날', const Color(0xFFB26A00)),
-      ConditionLevel.highLoad => ('회복 부담이 큰 날', const Color(0xFFC62828)),
+      ConditionLevel.normal => (
+          context.l10n.sleepText016,
+          AppUiPalette.of(context).success
+        ),
+      ConditionLevel.attention => (
+          context.l10n.sleepText017,
+          AppUiPalette.of(context).warning
+        ),
+      ConditionLevel.highLoad => (
+          context.l10n.sleepText018,
+          AppUiPalette.of(context).danger
+        ),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -409,7 +446,9 @@ class _LevelChip extends StatelessWidget {
       ),
       child: Text(label,
           style: TextStyle(
-              fontSize: 11.5, fontWeight: FontWeight.w700, color: color)),
+              fontSize: AppFontSize.meta,
+              fontWeight: FontWeight.w700,
+              color: color)),
     );
   }
 }
@@ -420,12 +459,12 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     return Text(text,
-        style: const TextStyle(
-            fontSize: 12.5,
+        style: TextStyle(
+            fontSize: AppFontSize.body,
             fontWeight: FontWeight.w700,
-            color: Colors.black54));
+            color: AppUiPalette.of(context).secondaryText));
   }
 }
 
@@ -435,15 +474,16 @@ class _FactRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     final Widget icon = switch (fact.tone) {
       BriefingTone.caution =>
         const Icon(Icons.error_outline, size: 16, color: Color(0xFFE08A00)),
       BriefingTone.good => const Icon(Icons.check_circle_outline,
           size: 16, color: Color(0xFF2E7D32)),
-      BriefingTone.neutral => const Padding(
+      BriefingTone.neutral => Padding(
           padding: EdgeInsets.symmetric(horizontal: 5),
-          child: Icon(Icons.circle, size: 6, color: Colors.black38),
+          child: Icon(Icons.circle,
+              size: 6, color: AppUiPalette.of(context).secondaryText),
         ),
     };
     return Padding(
@@ -455,8 +495,10 @@ class _FactRow extends StatelessWidget {
           const SizedBox(width: 6),
           Expanded(
             child: Text(fact.text,
-                style: const TextStyle(
-                    fontSize: 13.5, height: 1.4, color: Colors.black87)),
+                style: TextStyle(
+                    fontSize: AppFontSize.body,
+                    height: 1.4,
+                    color: AppUiPalette.of(context).text)),
           ),
         ],
       ),
@@ -471,7 +513,7 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -482,19 +524,22 @@ class _ActionRow extends StatelessWidget {
             height: 18,
             margin: const EdgeInsets.only(top: 1),
             alignment: Alignment.center,
-            decoration: const BoxDecoration(
-                color: kAppMainAccent, shape: BoxShape.circle),
+            decoration: BoxDecoration(
+                color: AppUiPalette.of(context).primary,
+                shape: BoxShape.circle),
             child: Text('$index',
-                style: const TextStyle(
-                    fontSize: 11,
+                style: TextStyle(
+                    fontSize: AppFontSize.meta,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white)),
+                    color: AppUiPalette.of(context).onPrimary)),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(action.text,
-                style: const TextStyle(
-                    fontSize: 13.5, height: 1.4, color: Colors.black87)),
+                style: TextStyle(
+                    fontSize: AppFontSize.body,
+                    height: 1.4,
+                    color: AppUiPalette.of(context).text)),
           ),
         ],
       ),
@@ -509,10 +554,13 @@ class _GeneralGuidanceNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
-    return const Text(
-      '수면·교대근무 연구를 참고한 일반적인 안내예요(의학적 진단이 아니에요).',
-      style: TextStyle(fontSize: 11, height: 1.3, color: Colors.black38),
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
+    return Text(
+      context.l10n.sleepText019,
+      style: TextStyle(
+          fontSize: AppFontSize.meta,
+          height: 1.3,
+          color: AppUiPalette.of(context).secondaryText),
     );
   }
 }
@@ -525,8 +573,9 @@ class _SleepOnlySummaryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
-    final briefing = ref.watch(recoveryBriefingProvider);
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
+    final briefing = ref.watch(localizedRecoveryBriefingProvider(
+        Localizations.localeOf(context).languageCode));
     if (briefing == null) return const SizedBox.shrink();
     final facts = briefing.facts
         .where((f) =>
@@ -543,7 +592,7 @@ class _SleepOnlySummaryCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _SectionLabel('최근 수면'),
+              _SectionLabel(context.l10n.sleepText020),
               const SizedBox(height: 6),
               for (final fact in facts) _FactRow(fact: fact),
             ],
@@ -560,26 +609,27 @@ class _LimitationBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: AppUiPalette.of(context).soft,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.info_outline, size: 15, color: Colors.black54),
+              Icon(Icons.info_outline,
+                  size: 15, color: AppUiPalette.of(context).secondaryText),
               SizedBox(width: 4),
-              Text('판단 범위',
+              Text(context.l10n.sleepText021,
                   style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppFontSize.meta,
                       fontWeight: FontWeight.w700,
-                      color: Colors.black54)),
+                      color: AppUiPalette.of(context).secondaryText)),
             ],
           ),
           const SizedBox(height: 4),
@@ -587,8 +637,10 @@ class _LimitationBox extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(top: 2),
               child: Text('· $line',
-                  style: const TextStyle(
-                      fontSize: 12, height: 1.4, color: Colors.black54)),
+                  style: TextStyle(
+                      fontSize: AppFontSize.meta,
+                      height: 1.4,
+                      color: AppUiPalette.of(context).secondaryText)),
             ),
         ],
       ),
@@ -602,7 +654,7 @@ class _EvidenceLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     Evidence? evidence;
     for (final e in kEvidenceDatabase) {
       if (e.id == id) {
@@ -614,9 +666,11 @@ class _EvidenceLine extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Text(
-        '${evidence.topic} — ${evidence.source}',
-        style: const TextStyle(
-            fontSize: 11.5, height: 1.35, color: Colors.black54),
+        '${sleepEvidenceTopic(evidence, context.l10n)} — ${sleepEvidenceSource(evidence, context.l10n)}',
+        style: TextStyle(
+            fontSize: AppFontSize.meta,
+            height: 1.35,
+            color: AppUiPalette.of(context).secondaryText),
       ),
     );
   }
@@ -633,14 +687,15 @@ class _PendingSleepConfirmationCard extends ConsumerWidget {
       context,
       initialStart: record.start,
       initialEnd: record.end ?? DateTime.now(),
-      title: '수면 시각 수정',
+      title: context.l10n.sleepText022,
     );
     if (result is! SleepSlotSaved) return;
-    final conflict = await ref.read(sleepRecordProvider.notifier).confirmPending(
-          record,
-          overrideStart: result.start,
-          overrideEnd: result.end,
-        );
+    final conflict =
+        await ref.read(sleepRecordProvider.notifier).confirmPending(
+              record,
+              overrideStart: result.start,
+              overrideEnd: result.end,
+            );
     if (context.mounted) _showConflict(context, conflict);
   }
 
@@ -648,33 +703,36 @@ class _PendingSleepConfirmationCard extends ConsumerWidget {
   void _showConflict(BuildContext context, SleepRecord? conflict) {
     if (conflict == null) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(sleepOverlapMessage(conflict))),
+      AppUiSnackBar(content: Text(sleepOverlapMessage(context, conflict))),
     );
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     final end = record.end;
     final durationText = end != null
-        ? fmtSleepDuration(end.difference(record.start), record.source)
-        : '진행 중';
+        ? fmtSleepDuration(end.difference(record.start), record.source,
+            localizations: context.l10n)
+        : context.l10n.sleepText023;
 
     return Card(
-      color: const Color(0xFFFFF8E1),
+      color: AppUiPalette.of(context).soft,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
                 Icon(Icons.bedtime, color: Color(0xFFF9A825)),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '이때 주무셨나요?',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                    context.l10n.sleepText024,
+                    style: TextStyle(
+                        fontSize: AppFontSize.control,
+                        fontWeight: FontWeight.w700),
                   ),
                 ),
               ],
@@ -683,16 +741,25 @@ class _PendingSleepConfirmationCard extends ConsumerWidget {
             Text(
               // ⭐ 2026-09-01 - end==null(진행 중)은 거의 안 보여야 정상 - 앱을 여는 즉시(checkNow) Native가 후보를 닫음.
               end != null
-                  ? '${fmtDateTime(record.start)} ~ ${fmtDateTime(end)}, 약 $durationText 동안 폰을 쓰지 않아 수면으로 추정했어요.'
-                  : '${fmtDateTime(record.start)}부터 수면 중인 것으로 추정됩니다.\n(잠시 후 기상 시각이 추정되면 다시 표시돼요)',
-              style: const TextStyle(fontSize: 13.5, height: 1.4),
+                  ? context.l10n.sleepText025(
+                      (fmtDateTime(record.start, localizations: context.l10n))
+                          .toString(),
+                      (fmtDateTime(end, localizations: context.l10n))
+                          .toString(),
+                      (durationText).toString())
+                  : context.l10n.sleepText026(
+                      (fmtDateTime(record.start, localizations: context.l10n))
+                          .toString()),
+              style: const TextStyle(fontSize: AppFontSize.body, height: 1.4),
             ),
             const SizedBox(height: 4),
             // ⭐ 2026-09-15 - 확인을 미루면 분석에 빠진다는 걸 알려서(재검토 #3) 확인 동선으로 유도. 거부는 학습에 반영됨.
-            const Text(
-              '확인한 기록만 오늘의 컨디션에 반영돼요. 수면이 아니었다면 "기록하지 않기"를 눌러주세요(다음부터 덜 잡혀요).',
+            Text(
+              context.l10n.sleepText027,
               style: TextStyle(
-                  fontSize: 11.5, height: 1.35, color: Colors.black54),
+                  fontSize: AppFontSize.meta,
+                  height: 1.35,
+                  color: AppUiPalette.of(context).secondaryText),
             ),
             const SizedBox(height: 12),
             Wrap(
@@ -704,11 +771,11 @@ class _PendingSleepConfirmationCard extends ConsumerWidget {
                   onPressed: () => ref
                       .read(sleepRecordProvider.notifier)
                       .discardPending(record),
-                  child: const Text('기록하지 않기'),
+                  child: Text(context.l10n.sleepText028),
                 ),
                 OutlinedButton(
                   onPressed: () => _edit(context, ref),
-                  child: const Text('수정'),
+                  child: Text(context.l10n.sleepText029),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -717,7 +784,7 @@ class _PendingSleepConfirmationCard extends ConsumerWidget {
                         .confirmPending(record);
                     if (context.mounted) _showConflict(context, conflict);
                   },
-                  child: const Text('맞아요'),
+                  child: Text(context.l10n.sleepText030),
                 ),
               ],
             ),
@@ -748,7 +815,7 @@ class _SleepMiniCalendarCardState
     extends ConsumerState<_SleepMiniCalendarCard> {
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     final days = ref.watch(recentSleepDaySlotsProvider);
     final analyzer = ref.watch(conditionAnalyzerProvider);
     final reversedDays = days.reversed.toList();
@@ -761,10 +828,11 @@ class _SleepMiniCalendarCardState
           children: [
             Row(
               children: [
-                const Expanded(
-                  child: Text('최근 수면 기록',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                Expanded(
+                  child: Text(context.l10n.sleepText031,
+                      style: TextStyle(
+                          fontSize: AppFontSize.section,
+                          fontWeight: FontWeight.w700)),
                 ),
                 TextButton.icon(
                   onPressed: () => Navigator.of(context).push(
@@ -772,21 +840,25 @@ class _SleepMiniCalendarCardState
                         builder: (_) => const SleepCalendarFullScreen()),
                   ),
                   icon: const Icon(Icons.calendar_month, size: 17),
-                  label: const Text('전체보기'),
+                  label: Text(context.l10n.sleepText032),
                 ),
                 const SizedBox(width: 8),
               ],
             ),
             const SizedBox(height: 2),
-            const Text(
-              '칸을 눌러 수면을 기록·수정할 수 있어요. 옆으로 밀면 지난 날짜가 보여요 →',
-              style: TextStyle(fontSize: 11.5, color: Colors.black45),
+            Text(
+              context.l10n.sleepText033,
+              style: TextStyle(
+                  fontSize: AppFontSize.meta,
+                  color: AppUiPalette.of(context).secondaryText),
             ),
             const SizedBox(height: 10),
             SizedBox(
               // Three sleep slots must retain their label, time and duration
               // lines when accessibility text grows.
-              height: 208 * (MediaQuery.textScalerOf(context).scale(11) / 11).clamp(1.0, double.infinity),
+              height: 208 *
+                  (MediaQuery.textScalerOf(context).scale(11) / 11)
+                      .clamp(1.0, double.infinity),
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 reverse: true,
@@ -821,7 +893,7 @@ class _SleepCategoryAveragesCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     final stats = ref.watch(sleepCategoryStatsProvider);
     final averages = stats.averages;
     final pendingCategories = stats.categories
@@ -844,22 +916,26 @@ class _SleepCategoryAveragesCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.insights_rounded, size: 20, color: kAppMainAccent),
+                Icon(Icons.insights_rounded,
+                    size: 20, color: AppUiPalette.of(context).primary),
                 SizedBox(width: 7),
                 Expanded(
-                  child: Text('내 근무별 수면 패턴',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  child: Text(context.l10n.sleepText034,
+                      style: TextStyle(
+                          fontSize: AppFontSize.section,
+                          fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
             const SizedBox(height: 4),
-            const Text(
-              '최근 30일 중 수면 기록이 있는 날을 근무 유형별로 비교해요.',
+            Text(
+              context.l10n.sleepText035,
               style: TextStyle(
-                  fontSize: 11.5, height: 1.35, color: Colors.black45),
+                  fontSize: AppFontSize.meta,
+                  height: 1.35,
+                  color: AppUiPalette.of(context).secondaryText),
             ),
             if (averages.isNotEmpty) ...[
               const SizedBox(height: 10),
@@ -877,25 +953,28 @@ class _SleepCategoryAveragesCard extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: kAppMainAccent.withValues(alpha: 0.06),
+                  color:
+                      AppUiPalette.of(context).primary.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Text(
-                  '아직 평균을 만드는 중이에요. 같은 근무 유형의 수면이 3일 쌓이면 주 수면과 낮잠을 나눠 보여드려요.',
+                child: Text(
+                  context.l10n.sleepText036,
                   style: TextStyle(
-                      fontSize: 12.5, height: 1.4, color: Colors.black87),
+                      fontSize: AppFontSize.body,
+                      height: 1.4,
+                      color: AppUiPalette.of(context).text),
                 ),
               ),
             ],
             if (pendingCategories.isNotEmpty) ...[
               if (averages.isNotEmpty) const Divider(height: 12),
               const SizedBox(height: 8),
-              const Text(
-                '평균 준비 중 · 유형별 3일 필요',
+              Text(
+                context.l10n.sleepText037,
                 style: TextStyle(
-                    fontSize: 11.5,
+                    fontSize: AppFontSize.meta,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black54),
+                    color: AppUiPalette.of(context).secondaryText),
               ),
               const SizedBox(height: 7),
               Wrap(
@@ -907,24 +986,32 @@ class _SleepCategoryAveragesCard extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 9, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+                        color: AppUiPalette.of(context).soft,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.shade300),
+                        border:
+                            Border.all(color: AppUiPalette.of(context).border),
                       ),
                       child: Text(
-                        '${_sleepCategoryRowLabel(category)} ${stats.samplesFor(category)}/$kMinSampleDaysForCategoryAverage일',
-                        style: const TextStyle(
-                            fontSize: 11.5, color: Colors.black54),
+                        context.l10n.sleepText038(
+                            (_sleepCategoryRowLabel(context, category))
+                                .toString(),
+                            (stats.samplesFor(category)).toString(),
+                            (kMinSampleDaysForCategoryAverage).toString()),
+                        style: TextStyle(
+                            fontSize: AppFontSize.meta,
+                            color: AppUiPalette.of(context).secondaryText),
                       ),
                     ),
                 ],
               ),
             ],
             const SizedBox(height: 2),
-            const Text(
-              '하루는 주 수면 1건과 낮잠 최대 2건만 합산해요. 빠진 기록이 있으면 평균이 낮게 보일 수 있어요.',
+            Text(
+              context.l10n.sleepText039,
               style: TextStyle(
-                  fontSize: 10.5, height: 1.35, color: Colors.black38),
+                  fontSize: AppFontSize.meta,
+                  height: 1.35,
+                  color: AppUiPalette.of(context).secondaryText),
             ),
           ],
         ),
@@ -937,39 +1024,49 @@ class _SleepCategoryAveragesCard extends ConsumerWidget {
 /// 항상 막대의 70% 지점에 오도록 해서 카테고리끼리 눈으로 바로 비교되게 한다.
 const int _kSleepBarBaseScaleMinutes = 10 * 60;
 
-const Color _kMainSleepBarColor = kAppMainAccent;
-final Color _kNapBarColor = kAppMainAccent.withOpacity(0.32);
-
-String _sleepCategoryRowLabel(ShiftTimeCategory c) =>
-    c == ShiftTimeCategory.off ? '휴무일' : '${c.label} 근무일';
+String _sleepCategoryRowLabel(BuildContext context, ShiftTimeCategory c) =>
+    c == ShiftTimeCategory.off
+        ? context.l10n.sleepText040
+        : context.l10n.sleepText041(sleepShiftLabel(c, context.l10n));
 
 class _SleepCategoryLegend extends StatelessWidget {
   const _SleepCategoryLegend();
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     // ⭐ 글꼴 배율을 키운 기기에서 한 줄에 안 들어갈 수 있어 Wrap으로 감쌈(항목별로는
     // 색칩과 라벨이 떨어지면 안 되므로 각 쌍을 Row로 묶어서 넣는다).
     return Wrap(
       spacing: 12,
       runSpacing: 4,
       children: [
-        _item(_swatch(_kMainSleepBarColor), '주 수면'),
-        _item(_swatch(_kNapBarColor), '낮잠'),
+        _item(context, _swatch(AppUiPalette.of(context).primary),
+            context.l10n.sleepText042),
         _item(
-            Container(width: 1.5, height: 10, color: Colors.black38), '권장 7시간'),
+            context,
+            _swatch(AppUiPalette.of(context).primary.withValues(alpha: .32)),
+            context.l10n.sleepText043),
+        _item(
+            context,
+            Container(
+                width: 1.5,
+                height: 10,
+                color: AppUiPalette.of(context).secondaryText),
+            context.l10n.sleepText044),
       ],
     );
   }
 
-  Widget _item(Widget mark, String label) => Row(
+  Widget _item(BuildContext context, Widget mark, String label) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           mark,
           const SizedBox(width: 4),
           Text(label,
-              style: const TextStyle(fontSize: 11, color: Colors.black54)),
+              style: TextStyle(
+                  fontSize: AppFontSize.meta,
+                  color: AppUiPalette.of(context).secondaryText)),
         ],
       );
 
@@ -990,7 +1087,7 @@ class _SleepCategoryAverageRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     final total = average.averageMinutes;
     final low = total < ConditionRuleEngine.recommendedSleepMinMinutes;
     final hasNap = average.averageNapMinutes > 0;
@@ -1002,26 +1099,32 @@ class _SleepCategoryAverageRow extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                _sleepCategoryRowLabel(average.category),
-                style: const TextStyle(
-                    fontSize: 13,
+                _sleepCategoryRowLabel(context, average.category),
+                style: TextStyle(
+                    fontSize: AppFontSize.body,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87),
+                    color: AppUiPalette.of(context).text),
               ),
             ),
             // ⭐ 2026-09-22 사용자 지적 - "5시간 34분"만 있으면 평균인지 알기 어려움.
             // "평균" 접두어를 붙여서 이 숫자가 평균값임을 바로 알 수 있게 함.
             Text(
-              '평균 ${fmtDuration(Duration(minutes: total))}',
+              context.l10n.sleepText045((fmtDuration(Duration(minutes: total),
+                      localizations: context.l10n))
+                  .toString()),
               style: TextStyle(
-                fontSize: 14,
+                fontSize: AppFontSize.body,
                 fontWeight: FontWeight.w700,
-                color: low ? const Color(0xFFB26A00) : Colors.black87,
+                color: low
+                    ? AppUiPalette.of(context).warning
+                    : AppUiPalette.of(context).text,
               ),
             ),
             const SizedBox(width: 6),
-            Text('(${average.sampleDays}일)',
-                style: const TextStyle(fontSize: 10.5, color: Colors.black38)),
+            Text(context.l10n.sleepText046((average.sampleDays).toString()),
+                style: TextStyle(
+                    fontSize: AppFontSize.meta,
+                    color: AppUiPalette.of(context).secondaryText)),
           ],
         ),
         const SizedBox(height: 5),
@@ -1035,10 +1138,20 @@ class _SleepCategoryAverageRow extends StatelessWidget {
         Text(
           // ⭐ 낮잠이 0이면 줄 자체를 짧게 - "낮잠 0분"이 주간·휴무마다 반복되면 노이즈만 됨.
           hasNap
-              ? '주 수면 ${fmtDuration(Duration(minutes: average.averageMainMinutes))}'
-                  ' · 낮잠 ${fmtDuration(Duration(minutes: average.averageNapMinutes))}'
-              : '주 수면 ${fmtDuration(Duration(minutes: average.averageMainMinutes))}',
-          style: const TextStyle(fontSize: 11.5, color: Colors.black54),
+              ? context.l10n.sleepText047(
+                  (fmtDuration(Duration(minutes: average.averageMainMinutes),
+                          localizations: context.l10n))
+                      .toString(),
+                  (fmtDuration(Duration(minutes: average.averageNapMinutes),
+                          localizations: context.l10n))
+                      .toString())
+              : context.l10n.sleepText048((fmtDuration(
+                      Duration(minutes: average.averageMainMinutes),
+                      localizations: context.l10n))
+                  .toString()),
+          style: TextStyle(
+              fontSize: AppFontSize.meta,
+              color: AppUiPalette.of(context).secondaryText),
         ),
       ],
     );
@@ -1059,7 +1172,7 @@ class _SleepStackedBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     const height = 10.0;
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1077,7 +1190,7 @@ class _SleepStackedBar extends StatelessWidget {
               Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.06),
+                    color: AppUiPalette.of(context).text.withOpacity(0.06),
                     borderRadius: BorderRadius.circular(height / 2),
                   ),
                 ),
@@ -1089,16 +1202,22 @@ class _SleepStackedBar extends StatelessWidget {
                     Container(
                         width: mainW,
                         height: height,
-                        color: _kMainSleepBarColor),
+                        color: AppUiPalette.of(context).primary),
                     Container(
-                        width: napW, height: height, color: _kNapBarColor),
+                        width: napW,
+                        height: height,
+                        color: AppUiPalette.of(context)
+                            .primary
+                            .withValues(alpha: .32)),
                   ],
                 ),
               ),
               Positioned(
                 left: (markerX - 0.75).clamp(0.0, w),
                 child: Container(
-                    width: 1.5, height: height, color: Colors.black38),
+                    width: 1.5,
+                    height: height,
+                    color: AppUiPalette.of(context).secondaryText),
               ),
             ],
           ),
@@ -1133,33 +1252,35 @@ class _SleepDayTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     return Container(
       width: 128,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color:
-            _isToday ? kAppMainAccent.withOpacity(0.05) : Colors.grey.shade50,
+        color: _isToday
+            ? AppUiPalette.of(context).primary.withOpacity(0.05)
+            : AppUiPalette.of(context).soft,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
             color: _isToday
-                ? kAppMainAccent.withOpacity(0.35)
-                : Colors.grey.shade200),
+                ? AppUiPalette.of(context).primary.withOpacity(0.35)
+                : AppUiPalette.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            fmtDateWeekday(day.date),
-            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+            fmtDateWeekday(day.date, localizations: context.l10n),
+            style: const TextStyle(
+                fontSize: AppFontSize.body, fontWeight: FontWeight.w700),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           Text(
             shiftName ?? '—',
-            style: const TextStyle(
-                fontSize: 11,
-                color: Colors.black87,
+            style: TextStyle(
+                fontSize: AppFontSize.meta,
+                color: AppUiPalette.of(context).text,
                 fontWeight: FontWeight.w500),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -1200,7 +1321,7 @@ class _SleepSlotCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     final r = record;
     return InkWell(
       borderRadius: BorderRadius.circular(6),
@@ -1212,43 +1333,50 @@ class _SleepSlotCell extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              category.label,
-              style: const TextStyle(
+              (category == SleepSlotCategory.main
+                  ? context.l10n.sleepText042
+                  : context.l10n.sleepText043),
+              style: TextStyle(
                   fontSize: 9.5,
-                  color: Colors.black87,
+                  color: AppUiPalette.of(context).text,
                   fontWeight: FontWeight.w600),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             if (r == null)
-              const Text('+ 기록',
+              Text(context.l10n.sleepText049,
                   style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.black54,
+                      fontSize: AppFontSize.meta,
+                      color: AppUiPalette.of(context).secondaryText,
                       fontWeight: FontWeight.w500))
             else ...[
               Builder(builder: (context) {
-          if (!context.usesKoreanFeatures) return const UnavailableFeature();
+                if (!context.supportsSleepFeatures)
+                  return const UnavailableFeature();
                 // ⭐ 2026-09-13 - 야간 근무 회복수면처럼 실제 취침일이 카드 날짜와 다르면 시각 앞에 "M/D "를 붙임.
                 final timeText = r.end != null
-                    ? '${fmtTimeOnly(r.start)}-${fmtTimeOnly(r.end!)}'
-                    : '${fmtTimeOnly(r.start)}~ 진행중';
+                    ? '${fmtTimeOnly(r.start, localizations: context.l10n)}-${fmtTimeOnly(r.end!, localizations: context.l10n)}'
+                    : context.l10n.sleepText050(
+                        (fmtTimeOnly(r.start, localizations: context.l10n))
+                            .toString());
                 final startsOnDifferentDate = !_isSameDate(r.start, cardDate);
                 final displayText = startsOnDifferentDate
-                    ? '${r.start.month}/${r.start.day} $timeText'
+                    ? '${fmtShortSleepDate(r.start, localizations: context.l10n)} $timeText'
                     : timeText;
                 return Text(
                   displayText,
                   style: const TextStyle(
-                      fontSize: 11, fontWeight: FontWeight.w600),
+                      fontSize: AppFontSize.meta, fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 );
               }),
               if (r.durationMinutes != null)
                 Text(
-                  '(${fmtSleepDuration(Duration(minutes: r.durationMinutes!), r.source)})',
-                  style: const TextStyle(fontSize: 10, color: Colors.black45),
+                  '(${fmtSleepDuration(Duration(minutes: r.durationMinutes!), r.source, localizations: context.l10n)})',
+                  style: TextStyle(
+                      fontSize: AppFontSize.meta,
+                      color: AppUiPalette.of(context).secondaryText),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

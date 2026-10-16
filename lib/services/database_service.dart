@@ -1663,12 +1663,17 @@ Future<List<SleepRecord>> getSleepRecords({DateTime? since}) async {
   final rows = since != null
       ? await db.query(
           'sleep_records',
-          where: 'start_time >= ? OR end_time IS NULL',
-          whereArgs: [since.toIso8601String()],
+          // Offset-free legacy rows must be resolved by the same local-clock parser
+          // as Native. SQLite's 'utc' overlap choice differs on Android.
+          where: "(substr(start_time, -1) != 'Z' AND substr(start_time, -6, 1) NOT IN ('+', '-')) "
+              "OR julianday(start_time) >= julianday(?) OR end_time IS NULL",
+          whereArgs: [sleepDateTimeToDb(since)],
           orderBy: 'start_time DESC',
         )
       : await db.query('sleep_records', orderBy: 'start_time DESC');
-  return decodeSleepRecordRows(rows);
+  return decodeSleepRecordRows(rows)
+      .where((record) => since == null || record.isOngoing || !record.start.isBefore(since))
+      .toList()..sort((a, b) => b.start.compareTo(a.start));
 }
 
 /// PENDING_CONFIRMATION 상태(자동 감지, 아직 사용자 확인 전) 전체 조회.
@@ -1680,7 +1685,7 @@ Future<List<SleepRecord>> getPendingSleepRecords() async {
     whereArgs: [sleepStatusToDb(SleepStatus.pendingConfirmation)],
     orderBy: 'start_time DESC',
   );
-  return decodeSleepRecordRows(rows);
+  return decodeSleepRecordRows(rows)..sort((a, b) => b.start.compareTo(a.start));
 }
 
 Future<int> insertSleepRecord(SleepRecord record) async {

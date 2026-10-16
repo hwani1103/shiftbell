@@ -1,0 +1,2710 @@
+[
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 2012,
+    "length": 7,
+    "template": "수면·회복",
+    "args": [],
+    "parent": "VariableDeclarationImpl",
+    "source": "'수면·회복'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 2925,
+    "length": 16,
+    "template": "불러오지 못했습니다: {arg0}",
+    "args": [
+      "e"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'불러오지 못했습니다: $e'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 3587,
+    "length": 40,
+    "template": "먼저 근무 스케줄을 설정해주세요.\n(달력 탭에서 설정할 수 있어요)",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'먼저 근무 스케줄을 설정해주세요.\\n(달력 탭에서 설정할 수 있어요)'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 6636,
+    "length": 71,
+    "template": "{arg0}건은 이미 기록된 수면과 겹쳐서 확인하지 않았어요. 남은 카드에서 \"기록하지 않기\"나 \"수정\"을 눌러 주세요.",
+    "args": [
+      "skipped"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'$skipped건은 이미 기록된 수면과 겹쳐서 확인하지 않았어요. 남은 카드에서 \"기록하지 않기\"나 \"수정\"을 눌러 주세요.'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 6849,
+    "length": 14,
+    "template": "보이는 기록 모두 확인",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'보이는 기록 모두 확인'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 7197,
+    "length": 85,
+    "template": "확인을 기다리는 자동 기록이 {arg0}건 더 있어요. 위 카드를 처리하면 이어서 보여드려요.",
+    "args": [
+      "pending.length - _kMaxPendingCards"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'확인을 기다리는 자동 기록이 ${pending.length - _kMaxPendingCards}건 더 있어요. 위 카드를 처리하면 이어서 보여드려요.'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 9105,
+    "length": 25,
+    "template": "오늘의 컨디션을 보려면 근무시간이 필요해요",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'오늘의 컨디션을 보려면 근무시간이 필요해요'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 9304,
+    "length": 181,
+    "template": "쓰고 있는 근무 중 하나 이상의 출퇴근 시각을 입력하면, 근무 사이 회복시간과 퇴근 후 실제 수면을 바탕으로 몇 시까지 잠자리에 들지·카페인을 언제 끊을지 같은 오늘 챙길 일을 알려드려요.\n수면 기록은 지금도 아래 \"최근 수면 기록\"에서 남길 수 있어요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'쓰고 있는 근무 중 하나 이상의 출퇴근 시각을 입력하면, 근무 사이 회복시간과 퇴근 후 실제 수면을 바탕으로 ' '몇 시까지 잠자리에 들지·카페인을 언제 끊을지 같은 오늘 챙길 일을 알려드려요.\\n' '수면 기록은 지금도 아래 \"최근 수면 기록\"에서 남길 수 있어요.'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 10051,
+    "length": 11,
+    "template": "근무시간 입력하기",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'근무시간 입력하기'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 11585,
+    "length": 9,
+    "template": "오늘의 컨디션",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'오늘의 컨디션'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 12577,
+    "length": 10,
+    "template": "최근 근무·수면",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'최근 근무·수면'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 12697,
+    "length": 17,
+    "template": "아직 살펴볼 내용이 없어요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'아직 살펴볼 내용이 없어요.'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 12954,
+    "length": 7,
+    "template": "추천 행동",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'추천 행동'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 13091,
+    "length": 36,
+    "template": "지금 따로 챙길 행동은 없어요. 평소 수면 리듬을 유지하세요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'지금 따로 챙길 행동은 없어요. 평소 수면 리듬을 유지하세요.'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 14204,
+    "length": 7,
+    "template": "근거 접기",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'근거 접기'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 14214,
+    "length": 7,
+    "template": "근거 보기",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'근거 보기'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 14881,
+    "length": 10,
+    "template": "근무 부담 보통",
+    "args": [],
+    "parent": "RecordLiteralImpl",
+    "source": "'근무 부담 보통'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 14955,
+    "length": 11,
+    "template": "주의가 필요한 날",
+    "args": [],
+    "parent": "RecordLiteralImpl",
+    "source": "'주의가 필요한 날'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 15029,
+    "length": 12,
+    "template": "회복 부담이 큰 날",
+    "args": [],
+    "parent": "RecordLiteralImpl",
+    "source": "'회복 부담이 큰 날'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 18690,
+    "length": 42,
+    "template": "수면·교대근무 연구를 참고한 일반적인 안내예요(의학적 진단이 아니에요).",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'수면·교대근무 연구를 참고한 일반적인 안내예요(의학적 진단이 아니에요).'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 19898,
+    "length": 7,
+    "template": "최근 수면",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'최근 수면'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 20838,
+    "length": 7,
+    "template": "판단 범위",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'판단 범위'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 22589,
+    "length": 10,
+    "template": "수면 시각 수정",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'수면 시각 수정'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 23491,
+    "length": 6,
+    "template": "진행 중",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'진행 중'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 23961,
+    "length": 11,
+    "template": "이때 주무셨나요?",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'이때 주무셨나요?'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 24338,
+    "length": 93,
+    "template": "{arg0} ~ {arg1}, 약 {arg2} 동안 폰을 쓰지 않아 수면으로 추정했어요.",
+    "args": [
+      "fmtDateTime(record.start)",
+      "fmtDateTime(end)",
+      "durationText"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'${fmtDateTime(record.start)} ~ ${fmtDateTime(end)}, 약 $durationText 동안 폰을 쓰지 않아 수면으로 추정했어요.'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 24453,
+    "length": 77,
+    "template": "{arg0}부터 수면 중인 것으로 추정됩니다.\n(잠시 후 기상 시각이 추정되면 다시 표시돼요)",
+    "args": [
+      "fmtDateTime(record.start)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'${fmtDateTime(record.start)}부터 수면 중인 것으로 추정됩니다.\\n(잠시 후 기상 시각이 추정되면 다시 표시돼요)'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 24783,
+    "length": 64,
+    "template": "확인한 기록만 오늘의 컨디션에 반영돼요. 수면이 아니었다면 \"기록하지 않기\"를 눌러주세요(다음부터 덜 잡혀요).",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'확인한 기록만 오늘의 컨디션에 반영돼요. 수면이 아니었다면 \"기록하지 않기\"를 눌러주세요(다음부터 덜 잡혀요).'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 25373,
+    "length": 9,
+    "template": "기록하지 않기",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'기록하지 않기'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 25532,
+    "length": 4,
+    "template": "수정",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'수정'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 25927,
+    "length": 5,
+    "template": "맞아요",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'맞아요'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 27418,
+    "length": 10,
+    "template": "최근 수면 기록",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'최근 수면 기록'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 27903,
+    "length": 6,
+    "template": "전체보기",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'전체보기'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 28089,
+    "length": 45,
+    "template": "칸을 눌러 수면을 기록·수정할 수 있어요. 옆으로 밀면 지난 날짜가 보여요 →",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'칸을 눌러 수면을 기록·수정할 수 있어요. 옆으로 밀면 지난 날짜가 보여요 →'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 30864,
+    "length": 13,
+    "template": "내 근무별 수면 패턴",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'내 근무별 수면 패턴'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 31125,
+    "length": 37,
+    "template": "최근 30일 중 수면 기록이 있는 날을 근무 유형별로 비교해요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'최근 30일 중 수면 기록이 있는 날을 근무 유형별로 비교해요.'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 32150,
+    "length": 59,
+    "template": "아직 평균을 만드는 중이에요. 같은 근무 유형의 수면이 3일 쌓이면 주 수면과 낮잠을 나눠 보여드려요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'아직 평균을 만드는 중이에요. 같은 근무 유형의 수면이 3일 쌓이면 주 수면과 낮잠을 나눠 보여드려요.'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 32583,
+    "length": 21,
+    "template": "평균 준비 중 · 유형별 3일 필요",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'평균 준비 중 · 유형별 3일 필요'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 33484,
+    "length": 102,
+    "template": "{arg0} {arg1}/{arg2}일",
+    "args": [
+      "_sleepCategoryRowLabel(category)",
+      "stats.samplesFor(category)",
+      "kMinSampleDaysForCategoryAverage"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'${_sleepCategoryRowLabel(category)} ${stats.samplesFor(category)}/$kMinSampleDaysForCategoryAverage일'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 33890,
+    "length": 58,
+    "template": "하루는 주 수면 1건과 낮잠 최대 2건만 합산해요. 빠진 기록이 있으면 평균이 낮게 보일 수 있어요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'하루는 주 수면 1건과 낮잠 최대 2건만 합산해요. 빠진 기록이 있으면 평균이 낮게 보일 수 있어요.'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 34491,
+    "length": 5,
+    "template": "휴무일",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'휴무일'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 34499,
+    "length": 16,
+    "template": "{arg0} 근무일",
+    "args": [
+      "c.label"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'${c.label} 근무일'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 34962,
+    "length": 6,
+    "template": "주 수면",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'주 수면'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 35010,
+    "length": 4,
+    "template": "낮잠",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'낮잠'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 35104,
+    "length": 8,
+    "template": "권장 7시간",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'권장 7시간'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 36800,
+    "length": 45,
+    "template": "평균 {arg0}",
+    "args": [
+      "fmtDuration(Duration(minutes: total))"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'평균 ${fmtDuration(Duration(minutes: total))}'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 37120,
+    "length": 26,
+    "template": "({arg0}일)",
+    "args": [
+      "average.sampleDays"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'(${average.sampleDays}일)'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 37696,
+    "length": 156,
+    "template": "주 수면 {arg0} · 낮잠 {arg1}",
+    "args": [
+      "fmtDuration(Duration(minutes: average.averageMainMinutes))",
+      "fmtDuration(Duration(minutes: average.averageNapMinutes))"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'주 수면 ${fmtDuration(Duration(minutes: average.averageMainMinutes))}' ' · 낮잠 ${fmtDuration(Duration(minutes: average.averageNapMinutes))}'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 37870,
+    "length": 68,
+    "template": "주 수면 {arg0}",
+    "args": [
+      "fmtDuration(Duration(minutes: average.averageMainMinutes))"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'주 수면 ${fmtDuration(Duration(minutes: average.averageMainMinutes))}'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 43670,
+    "length": 6,
+    "template": "+ 기록",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'+ 기록'"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "offset": 44225,
+    "length": 30,
+    "template": "{arg0}~ 진행중",
+    "args": [
+      "fmtTimeOnly(r.start)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'${fmtTimeOnly(r.start)}~ 진행중'"
+  },
+  {
+    "file": "lib/screens/sleep_calendar_full_screen.dart",
+    "offset": 2958,
+    "length": 12,
+    "template": "수면 기록 전체보기",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'수면 기록 전체보기'"
+  },
+  {
+    "file": "lib/screens/sleep_calendar_full_screen.dart",
+    "offset": 4153,
+    "length": 20,
+    "template": "이 달에는 표시할 날짜가 없어요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'이 달에는 표시할 날짜가 없어요.'"
+  },
+  {
+    "file": "lib/screens/sleep_calendar_full_screen.dart",
+    "offset": 5224,
+    "length": 32,
+    "template": "{arg0}년 {arg1}월",
+    "args": [
+      "month.year",
+      "month.month"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'${month.year}년 ${month.month}월'"
+  },
+  {
+    "file": "lib/screens/sleep_calendar_full_screen.dart",
+    "offset": 13069,
+    "length": 6,
+    "template": "+ 기록",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'+ 기록'"
+  },
+  {
+    "file": "lib/screens/sleep_calendar_full_screen.dart",
+    "offset": 13729,
+    "length": 31,
+    "template": "{arg0}~ 진행 중",
+    "args": [
+      "fmtTimeOnly(r.start)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'${fmtTimeOnly(r.start)}~ 진행 중'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 1602,
+    "length": 10,
+    "template": "수면 시각 입력",
+    "args": [],
+    "parent": "DefaultFormalParameterImpl",
+    "source": "'수면 시각 입력'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 3413,
+    "length": 17,
+    "template": "기상 시각이 취침보다 빨라요",
+    "args": [],
+    "parent": "AssignmentExpressionImpl",
+    "source": "'기상 시각이 취침보다 빨라요'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 3489,
+    "length": 25,
+    "template": "아직 지나지 않은 시각은 기록할 수 없어요",
+    "args": [],
+    "parent": "AssignmentExpressionImpl",
+    "source": "'아직 지나지 않은 시각은 기록할 수 없어요'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 3559,
+    "length": 42,
+    "template": "{arg0} 수면",
+    "args": [
+      "fmtDuration(end.difference(start))"
+    ],
+    "parent": "AssignmentExpressionImpl",
+    "source": "'${fmtDuration(end.difference(start))} 수면'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 5494,
+    "length": 4,
+    "template": "취침",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'취침'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 5926,
+    "length": 4,
+    "template": "기상",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'기상'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 9001,
+    "length": 4,
+    "template": "삭제",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'삭제'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 9438,
+    "length": 4,
+    "template": "취소",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'취소'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 10012,
+    "length": 4,
+    "template": "저장",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'저장'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 12534,
+    "length": 22,
+    "template": "{arg0} 수정",
+    "args": [
+      "category.label"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'${category.label} 수정'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 12559,
+    "length": 22,
+    "template": "{arg0} 기록",
+    "args": [
+      "category.label"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'${category.label} 기록'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 13507,
+    "length": 73,
+    "template": "이미 기록된 수면({arg0}~{arg1})",
+    "args": [
+      "fmtDateTime(conflict.start)",
+      "fmtTimeOnly(conflict.end!)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'이미 기록된 수면(${fmtDateTime(conflict.start)}~${fmtTimeOnly(conflict.end!)})'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 13590,
+    "length": 44,
+    "template": "진행 중인 수면({arg0}부터)",
+    "args": [
+      "fmtDateTime(conflict.start)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'진행 중인 수면(${fmtDateTime(conflict.start)}부터)'"
+  },
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "offset": 13646,
+    "length": 44,
+    "template": "{arg0}과 시간이 겹쳐요. 시각을 고치거나 그 기록을 먼저 수정해 주세요.",
+    "args": [
+      "what"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'$what과 시간이 겹쳐요. 시각을 고치거나 그 기록을 먼저 수정해 주세요.'"
+  },
+  {
+    "file": "lib/widgets/evidence_library_section.dart",
+    "offset": 1769,
+    "length": 7,
+    "template": "근거 자료",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'근거 자료'"
+  },
+  {
+    "file": "lib/widgets/evidence_library_section.dart",
+    "offset": 3140,
+    "length": 34,
+    "template": "근거 수준: {arg0}",
+    "args": [
+      "evidence.evidenceLevel"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'근거 수준: ${evidence.evidenceLevel}'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 5835,
+    "length": 71,
+    "template": "퇴근길엔 선글라스 등으로 강한 햇빛을 줄이면 이후 잠들기 쉬워요. 많이 졸리면 운전하지 말고 대중교통이나 동승을 이용하세요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'퇴근길엔 선글라스 등으로 강한 햇빛을 줄이면 이후 잠들기 쉬워요. 많이 졸리면 운전하지 말고 대중교통이나 동승을 이용하세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 6016,
+    "length": 75,
+    "template": "출근 전에 짧게 눈을 붙이면 야간 졸림을 줄이는 데 도움이 될 수 있어요. 깬 직후엔 잠깐 멍할 수 있으니 바로 운전하지는 마세요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'출근 전에 짧게 눈을 붙이면 야간 졸림을 줄이는 데 도움이 될 수 있어요. 깬 직후엔 잠깐 멍할 수 있으니 바로 운전하지는 마세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 6192,
+    "length": 35,
+    "template": "자정~06시에는 식사량을 줄이고 가벼운 음식 위주로 드세요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'자정~06시에는 식사량을 줄이고 가벼운 음식 위주로 드세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 6338,
+    "length": 68,
+    "template": "아래 \"최근 수면 기록\"에 수면 시간을 남겨주세요. 기록이 쌓이면 실제로 잔 시간을 바탕으로 더 정확하게 알려드릴게요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'아래 \"최근 수면 기록\"에 수면 시간을 남겨주세요. 기록이 쌓이면 실제로 잔 시간을 바탕으로 더 정확하게 알려드릴게요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 6776,
+    "length": 5,
+    "template": "{arg0}분",
+    "args": [
+      "r"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'$r분'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 6805,
+    "length": 6,
+    "template": "{arg0}시간",
+    "args": [
+      "h"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'$h시간'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 6823,
+    "length": 10,
+    "template": "{arg0}시간 {arg1}분",
+    "args": [
+      "h",
+      "r"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'$h시간 $r분'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 7105,
+    "length": 8,
+    "template": "오늘 {arg0}",
+    "args": [
+      "hm"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'오늘 $hm'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 7142,
+    "length": 8,
+    "template": "내일 {arg0}",
+    "args": [
+      "hm"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'내일 $hm'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 7180,
+    "length": 8,
+    "template": "어제 {arg0}",
+    "args": [
+      "hm"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'어제 $hm'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 7217,
+    "length": 8,
+    "template": "모레 {arg0}",
+    "args": [
+      "hm"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'모레 $hm'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 11497,
+    "length": 46,
+    "template": "다음 근무 {arg0} {arg1}",
+    "args": [
+      "next.shiftName",
+      "when(next.start!)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'다음 근무 ${next.shiftName} ${when(next.start!)}'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 11580,
+    "length": 32,
+    "template": "다음 근무 {arg0}(시각 미입력)",
+    "args": [
+      "untimedNextName"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'다음 근무 $untimedNextName(시각 미입력)'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 11704,
+    "length": 124,
+    "template": "지금 {arg0} 근무 중 · {arg1} 퇴근 ({arg2} 남음)",
+    "args": [
+      "current!.shiftName",
+      "when(current.end!)",
+      "dur(current.end!.difference(now).inMinutes)"
+    ],
+    "parent": "SwitchExpressionCaseImpl",
+    "source": "'지금 ${current!.shiftName} 근무 중 · ${when(current.end!)} 퇴근 ' '(${dur(current.end!.difference(now).inMinutes)} 남음)'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 11871,
+    "length": 98,
+    "template": "곧 {arg0} 출근 · {arg1} ({arg2} 뒤)",
+    "args": [
+      "next!.shiftName",
+      "when(next.start!)",
+      "dur(next.start!.difference(now).inMinutes)"
+    ],
+    "parent": "SwitchExpressionCaseImpl",
+    "source": "'곧 ${next!.shiftName} 출근 · ${when(next.start!)} (${dur(next.start!.difference(now).inMinutes)} 뒤)'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 12011,
+    "length": 127,
+    "template": "{arg0} 근무 마친 지 {arg1}{arg2}",
+    "args": [
+      "last!.shiftName",
+      "dur(now.difference(last.end!).inMinutes)",
+      "nextText != null ? ' · $nextText' : ''"
+    ],
+    "parent": "SwitchExpressionCaseImpl",
+    "source": "'${last!.shiftName} 근무 마친 지 ${dur(now.difference(last.end!).inMinutes)}' '${nextText != null ? ' · $nextText' : ''}'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 12169,
+    "length": 49,
+    "template": "오늘은 휴무{arg0}",
+    "args": [
+      "nextText != null ? ' · $nextText' : ''"
+    ],
+    "parent": "SwitchExpressionCaseImpl",
+    "source": "'오늘은 휴무${nextText != null ? ' · $nextText' : ''}'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 12260,
+    "length": 102,
+    "template": "오늘 {arg0} 근무 · {arg1} 출근 ({arg2} 뒤)",
+    "args": [
+      "next!.shiftName",
+      "when(next.start!)",
+      "dur(next.start!.difference(now).inMinutes)"
+    ],
+    "parent": "SwitchExpressionCaseImpl",
+    "source": "'오늘 ${next!.shiftName} 근무 · ${when(next.start!)} 출근 (${dur(next.start!.difference(now).inMinutes)} 뒤)'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 12423,
+    "length": 20,
+    "template": "오늘은 근무 일정이 없는 날이에요",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'오늘은 근무 일정이 없는 날이에요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 12455,
+    "length": 43,
+    "template": "오늘 {arg0} 근무 (출퇴근 시각 미입력)",
+    "args": [
+      "todayInst.shiftName"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'오늘 ${todayInst.shiftName} 근무 (출퇴근 시각 미입력)'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 17284,
+    "length": 34,
+    "template": " (출근 전 {arg0} 포함)",
+    "args": [
+      "dur(preShiftSleep)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "' (출근 전 ${dur(preShiftSleep)} 포함)'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 17376,
+    "length": 74,
+    "template": "지난 24시간 수면 {arg0}{arg1}{arg2}",
+    "args": [
+      "dur(last24hSleep)",
+      "preNote",
+      "enough ? '' : ', 권장 7시간보다 적어요'"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'지난 24시간 수면 ${dur(last24hSleep)}$preNote${enough ? '' : ', 권장 7시간보다 적어요'}'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 17750,
+    "length": 20,
+    "template": "지난 24시간 수면 기록이 없어요",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'지난 24시간 수면 기록이 없어요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 18387,
+    "length": 98,
+    "template": "퇴근({arg0}) 후 수면 {arg1}{arg2}",
+    "args": [
+      "when(l.end!)",
+      "dur(sleepSinceLast)",
+      "cannotReach ? ', 다음 출근 전까지 7시간을 채우긴 어려워요' : ''"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'퇴근(${when(l.end!)}) 후 수면 ${dur(sleepSinceLast)}${cannotReach ? ', 다음 출근 전까지 7시간을 채우긴 어려워요' : ''}'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 18784,
+    "length": 19,
+    "template": "지금 수면 중으로 기록돼 있어요",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'지금 수면 중으로 기록돼 있어요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 18965,
+    "length": 38,
+    "template": "퇴근({arg0}) 후 기록된 수면이 아직 없어요",
+    "args": [
+      "when(l.end!)"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'퇴근(${when(l.end!)}) 후 기록된 수면이 아직 없어요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 19291,
+    "length": 84,
+    "template": "어제({arg0}/{arg1}) 수면 {arg2}{arg3}",
+    "args": [
+      "y.month",
+      "y.day",
+      "dur(yesterdayTotal)",
+      "enough ? '' : ', 권장 7시간보다 적어요'"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'어제(${y.month}/${y.day}) 수면 ${dur(yesterdayTotal)}${enough ? '' : ', 권장 7시간보다 적어요'}'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 19649,
+    "length": 36,
+    "template": "어제({arg0}/{arg1}) 수면 기록이 없어요",
+    "args": [
+      "y.month",
+      "y.day"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'어제(${y.month}/${y.day}) 수면 기록이 없어요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 20011,
+    "length": 5,
+    "template": "휴무일",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'휴무일'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 20019,
+    "length": 23,
+    "template": "{arg0} 근무일",
+    "args": [
+      "category.label"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'${category.label} 근무일'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 20141,
+    "length": 4,
+    "template": "어제",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'어제'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 20148,
+    "length": 4,
+    "template": "그제",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'그제'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 20190,
+    "length": 203,
+    "template": "{arg0} {arg1} 수면 {arg2}, 개인 평균 {arg3}보다 {arg4} 적어요 (최근 30일 {arg5}일 기준)",
+    "args": [
+      "dayLabel",
+      "categoryLabel",
+      "dur(comparison.actual)",
+      "dur(comparison.average.averageMinutes)",
+      "dur(comparison.deficit)",
+      "comparison.average.sampleDays"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'$dayLabel $categoryLabel 수면 ${dur(comparison.actual)}, 개인 평균 ' '${dur(comparison.average.averageMinutes)}보다 ${dur(comparison.deficit)} 적어요 ' '(최근 30일 ${comparison.average.sampleDays}일 기준)'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 20801,
+    "length": 77,
+    "template": "최근 {arg0} 수면이 평소보다 적었어요. 다음 수면 기회에는 다른 일정보다 회복할 시간을 조금 더 넉넉히 잡아보세요.",
+    "args": [
+      "categoryLabel"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'최근 $categoryLabel 수면이 평소보다 적었어요. 다음 수면 기회에는 다른 일정보다 회복할 시간을 조금 더 넉넉히 잡아보세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 21748,
+    "length": 126,
+    "template": "근무 사이 회복시간 {arg0} ({arg1} 퇴근 → {arg2} 출근){arg3}",
+    "args": [
+      "dur(gap)",
+      "when(gapFrom.end!)",
+      "when(gapTo.start!)",
+      "short ? ', 권장 최소 11시간보다 짧아요' : ''"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'근무 사이 회복시간 ${dur(gap)} (${when(gapFrom.end!)} 퇴근 → ${when(gapTo.start!)} 출근)' '${short ? ', 권장 최소 11시간보다 짧아요' : ''}'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 23141,
+    "length": 19,
+    "template": "야간 {arg0}일 연속 근무 후",
+    "args": [
+      "days"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'야간 $days일 연속 근무 후'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 23176,
+    "length": 15,
+    "template": "연속 야간 {arg0}일째",
+    "args": [
+      "days"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'연속 야간 $days일째'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 23259,
+    "length": 26,
+    "template": "야간 근무가 휴무 없이 매우 오래 이어진 후",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'야간 근무가 휴무 없이 매우 오래 이어진 후'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 23301,
+    "length": 31,
+    "template": "연속 야간 근무가 휴무 없이 매우 오래 이어지고 있음",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'연속 야간 근무가 휴무 없이 매우 오래 이어지고 있음'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 23393,
+    "length": 30,
+    "template": "{arg0}. 연속될수록 피로와 실수가 쌓이기 쉬워요",
+    "args": [
+      "text"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'$text. 연속될수록 피로와 실수가 쌓이기 쉬워요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 25474,
+    "length": 33,
+    "template": "(전체 연속근무는 {arg0}일째)",
+    "args": [
+      "workStreak.days"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'(전체 연속근무는 ${workStreak.days}일째)'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 25653,
+    "length": 41,
+    "template": "{arg0}시간 이상 근무 {arg1}일 연속{arg2}",
+    "args": [
+      "floorHours",
+      "days",
+      "totalNote"
+    ],
+    "parent": "ExpressionFunctionBodyImpl",
+    "source": "'$floorHours시간 이상 근무 $days일 연속$totalNote'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 25715,
+    "length": 43,
+    "template": "{arg0}시간 이상 근무가 휴무 없이 매우 오래 이어지고 있어요",
+    "args": [
+      "floorHours"
+    ],
+    "parent": "NamedExpressionImpl",
+    "source": "'$floorHours시간 이상 근무가 휴무 없이 매우 오래 이어지고 있어요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 26012,
+    "length": 207,
+    "template": "{arg0}시간 근무가 {arg1} 이어졌어요. 근무 조정이 가능하다면 이어서 {arg2}일 정도는 쉬어보세요.",
+    "args": [
+      "floorHours",
+      "ConditionRuleEngine.streakClause(bucketStreak, normal: (days) => '$days일', capped: '휴무 없이 매우 오래')",
+      "breakDays"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'$floorHours시간 근무가 ' '${ConditionRuleEngine.streakClause(bucketStreak, normal: (days) => '$days일', capped: '휴무 없이 매우 오래')} ' '이어졌어요. 근무 조정이 가능하다면 이어서 $breakDays일 정도는 쉬어보세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 26600,
+    "length": 46,
+    "template": "{arg0}일째 연속 근무 중이에요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요",
+    "args": [
+      "days"
+    ],
+    "parent": "ExpressionFunctionBodyImpl",
+    "source": "'$days일째 연속 근무 중이에요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 26667,
+    "length": 52,
+    "template": "휴무 없이 매우 오래 근무가 이어지고 있어요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'휴무 없이 매우 오래 근무가 이어지고 있어요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 27018,
+    "length": 53,
+    "template": "연속 근무가 길게 이어지고 있어요. 근무 조정이 가능하다면 하루라도 쉬는 날을 만들어보세요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'연속 근무가 길게 이어지고 있어요. 근무 조정이 가능하다면 하루라도 쉬는 날을 만들어보세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 27377,
+    "length": 15,
+    "template": "{arg0}일째 연속 근무",
+    "args": [
+      "days"
+    ],
+    "parent": "ExpressionFunctionBodyImpl",
+    "source": "'$days일째 연속 근무'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 27415,
+    "length": 26,
+    "template": "휴무 없이 매우 오래 근무가 이어지고 있어요",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'휴무 없이 매우 오래 근무가 이어지고 있어요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 28730,
+    "length": 80,
+    "template": "최근 7일 실근무시간 {arg0}, 평소(주 {arg1} 안팎)보다 {arg2} 많아요",
+    "args": [
+      "dur(weeklyTotal)",
+      "dur(baseline)",
+      "dur(extra)"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'최근 7일 실근무시간 ${dur(weeklyTotal)}, 평소(주 ${dur(baseline)} 안팎)보다 ${dur(extra)} 많아요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 29088,
+    "length": 60,
+    "template": "최근 7일 근무시간이 평소보다 많이 쌓였어요. 가능하면 추가 근무를 줄이고 쉬는 시간부터 먼저 챙기세요.",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'최근 7일 근무시간이 평소보다 많이 쌓였어요. 가능하면 추가 근무를 줄이고 쉬는 시간부터 먼저 챙기세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 29166,
+    "length": 52,
+    "template": "이번 주는 평소보다 근무가 좀 더 많아요. 가능하면 추가 근무를 줄이고 휴식을 챙겨보세요.",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'이번 주는 평소보다 근무가 좀 더 많아요. 가능하면 추가 근무를 줄이고 휴식을 챙겨보세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 29921,
+    "length": 83,
+    "template": "역방향 교대 전환({arg0} → {arg1}). 정방향보다 몸이 적응하기 어려운 편이에요",
+    "args": [
+      "prev.category.label",
+      "ctx.category.label"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'역방향 교대 전환(${prev.category.label} → ${ctx.category.label}). 정방향보다 몸이 적응하기 어려운 편이에요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 30414,
+    "length": 58,
+    "template": "{arg0} 이후엔 커피·에너지음료를 피하세요(잠드는 목표 {arg1}).",
+    "args": [
+      "when(cutoff)",
+      "when(bed)"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'${when(cutoff)} 이후엔 커피·에너지음료를 피하세요(잠드는 목표 ${when(bed)}).'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 30590,
+    "length": 59,
+    "template": "잠드는 목표({arg0})까지 6시간이 안 남았어요. 지금부터는 커피·에너지음료를 피하세요.",
+    "args": [
+      "when(bed)"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'잠드는 목표(${when(bed)})까지 6시간이 안 남았어요. 지금부터는 커피·에너지음료를 피하세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 31261,
+    "length": 78,
+    "template": "퇴근 후 다음 출근까지 잘 수 있는 시간이 거의 없어요. 가능하다면 근무 조정을 요청하거나 근무 중에라도 잠깐 쉴 수 있는지 알아보세요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'퇴근 후 다음 출근까지 잘 수 있는 시간이 거의 없어요. 가능하다면 근무 조정을 요청하거나 근무 중에라도 잠깐 쉴 수 있는지 알아보세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 31549,
+    "length": 98,
+    "template": "퇴근 후 잘 수 있는 시간은 {arg0}~{arg1}, 약 {arg2}뿐이에요. 퇴근하면 다른 일정보다 수면을 먼저 챙기세요.",
+    "args": [
+      "when(bed)",
+      "when(wakeBy)",
+      "dur(available)"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'퇴근 후 잘 수 있는 시간은 ${when(bed)}~${when(wakeBy)}, 약 ${dur(available)}뿐이에요. 퇴근하면 다른 일정보다 수면을 먼저 챙기세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 31878,
+    "length": 64,
+    "template": "퇴근 후엔 수면을 먼저 챙기세요. {arg0}쯤 잠들면 다음 출근 전까지 7시간 이상 잘 수 있어요.",
+    "args": [
+      "when(bed)"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'퇴근 후엔 수면을 먼저 챙기세요. ${when(bed)}쯤 잠들면 다음 출근 전까지 7시간 이상 잘 수 있어요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 32158,
+    "length": 28,
+    "template": "퇴근 후엔 다른 일정보다 수면을 먼저 챙기세요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'퇴근 후엔 다른 일정보다 수면을 먼저 챙기세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 32908,
+    "length": 76,
+    "template": "지난 24시간 수면이 권장량보다 적어요. 이번 근무를 마치면({arg0}쯤) 다른 일정보다 수면을 먼저 챙기세요.",
+    "args": [
+      "when(bedAfter)"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'지난 24시간 수면이 권장량보다 적어요. 이번 근무를 마치면(${when(bedAfter)}쯤) 다른 일정보다 수면을 먼저 챙기세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 33634,
+    "length": 23,
+    "template": "야간 근무 뒤에는 수면이 우선이에요. ",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'야간 근무 뒤에는 수면이 우선이에요. '"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 34003,
+    "length": 20,
+    "template": "{arg0} 더 자려면",
+    "args": [
+      "dur(need)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'${dur(need)} 더 자려면'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 34026,
+    "length": 10,
+    "template": "7시간을 자려면",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'7시간을 자려면'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 34152,
+    "length": 80,
+    "template": "{arg0}다음 출근({arg1}) 전에 {arg2} 늦어도 {arg3}에는 잠자리에 드세요.",
+    "args": [
+      "prefix",
+      "when(next.start!)",
+      "goal",
+      "when(latestBed)"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'$prefix다음 출근(${when(next.start!)}) 전에 $goal 늦어도 ${when(latestBed)}에는 잠자리에 드세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 34573,
+    "length": 74,
+    "template": "{arg0}지금 바로 자도 출근 준비 전까지 최대 {arg1}이에요. 다른 일정은 미루고 수면부터 챙기세요.",
+    "args": [
+      "prefix",
+      "dur(available)"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'$prefix지금 바로 자도 출근 준비 전까지 최대 ${dur(available)}이에요. 다른 일정은 미루고 수면부터 챙기세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 34818,
+    "length": 34,
+    "template": "곧 잠들어야 해요. 지금부터는 커피·에너지음료를 피하세요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'곧 잠들어야 해요. 지금부터는 커피·에너지음료를 피하세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 35078,
+    "length": 32,
+    "template": "야간 근무 뒤에는 다른 일정보다 수면을 먼저 챙기세요.",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'야간 근무 뒤에는 다른 일정보다 수면을 먼저 챙기세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 35132,
+    "length": 26,
+    "template": "오늘은 7시간 이상 자는 걸 목표로 하세요.",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'오늘은 7시간 이상 자는 걸 목표로 하세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 35865,
+    "length": 22,
+    "template": "어제까지 야간 {arg0}일 연속 근무",
+    "args": [
+      "days"
+    ],
+    "parent": "ExpressionFunctionBodyImpl",
+    "source": "'어제까지 야간 $days일 연속 근무'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 35908,
+    "length": 29,
+    "template": "어제까지 야간 근무가 휴무 없이 매우 오래 이어짐",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'어제까지 야간 근무가 휴무 없이 매우 오래 이어짐'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 36110,
+    "length": 42,
+    "template": "야간 근무 뒤 휴무예요. 약속이나 집안일보다 수면 회복을 먼저 챙기세요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'야간 근무 뒤 휴무예요. 약속이나 집안일보다 수면 회복을 먼저 챙기세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 36580,
+    "length": 96,
+    "template": "다음 근무({arg0}, {arg1})에 맞춰 7시간을 자려면 늦어도 {arg2}에는 잠자리에 드세요.",
+    "args": [
+      "next.shiftName",
+      "when(next.start!)",
+      "when(latestBed)"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'다음 근무(${next.shiftName}, ${when(next.start!)})에 맞춰 7시간을 자려면 늦어도 ${when(latestBed)}에는 잠자리에 드세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 37007,
+    "length": 49,
+    "template": "최근 수면이 권장량(7시간)보다 적었어요. 쉬는 날엔 수면 시간을 넉넉히 잡아보세요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'최근 수면이 권장량(7시간)보다 적었어요. 쉬는 날엔 수면 시간을 넉넉히 잡아보세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 37566,
+    "length": 94,
+    "template": "최근 7일 평균 수면 {arg0} (기록한 {arg1}일 기준){arg2}",
+    "args": [
+      "dur(avgRecent)",
+      "recordedDays.length",
+      "low ? ', 권장 7시간보다 적어요' : ''"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'최근 7일 평균 수면 ${dur(avgRecent)} (기록한 ${recordedDays.length}일 기준)${low ? ', 권장 7시간보다 적어요' : ''}'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 38053,
+    "length": 32,
+    "template": "연속 야간 근무가 휴무 없이 매우 오래 이어지고 있어요",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'연속 야간 근무가 휴무 없이 매우 오래 이어지고 있어요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 38097,
+    "length": 24,
+    "template": "연속 야간 {arg0}일째예요",
+    "args": [
+      "nightStreak"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'연속 야간 $nightStreak일째예요'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 38209,
+    "length": 43,
+    "template": "{arg0}. 운전이나 위험한 작업은 특히 조심하세요.",
+    "args": [
+      "nightStreakLabel"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'$nightStreakLabel. 운전이나 위험한 작업은 특히 조심하세요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 38513,
+    "length": 34,
+    "template": "최근 2주 수면 기록이 없어 근무 일정만 보고 안내했어요.",
+    "args": [],
+    "parent": "ArgumentListImpl",
+    "source": "'최근 2주 수면 기록이 없어 근무 일정만 보고 안내했어요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 38633,
+    "length": 58,
+    "template": "최근 7일 중 기록이 {arg0}일뿐이라 평균 수면은 계산하지 않았어요.",
+    "args": [
+      "recordedDays.length"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'최근 7일 중 기록이 ${recordedDays.length}일뿐이라 평균 수면은 계산하지 않았어요.'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 38817,
+    "length": 58,
+    "template": "{arg0} 근무는 출퇴근 시각이 없어 그날은 계산에서 빠졌어요. (설정 → 근무시간 및 OT 설정)",
+    "args": [
+      "names"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'$names 근무는 출퇴근 시각이 없어 그날은 계산에서 빠졌어요. (설정 → 근무시간 및 OT 설정)'"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "offset": 38931,
+    "length": 45,
+    "template": "확인하지 않은 자동 수면 기록 {arg0}건은 반영하지 않았어요.",
+    "args": [
+      "pendingCount"
+    ],
+    "parent": "ArgumentListImpl",
+    "source": "'확인하지 않은 자동 수면 기록 $pendingCount건은 반영하지 않았어요.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 2152,
+    "length": 4,
+    "template": "일반",
+    "args": [],
+    "parent": "ReturnStatementImpl",
+    "source": "'일반'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 2212,
+    "length": 11,
+    "template": "주의가 필요한 날",
+    "args": [],
+    "parent": "ReturnStatementImpl",
+    "source": "'주의가 필요한 날'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 2278,
+    "length": 12,
+    "template": "회복 부담이 큰 날",
+    "args": [],
+    "parent": "ReturnStatementImpl",
+    "source": "'회복 부담이 큰 날'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 11823,
+    "length": 140,
+    "template": "이 근무 패턴은 평균 주 {arg0} 안팎이에요. 간호사 근무시간 권고 상한(주 60시간)과 EU 근로시간지침 기준(주 48시간)을 구조적으로 넘는 편이에요.",
+    "args": [
+      "_formatHours(baselineWeeklyMinutes)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'이 근무 패턴은 평균 주 ${_formatHours(baselineWeeklyMinutes)} 안팎이에요. 간호사 근무시간 권고 상한(주 60시간)과 ' 'EU 근로시간지침 기준(주 48시간)을 구조적으로 넘는 편이에요.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 11977,
+    "length": 116,
+    "template": "이 근무 패턴은 평균 주 {arg0} 안팎이에요. EU 근로시간지침 기준(주 48시간)을 구조적으로 넘는 편이에요.",
+    "args": [
+      "_formatHours(baselineWeeklyMinutes)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'이 근무 패턴은 평균 주 ${_formatHours(baselineWeeklyMinutes)} 안팎이에요. EU 근로시간지침 기준(주 48시간)을 ' '구조적으로 넘는 편이에요.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 12826,
+    "length": 23,
+    "template": "근무 일정이 아직 설정되지 않았습니다.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'근무 일정이 아직 설정되지 않았습니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 18402,
+    "length": 89,
+    "template": "다음 근무까지 회복시간이 {arg0}로, 권장 최소 기준(11시간)보다 짧습니다.",
+    "args": [
+      "_formatHours(recoveryMinutes)"
+    ],
+    "parent": "NamedExpressionImpl",
+    "source": "'다음 근무까지 회복시간이 ${_formatHours(recoveryMinutes)}로, ' '권장 최소 기준(11시간)보다 짧습니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 18913,
+    "length": 265,
+    "template": "최근 7일간 실제 근무시간이 총 {arg0}으로, 평소(주 {arg1} 안팎)보다 {arg2} 더 많습니다. 평소보다 근무가 많이 누적되면 피로가 커질 수 있습니다(정확한 증가 폭 기준은 특정 연구 수치가 아니라 이 앱이 보수적으로 정한 값입니다).",
+    "args": [
+      "_formatHours(weeklyTotalMinutes)",
+      "_formatHours(baseline)",
+      "_formatHours(extra)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'최근 7일간 실제 근무시간이 총 ${_formatHours(weeklyTotalMinutes)}으로, 평소(주 ' '${_formatHours(baseline)} 안팎)보다 ${_formatHours(extra)} 더 많습니다. 평소보다 근무가 많이 ' '누적되면 피로가 커질 수 있습니다(정확한 증가 폭 기준은 특정 연구 수치가 아니라 이 앱이 ' '보수적으로 정한 값입니다).'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 19194,
+    "length": 220,
+    "template": "최근 7일간 실제 근무시간이 총 {arg0}으로, 평소(주 {arg1} 안팎)보다 {arg2} 더 많습니다. 평소보다 근무가 누적되면 피로가 커질 수 있습니다(정확한 증가 폭 기준은 이 앱의 판단입니다).",
+    "args": [
+      "_formatHours(weeklyTotalMinutes)",
+      "_formatHours(baseline)",
+      "_formatHours(extra)"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'최근 7일간 실제 근무시간이 총 ${_formatHours(weeklyTotalMinutes)}으로, 평소(주 ' '${_formatHours(baseline)} 안팎)보다 ${_formatHours(extra)} 더 많습니다. 평소보다 근무가 ' '누적되면 피로가 커질 수 있습니다(정확한 증가 폭 기준은 이 앱의 판단입니다).'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 19778,
+    "length": 173,
+    "template": "오늘로 연속 근무 {arg0}일째입니다. 하루 근무시간과 무관하게 쉬는 날 없이 근무가 길게 이어지는 것 자체가 피로 누적으로 이어질 수 있습니다 (정확한 일수 기준은 특정 연구 수치가 아니라 이 앱이 보수적으로 정한 값입니다).",
+    "args": [
+      "days"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'오늘로 연속 근무 $days일째입니다. 하루 근무시간과 무관하게 쉬는 날 ' '없이 근무가 길게 이어지는 것 자체가 피로 누적으로 이어질 수 있습니다 ' '(정확한 일수 기준은 특정 연구 수치가 아니라 이 앱이 보수적으로 정한 값입니다).'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 19969,
+    "length": 114,
+    "template": "오늘로 연속 근무 {arg0}일째입니다. 하루 근무시간과 무관하게 쉬는 날 없이 근무가 이어지면 피로가 쌓일 수 있습니다(정확한 일수 기준은 이 앱의 판단입니다).",
+    "args": [
+      "days"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'오늘로 연속 근무 $days일째입니다. 하루 근무시간과 무관하게 쉬는 날 없이 ' '근무가 이어지면 피로가 쌓일 수 있습니다(정확한 일수 기준은 이 앱의 판단입니다).'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 20104,
+    "length": 173,
+    "template": "휴무 없이 매우 오랜 기간 근무가 이어지고 있습니다. 하루 근무시간과 무관하게 쉬는 날 없이 근무가 길게 이어지는 것 자체가 피로 누적으로 이어질 수 있습니다 (정확한 일수 기준은 특정 연구 수치가 아니라 이 앱이 보수적으로 정한 값입니다).",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'휴무 없이 매우 오랜 기간 근무가 이어지고 있습니다. 하루 근무시간과 무관하게 ' '쉬는 날 없이 근무가 길게 이어지는 것 자체가 피로 누적으로 이어질 수 있습니다 ' '(정확한 일수 기준은 특정 연구 수치가 아니라 이 앱이 보수적으로 정한 값입니다).'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 20489,
+    "length": 128,
+    "template": "오늘은 역방향 교대 전환에 해당합니다. 일부 연구에서는 역방향이 정방향보다 적응에 상대적으로 불리한 경향으로 보고돼, 다른 부담과 겹치면 회복이 더 어려울 수 있습니다.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'오늘은 역방향 교대 전환에 해당합니다. 일부 연구에서는 역방향이 ' '정방향보다 적응에 상대적으로 불리한 경향으로 보고돼, 다른 부담과 ' '겹치면 회복이 더 어려울 수 있습니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 20928,
+    "length": 183,
+    "template": "연속 야간근무가 {arg0}일째로 접어들었습니다. 관련 연구는 이 시점부터 사고·실수 위험이 뚜렷하게 가속화된다고 보고하며, 일부 안전 최우선 산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 둡니다.",
+    "args": [
+      "days"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'연속 야간근무가 $days일째로 접어들었습니다. 관련 연구는 ' '이 시점부터 사고·실수 위험이 뚜렷하게 가속화된다고 보고하며, 일부 ' '안전 최우선 산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 ' '둡니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 21129,
+    "length": 130,
+    "template": "연속 야간근무 {arg0}일째입니다. 관련 연구는 야간근무가 연속될수록(특히 낮·오후근무 연속보다 더 가파르게) 사고·실수 위험이 누적된다고 보고합니다.",
+    "args": [
+      "days"
+    ],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'연속 야간근무 $days일째입니다. 관련 연구는 야간근무가 ' '연속될수록(특히 낮·오후근무 연속보다 더 가파르게) 사고·실수 위험이 ' '누적된다고 보고합니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 21280,
+    "length": 158,
+    "template": "연속 야간근무가 휴무 없이 매우 오래 이어지고 있습니다. 관련 연구는 이 시점부터 사고·실수 위험이 뚜렷하게 가속화된다고 보고하며, 일부 안전 최우선 산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 둡니다.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'연속 야간근무가 휴무 없이 매우 오래 이어지고 있습니다. 관련 연구는 ' '이 시점부터 사고·실수 위험이 뚜렷하게 가속화된다고 보고하며, 일부 ' '안전 최우선 산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 둡니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 21661,
+    "length": 9,
+    "template": "회복시간 부족",
+    "args": [],
+    "parent": "IfElementImpl",
+    "source": "'회복시간 부족'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 21696,
+    "length": 12,
+    "template": "평소보다 근무 누적",
+    "args": [],
+    "parent": "IfElementImpl",
+    "source": "'평소보다 근무 누적'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 21735,
+    "length": 11,
+    "template": "역방향 교대 전환",
+    "args": [],
+    "parent": "IfElementImpl",
+    "source": "'역방향 교대 전환'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 21783,
+    "length": 9,
+    "template": "연속 야간근무",
+    "args": [],
+    "parent": "IfElementImpl",
+    "source": "'연속 야간근무'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 21828,
+    "length": 11,
+    "template": "연속근무일수 누적",
+    "args": [],
+    "parent": "IfElementImpl",
+    "source": "'연속근무일수 누적'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 22313,
+    "length": 155,
+    "template": "{arg0}이 오늘 함께 겹쳐 회복 부담이 큰 날로 판단됩니다. (여러 부담이 겹치면 누적된다고 보는 것은 이 앱의 판단이며, 개별 요인 각각의 근거는 위 항목을 참고하세요.)",
+    "args": [
+      "compoundLabels.join(' + ')"
+    ],
+    "parent": "NamedExpressionImpl",
+    "source": "'${compoundLabels.join(' + ')}이 오늘 함께 겹쳐 회복 부담이 큰 ' '날로 판단됩니다. (여러 부담이 겹치면 누적된다고 보는 것은 이 앱의 ' '판단이며, 개별 요인 각각의 근거는 위 항목을 참고하세요.)'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 23825,
+    "length": 109,
+    "template": "{arg0}시간 이상 근무가 {arg1}일 연속 이어졌습니다. 관련 훈련자료는 이런 경우 최소 {arg2}일의 휴식을 고려할 것을 제안합니다.",
+    "args": [
+      "floorHours",
+      "days",
+      "breakDays"
+    ],
+    "parent": "ExpressionFunctionBodyImpl",
+    "source": "'$floorHours시간 이상 근무가 $days일 연속 이어졌습니다. 관련 훈련자료는 ' '이런 경우 최소 $breakDays일의 휴식을 고려할 것을 제안합니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 23957,
+    "length": 114,
+    "template": "{arg0}시간 이상 근무가 휴무 없이 매우 오래 이어지고 있습니다. 관련 훈련자료는 이런 경우 최소 {arg1}일의 휴식을 고려할 것을 제안합니다.",
+    "args": [
+      "floorHours",
+      "breakDays"
+    ],
+    "parent": "NamedExpressionImpl",
+    "source": "'$floorHours시간 이상 근무가 휴무 없이 매우 오래 이어지고 있습니다. 관련 ' '훈련자료는 이런 경우 최소 $breakDays일의 휴식을 고려할 것을 제안합니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 24938,
+    "length": 44,
+    "template": "오늘로 연속 야간근무 {arg0}일째입니다.",
+    "args": [
+      "consecutiveNight.days"
+    ],
+    "parent": "NamedExpressionImpl",
+    "source": "'오늘로 연속 야간근무 ${consecutiveNight.days}일째입니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 25388,
+    "length": 80,
+    "template": "어제까지 이어진 야간근무({arg0}일) 이후의 휴무입니다. 회복을 위한 수면·휴식 구간으로 활용해보세요.",
+    "args": [
+      "days"
+    ],
+    "parent": "ExpressionFunctionBodyImpl",
+    "source": "'어제까지 이어진 야간근무($days일) 이후의 휴무입니다. 회복을 위한 ' '수면·휴식 구간으로 활용해보세요.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 25491,
+    "length": 79,
+    "template": "휴무 없이 매우 오래 이어진 야간근무 이후의 휴무입니다. 회복을 위한 수면·휴식 구간으로 활용해보세요.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'휴무 없이 매우 오래 이어진 야간근무 이후의 휴무입니다. 회복을 위한 ' '수면·휴식 구간으로 활용해보세요.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 26024,
+    "length": 113,
+    "template": "현재 교대는 정방향(주간→오후→야간)으로 진행됩니다. 일부 교대근무 연구에서는 정방향이 역방향보다 적응에 상대적으로 유리한 것으로 보고됩니다.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'현재 교대는 정방향(주간→오후→야간)으로 진행됩니다. 일부 교대근무 ' '연구에서는 정방향이 역방향보다 적응에 상대적으로 유리한 것으로 ' '보고됩니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 27174,
+    "length": 4,
+    "template": "수면",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'수면'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 27200,
+    "length": 200,
+    "template": "{arg0} ~ {arg1} 사이에 수면을 확보하기 좋은 시간대입니다. (목표 수면 7~9시간 기준){arg2}",
+    "args": [
+      "_formatTime(sleepStart)",
+      "_formatTime(sleepEnd)",
+      "sleepShorterThanRecommended ? \" 다만 오늘은 가용 시간이 권장 범위보다 짧습니다.\" : \"\""
+    ],
+    "parent": "NamedExpressionImpl",
+    "source": "'${_formatTime(sleepStart)} ~ ${_formatTime(sleepEnd)} 사이에 수면을 ' '확보하기 좋은 시간대입니다. (목표 수면 7~9시간 기준)' '${sleepShorterThanRecommended ? \" 다만 오늘은 가용 시간이 권장 범위보다 짧습니다.\" : \"\"}'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 27714,
+    "length": 5,
+    "template": "카페인",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'카페인'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 27741,
+    "length": 113,
+    "template": "취침 목표 시각({arg0}) 6시간 전인 {arg1} 이후부터는 카페인 섭취를 줄이는 것이 좋습니다.",
+    "args": [
+      "_formatTime(sleepStart)",
+      "_formatTime(cutoff)"
+    ],
+    "parent": "NamedExpressionImpl",
+    "source": "'취침 목표 시각(${_formatTime(sleepStart)}) 6시간 전인 ' '${_formatTime(cutoff)} 이후부터는 카페인 섭취를 줄이는 것이 좋습니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 28006,
+    "length": 63,
+    "template": "다음 근무까지 회복시간이 매우 짧아 별도의 수면 시간대를 제안하기 어렵습니다.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'다음 근무까지 회복시간이 매우 짧아 별도의 수면 시간대를 제안하기 ' '어렵습니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 28327,
+    "length": 4,
+    "template": "식사",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'식사'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 28351,
+    "length": 73,
+    "template": "야간근무 중에는 과식이나 기름지고 자극적인 음식을 피하고, 가벼운 식사 위주로 하는 것이 좋습니다.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무 중에는 과식이나 기름지고 자극적인 음식을 피하고, 가벼운 ' '식사 위주로 하는 것이 좋습니다.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 28630,
+    "length": 6,
+    "template": "빛 노출",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'빛 노출'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 28656,
+    "length": 133,
+    "template": "야간근무 후 귀가길에 강한 햇빛 노출을 줄이면(선글라스 등) 이후 수면에 도움이 될 수 있습니다. 단, 많이 졸린 상태라면 안전을 우선하고 가능하면 다른 사람이 운전하게 하세요.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무 후 귀가길에 강한 햇빛 노출을 줄이면(선글라스 등) 이후 ' '수면에 도움이 될 수 있습니다. 단, 많이 졸린 상태라면 안전을 우선하고 ' '가능하면 다른 사람이 운전하게 하세요.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 28988,
+    "length": 4,
+    "template": "낮잠",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'낮잠'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 29012,
+    "length": 122,
+    "template": "야간근무 전 짧은 낮잠이 졸림을 줄이는 데 도움이 될 수 있다고 보고됩니다(근거 수준은 높지 않음). 낮잠 직후엔 잠시 몽롱할 수 있으니 운전 등은 피하세요.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무 전 짧은 낮잠이 졸림을 줄이는 데 도움이 될 수 있다고 ' '보고됩니다(근거 수준은 높지 않음). 낮잠 직후엔 잠시 몽롱할 수 있으니 ' '운전 등은 피하세요.'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 30517,
+    "length": 6,
+    "template": "{arg0}시간",
+    "args": [
+      "h"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'$h시간'"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "offset": 30537,
+    "length": 10,
+    "template": "{arg0}시간 {arg1}분",
+    "args": [
+      "h",
+      "m"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'$h시간 $m분'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1024,
+    "length": 16,
+    "template": "교대 방향(정방향/역방향)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'교대 방향(정방향/역방향)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1056,
+    "length": 84,
+    "template": "정방향 교대(주간→오후→야간)가 역방향보다 적응하기 쉽다고 보고됨. 회전 속도가 빠를수록, 주 단위 회전일수록 더 힘든 경향.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'정방향 교대(주간→오후→야간)가 역방향보다 적응하기 쉽다고 보고됨. ' '회전 속도가 빠를수록, 주 단위 회전일수록 더 힘든 경향.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1162,
+    "length": 41,
+    "template": "정부기관 종합 훈련자료(다수 생체리듬 연구를 정리한 전문가 합의 수준)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'정부기관 종합 훈련자료(다수 생체리듬 연구를 정리한 전문가 합의 수준)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1220,
+    "length": 87,
+    "template": "\"일부 연구에서는 정방향이 역방향보다 적응에 유리한 것으로 보고됩니다\" 수준의 정보 제공. \"정방향=건강에 좋음\" 같은 단정 금지.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'\"일부 연구에서는 정방향이 역방향보다 적응에 유리한 것으로 보고됩니다\" ' '수준의 정보 제공. \"정방향=건강에 좋음\" 같은 단정 금지.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1458,
+    "length": 41,
+    "template": "Knauth & Hornberger (NIOSH Module 5 인용)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'Knauth & Hornberger (NIOSH Module 5 인용)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1513,
+    "length": 15,
+    "template": "근무 사이 최소 회복시간",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'근무 사이 최소 회복시간'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1544,
+    "length": 33,
+    "template": "두 근무 사이 최소 11시간의 회복시간을 둘 것을 권장.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'두 근무 사이 최소 11시간의 회복시간을 둘 것을 권장.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1599,
+    "length": 22,
+    "template": "학술 권고(정부기관 훈련자료에 인용)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'학술 권고(정부기관 훈련자료에 인용)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1638,
+    "length": 36,
+    "template": "회복시간이 11시간보다 짧을 때 \"짧습니다\"라는 사실만 서술.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'회복시간이 11시간보다 짧을 때 \"짧습니다\"라는 사실만 서술.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1825,
+    "length": 54,
+    "template": "EU Directive 2003/88/EC (Working Time Directive) 제3조",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'EU Directive 2003/88/EC (Working Time Directive) 제3조'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1893,
+    "length": 22,
+    "template": "근무 사이 최소 회복시간(법제 기준)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'근무 사이 최소 회복시간(법제 기준)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1931,
+    "length": 41,
+    "template": "모든 근로자는 24시간마다 최소 11시간의 연속 휴식을 보장받아야 함.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'모든 근로자는 24시간마다 최소 11시간의 연속 휴식을 보장받아야 함.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 1994,
+    "length": 27,
+    "template": "법제/정부 가이드라인(널리 채택된 최소 기준)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'법제/정부 가이드라인(널리 채택된 최소 기준)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 2038,
+    "length": 36,
+    "template": "EVIDENCE-002와 함께 11시간 임계값의 근거로 사용.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'EVIDENCE-002와 함께 11시간 임계값의 근거로 사용.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 2279,
+    "length": 20,
+    "template": "장시간 근무와 사고/부상 상대위험",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'장시간 근무와 사고/부상 상대위험'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 2315,
+    "length": 76,
+    "template": "8시간 근무 대비 10시간 근무는 상대위험 약 +13%, 12시간 근무는 약 +27% 증가하는 것으로 모델링됨.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'8시간 근무 대비 10시간 근무는 상대위험 약 +13%, 12시간 근무는 약 ' '+27% 증가하는 것으로 모델링됨.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 2413,
+    "length": 34,
+    "template": "여러 연구를 종합한 메타분석적 모델링(Risk Index)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'여러 연구를 종합한 메타분석적 모델링(Risk Index)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 2464,
+    "length": 116,
+    "template": "오늘 근무가 12시간 이상일 때 \"근무시간이 길수록 피로·사고 위험이 상대적으로 높아지는 경향이 보고됩니다\" 수준으로만 서술. 개인 위험도를 %로 제시하지 않음.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'오늘 근무가 12시간 이상일 때 \"근무시간이 길수록 피로·사고 위험이 ' '상대적으로 높아지는 경향이 보고됩니다\" 수준으로만 서술. 개인 위험도를 ' '%로 제시하지 않음.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 2815,
+    "length": 25,
+    "template": "연속 근무 후 휴식일(근무시간대별 일반화)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'연속 근무 후 휴식일(근무시간대별 일반화)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 2856,
+    "length": 236,
+    "template": "\"연속 8시간 근무 5일 또는 10시간 근무 4일 후에는 1~2일의 완전한 휴식을, 연속 12시간 근무 3일 후에는 2일의 휴식을 계획할 것\"을 권고. 또한 \"며칠 몰아서 일하고 4~7일을 몰아 쉬는\" 압축 패턴은 전문가들이 피할 것을 권고한다고 명시(2026-09-17 재조사로 근무시간대별 일반화된 수치 확인 - 기존엔 12시간 근무 축만 반영했음).",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'\"연속 8시간 근무 5일 또는 10시간 근무 4일 후에는 1~2일의 완전한 휴식을, ' '연속 12시간 근무 3일 후에는 2일의 휴식을 계획할 것\"을 권고. 또한 \"며칠 몰아서 ' '일하고 4~7일을 몰아 쉬는\" 압축 패턴은 전문가들이 피할 것을 권고한다고 명시(2026-09-17 ' '재조사로 근무시간대별 일반화된 수치 확인 - 기존엔 12시간 근무 축만 반영했음).'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 3114,
+    "length": 42,
+    "template": "정부기관 종합 훈련자료의 정성적 권고(정량적 \"위험 시작 일수\"는 아님)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'정부기관 종합 훈련자료의 정성적 권고(정량적 \"위험 시작 일수\"는 아님)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 3173,
+    "length": 304,
+    "template": "근무시간이 8시간대/10시간대/12시간대인지에 따라 각각 5일/4일/3일 연속 뒤 회복시간이 부족(24~48시간 미만)하면 \"높은 부담\" 판정에 사용 - 원문 숫자를 그대로 씀, 임의로 만든 임계값이 아님. 8시간 미만 근무의 연속일수는 이 근거가 다루지 않아 레벨 판정에 안 씀(RULE_CONSECUTIVE_WORKDAYS 참고 - \"며칠 몰아서 일하는 압축 패턴을 피하라\"는 이 자료의 일반 원칙만 빌리고, 정확한 일수 기준 자체는 이 앱의 판단).",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'근무시간이 8시간대/10시간대/12시간대인지에 따라 각각 5일/4일/3일 연속 뒤 ' '회복시간이 부족(24~48시간 미만)하면 \"높은 부담\" 판정에 사용 - 원문 숫자를 그대로 ' '씀, 임의로 만든 임계값이 아님. 8시간 미만 근무의 연속일수는 이 근거가 다루지 않아 ' '레벨 판정에 안 씀(RULE_CONSECUTIVE_WORKDAYS 참고 - \"며칠 몰아서 일하는 압축 패턴을 ' '피하라\"는 이 자료의 일반 원칙만 빌리고, 정확한 일수 기준 자체는 이 앱의 판단).'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 3722,
+    "length": 11,
+    "template": "야간근무 후 수면",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무 후 수면'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 3749,
+    "length": 33,
+    "template": "야간근무 후에는 수면을 확보하는 것을 우선할 것을 권고.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무 후에는 수면을 확보하는 것을 우선할 것을 권고.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 3804,
+    "length": 14,
+    "template": "정부기관 종합 훈련자료",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'정부기관 종합 훈련자료'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 3835,
+    "length": 85,
+    "template": "야간근무 다음 날이 휴무인 경우 \"회복을 위한 수면·휴식 구간\"으로 맥락을 재구성(상태 판정에는 영향 없음, 순수 정보 제공).",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무 다음 날이 휴무인 경우 \"회복을 위한 수면·휴식 구간\"으로 ' '맥락을 재구성(상태 판정에는 영향 없음, 순수 정보 제공).'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 4163,
+    "length": 11,
+    "template": "야간근무 전 낮잠",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무 전 낮잠'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 4190,
+    "length": 174,
+    "template": "졸림을 겪는 교대근무 수면장애 성인에서 야간근무 전 낮잠을 조건부로 권장(단, 가이드라인 스스로 \"근거 수준 매우 낮음\"이라고 명시). 낮잠 직후 수면관성으로 일시적 졸림/인지저하가 있을 수 있어 운전 등 위험한 활동 전 시간을 둘 것을 권고.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'졸림을 겪는 교대근무 수면장애 성인에서 야간근무 전 낮잠을 조건부로 ' '권장(단, 가이드라인 스스로 \"근거 수준 매우 낮음\"이라고 명시). 낮잠 직후 ' '수면관성으로 일시적 졸림/인지저하가 있을 수 있어 운전 등 위험한 활동 전 ' '시간을 둘 것을 권고.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 4386,
+    "length": 34,
+    "template": "조건부 권고, 근거 수준 매우 낮음(가이드라인 원문 명시)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'조건부 권고, 근거 수준 매우 낮음(가이드라인 원문 명시)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 4437,
+    "length": 93,
+    "template": "팁으로만 노출(\"도움이 될 수 있다고 보고됩니다, 근거 수준은 높지 않습니다\" + 낮잠 직후 운전 주의). 상태 판정에는 절대 사용하지 않음.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'팁으로만 노출(\"도움이 될 수 있다고 보고됩니다, 근거 수준은 높지 ' '않습니다\" + 낮잠 직후 운전 주의). 상태 판정에는 절대 사용하지 않음.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 4761,
+    "length": 9,
+    "template": "카페인과 수면",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'카페인과 수면'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 4786,
+    "length": 63,
+    "template": "취침 6시간 전 카페인(400mg) 섭취도 총 수면시간을 1시간 이상 유의하게 감소시킴.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'취침 6시간 전 카페인(400mg) 섭취도 총 수면시간을 1시간 이상 유의하게 ' '감소시킴.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 4871,
+    "length": 26,
+    "template": "무작위 대조 실험(반복 인용되는 기준 연구)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'무작위 대조 실험(반복 인용되는 기준 연구)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 4914,
+    "length": 57,
+    "template": "추천 수면 시간대 시작 시각 기준 6시간 전부터 카페인 섭취를 줄이도록 안내.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'추천 수면 시간대 시작 시각 기준 6시간 전부터 카페인 섭취를 줄이도록 ' '안내.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 5185,
+    "length": 17,
+    "template": "야간근무 후 귀가길 빛 노출",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무 후 귀가길 빛 노출'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 5218,
+    "length": 142,
+    "template": "야간근무 후 귀가길에 선글라스 등으로 강한 빛 노출을 줄이면 이후 수면에 도움이 될 수 있음. 단, 매우 졸린 상태에서는 선글라스가 각성 효과를 줄여 졸음운전 위험을 높일 수 있다는 안전 경고가 함께 명시됨.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무 후 귀가길에 선글라스 등으로 강한 빛 노출을 줄이면 이후 수면에 ' '도움이 될 수 있음. 단, 매우 졸린 상태에서는 선글라스가 각성 효과를 줄여 ' '졸음운전 위험을 높일 수 있다는 안전 경고가 함께 명시됨.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 5382,
+    "length": 27,
+    "template": "정부기관 종합 훈련자료 + 생체리듬 연구 기반",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'정부기관 종합 훈련자료 + 생체리듬 연구 기반'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 5426,
+    "length": 61,
+    "template": "야간근무가 끝나는 날 팁으로 노출하되, 졸음운전 안전 경고 문구를 반드시 함께 표시.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무가 끝나는 날 팁으로 노출하되, 졸음운전 안전 경고 문구를 ' '반드시 함께 표시.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 5731,
+    "length": 11,
+    "template": "야간근무 중 식사",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무 중 식사'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 5758,
+    "length": 123,
+    "template": "자정~새벽 6시 사이 식사량을 줄이고, 주 수면 전 1~2시간 내 과식을 피하며, 가벼운 음식 위주로 할 것을 권고. 기름지고 자극적인 음식·알코올· 설탕 많은 음식은 자제.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'자정~새벽 6시 사이 식사량을 줄이고, 주 수면 전 1~2시간 내 과식을 ' '피하며, 가벼운 음식 위주로 할 것을 권고. 기름지고 자극적인 음식·알코올· ' '설탕 많은 음식은 자제.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 5903,
+    "length": 14,
+    "template": "정부기관 종합 훈련자료",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'정부기관 종합 훈련자료'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 5934,
+    "length": 59,
+    "template": "오늘이 야간근무일 때 \"과식·기름진 음식을 피하고 가벼운 식사 위주로\" 팁 노출.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'오늘이 야간근무일 때 \"과식·기름진 음식을 피하고 가벼운 식사 위주로\" ' '팁 노출.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 6144,
+    "length": 66,
+    "template": "National Sleep Foundation, Sleep Health 저널(2015) — 다학제 전문가 패널 합의",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'National Sleep Foundation, Sleep Health 저널(2015) — 다학제 전문가 패널 합의'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 6224,
+    "length": 12,
+    "template": "성인 권장 수면시간",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'성인 권장 수면시간'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 6252,
+    "length": 41,
+    "template": "성인(만 18~64세) 권장 수면시간은 7~9시간(고령자 7~8시간).",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'성인(만 18~64세) 권장 수면시간은 7~9시간(고령자 7~8시간).'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 6315,
+    "length": 49,
+    "template": "다학제 전문가 패널 합의(RAND/UCLA Appropriateness Method)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'다학제 전문가 패널 합의(RAND/UCLA Appropriateness Method)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 6381,
+    "length": 69,
+    "template": "\"오늘 목표 수면: 7~9시간\"처럼 항상 범위로 표시. 특정 분·시간 단위로 정확히 표현하지 않음.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'\"오늘 목표 수면: 7~9시간\"처럼 항상 범위로 표시. 특정 분·시간 단위로 ' '정확히 표현하지 않음.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 6596,
+    "length": 54,
+    "template": "EU Directive 2003/88/EC (Working Time Directive) 제6조",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'EU Directive 2003/88/EC (Working Time Directive) 제6조'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 6664,
+    "length": 19,
+    "template": "주간 최대 근무시간(법제 기준)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'주간 최대 근무시간(법제 기준)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 6699,
+    "length": 58,
+    "template": "평균 주간 근무시간(연장근무 포함)이 기준기간 동안 48시간을 넘지 않아야 함.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'평균 주간 근무시간(연장근무 포함)이 기준기간 동안 48시간을 넘지 ' '않아야 함.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 6779,
+    "length": 27,
+    "template": "법제/정부 가이드라인(널리 채택된 최소 기준)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'법제/정부 가이드라인(널리 채택된 최소 기준)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 6823,
+    "length": 486,
+    "template": "2026-09-18 재설계 - ConditionRuleEngine.scheduleLoadProfileFor()에서 이 사람의 근무 패턴 자체(개인 기준선)가 구조적으로 주 48시간을 넘는지 판단할 때만 절대값으로 씀(레벨과 무관한 배경 정보 한 줄, \"이 근무 패턴은 평균 주 N시간이에요\"). RULE_WEEKLY_LOAD_INCREASE(최근 7일 실근무시간이 평소보다 늘었는지)는 이 48시간을 더 이상 절대 기준으로 쓰지 않고 개인 기준선 대비 증가 폭만 보되, 같은 축의 배경 근거로 evidenceIds에 계속 인용함(절대 기준 위반을 단정하는 문구는 안 씀 - 12시간 표준 근무자는 원래도 48시간을 구조적으로 넘기 때문). 60시간 이상은 EVIDENCE-014와 함께 씀. 개인 위험도·질병 연관은 절대 언급하지 않음.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'2026-09-18 재설계 - ConditionRuleEngine.scheduleLoadProfileFor()에서 이 사람의 근무 패턴 ' '자체(개인 기준선)가 구조적으로 주 48시간을 넘는지 판단할 때만 절대값으로 씀(레벨과 무관한 ' '배경 정보 한 줄, \"이 근무 패턴은 평균 주 N시간이에요\"). RULE_WEEKLY_LOAD_INCREASE(최근 7일 ' '실근무시간이 평소보다 늘었는지)는 이 48시간을 더 이상 절대 기준으로 쓰지 않고 개인 기준선 ' '대비 증가 폭만 보되, 같은 축의 배경 근거로 evidenceIds에 계속 인용함(절대 기준 위반을 ' '단정하는 문구는 안 씀 - 12시간 표준 근무자는 원래도 48시간을 구조적으로 넘기 때문). ' '60시간 이상은 EVIDENCE-014와 함께 씀. 개인 위험도·질병 연관은 절대 언급하지 않음.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 7837,
+    "length": 108,
+    "template": "Folkard S, Tucker P. Occup Med (Lond). 2003 (Frontiers 2024 rapid evidence review에 재인용된 수치 기준)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'Folkard S, Tucker P. Occup Med (Lond). 2003 (Frontiers 2024 rapid ' 'evidence review에 재인용된 수치 기준)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 7959,
+    "length": 19,
+    "template": "연속 야간근무 횟수와 사고 위험",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'연속 야간근무 횟수와 사고 위험'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 7994,
+    "length": 205,
+    "template": "야간근무가 연속될수록 사고·부상 상대위험이 누적됨(1일째 대비 2일째 약 +6%, 3일째 약 +17%, 4일째 약 +36% - 낮/오후근무의 연속보다 야간근무의 연속에서 위험 증가가 더 가파름). 이 수치를 근거로 원자력 등 안전 최우선 산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 둠.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'야간근무가 연속될수록 사고·부상 상대위험이 누적됨(1일째 대비 2일째 ' '약 +6%, 3일째 약 +17%, 4일째 약 +36% - 낮/오후근무의 연속보다 야간근무의 ' '연속에서 위험 증가가 더 가파름). 이 수치를 근거로 원자력 등 안전 최우선 ' '산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 둠.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 8221,
+    "length": 102,
+    "template": "동료심사 학술지 원 연구(다수 연구를 종합한 산업안전 지표) - 2차 인용(Frontiers 2024 rapid evidence review)으로 수치 재확인",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'동료심사 학술지 원 연구(다수 연구를 종합한 산업안전 지표) - ' '2차 인용(Frontiers 2024 rapid evidence review)으로 수치 재확인'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 8340,
+    "length": 164,
+    "template": "연속 야간근무 3일째부터 \"주의\" 신호로, 4일째부터는 그 자체로 \"회복 부담이 큰 날\"로 판정(가속화 구간이라는 원 연구 취지 반영). 개인별 %나 사고 확률은 표시하지 않고 \"위험이 누적/가속화되는 경향\" 수준으로만 서술.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'연속 야간근무 3일째부터 \"주의\" 신호로, 4일째부터는 그 자체로 ' '\"회복 부담이 큰 날\"로 판정(가속화 구간이라는 원 연구 취지 반영). 개인별 ' '%나 사고 확률은 표시하지 않고 \"위험이 누적/가속화되는 경향\" 수준으로만 ' '서술.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 8839,
+    "length": 132,
+    "template": "Institute of Medicine, Keeping Patients Safe (2004); 2014년 체계적 검토 (둘 다 NIOSH Training for Nurses Module 5에 인용된 수치로 확인)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'Institute of Medicine, Keeping Patients Safe (2004); 2014년 체계적 검토 ' '(둘 다 NIOSH Training for Nurses Module 5에 인용된 수치로 확인)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 8985,
+    "length": 15,
+    "template": "주간 누적 근무시간 상한",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'주간 누적 근무시간 상한'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 9016,
+    "length": 135,
+    "template": "간호사 근무시간을 24시간 내 12시간, 7일 내 60시간을 넘지 않도록 제한할 것을 권고(IOM 2004). 2014년 체계적 검토는 주 40시간을 넘는 근무가 환자안전 저하와 연관된다고 보고.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'간호사 근무시간을 24시간 내 12시간, 7일 내 60시간을 넘지 않도록 제한할 ' '것을 권고(IOM 2004). 2014년 체계적 검토는 주 40시간을 넘는 근무가 환자안전 ' '저하와 연관된다고 보고.'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 9173,
+    "length": 85,
+    "template": "정부기관 종합 훈련자료에 인용된 위원회 보고서 + 체계적 검토(원문 직접 확인은 이번 조사에서 못 함 - 2차 인용 확인 수준)",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'정부기관 종합 훈련자료에 인용된 위원회 보고서 + 체계적 검토(원문 ' '직접 확인은 이번 조사에서 못 함 - 2차 인용 확인 수준)'"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "offset": 9275,
+    "length": 453,
+    "template": "2026-09-18 재설계 - scheduleLoadProfileFor()에서 개인 기준선이 주 60시간 이상이면 EVIDENCE-012와 함께 배경 정보에 \"간호사 근무시간 권고 상한(주 60시간)\" 문구 추가. RULE_WEEKLY_LOAD_INCREASE에서는 최근 7일 실근무시간이 평소보다 크게(기준선의 25% 이상 또는 최소 12시간 이상) 늘었을 때 배경 근거로 evidenceIds에 인용(60시간 절대 위반을 단정하지 않음 - 평소가 이미 60시간대인 사람도 있기 때문). 40시간 수치는 서술에서 참고만 하고 별도 레벨 신호로는 쓰지 않음(EU 48시간 기준과 같은 축의 더 약한 근거를 이중으로 반영하지 않기 위함). 개인 위험도·질병 연관은 언급하지 않음.",
+    "args": [],
+    "parent": "NamedExpressionImpl",
+    "source": "'2026-09-18 재설계 - scheduleLoadProfileFor()에서 개인 기준선이 주 60시간 이상이면 ' 'EVIDENCE-012와 함께 배경 정보에 \"간호사 근무시간 권고 상한(주 60시간)\" 문구 추가. ' 'RULE_WEEKLY_LOAD_INCREASE에서는 최근 7일 실근무시간이 평소보다 크게(기준선의 25% 이상 ' '또는 최소 12시간 이상) 늘었을 때 배경 근거로 evidenceIds에 인용(60시간 절대 위반을 ' '단정하지 않음 - 평소가 이미 60시간대인 사람도 있기 때문). 40시간 수치는 서술에서 참고만 ' '하고 별도 레벨 신호로는 쓰지 않음(EU 48시간 기준과 같은 축의 더 약한 근거를 이중으로 ' '반영하지 않기 위함). 개인 위험도·질병 연관은 언급하지 않음.'"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "offset": 291,
+    "length": 3,
+    "template": "월",
+    "args": [],
+    "parent": "ListLiteralImpl",
+    "source": "'월'"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "offset": 296,
+    "length": 3,
+    "template": "화",
+    "args": [],
+    "parent": "ListLiteralImpl",
+    "source": "'화'"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "offset": 301,
+    "length": 3,
+    "template": "수",
+    "args": [],
+    "parent": "ListLiteralImpl",
+    "source": "'수'"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "offset": 306,
+    "length": 3,
+    "template": "목",
+    "args": [],
+    "parent": "ListLiteralImpl",
+    "source": "'목'"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "offset": 311,
+    "length": 3,
+    "template": "금",
+    "args": [],
+    "parent": "ListLiteralImpl",
+    "source": "'금'"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "offset": 316,
+    "length": 3,
+    "template": "토",
+    "args": [],
+    "parent": "ListLiteralImpl",
+    "source": "'토'"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "offset": 321,
+    "length": 3,
+    "template": "일",
+    "args": [],
+    "parent": "ListLiteralImpl",
+    "source": "'일'"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "offset": 936,
+    "length": 5,
+    "template": "{arg0}분",
+    "args": [
+      "m"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'$m분'"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "offset": 965,
+    "length": 6,
+    "template": "{arg0}시간",
+    "args": [
+      "h"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'$h시간'"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "offset": 983,
+    "length": 10,
+    "template": "{arg0}시간 {arg1}분",
+    "args": [
+      "h",
+      "m"
+    ],
+    "parent": "ReturnStatementImpl",
+    "source": "'$h시간 $m분'"
+  },
+  {
+    "file": "lib/services/condition/sleep_day_slots.dart",
+    "offset": 1895,
+    "length": 6,
+    "template": "주 수면",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'주 수면'"
+  },
+  {
+    "file": "lib/services/condition/sleep_day_slots.dart",
+    "offset": 1904,
+    "length": 4,
+    "template": "낮잠",
+    "args": [],
+    "parent": "ConditionalExpressionImpl",
+    "source": "'낮잠'"
+  },
+  {
+    "file": "lib/services/condition/shift_time_category.dart",
+    "offset": 945,
+    "length": 4,
+    "template": "주간",
+    "args": [],
+    "parent": "ReturnStatementImpl",
+    "source": "'주간'"
+  },
+  {
+    "file": "lib/services/condition/shift_time_category.dart",
+    "offset": 1006,
+    "length": 4,
+    "template": "오후",
+    "args": [],
+    "parent": "ReturnStatementImpl",
+    "source": "'오후'"
+  },
+  {
+    "file": "lib/services/condition/shift_time_category.dart",
+    "offset": 1065,
+    "length": 4,
+    "template": "야간",
+    "args": [],
+    "parent": "ReturnStatementImpl",
+    "source": "'야간'"
+  },
+  {
+    "file": "lib/services/condition/shift_time_category.dart",
+    "offset": 1122,
+    "length": 4,
+    "template": "휴무",
+    "args": [],
+    "parent": "ReturnStatementImpl",
+    "source": "'휴무'"
+  },
+  {
+    "file": "lib/services/condition/shift_time_category.dart",
+    "offset": 1187,
+    "length": 8,
+    "template": "시각 미입력",
+    "args": [],
+    "parent": "ReturnStatementImpl",
+    "source": "'시각 미입력'"
+  }
+]

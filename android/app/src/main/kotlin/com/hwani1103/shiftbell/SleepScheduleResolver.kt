@@ -57,7 +57,7 @@ object SleepScheduleResolver {
     /**
      * ⭐ 2026-09-21(사용자 결정) - 창의 종류. `sleep_opportunity.dart`의
      * `SleepWindowKind`와 동일하게 유지할 것. 감지 리시버가 후보를 닫을 때
-     * 인정 최소 길이를 이 값으로 고른다(메인 잠 2시간 / 출근 전 낮잠 40분).
+     * 현행 자동 후보 최소 길이는 창 종류와 무관하게 5시간이다.
      */
     enum class WindowKind { MAIN_SLEEP, PRE_SHIFT_NAP }
 
@@ -241,13 +241,15 @@ object SleepScheduleResolver {
         if (!isWorkDay) return ResolvedInstance(false, false, null, null)
 
         val range = conditionTimes[name] ?: return ResolvedInstance(true, false, null, null)
-        val dayStartMillis = dayOnly(dateCal).timeInMillis
-        val startMillis = dayStartMillis + range.startMinutes * 60_000L
-        val endMillis = if (range.crossesMidnight) {
-            dayStartMillis + (range.endMinutes + 24 * 60) * 60_000L
-        } else {
-            dayStartMillis + range.endMinutes * 60_000L
+        // Use the same explicit policy as Dart and alarms: skipped clocks move
+        // forward by the DST change; repeated clocks use the later occurrence.
+        fun atLocalClock(dayOffset: Int, minutes: Int): Long {
+            val day = dayOnly(dateCal).apply { add(Calendar.DAY_OF_MONTH, dayOffset) }
+            return AlarmWallTime.resolve(day.get(Calendar.YEAR), day.get(Calendar.MONTH) + 1,
+                day.get(Calendar.DAY_OF_MONTH), minutes / 60, minutes % 60, day.timeZone.toZoneId())
         }
+        val startMillis = atLocalClock(0, range.startMinutes)
+        val endMillis = atLocalClock(if (range.crossesMidnight) 1 else 0, range.endMinutes)
         return ResolvedInstance(true, isNightStartMinutes(range.startMinutes), startMillis, endMillis)
     }
 

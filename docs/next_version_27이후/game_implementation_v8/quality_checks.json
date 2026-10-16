@@ -1,0 +1,19 @@
+{
+  "levels": 50,
+  "unchangedFirst30": true,
+  "uniqueFloorLayouts": 50,
+  "gateLevels": 20,
+  "boards": {
+    "5": 6,
+    "6": 11,
+    "7": 33
+  },
+  "independentGatePlans": 726,
+  "distinctGateSolutions": 183,
+  "rawGateSolutions": 1588,
+  "allSolutionsRequireCooperation": true,
+  "eachGateRemovesOtherwiseSafePlans": true,
+  "humanPlaytest": "NOT_TESTED",
+  "apkBuild": "NOT_RUN_USER_REQUEST",
+  "webBuild": "NOT_RUN_USER_REQUEST"
+}

@@ -1,0 +1,21 @@
+미니멀 언더라인 / 매거진 상단 아이콘 정리 (2026-10-15)
+
+기준과 요청
+- UI12 대기 항목의 UI13 연결 및 UI47 현황/48~49 후속 기준 확인. 기존 원장은 보존.
+- 사용자 요청: 두 테마의 상단 세 버튼을 메인 테마와 같은 아이콘으로 변경하고 크기를 줄여 우측 정렬.
+
+구현 규칙
+- CalendarHeaderActions에 선택적 iconOnly 경로 추가. 실제 한글 달력의 언더라인/매거진에서 활성화.
+- 메인과 동일한 CalendarAppAction 재사용: grid_view_rounded / people_alt_outlined / today_rounded 순서. 전체 근무표의 규칙근무 조건, 일정공유의 한국어 조건, 콜백 유지.
+- 공통 AppUiMetrics.calendarHeaderActionExtent=36 logical dp. 슬롯마다 기존 공통 4dp 패딩으로 보이는 버튼 28dp, 기존 compact 아이콘 16dp. 텍스트 제거, Tooltip/Semantics 라벨 유지.
+- Row(mainAxisSize.min) + Align(centerRight), 부족한 폭/높이에서만 FittedBox.scaleDown. 세 버튼의 기본 합계 폭108dp. 오늘이 가장 오른쪽.
+- 헤더 높이48.h와 제목 배분, 날짜 그리드/근무칩/범례/푸터는 그대로. 화면 색상 역할은 공통 컴포넌트에서 참조.
+- 외국어 기존 텍스트 버튼 경로 및 미리보기 유지. 앱 전체 버튼 중앙화 완료를 뜻하지 않음.
+
+적용/검증
+- 연결 dev debug 핫리로드 성공:48/2161 libraries,2137ms(compile1251/reload346/reassemble171).
+- 기존 ko/underline 및 ko/editorial 팔레트 전환/근무 표시 배치/광고 State 유지/오늘 이동 검사 실행. 최종 결과 artifacts/calendar_legend_header_icons_2026_10_15/test.log.
+- 같은 폴더에 직전 소스 및 이번 diff 보존. 사용자 시각 평가는 후속이며 실기기 두 테마 시각 PASS로 표기하지 않음.
+- 알람/권한/언어 리소스 기능 변경 없음. release/APK 빌드 없음.
+
+최종 검사 결과: 두 테마 기존 회귀 검사 2 PASS, All tests passed! 확인.

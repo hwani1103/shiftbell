@@ -1,0 +1,190 @@
+GAME-01 / 02 엔진·데이터·구현 아키텍처 계약
+기준: 01_규칙과범위.txt / shared-goal-v1 / 구현 파일은 아직 만들지 않음
+
+1. 의존성 방향과 예정 디렉터리
+packages/sync_path_core/
+  lib/src/model/        Cell, GridMap, UnitSpec, LevelSpec, MoveCommand, UnitRoute, RuleSet
+  lib/src/math/         Rational, RationalPoint, SegmentContact
+  lib/src/validation/   LevelValidator, RouteValidator
+  lib/src/simulation/   MotionCompiler, CollisionResolver, SimulationEngine, SimulationTrace
+  test/                07번 문서 및 JSON 기대값의 Dart 테스트
+  Flutter, dart:ui, 플랫폼 채널, DB, AdMob, 실제 시계, 난수, UI 상태를 import하지 않는다.
+packages/sync_path_tools/
+  lib/src/solver/       경로 열거·호환성·CSP·제한 탐색
+  lib/src/generator/    seed 생성·변형·검증·평가
+  bin/                 로컬 제작/검증 명령의 진입점
+  core에만 의존한다. 정상 플레이 의존 경로에는 넣지 않는다.
+packages/sync_path_ui/
+  lib/src/controller/  GameSessionController, RouteEditorState, ReplayState
+  lib/src/board/       보드 좌표 변환·Painter·입력·Semantics
+  lib/src/screens/     허브·게임·결과
+  lib/src/skin/        역할 기반 GameSkin, GameStrings, 공통 컨트롤 어댑터 계약
+  Flutter와 core에 의존한다. ShiftBell 내부 기능을 import하지 않는다.
+examples/sync_path_lab/
+  기존 앱과 독립된 pubspec, 진입점, asset, Android 설정을 갖는 실험 실행 프로젝트.
+  core/UI만 path dependency로 사용한다. 기존 앱 root pubspec/lockfile은 수정하지 않는다.
+  앱 ID와 저장 공간은 기존 dev/prod와 다르게 분리한다. 설치는 명시 요청 시에만 한다.
+다음 host adapter 경로는 향후 연결 재검토 시의 후보이며 이번 구현 범위가 아니다:
+lib/features/dev_puzzle/
+  dev_puzzle_gate.dart          dev 진입 활성화
+  dev_puzzle_host.dart          앱 생명주기·뒤로가기·진입 어댑터
+  shiftbell_game_skin.dart      AppUiPalette/Typography/Metrics/Motion 역할 연결
+  puzzle_progress_store.dart   게임 전용 키 저장소 어댑터
+현재 구현의 의존 방향은 lab→UI→core, tools→core다. 기존 앱에는 의존 간선이 없다.
+향후 연결을 별도 허용한 경우에만 앱→UI 간선을 추가할 수 있다.
+core→UI 또는 UI→기존 앱 역참조를 금지한다.
+독립 게임은 같은 UI/core에 다른 Host/Store/Skin을 주입하는 방식으로 분리한다.
+패키지 이름은 설계 기본값이다. 착수 시 충돌을 확인하고 한 번 정하면 모든 참조를 함께 갱신한다.
+첫 버전에는 Flame/물리 엔진/외부 경로 탐색 서버가 필요 없다.
+
+2. 데이터 계약
+08_pilot_levels.json을 레벨 입력의 기준으로 삼는다.
+상위:
+  schemaVersion=1, ruleSetId="shared-goal-v1", packId="dev-pilot-12", revision=1, levels=[...].
+각 레벨:
+  id, revision, width, height, rows, goal:[x,y], units:[{id,start:[x,y]}],
+  maxCommands, requiredMechanics.
+rows: 높이 개수의 문자열. 각 문자열 길이는 width. "."=Walkable, "#"=Blocked.
+Goal과 Unit은 rows 위의 별도 오버레이이며 해당 셀은 반드시 "."이다.
+requiredMechanics는 ["straight-motion","absorbing-shared-goal"]만 허용한다.
+Unknown schema/ruleSet/mechanic은 명시 오류로 거절한다. 조용히 무시하거나 v1로 추정하지 않는다.
+개별 좌표는 정수. Float, NaN, 문자열 숫자, 격자 밖 좌표를 받아 정수로 반올림하지 않는다.
+런타임 경로:
+  {unitId:"A", endpoints:[[x1,y1],...,[gx,gy]]}
+시작점은 LevelSpec에서 가져온다. 첫 endpoint를 시작점으로 오해하지 않는다.
+명령 수는 endpoints.length. MoveCommand의 start는 이전 endpoint 또는 UnitSpec.start.
+불변 모델을 사용하고 Route와 Level의 ID/리비전/해시가 바뀌면 결과 캐시를 폐기한다.
+level identity는 (packId, levelId, revision, ruleSetId). ID만 같은 옛 경로를 재생하지 않는다.
+임의 길이 숫자·리스트 입력은 파싱 단계에서 상한을 검사한 뒤 객체를 생성한다.
+
+09_pilot_certificates.json은 개발용 검증 데이터다.
+domains[].routes의 routeIndex는 0부터이며 각 Unit 안에서만 유효하다.
+safeAssignments의 [a,b,c]는 A의 routeIndex=a, B=b, C=c인 정답 조합이다.
+이 인덱스는 Solver 탐색 순서 계약이 아니다. 비교 시 실제 endpoint 경로로 대응한다.
+witness에는 시작점이 제외되어 있다. 각 route의 시작점은 08에서 복원한다.
+개발용 해답·통계·실패 궤적을 사용자 화면이나 정상 runtime asset에 함께 노출하지 않는다.
+최초 레벨 import 시 필요한 입력만 08에서 명시적으로 복사한다.
+
+3. LevelValidator
+순서: 형식/상한 → 좌표/ID → 맵 구조 → 규칙 지원 → 개별 도달 가능성.
+- 5<=width,height<=8; 2<=Unit수<=5; 1<=maxCommands<=5.
+- 문자열 길이·문자 집합 검사, ID 중복/빈 ID 거절.
+- Goal 정확히 하나, 좌표가 "."인지 검사. 서로 다른 시작점, 시작=Goal 금지.
+- 전체 "."의 4방향 연결성 검사. Goal을 포함한다.
+- Goal을 만나면 끝나는 직선 가시성 그래프를 만든다.
+- 각 시작에서 Goal까지 최소 명령 수가 N 이내인지 검사.
+이것은 필요조건일 뿐이다. 모든 Unit을 함께 해결할 수 있는지는 PuzzleSolver가 증명한다.
+결과: valid 또는 구조화된 오류 코드/위치/Unit ID. 사용자 화면 문구와 분리한다.
+권장 코드: unsupportedSchema, unsupportedRuleSet, unsupportedMechanic, outOfBounds,
+invalidMap, duplicateUnitId, duplicateStart, startOnGoal, blockedPlacement,
+disconnectedWalkable, individuallyUnreachable.
+레벨 데이터 오류는 플레이어의 실패 횟수로 세지 않는다.
+
+4. RouteValidator와 MotionCompiler
+미완성 draft 검사와 실행 직전 complete 검사 모드를 구분한다.
+- 정확한 Unit 집합이 있는지 검사. 누락/추가/중복 Unit 경로를 거절한다.
+- endpoints 수는 1..N. empty draft는 입력 중에는 허용하되 실행에는 부적합하다.
+- 각 명령에서 current!=end, 같은 행 또는 열.
+- cardinal ray의 중간 칸/끝 칸 모두 검사한다.
+- ray 중간에서 Goal을 만났는데 end가 Goal이 아니면 goalPassThrough 오류.
+- 처음 Goal에 도착한 명령 이후 endpoint가 있으면 commandAfterGoal 오류.
+- complete 모드에서는 마지막 endpoint=Goal 필수.
+- 직선 분할, 되돌아가기, 반복 방문은 오류로 처리하지 않는다.
+검증을 마친 경로만 MotionCompiler가 Step별 LinearPiece로 변환한다.
+MoveCommand는 Step k의 [0,1]을 정확히 사용한다. 짧은 거리도 일부 시간만 사용하지 않는다.
+완료 후의 Piece는 생성하지 않는다. 빈 명령/대기 Piece로 N까지 채우지 않는다.
+현재 v1은 명령당 LinearPiece 1개로 충분하다.
+
+5. 유리수 수학
+Rational(numerator,denominator): denominator>0, gcd로 기약화, 0은 0/1로 정규화.
+비교는 교차곱. 시간과 좌표는 서로 다른 값이므로 RationalPoint(x,y)로 분리한다.
+화면에 그릴 때만 toDouble. float→유리수로 역변환하여 판정하지 않는다.
+격자 좌표는 0..7. 변위는 -7..7, 상대 변위는 -14..14.
+접촉 시각의 기약 분모는 1..14 범위다. 후보 t=p/q는 정수 연산으로 검사 가능하다.
+q*S+p*(E-S) 등 v1 산술은 매우 작은 정수라 JS의 정확한 정수 범위 안에 있다.
+v1에서 BigInt를 모든 좌표에 적용할 필요는 없다. 입력 상한을 유지하는 것이 전제다.
+큰 맵·연쇄 포탈·임의 유리수 구간 도입 때에는 범위를 다시 증명하거나 BigInt를 도입한다.
+전체 경로 수/해답 수는 지수 증가한다. 임의의 전체 개수는 BigInt 또는 상한+truncated로 관리한다.
+웹에서 64칸 비트셋을 int의 1<<cellIndex로 만들지 않는다.
+Dart JS target의 비트 연산은 32비트 특성이 있으므로 bool 목록/작은 set/분할 word를 사용한다.
+공식 근거: https://dart.dev/resources/language/number-representation
+
+6. CollisionResolver: 순수 기하 판정
+입력: 같은 Step에 존재하는 두 선형 Piece (S_A,E_A),(S_B,E_B).
+r = S_A - S_B
+v = (E_A-S_A) - (E_B-S_B)
+접촉 조건: r + v*t = (0,0), 0<=t<=1.
+
+절차:
+1) vx=vy=0이면, r=(0,0)일 때 CoincidentInterval([0,1]), 아니면 None.
+2) v의 0이 아닌 성분 j 하나를 고른다.
+3) t=-rj/vj를 p/q로 정규화한다. q>0.
+4) p<0 또는 p>q이면 None.
+5) x와 y 모두 q*r_axis + p*v_axis = 0인지 확인한다.
+   하나라도 다르면 None. 각 축의 0.5,0.500001 같은 근삿값 비교는 하지 않는다.
+6) 둘 다 맞으면 InstantContact(t, Q).
+   Q_axis=(q*S_A_axis+p*(E_A_axis-S_A_axis))/q를 기약화한다.
+
+결과는 None | InstantContact | CoincidentInterval 중 하나다.
+동일 방향 추월, 반대 방향, 교차, 정지, 시작/끝 접촉을 같은 공식으로 처리한다.
+정지 명령은 게임 규칙상 금지지만 기하 함수의 완결성을 위해 정지 입력도 정의한다.
+CoincidentInterval은 한 순간이라고 축약하지 않는다. 유효 v1의 서로 다른 시작 경로에서
+최초 충돌 없이 이런 구간이 나타날 수는 없다. 나타나면 구간 시작에서 실패 처리한다.
+해당 구간의 시작이 Goal인 정상 활성 경로도 v1 검증을 통과할 수 없다.
+
+Geometry는 Goal을 모른다. Goal 예외는 검증된 입력 위에서 CollisionPolicy가 처리한다.
+합법적 v1 접촉 Q=Goal, t=1이면 동시 도착으로 허용한다.
+Goal 중간 통과 입력은 예외 판정 전에 RouteValidator가 거절한다.
+01에 없는 개별 Goal 소유권 정책 등을 미리 추정하지 않는다.
+
+7. SimulationEngine의 결과 계약
+입력: 불변 LevelSpec + 모든 완성 UnitRoute. 실제 시간·FPS·랜덤·UI 객체 없음.
+출력:
+  InvalidPlan(issues)
+  또는 SimulationTrace(outcome=success|collision, motions, arrivals, earliestCollisions,
+                       durationInSteps, ruleSetId, levelIdentity, routeRevision).
+earliestCollisions는 같은 가장 이른 시각의 모든 금지 충돌을 포함한다.
+3 Unit이 같은 곳에서 만나면 3쌍 정보를 보존하되 UI는 하나의 위치와 Unit 집합으로 묶는다.
+같은 시각 다른 두 곳에서 충돌하면 두 사건을 모두 보존한다.
+출력 순서는 전역 시각→위치→정렬된 Unit ID로 안정화한다.
+완료/충돌 이벤트는 재생 콜백이 만드는 사실이 아니라 엔진 결과에 이미 들어 있다.
+
+권장 처리:
+각 Step에 아직 완료되지 않은 Unit의 명령을 모은다.
+모든 쌍에 대해 접촉을 분석하고 Goal 정책을 적용한다.
+금지 접촉의 최소 시각을 구한다.
+그 시각보다 늦은 도착/이동 결과는 실행 결과로 적용하지 않는다.
+같은 시각의 Goal 도착은 기록할 수 있지만 금지 충돌이 있으면 전체 결과는 collision.
+금지 충돌이 없으면 t=1에서 해당 Goal 도착 Unit을 모두 completed로 제거한다.
+다음 Step으로 진행. 모두 제거되면 N을 기다리지 않고 성공한다.
+v1 최대 5 Step, Unit 5개이면 쌍별 검사 최대 5*10=50회다.
+유효 경로의 단일 실행 판정은 작다. Solver의 조합 탐색 비용과 혼동하지 않는다.
+
+Step 경계:
+step=k(1기반), local t이면 전역 시간 tau=(k-1)+t.
+(k,1)과 (k+1,0)은 같은 전역 시각이다.
+이벤트 키에는 tau를 사용하여 중복 보고를 막고, 경계 사건은 앞 Step의 끝 표현을 우선한다.
+Goal에서 완료된 Unit을 다음 Step의 t=0 활성 집합에 다시 넣지 않는다.
+Goal 이외의 끝점 충돌을 먼저 제거/이동 적용으로 숨기지 않는다.
+
+8. UI가 사용할 서비스 경계
+LevelRepository: 검증된 pack/level 읽기, 서버 의존 없음.
+GameRules: level/route 검증, legalDestinations(current), compile+simulate.
+PuzzleSolver: existence/count/witness를 tools에서 제공. 게임 정상 시작 때 호출하지 않는다.
+GameSessionController: 선택/초안/undo/상태 전환 관리. 판정은 core에 위임.
+ReplayController: trace와 커서를 받아 재생. 충돌을 직접 계산하지 않는다.
+ProgressStore: 완료 ID·revision·현재 초안 저장. 구현체는 host에 주입.
+GameHostCallbacks: exit, systemBack delegate 등. 일정/알람 서비스 객체는 전달하지 않는다.
+GameSkin/GameStrings: 색/글자/간격/문구와 공통 컨트롤 계약.
+Future completion에는 session generation/revision을 붙여 옛 레벨 결과가 현재 화면을 덮지 못하게 한다.
+
+9. 미래 확장 경계: 포탈
+지금 필요한 추상화는 '명령을 시간 궤적으로 변환'하는 MotionCompiler 경계 하나다.
+향후에는 Step의 일부 시간에 대한 LinearPiece 여러 개와 InstantTransition 사건으로 표현 가능하다.
+포탈 입구→출구를 잇는 가짜 직선을 만들면 그 사이 장애물/Unit과 거짓 충돌이 발생하므로 금지한다.
+순간 이동 시 같은 정확한 시각의 입구/출구 점유를 어떻게 정의할지는 새 규칙 결정이 필요하다.
+방향 유지/출구 방향, 남은 이동 거리, 남은 시간, 포탈을 종점으로 선택 가능 여부,
+연쇄 순환, 동시에 양쪽 진입, Goal 도착 우선순위를 먼저 확정해야 한다.
+여러 Piece는 공통 시간 구간 교집합으로 나누어 분석한다는 설계 방향만 보존한다.
+새 규칙은 새 ruleSetId 및 별도 golden fixture를 요구한다.
+지금 가짜 PortalTile, 임의 teleportDuration, 빈 switch case fallback을 구현하지 않는다.

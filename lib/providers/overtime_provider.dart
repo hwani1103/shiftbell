@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 // providers/overtime_provider.dart
 
 import 'data_revision_provider.dart';
@@ -29,7 +30,7 @@ class OvertimeNotifier extends StateNotifier<Map<String, int>> {
       newState.remove(_dateKey(d));
     }
     newState.addAll(data);
-    state = newState;
+    if (!mapEquals(state, newState)) state = newState;
   }
 
   // ⭐ 30분 단위 증감. 성공 시 그 날짜의 새 누적 시간(분) 반환
@@ -64,7 +65,8 @@ class OvertimeNotifier extends StateNotifier<Map<String, int>> {
   // ⭐ 특정 연/월의 날짜별 OT 목록 (날짜 오름차순)
   List<MapEntry<String, int>> getMonthEntries(int year, int month) {
     final prefix = '$year-${month.toString().padLeft(2, '0')}-';
-    final entries = state.entries.where((e) => e.key.startsWith(prefix)).toList();
+    final entries =
+        state.entries.where((e) => e.key.startsWith(prefix)).toList();
     entries.sort((a, b) => a.key.compareTo(b.key));
     return entries;
   }
@@ -94,6 +96,7 @@ class OvertimeNotifier extends StateNotifier<Map<String, int>> {
   }
 }
 
-final overtimeProvider = StateNotifierProvider<OvertimeNotifier, Map<String, int>>(
+final overtimeProvider =
+    StateNotifierProvider<OvertimeNotifier, Map<String, int>>(
   (ref) => OvertimeNotifier(ref),
 );

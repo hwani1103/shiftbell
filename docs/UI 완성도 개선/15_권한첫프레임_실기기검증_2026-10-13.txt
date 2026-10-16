@@ -1,0 +1,50 @@
+권한 첫 프레임 실기기 검증 — 2026-10-13 (진행 기록)
+
+기기: R5KL20DHWAE / SM_S948N / Android 16 / 1080x2340.
+대상: com.hwani1103.shiftbell.dev, versionCode 27, versionName 1.0.24-dev.
+최신 debug APK: onboarding_round6 SHA256 733D420E7F0AC6D33FE7DD411FAEF7B190A732DFAF70F9B57F490480EDDADD35. 데이터 보존 설치 성공.
+
+현재 기기 조건
+- 설치 직후 상태가 아님: permissions_requested=true, 백업 기록 존재.
+- 실제 신규 설치 재현을 위한 dev 데이터 초기화 여부는 사용자 질문 응답 대기. 데이터 초기화/앱 삭제는 수행하지 않음.
+- 대안: 완료 플래그만 일시적으로 false로 바꿔 정상 InitialRouter의 권한 경로를 사용하고, 녹화 후 원래 환경 설정 바이트를 정확히 복원함.
+- 정식 앱 패키지/데이터/권한은 조작하지 않음.
+
+영상 결과
+1. 기존 설정 그대로 최신 debug COLD 실행: 백업 복구 안내로 정상 도달. 최초 실행 증거로 쓰지 않음.
+2. 완료 플래그 임시 false / 기존 모든 권한 허용: 처음 unknown 상태의 권한 카드 4개가 표시된 뒤 조회 완료 시 자동 진행하여 복구 안내로 이동. PermissionIntroScreen._permissionsChanged → _continue 흐름과 일치.
+3. 완료 플래그 임시 false / 오버레이만 임시 ignore: 첫 권한 UI는 카드 4개(알림/오버레이/정확한 알람/전체화면), 다음 UI는 오버레이 카드 1개. 영상 타임스탬프 2149.2ms → 2182.5ms, 약33ms 간격. 초기 unknown snapshot과 실제 조회 완료 필터 변경이 실기기에서도 보임.
+- 원래 appops SYSTEM_ALERT_WINDOW allow 및 환경 설정 복원 확인. 권한 화면의 설정 버튼은 누르지 않았고 설정 화면 연쇄 실행 없음.
+- 사용자 관찰의 다른 온보딩 화면 → 권한 화면은 재현되지 않음. 확인된 권한 카드 재배치와 동일 현상이라고 단정하지 않음.
+- 별도 --es route /permission_intro 진입 녹화는 초기 라우팅 조건이 다르므로 최초 실행 판단에서 제외.
+
+증거: artifacts/startup_device_2026-10-13/
+- latest_debug_existing_state.mp4 / .log
+- debug_permission_entry.mp4 / debug_permission_log.txt
+- debug_missing_overlay_permission_entry.mp4 / .png / debug_missing_overlay_permission_log.txt
+- debug_preference_restore.txt, debug_missing_overlay_preference_restore.txt, debug_missing_overlay_overlay_restore.txt
+- verify_permission_entry.py: 원본 환경 설정 보존/임시 플래그/촬영/finally 복원
+- contact_frames.py: 실제 영상 프레젠테이션 타임스탬프 기반 프레임 비교 (평균fps로 시간 환산하지 않음)
+
+profile/AOT 비교는 진행 중. release 빌드는 실행하지 않음. 권한/시작 경로 생산 코드 수정 없음. 호스트 테스트와 신규설치 실기기 검증 및 잠금 알람 검증을 혼동하지 않음.
+
+완료 판정 및 profile 비교
+- dev profile APK 생성 완료, aapt 확인: 같은 dev package/code27. install -r 성공. libapp.so 3개 ABI 포함, kernel_blob 없음 → AOT 산출물 확인.
+- profile 오버레이 미허용 녹화에서도 카드4개 → 오버레이1개 변화 확인. 영상 타임스탬프1368.0ms →1384.8ms, 약16.8ms 간격.
+- 증거: profile_missing_overlay_permission_entry.mp4 / .png / profile_missing_overlay_permission_log.txt / profile_missing_overlay_install.txt.
+- ‘확인된 권한 카드 순간 재배치는 Flutter debug 전용이 아님’으로 판정. 초기 PermissionSnapshot({})에서 unknown 카드들이 표시되고, 비동기 조회 뒤 허용/해당없음 카드들이 필터링되는 공통 경로와 일치.
+- Android profile APK는 application-debuggable 플래그를 유지하므로 Android release 동작 전체를 검증한 것은 아님. 관련 시작/권한 경로의 BuildConfig.DEBUG/kDebugMode/kProfileMode/FLAG_DEBUGGABLE 분기는 발견되지 않음. release 빌드 및 실기기 release 비교는 수행하지 않음.
+- 사용자 관찰 ‘다른 온보딩 화면이 먼저 보이고 권한 화면으로 전환’은 이번 영상에서 재현되지 않았다. 권한 화면의 첫 프레임 배치 변화와 동일 현상이라고 확정하지 않는다.
+- 완전한 신규 설치(데이터 및 OS 권한 초기 상태)는 수행하지 않음. 초기화 질문 응답 없이 데이터를 지우지 않았으며 대안인 임시 플래그/임시 오버레이만 사용 후 복원함. 향후 정확한 관찰 동일성 판별에는 실제 신규설치 재현이 추가로 필요.
+
+복원 확인
+- profile 비교 후 최신 round6 debug APK install -r 성공. 설치된 base.apk SHA256이 원본 round6 733D420E7F0AC6D33FE7DD411FAEF7B190A732DFAF70F9B57F490480EDDADD35와 일치.
+- 환경 설정 원본 바이트 일치, permissions_requested=true, SYSTEM_ALERT_WINDOW=allow 확인. 정식 앱/DB/백업 파일 삭제 없음.
+- profile 비교 빌드 로그에는 NativeCommandError 형식의 컴파일 경고와 PowerShell 프로세스 exit1이 있었으나 최종 Built 메시지/정상 APK/AOT 확인 및 설치·실행 성공으로 비교 산출물을 검증함. ‘빌드 프로세스 exit0’로 기록하지 않음.
+
+후속 수정 제안
+- 최초 권한 조회가 끝날 때까지 안정된 초기 화면을 유지하여 임시 unknown 카드4개 표시를 방지한다. unknown을 허용으로 간주하지 않는다. 이후 resume 재조회와 설정 복귀 흐름은 유지한다.
+- 이번에는 검증만 수행했고 생산 코드 수정 없음. 수정 시 P0 권한 진입/복귀 영향을 검토하고 check_critical_release.ps1 -Build 실행.
+- 앱 전체 권한/잠금 알람 실기기 PASS가 아니라 이번 첫 프레임 동작 확인으로만 기록한다.
+
+사용자 후속(수정 진행 중): 다른 온보딩 화면으로 보였다는 관찰은 잘못 본 것 같다고 정정. 확인된 카드 재배치를 수정 대상으로 합의하여 16번 원장에 연결. 신규 설치 데이터 초기화는 하지 않고 정상 초기 권한 경로의 임시 플래그 검증을 사용한다.

@@ -1,3 +1,4 @@
+import '../../utils/calendar_dates.dart';
 // lib/services/condition/sleep_shift_relation.dart
 //
 // ⭐ 근무시간과 겹치는 수면을 "정상 데이터로 저장 + 조회 시점에 분류"하는 원칙의
@@ -41,7 +42,7 @@ SleepRelation classifySleepRelation(SleepRecord record, ShiftPatternAnalyzer ana
   // 여지가 있었다 - graceAdjustedShiftEnd 도입과 별개로 그 자체로도 놓치고
   // 있던 케이스). 전날에 근무가 없거나 휴무면 그냥 무시되므로(아래
   // isWorkDay 체크) 안전하게 범위만 넓힘.
-  var day = DateTime(record.start.year, record.start.month, record.start.day).subtract(const Duration(days: 1));
+  var day = shiftLocalCalendarDay(record.start, -1);
   final lastDay = DateTime(end.year, end.month, end.day);
   while (!day.isAfter(lastDay)) {
     final inst = analyzer.instanceForDate(day);
@@ -53,7 +54,7 @@ SleepRelation classifySleepRelation(SleepRecord record, ShiftPatternAnalyzer ana
       final overlaps = record.start.isBefore(effectiveEnd) && end.isAfter(inst.start!);
       if (overlaps) return SleepRelation.workShiftOverlap;
     }
-    day = day.add(const Duration(days: 1));
+    day = shiftLocalCalendarDay(day, 1);
   }
 
   final minutes = end.difference(record.start).inMinutes;

@@ -1,0 +1,127 @@
+GAME-01 W00~W03 규칙 엔진·충돌 판정 구현 및 검증 — 2026-10-13
+상태: 규칙 엔진 및 Dart host/JavaScript 검증 완료 / Flutter UI·Android 앱·사람 테스트 미수행
+사용자 요청: W00부터 구현하되 우선 규칙 엔진·충돌 판정·검증까지 완성. 기존 dev/prod 및 다른 세션의 레이아웃 작업과 분리.
+연결 인계: ../06_GAME-01_구현인계_읽기순서_2026-10-13.txt
+기준 설계: ../game_design_v1/12 → 01 → 02 → 07, 추가 03~06 및 08~11 읽음.
+기존 설계서/인증서/과거 원장은 수정하지 않고 이 후속 원장을 추가했다.
+
+1. W00 시작 기준과 쓰기 범위
+branch: dev. 시작 때 기존 앱/대시보드/UI/문서에 광범위한 미커밋·미추적 작업 존재.
+git_status_start.txt에 시작 상태를 보존하고 tracked_baseline.json에 읽기 가능한 기존 tracked 1,427개 파일의 SHA-256을 저장했다.
+기본 git 파일명 quoting 때문에 일부 비ASCII 경로는 hash baseline에 포함되지 않을 수 있다. 기존 미추적 파일 전체의 해시를 기록했다는 뜻이 아니다.
+설계 입력 08/09/10은 별도로 공개된 문서 해시와 비교하여 동일함을 확인했다.
+예정 core/tools/UI/lab 디렉터리는 착수 때 존재하지 않았다. 사용자 파일 덮어쓰기 없음.
+
+이번 작업의 쓰기 루트:
+  packages/sync_path_core/
+  packages/sync_path_tools/
+  examples/sync_path_lab/
+  docs/next_version_27이후/game_implementation_v1/
+root pubspec/lockfile, 기존 lib/android/web/assets/tools/CI 및 기존 원장은 쓰기 대상으로 잡지 않았다.
+reset/checkout/clean/stash, 커밋/푸시, 기존 앱 연결·빌드·설치·데이터·권한 변경 없음.
+기존 앱 ID의 읽기 확인: prod=com.hwani1103.shiftbell, dev=com.hwani1103.shiftbell.dev.
+이번 lab은 콘솔 실행기이므로 Android applicationId나 기기 설치는 아직 없다.
+
+환경:
+  Windows / Dart SDK 3.11.5 (dart --version 실제 출력).
+  Flutter 캐시 metadata: 3.41.7 stable. flutter --version 호출은 완료되지 않아 중단했고 Flutter 실행/빌드 PASS로 쓰지 않음.
+  최초 pub get --offline은 전역 Pub Cache의 active_roots 쓰기 권한 오류로 종료.
+  이미 있는 47개 테스트 의존성을 core/.pub-cache로 복사하고 기존 SHA-256 메타데이터도 복사했다.
+  해당 패키지 전용 캐시에서 core/tools/lab의 최종 pub get --offline 모두 exit 0.
+  전역 SDK 업그레이드, 전역 pub 설정 변경, 기존 앱 pub get/upgrade 없음.
+
+2. 구현 상태
+W00 COMPLETE: 읽기, 경로 충돌 확인, 시작 상태/검증 계획·격리 기준 보존.
+W01 COMPLETE: 불변 Cell/GridMap/Unit/LevelIdentity/LevelSpec/RoutePlan, bounded JSON parser,
+  구조·배치·연결성·지원 규칙·개별 도달 검증, Goal-stopping legalDestinations,
+  draft/complete와 정확한 Unit 집합, 중간 벽·Goal 통과·Goal 이후 명령 검사.
+  Unit 경로 endpoint에는 시작을 넣지 않고 시작점은 level에서 가져온다.
+  최대 N·1회 조기 도착·분할·왕복·재방문 허용. 제자리/대각선/대기 금지.
+W02 COMPLETE: 정규화 Rational/RationalPoint, 상대 운동 r+v*t 정확 정수 판정.
+  NoContact/InstantContact/CoincidentInterval을 구분한다. Geometry에는 Goal/픽셀/FPS 개념이 없다.
+W03 COMPLETE: 검증된 snapshot의 MotionCompiler, Goal 동시 도착 허용,
+  도착 즉시 이후 Step 제거, 정확한 최초 금지 충돌 시각의 모든 쌍 보존,
+  위치→정렬 Unit ID의 안정 정렬, InvalidPlan과 collision 분리, 불변 Trace.
+  같은 시각 Goal 도착과 금지 충돌이 있으면 collision이 우선한다.
+  motions는 정지 Step까지의 계획 조각이다. 실패 Step endpoint는 실제 도달 결과가 아니며
+  이후 UI 재생은 반드시 durationInSteps에서 clamp해야 한다.
+  levelIdentity와 routeRevision을 trace에 포함한다. ID만의 전역 결과 캐시 없음.
+
+W04 PARTIAL: 제작용 Solver와 인증서 검증 부분 COMPLETE, Generator는 다음 범위.
+  reverse BFS/거리 가지치기 DFS, MRV/forward checking CSP, bounded compatibility cache.
+  정답을 core 전체 simulate로 재검증한다. BigInt exactCount 또는 lowerBound/truncated.
+  예산 초과의 무해답은 UNKNOWN, 완전 무해답만 UNSAT. cap 도달 SAT를 유일해답으로 표시하지 않음.
+  도메인/노드/해답/캐시 상한을 제공하며 시간 제한 API는 아직 없음.
+  별도 직접 ray DFS + 유리수 후보 전수 oracle로 모든 인증서 도메인/해답/충돌/통계를 대조한다.
+  이번 사용자 우선 범위에는 자동 생성이 필요하지 않아 Generator는 구현 완료로 표시하지 않았다.
+
+독립 lab: core만 의존하는 별도 pubspec/lockfile/콘솔 진입점.
+  LEVELS.json + identity/revision을 가진 PLAN.json → TRACE.json.
+  success/collision exit 0, invalidPlan exit 2. 출력 파일만 쓰고 자동 저장/서버/광고/알람/권한 없음.
+  tools/인증서/기존 앱을 import하지 않는다. sample plan은 개발 검증 원장에만 있으며 runtime asset 등록 없음.
+W05~W06 NOT_STARTED: Flutter 입력 화면, UI 패키지, 재생/저장/생명주기.
+W07 NOT_COMPLETE: 콘솔 lab 준비만 완료. Flutter/Android 별도 실행 앱은 후속.
+W08~W09 NOT_RUN: 독립 MVP·실기기·사람 파일럿.
+
+3. 실제 최종 검증 증거
+실행:
+  docs/next_version_27이후/game_implementation_v1/check_game_engine.ps1 -Offline -Web
+최종 exit 0. 실행기는 각 새 패키지/lab의 working directory를 사용한다. 기존 앱 출시 실행기를 호출하지 않는다.
+
+core analyze: No issues found (core_analyze.txt).
+tools analyze: No issues found (tools_analyze.txt).
+lab analyze: No issues found (lab_analyze.txt).
+core 테스트 89개 PASS (core_test.txt).
+tools 테스트 8개 PASS (tools_test.txt).
+총 97개 테스트 PASS. 초기 analyzer 불필요 cast 경고 5개는 수정 후 최종 0개.
+
+검증한 계약:
+  20개 기하 golden vector의 정확 기약 시각/좌표/interval.
+  Unit 교환, 회전, 반사, geometry 시간 뒤집기.
+  고정 seed=20261013의 20,000개 bounded segment 쌍과 독립 유리수 후보 전수 oracle 일치.
+  12개 witness 성공, 합법 실패 예 10개 최초 충돌 일치.
+  3 Unit 접촉의 3쌍, 같은 시각 2곳의 충돌, Goal 동시 도착과 금지 충돌 우선순위.
+  Step 경계 충돌 중복 없음, 늦은 도착 억제, N 이전 즉시 성공.
+  A 1회/B 3회 조기 완료 및 A의 뒤 Step motion 미생성.
+  분할/왕복 보존, Unit/route 순서 변경 및 재실행 trace 동일, defensive snapshot/불변 목록.
+  오류 schema/rule/mechanic·좌표·ID·맵·개별 도달·잘못된 경로·거대한 JSON·stale revision 거절.
+  Solver UNKNOWN/SAT truncated/UNSAT exact 0 구별과 bounded memory/노드 검사.
+
+12레벨 완전 대조: pilot_verification.json / pilot_verify.txt.
+  모든 개별 경로 집합, safeAssignments의 실제 endpoint 조합 및 전체 359개 조합의
+  success/collision과 최초 충돌 쌍/시각/좌표를 인증서와 독립 oracle로 비교하여 일치.
+  전체 정답 47개. 레벨별 1,3,1,1,1,22,8,2,2,2,1,3.
+  최소 명령/최소 합·조기 도착·상호작용 간선·도착 범위·Goal 진입 수·제한 트릭 통계 일치.
+  L07 왕복 없는 정답 0, L09/L10 직선 분할 없는 정답 0.
+
+lab 콘솔: L01 success, L09 collision(3쌍), 같은 ID/revision=2 초안 invalidPlan(staleLevelIdentity).
+  lab_success/collision/stale의 plan/trace JSON과 *.txt에 실제 입력/출력을 보존.
+
+웹 target: Flutter 웹앱 빌드가 아니라 순수 core의 Dart→JavaScript 컴파일 + Node 실행.
+  12개 witness, 20개 충돌 vector, float 정수 입력 거절, 1회/3회 조기 제거, 64칸(8×8) 맵 PASS.
+  web_compile.txt, web_smoke.txt. 생성 JS/맵은 git ignore인 로컬 개발 산출물.
+  Android release/debug 빌드나 기기 설치를 수행한 것으로 표현하지 않는다.
+
+4. 기존 앱과 다른 세션 보존
+isolation_audit.json: baseline 1,427개 중 기존 tracked 파일 변경 1개(AGENTS.md), 누락 0개.
+AGENTS.md에는 다른 세션의 UI26/UI27 합의가 추가되어 있었다. 읽어서 최신 제약을 확인했고 수정/원복하지 않았다.
+root pubspec/lockfile 및 baseline의 기존 앱 소스/native/웹 구성은 시작 hash와 동일했다.
+새 게임의 import 의존 방향은 lab→core, tools→core이며 기존 앱으로 가는 import 없음.
+08/09/10 문서 입력의 SHA-256은 11_문서검증기록.txt와 정확히 일치한다.
+기존 untracked UI 작업 전수 hash 비교나 동시 세션의 모든 쓰기 관찰을 했다는 뜻은 아니다.
+이번 작업의 모든 쓰기 호출은 위 4개 새 디렉터리 안에 한정되어 있다.
+
+기존 tools/check_critical_release.ps1: NOT_RUN. 기존 앱 P0/언어/구성/코드 변경이 없고
+그 실행기는 기존 dev 앱/웹을 빌드하므로 이번 격리 엔진 범위에는 호출하지 않았다.
+기존 앱 연결, 탭 추가, 운영/광고/서버/권한 수정: 없음.
+실기기 잠금 알람·제조사 설정·앱 공존: NOT_TESTED.
+사람 재미·실제 난이도·1~3분 풀이·터치 편의: NOT_TESTED.
+
+5. 다음 단계와 인계 주의
+현재 완료 표현: 'W00~W03 규칙 엔진·충돌 판정·Dart/JS 검증 완료, W04 Solver 검증 완료'.
+'독립 Flutter MVP 완료' 또는 '실기기/재미 검증 완료'로 확대하지 않는다.
+다음 범위는 W04 Generator 보완 또는 W05 독립 UI이며 기존 앱 연결은 계속 별도 후속 승인 범위다.
+새 UI는 core 판정을 사용하고 숫자/좌표/분수/인증서를 정상 보드에 노출하지 않는다.
+단일 선형 재생 cursor·duration clamp·Goal 제거·실패 후 계획 보존은 다음 UI 검증에 연결해야 한다.
+Android 프로젝트를 만들 때 위 기존 두 앱 ID와 다른 ID/자체 저장소로 만들고 설치는 명시 요청 시에만 한다.
+기존 앱 변경을 이유 없이 되돌리거나 root에서 format/pub upgrade/create를 실행하지 않는다.

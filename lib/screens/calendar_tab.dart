@@ -1,3 +1,16 @@
+import '../widgets/app_ui_theme_scope.dart';
+import '../widgets/app_ui_feedback.dart';
+import '../widgets/calendar_shift_change.dart';
+import '../utils/calendar_cell_annotations.dart';
+import '../theme/calendar_layout_contract.dart';
+import '../widgets/detail_calendar_cell.dart';
+import '../widgets/contract_calendar_cell.dart';
+import '../theme/calendar_date_grid.dart';
+import '../theme/calendar_merged_summary_border.dart';
+import '../theme/calendar_reading_palette.dart';
+import '../widgets/shift_chip_label.dart';
+import '../widgets/calendar_app_frame.dart';
+import '../theme/app_ui_theme.dart';
 import '../widgets/alarm_mode_label.dart';
 import '../widgets/global_concept_calendar_cell.dart';
 import '../widgets/calendar_footer_actions.dart';
@@ -10,7 +23,6 @@ import '../constants/layout_limits.dart';
 import '../widgets/adaptive_layout.dart';
 import 'dart:math' as math;
 import '../widgets/fold_calendar_text_scale.dart';
-import '../widgets/english_calendar_label.dart';
 import '../widgets/calendar_memo_sizing.dart';
 import '../widgets/complete_cell_memo_text.dart';
 import 'package:flutter/material.dart';
@@ -65,37 +77,7 @@ String? _getHolidayName(DateTime date, BuildContext context) =>
         countryCode: deviceHolidayCountry(),
         languageCode: Localizations.localeOf(context).languageCode);
 
-// ⭐ 2026-09-22 음력 표기 - 매주 수요일 자리에만 보여주되, 그 날이 빨간날(일요일/공휴일)이면
-// 겹치지 않게 화→목→월→금→일→토 순서로 옆으로 밀어 빨간날이 아닌 첫 날을 찾음(사용자
-// 결정: 화수목 다 빨간날이면 월/금, 월~금 다 빨간날이면 일/토, 그마저 다 빨간날이면 그
-// 주는 표기 안 함). 일요일은 이 앱 규칙상 공휴일 여부와 무관하게 항상 빨간날 취급이라
-// (_getHolidayName와 별개로 weekday==sunday만으로 red 판정, _themedCellData 참고)
-// 사실상 이 일/토 단계는 항상 토요일로 수렴함 - 그래도 로직은 대칭으로 둠.
-// 이 함수는 순수하게 "그 주(일~토)에서 음력을 표기할 날짜가 며칠인지"만 계산 - 실제
-// 그 날이 오늘 그리는 셀(day)과 같은지는 호출부에서 비교.
-DateTime? _lunarLabelDateForWeek(DateTime anyDayInWeek, BuildContext context) {
-  final normalized =
-      DateTime(anyDayInWeek.year, anyDayInWeek.month, anyDayInWeek.day);
-  final daysSinceSunday = normalized.weekday % 7; // Dart: 월=1..일=7 → 일=0
-  final sunday = normalized.subtract(Duration(days: daysSinceSunday));
-  bool isRed(DateTime d) =>
-      d.weekday == DateTime.sunday || _getHolidayName(d, context) != null;
-
-  final wed = sunday.add(const Duration(days: 3));
-  if (!isRed(wed)) return wed;
-  final tue = sunday.add(const Duration(days: 2));
-  if (!isRed(tue)) return tue;
-  final thu = sunday.add(const Duration(days: 4));
-  if (!isRed(thu)) return thu;
-  final mon = sunday.add(const Duration(days: 1));
-  if (!isRed(mon)) return mon;
-  final fri = sunday.add(const Duration(days: 5));
-  if (!isRed(fri)) return fri;
-  if (!isRed(sunday)) return sunday;
-  final sat = sunday.add(const Duration(days: 6));
-  if (!isRed(sat)) return sat;
-  return null; // 일주일 내내 빨간날이면 이번 주는 음력 표기 없음
-}
+// 음력 표본은 수→화→목→월→금 순서로 공휴일·OT를 피한다. 주말에는 표시하지 않는다.
 
 // ⭐ 테마별 헤더/요일행 표기에 쓰는 공용 상수 - calendar_theme_lab_screen.dart의
 // 동명 상수(그 파일 안에서만 쓰이는 private const)와 값은 같지만 별도 파일이라
@@ -114,8 +96,7 @@ const Color _diaryAccent = Color(0xFFCB8A4E);
 
 // ⭐ 2026-09-22 음력 표기(메인 달력, 매주 수요일 자리에 "(4.14)" 형태) 글자 크기 -
 // 조정하고 싶으면 이 숫자만 바꾸면 됨(모든 테마 공통, .sp 적용 전 기준값).
-// 색상은 조정 대상 아님(상세팝업의 "(없음)" 텍스트와 같은 colorScheme.onSurfaceVariant
-// 고정 - _lunarCellTextStyle 참고). 표기 위치·표시 요일 결정 로직은 _lunarLabelDateForWeek 참고.
+// 색상은 날짜 숫자보다 조금 연한 공통 음력 역할(_lunarInk)을 사용. 표기 위치·표시 요일 결정 로직은 _lunarLabelDateForWeek 참고.
 const double kLunarCellFontSize = 7.0;
 
 // Theme cards use display-only examples; live schedule names stay untouched.
@@ -153,27 +134,101 @@ const Color _diaryTodayRedBg = Color(0xFFFCE2B0);
 // StatefulWidget → ConsumerStatefulWidget으로 변경
 class CalendarTab extends StatelessWidget {
   // ⭐ 변경
-  const CalendarTab({super.key, this.preview = false});
-  final bool preview;
+  const CalendarTab(
+      {super.key, this.preview = false, this.currentDesign = false});
+  final bool preview, currentDesign;
 
   @override
-  Widget build(BuildContext context) =>
-      FoldCalendarTextScale(child: _CalendarTabBody(preview: preview));
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, box) {
+        final safeWidth =
+            box.maxWidth - MediaQuery.paddingOf(context).horizontal;
+        return CalendarViewportScope(
+            unit: safeWidth / CalendarLayoutProfile.designWidth,
+            child: FoldCalendarTextScale(
+                child: _CalendarTabBody(
+                    preview: preview, currentDesign: currentDesign)));
+      });
 }
 
 class _CalendarTabBody extends ConsumerStatefulWidget {
-  const _CalendarTabBody({required this.preview});
-  final bool preview;
+  const _CalendarTabBody({required this.preview, required this.currentDesign});
+  final bool preview, currentDesign;
   @override
   ConsumerState<_CalendarTabBody> createState() => _CalendarTabState();
 }
 
 class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
+  bool get _staticPreview => widget.preview && !widget.currentDesign;
+  bool _usesLayoutContract(CalendarThemeId theme) =>
+      !_staticPreview &&
+      context.usesKoreanFeatures &&
+      CalendarThemeRollout.mode == 'reading' &&
+      CalendarLayoutProfile.forTheme(theme) != null;
+  bool get _contractActive =>
+      !_staticPreview && CalendarThemeRollout.mode == 'reading';
+  double get _layoutUnit => CalendarViewportScope.unitOf(context);
+  double _layoutLength(double value, {bool vertical = false}) =>
+      _contractActive ? value * _layoutUnit : (vertical ? value.h : value.w);
+  double get _weekdayHeight => _layoutLength(28, vertical: true);
+  double get _headerHeight =>
+      _layoutLength(AppUiMetrics.calendarHeaderHeight, vertical: true);
+
   // ⭐ 변경
   static const platform = kAlarmChannel; // ⭐ 추가
 
-  DateTime _focusedDay = DateTime.now();
+  DateTime _focusedDayValue = DateTime.now();
+  DateTime get _focusedDay => _focusedDayValue;
+  set _focusedDay(DateTime value) {
+    _focusedDayValue = value;
+    // Keep Today, picker, cell selection and swipe paths on the same signal.
+    _monthFeedbackNotifier.value = DateTime(value.year, value.month);
+  }
+
   DateTime? _selectedDay;
+  bool _monthScrolling = false;
+  DateTime? _pendingMonthLoad;
+  final _monthFeedbackNotifier = ValueNotifier<DateTime?>(null);
+
+  // Rebuild only month chrome; the moving calendar keeps its current widget.
+  Widget _monthFeedback(Widget Function() build) =>
+      ValueListenableBuilder<DateTime?>(
+          valueListenable: _monthFeedbackNotifier,
+          builder: (_, __, ___) => build());
+
+  bool _onMonthScroll(ScrollNotification notification) {
+    if (notification.depth != 0 ||
+        notification.metrics.axis != Axis.horizontal) {
+      return false;
+    }
+    if (notification is ScrollStartNotification) {
+      _monthScrolling = true;
+    } else if (notification is ScrollEndNotification) {
+      _monthScrolling = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _monthScrolling || _pendingMonthLoad == null) return;
+        final month = _pendingMonthLoad!;
+        _pendingMonthLoad = null;
+        setState(() {});
+        _loadMemosForMonth(month);
+      });
+      // A drag can finish exactly on a page boundary with no further frame.
+      if (_pendingMonthLoad != null) WidgetsBinding.instance.scheduleFrame();
+    }
+    return false;
+  }
+
+  void _onMonthChanged(DateTime month) {
+    _focusedDay = month;
+    if (_monthScrolling) {
+      // Title and cached summary update immediately above. Keep the expensive
+      // calendar-parent rebuild and range refresh after the gesture settles.
+      _pendingMonthLoad = month;
+      return;
+    }
+    _pendingMonthLoad = null;
+    setState(() {});
+    _loadMemosForMonth(month);
+  }
   // ShiftSchedule? _schedule;  ⭐ 삭제 (Provider에서 가져올 것)
 
   bool _isMultiSelectMode = false;
@@ -203,8 +258,11 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     if (schedule == null) return {};
     final theme =
         context.availableCalendarTheme(ref.watch(calendarThemeProvider));
-    return effectiveShiftColors(
-        schedule.shiftTypes, theme, schedule.customShiftColors);
+    return theme == CalendarThemeId.mainWhite
+        ? mainCalendarShiftColors(schedule.shiftTypes, schedule.shiftColors,
+            schedule.customShiftColors)
+        : effectiveShiftColors(
+            schedule.shiftTypes, theme, schedule.customShiftColors);
   }
 
   Color _getShiftBackgroundColor(String shift, ShiftSchedule? schedule) {
@@ -233,7 +291,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     }
 
     final color = _shiftColorMap(schedule)[shift];
-    if (color != null) return ShiftSchedule.getTextColor(color);
+    if (color != null) {
+      return ShiftSchedule.getTextColor(color);
+    }
 
     final colorScheme = Theme.of(context).colorScheme;
     return colorScheme.onSurfaceVariant;
@@ -252,8 +312,14 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     super.initState();
     // ⭐ 앱 시작 시 현재 달의 메모 로드
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadMemosForMonth(_focusedDay);
+      if (mounted && !widget.preview) _loadMemosForMonth(_focusedDay);
     });
+  }
+
+  @override
+  void dispose() {
+    _monthFeedbackNotifier.dispose();
+    super.dispose();
   }
 
   @override
@@ -306,13 +372,16 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     return _calendarColumn(day) >= 2;
   }
 
-  // ⭐ 특정 달의 메모 미리 로드 (달력에 보이는 이전/다음 달 날짜 포함)
+  // Warm both adjacent pages while idle, including their outside-month cells.
+  // OT also covers the previous adjacent month's payday period (up to two
+  // calendar months back). Header/summary changes never wait for this query.
   void _loadMemosForMonth(DateTime month) {
-    final firstDay = DateTime(month.year, month.month, 1 - 7);
-    final lastDay = DateTime(month.year, month.month + 1, 7);
+    final firstDay = DateTime(month.year, month.month - 1, 1 - 7);
+    final lastDay = DateTime(month.year, month.month + 2, 7);
     ref.read(memoProvider.notifier).loadMemosForDateRange(firstDay, lastDay);
-    // ⭐ 같은 범위로 OT도 같이 로드 (달력에 보이는 달 전체 커버)
-    ref.read(overtimeProvider.notifier).loadForRange(firstDay, lastDay);
+    ref
+        .read(overtimeProvider.notifier)
+        .loadForRange(DateTime(month.year, month.month - 2, 1), lastDay);
   }
 
   // ⭐ 4번 기능: 년/월 선택 다이얼로그
@@ -328,7 +397,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     final monthFormat =
         DateFormat.MMM(Localizations.localeOf(context).toString());
 
-    showDialog(
+    showAppUiDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
@@ -479,17 +548,21 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         : isDarkTheme
             ? const Color(0xFF1A1F2E)
             : Colors.white;
+    final appFrame = calendarUsesAppFrame(currentTheme,
+        preview: _staticPreview, includeLegend: context.usesKoreanFeatures);
+    final frameBackground =
+        appFrame ? AppUiPalette.of(context).background : scaffoldBg;
 
     final body = scheduleAsync.when(
       // ⭐ 로딩/에러/스케줄없음 상태도 달력 탭 배경 예외(위 build() 안쪽 Scaffold
       // 주석 참고)를 똑같이 적용 - 안 그러면 데이터 로드 전 짧은 순간 파스텔
       // 배경이 깜빡였다가 흰색/다크와 안 맞는 색으로 바뀌는 게 보일 수 있음.
       loading: () => Scaffold(
-        backgroundColor: scaffoldBg,
+        backgroundColor: frameBackground,
         body: const SizedBox.shrink(), // ⭐ 로딩 인디케이터 제거
       ),
       error: (error, stack) => Scaffold(
-        backgroundColor: scaffoldBg,
+        backgroundColor: frameBackground,
         body: Center(
             child: Text(
                 '${context.l10n.statusErrorOccurred}: ${context.localizedErrorDetail(error)}')),
@@ -497,7 +570,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       data: (schedule) {
         if (schedule == null) {
           return Scaffold(
-            backgroundColor: scaffoldBg,
+            backgroundColor: frameBackground,
             body: Center(child: Text(context.l10n.statusNoSchedule)),
           );
         }
@@ -528,7 +601,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           // 예전부터 달력 탭이 실제로 보여주던 흰색을 여기서 명시적으로 고정.
           // ⭐ 2026-09-01 - 위 isDarkTheme 계산 참고, 메인·다크에선 흰색 대신
           // 0xFF1A1F2E를 씀(파일 상단 build() 진입부의 버그 수정 주석 참고).
-          backgroundColor: scaffoldBg,
+          backgroundColor: frameBackground,
           resizeToAvoidBottomInset: false,
           body: SafeArea(
             // ⭐⭐ 2026-08-24 - 애드몹 배너 자리 확보 방식을 재설계함. 예전엔 여기서
@@ -559,7 +632,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                       child: Container(
                         // ⭐ "2번은 원래 배경색으로 흰 카드 셀들을 구분했었다"는 지적 -
                         // lab이 페이지 전체를 옅은 회색으로 감쌌던 것을 그대로 재현.
-                        color: _themeBodyBackground(context, theme),
+                        color:
+                            _themeBodyBackground(context, theme) ?? scaffoldBg,
                         child: Column(
                           children: [
                             // ⭐ 헤더 영역 - 최소화
@@ -569,92 +643,102 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                             // 흰 배경 위에 그대로 겹쳐 안 보이는 문제였음 - 텍스트는 항상
                             // 있었지만 "흰 글씨 on 흰 배경"이라 안 보였던 것. 요일행
                             // (dowBuilder)은 이미 자기 배경을 스스로 그려서 문제 없었음.
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 6.w),
-                              child: Container(
-                                color: _themeHeaderBackground(theme),
-                                child: SizedBox(
-                                  height: 48.h,
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 8.w, vertical: 4.h),
-                                    child: !_isMultiSelectMode &&
-                                            (theme ==
-                                                    CalendarThemeId.underline ||
-                                                theme ==
-                                                    CalendarThemeId.editorial)
-                                        ? CalendarTitleActionsRow(
-                                            title:
-                                                _buildThemedHeaderTitle(theme),
-                                            actions: _buildThemedHeaderButtons(
-                                                theme, schedule),
-                                          )
-                                        : Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              _isMultiSelectMode
-                                                  ? Row(
-                                                      children: [
-                                                        IconButton(
-                                                          icon: Icon(
-                                                              Icons.close,
-                                                              size: 20.sp),
-                                                          onPressed:
-                                                              _exitMultiSelectMode,
-                                                          padding:
-                                                              EdgeInsets.zero,
-                                                          constraints:
-                                                              BoxConstraints(),
-                                                        ),
-                                                        SizedBox(width: 8.w),
-                                                        Text(
-                                                          context.l10n
-                                                              .calendarNSelected(
-                                                                  _selectedDates
-                                                                      .length),
-                                                          style: TextStyle(
-                                                              fontSize: 16.sp,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    )
-                                                  : Flexible(
-                                                      flex: 3,
+                            if (appFrame)
+                              _buildAppFrameHeader(theme, schedule)
+                            else
+                              Padding(
+                                padding: _staticPreview
+                                    ? EdgeInsets.symmetric(horizontal: 6.w)
+                                    : EdgeInsets.zero,
+                                child: Container(
+                                  color: _themeHeaderBackground(theme),
+                                  child: SizedBox(
+                                    height:
+                                        widget.preview ? 48.h : _headerHeight,
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 8.w, vertical: 4.h),
+                                      child: !_isMultiSelectMode &&
+                                              (theme ==
+                                                      CalendarThemeId
+                                                          .underline ||
+                                                  theme ==
+                                                      CalendarThemeId.editorial)
+                                          ? CalendarTitleActionsRow(
+                                              title: _buildThemedHeaderTitle(
+                                                  theme),
+                                              actions:
+                                                  _buildThemedHeaderButtons(
+                                                      theme, schedule),
+                                            )
+                                          : Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                _isMultiSelectMode
+                                                    ? Row(
+                                                        children: [
+                                                          IconButton(
+                                                            icon: Icon(
+                                                                Icons.close,
+                                                                size: 20.sp),
+                                                            onPressed:
+                                                                _exitMultiSelectMode,
+                                                            padding:
+                                                                EdgeInsets.zero,
+                                                            constraints:
+                                                                BoxConstraints(),
+                                                          ),
+                                                          SizedBox(width: 8.w),
+                                                          Text(
+                                                            context.l10n
+                                                                .calendarNSelected(
+                                                                    _selectedDates
+                                                                        .length),
+                                                            style: TextStyle(
+                                                                fontSize: 16.sp,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    : Flexible(
+                                                        flex: 3,
+                                                        child: FittedBox(
+                                                          fit: BoxFit.scaleDown,
+                                                          alignment: Alignment
+                                                              .centerLeft,
+                                                          child:
+                                                              _buildThemedHeaderTitle(
+                                                                  theme),
+                                                        )),
+                                                if (!_isMultiSelectMode &&
+                                                    !_usesWideCalendarCells &&
+                                                    (theme ==
+                                                            CalendarThemeId
+                                                                .underline ||
+                                                        theme ==
+                                                            CalendarThemeId
+                                                                .editorial))
+                                                  Flexible(
+                                                      flex: 4,
                                                       child: FittedBox(
                                                         fit: BoxFit.scaleDown,
                                                         alignment: Alignment
-                                                            .centerLeft,
+                                                            .centerRight,
                                                         child:
-                                                            _buildThemedHeaderTitle(
-                                                                theme),
+                                                            _buildThemedHeaderButtons(
+                                                                theme,
+                                                                schedule),
                                                       )),
-                                              if (!_isMultiSelectMode &&
-                                                  !_usesWideCalendarCells &&
-                                                  (theme ==
-                                                          CalendarThemeId
-                                                              .underline ||
-                                                      theme ==
-                                                          CalendarThemeId
-                                                              .editorial))
-                                                Flexible(
-                                                    flex: 4,
-                                                    child: FittedBox(
-                                                      fit: BoxFit.scaleDown,
-                                                      alignment:
-                                                          Alignment.centerRight,
-                                                      child:
-                                                          _buildThemedHeaderButtons(
-                                                              theme, schedule),
-                                                    )),
-                                            ],
-                                          ),
+                                              ],
+                                            ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
 
                             // ⭐ 달력 (하나의 TableCalendar, 6줄 고정) - Expanded+LayoutBuilder로
                             // 감싸서 헤더/푸터를 뺀 "실제로 남는 높이"를 직접 재고, 그 안에서
@@ -667,297 +751,337 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                   return Stack(
                                     children: [
                                       Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 6.w),
+                                        padding: widget.preview
+                                            ? EdgeInsets.symmetric(
+                                                horizontal: 6.w)
+                                            : EdgeInsets.zero,
                                         child: SemanticsTableBoundary(
-                                            child: TableCalendar(
-                                          startingDayOfWeek:
-                                              MaterialLocalizations.of(context)
-                                                          .firstDayOfWeekIndex ==
-                                                      1
-                                                  ? StartingDayOfWeek.monday
-                                                  : StartingDayOfWeek.sunday,
-                                          availableGestures:
-                                              AvailableGestures.all,
-                                          shouldFillViewport: true,
-                                          firstDay: DateTime(
-                                              DateTime.now().year - 3, 1, 1),
-                                          lastDay: DateTime(
-                                              DateTime.now().year + 3, 12, 31),
-                                          focusedDay: _focusedDay,
-                                          selectedDayPredicate: (day) {
-                                            if (_isMultiSelectMode) {
-                                              return _selectedDates.any(
-                                                  (d) => isSameDay(d, day));
-                                            }
-                                            return isSameDay(_selectedDay, day);
-                                          },
-                                          locale:
-                                              Localizations.localeOf(context)
-                                                  .toString(),
+                                            child: NotificationListener<
+                                                    ScrollNotification>(
+                                                onNotification: _onMonthScroll,
+                                                child: TableCalendar(
+                                                  startingDayOfWeek:
+                                                      MaterialLocalizations.of(
+                                                                      context)
+                                                                  .firstDayOfWeekIndex ==
+                                                              1
+                                                          ? StartingDayOfWeek
+                                                              .monday
+                                                          : StartingDayOfWeek
+                                                              .sunday,
+                                                  availableGestures:
+                                                      AvailableGestures.all,
+                                                  shouldFillViewport: true,
+                                                  firstDay: DateTime(
+                                                      DateTime.now().year - 3,
+                                                      1,
+                                                      1),
+                                                  lastDay: DateTime(
+                                                      DateTime.now().year + 3,
+                                                      12,
+                                                      31),
+                                                  focusedDay: _focusedDay,
+                                                  selectedDayPredicate: (day) {
+                                                    if (_isMultiSelectMode) {
+                                                      return _selectedDates.any(
+                                                          (d) => isSameDay(
+                                                              d, day));
+                                                    }
+                                                    return isSameDay(
+                                                        _selectedDay, day);
+                                                  },
+                                                  locale:
+                                                      Localizations.localeOf(
+                                                              context)
+                                                          .toString(),
 
-                                          headerVisible: false,
-                                          sixWeekMonthsEnforced:
-                                              true, // ⭐ 항상 6줄 고정
-                                          rowHeight: rowH,
+                                                  headerVisible: false,
+                                                  sixWeekMonthsEnforced:
+                                                      true, // ⭐ 항상 6줄 고정
+                                                  rowHeight: rowH,
 
-                                          daysOfWeekHeight: 28.h,
+                                                  daysOfWeekHeight:
+                                                      _weekdayHeight,
 
-                                          calendarStyle: CalendarStyle(
-                                            cellMargin: EdgeInsets.all(0),
-                                            cellPadding: EdgeInsets.all(0),
+                                                  calendarStyle: CalendarStyle(
+                                                    cellMargin:
+                                                        EdgeInsets.all(0),
+                                                    cellPadding:
+                                                        EdgeInsets.all(0),
 
-                                            // ⭐ "어떤 테마는 그리드가 아예 없고 가로줄만 있고 각자 다른데
-                                            // 결국 다 같은 격자 틀 안에서 그려진다"는 지적 - table_calendar가
-                                            // 셀마다 무조건 그려주던 격자선(tableBorder)을 메인·화이트/다크
-                                            // (원래부터 이 격자에 의존하던 디자인)에서만 켜고, 나머지 7개
-                                            // 테마는 각자 셀 위젯 자신이 이미 필요한 만큼만 테두리를 그리고
-                                            // 있으므로(1번=칸 왼쪽 얇은 선만, 2번=카드+그림자, 4번=칸마다
-                                            // 굵은 테두리, 5번=둥근 테두리, 8/9번=테두리 없음, 10번=칸마다
-                                            // 얇은 테두리) table_calendar 쪽 격자는 완전히 꺼서 이중으로
-                                            // 그려지거나 안 어울리는 격자가 겹치지 않게 함.
-                                            tableBorder: (theme ==
-                                                        CalendarThemeId
-                                                            .mainWhite ||
-                                                    theme ==
-                                                        CalendarThemeId
-                                                            .mainDark)
-                                                ? TableBorder.all(
-                                                    color: Theme.of(context)
-                                                                .brightness ==
-                                                            Brightness.dark
-                                                        ? Theme.of(context)
+                                                    // ⭐ "어떤 테마는 그리드가 아예 없고 가로줄만 있고 각자 다른데
+                                                    // 결국 다 같은 격자 틀 안에서 그려진다"는 지적 - table_calendar가
+                                                    // 셀마다 무조건 그려주던 격자선(tableBorder)을 메인·화이트/다크
+                                                    // (원래부터 이 격자에 의존하던 디자인)에서만 켜고, 나머지 7개
+                                                    // 테마는 각자 셀 위젯 자신이 이미 필요한 만큼만 테두리를 그리고
+                                                    // 있으므로(1번=칸 왼쪽 얇은 선만, 2번=카드+그림자, 4번=칸마다
+                                                    // 굵은 테두리, 5번=둥근 테두리, 8/9번=테두리 없음, 10번=칸마다
+                                                    // 얇은 테두리) table_calendar 쪽 격자는 완전히 꺼서 이중으로
+                                                    // 그려지거나 안 어울리는 격자가 겹치지 않게 함.
+                                                    tableBorder: _usesSharedDateGrid(
+                                                            theme)
+                                                        ? _dateGridBorder(
+                                                            theme, schedule)
+                                                        : (theme ==
+                                                                    CalendarThemeId
+                                                                        .mainWhite ||
+                                                                theme ==
+                                                                    CalendarThemeId
+                                                                        .mainDark)
+                                                            ? theme ==
+                                                                        CalendarThemeId
+                                                                            .mainWhite &&
+                                                                    !widget
+                                                                        .preview &&
+                                                                    appFrame
+                                                                ? CalendarMergedSummaryBorder(
+                                                                    side:
+                                                                        _mainCalendarGridSide)
+                                                                : TableBorder
+                                                                    .all(
+                                                                    color: _mainCalendarGridSide
+                                                                        .color,
+                                                                    width: _mainCalendarGridSide
+                                                                        .width,
+                                                                  )
+                                                            : const TableBorder(),
+
+                                                    defaultTextStyle: TextStyle(
+                                                        fontSize: 16.sp,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Theme.of(context)
                                                             .colorScheme
-                                                            .onSurface
-                                                            .withOpacity(
-                                                                0.4) // 다크모드: 더 밝게
-                                                        : Theme.of(context)
+                                                            .onSurface),
+                                                    weekendTextStyle: TextStyle(
+                                                        fontSize: 16.sp,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Theme.of(context)
                                                             .colorScheme
-                                                            .onSurface
-                                                            .withOpacity(
-                                                                0.15), // 화이트모드: 더 진하게
-                                                    width: 1.0,
-                                                  )
-                                                : const TableBorder(),
+                                                            .onSurface),
+                                                    outsideTextStyle: TextStyle(
+                                                        fontSize: 16.sp,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurfaceVariant),
 
-                                            defaultTextStyle: TextStyle(
-                                                fontSize: 16.sp,
-                                                fontWeight: FontWeight.w600,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface),
-                                            weekendTextStyle: TextStyle(
-                                                fontSize: 16.sp,
-                                                fontWeight: FontWeight.w600,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface),
-                                            outsideTextStyle: TextStyle(
-                                                fontSize: 16.sp,
-                                                fontWeight: FontWeight.w600,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurfaceVariant),
+                                                    todayDecoration:
+                                                        BoxDecoration(
+                                                      color: Colors
+                                                          .transparent, // ⭐ 배경 제거, 날짜 숫자만 표시
+                                                    ),
+                                                    todayTextStyle: TextStyle(
+                                                        fontSize: 16.sp,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurface),
 
-                                            todayDecoration: BoxDecoration(
-                                              color: Colors
-                                                  .transparent, // ⭐ 배경 제거, 날짜 숫자만 표시
-                                            ),
-                                            todayTextStyle: TextStyle(
-                                                fontSize: 16.sp,
-                                                fontWeight: FontWeight.w600,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurface),
+                                                    selectedDecoration:
+                                                        BoxDecoration(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .secondary
+                                                          .withOpacity(
+                                                              _isMultiSelectMode
+                                                                  ? 0.3
+                                                                  : 1.0),
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    selectedTextStyle:
+                                                        TextStyle(
+                                                            fontSize: 16.sp,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .colorScheme
+                                                                .onSecondary),
+                                                  ),
 
-                                            selectedDecoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .secondary
-                                                  .withOpacity(
-                                                      _isMultiSelectMode
-                                                          ? 0.3
-                                                          : 1.0),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            selectedTextStyle: TextStyle(
-                                                fontSize: 16.sp,
-                                                fontWeight: FontWeight.w600,
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSecondary),
-                                          ),
+                                                  calendarBuilders:
+                                                      CalendarBuilders(
+                                                    // ⭐ "그리드/요일 표기까지 테마마다 다 다르게 만들어놓고 실제로는
+                                                    // 그 틀 안에서만 그린다"는 지적 - 요일 헤더 표기(일/월/... vs
+                                                    // Sun/Mon/... vs S/M/...)도 테마별로 다르므로 daysOfWeekStyle(같은
+                                                    // 로케일 문구에 스타일만 입히는 것) 대신 dowBuilder로 완전히
+                                                    // 테마마다 다른 위젯을 그림.
+                                                    dowBuilder:
+                                                        (context, day) =>
+                                                            _buildThemedDow(
+                                                                theme, day),
+                                                    // ⭐ 여기 4개 콜백만 _buildDateCell → _buildThemedCell로 교체함 -
+                                                    // 선택된 테마에 따라 셀 디자인을 바꿔주는 유일한 진입점.
+                                                    // onDaySelected/onDayLongPressed 등 나머지 로직은 전혀 안 건드림.
+                                                    defaultBuilder: (context,
+                                                        day, focusedDay) {
+                                                      // ⭐ 6번째 줄 화~토는 빈 Container (범례/OT 카드가 그 자리를
+                                                      // 대신 차지하는 테마에서만 - 아래 reclaimsSixthRow 참고)
+                                                      if (_isRowSixReclaimed(
+                                                          day, focusedDay,
+                                                          reclaimsSixthRow:
+                                                              reclaimsSixthRow,
+                                                          reclaimsSixthRowButtons:
+                                                              reclaimsSixthRowButtons,
+                                                          includeAllShiftsCol:
+                                                              schedule
+                                                                  .isRegular)) {
+                                                        return Container();
+                                                      }
+                                                      return _buildThemedCell(
+                                                          day,
+                                                          false,
+                                                          false,
+                                                          schedule,
+                                                          focusedDay);
+                                                    },
+                                                    outsideBuilder: (context,
+                                                        day, focusedDay) {
+                                                      if (_isRowSixReclaimed(
+                                                          day, focusedDay,
+                                                          reclaimsSixthRow:
+                                                              reclaimsSixthRow,
+                                                          reclaimsSixthRowButtons:
+                                                              reclaimsSixthRowButtons,
+                                                          includeAllShiftsCol:
+                                                              schedule
+                                                                  .isRegular)) {
+                                                        return Container();
+                                                      }
+                                                      return _buildThemedCell(
+                                                          day,
+                                                          false,
+                                                          true,
+                                                          schedule,
+                                                          focusedDay);
+                                                    },
+                                                    todayBuilder: (context, day,
+                                                        focusedDay) {
+                                                      if (_isRowSixReclaimed(
+                                                          day, focusedDay,
+                                                          reclaimsSixthRow:
+                                                              reclaimsSixthRow,
+                                                          reclaimsSixthRowButtons:
+                                                              reclaimsSixthRowButtons,
+                                                          includeAllShiftsCol:
+                                                              schedule
+                                                                  .isRegular)) {
+                                                        return Container();
+                                                      }
+                                                      // ⭐ 위 _buildThemedCell 주석과 동일한 이유로, "오늘이 지금 이
+                                                      // 페이지 기준 바깥달 날짜인가"도 상태(_focusedDay)가 아니라 이
+                                                      // 콜백이 실제로 받은 focusedDay(그 페이지가 나타내는 달) 기준으로.
+                                                      final isOutsideMonth = day
+                                                                  .month !=
+                                                              focusedDay
+                                                                  .month ||
+                                                          day.year !=
+                                                              focusedDay.year;
+                                                      return _buildThemedCell(
+                                                          day,
+                                                          true,
+                                                          isOutsideMonth,
+                                                          schedule,
+                                                          focusedDay);
+                                                    },
+                                                    selectedBuilder: (context,
+                                                        day, focusedDay) {
+                                                      if (_isRowSixReclaimed(
+                                                          day, focusedDay,
+                                                          reclaimsSixthRow:
+                                                              reclaimsSixthRow,
+                                                          reclaimsSixthRowButtons:
+                                                              reclaimsSixthRowButtons,
+                                                          includeAllShiftsCol:
+                                                              schedule
+                                                                  .isRegular)) {
+                                                        return Container();
+                                                      }
+                                                      return _buildThemedCell(
+                                                          day,
+                                                          isSameDay(day,
+                                                              DateTime.now()),
+                                                          false,
+                                                          schedule,
+                                                          focusedDay,
+                                                          isSelected: true);
+                                                    },
+                                                  ),
 
-                                          calendarBuilders: CalendarBuilders(
-                                            // ⭐ "그리드/요일 표기까지 테마마다 다 다르게 만들어놓고 실제로는
-                                            // 그 틀 안에서만 그린다"는 지적 - 요일 헤더 표기(일/월/... vs
-                                            // Sun/Mon/... vs S/M/...)도 테마별로 다르므로 daysOfWeekStyle(같은
-                                            // 로케일 문구에 스타일만 입히는 것) 대신 dowBuilder로 완전히
-                                            // 테마마다 다른 위젯을 그림.
-                                            dowBuilder: (context, day) =>
-                                                _buildThemedDow(theme, day),
-                                            // ⭐ 여기 4개 콜백만 _buildDateCell → _buildThemedCell로 교체함 -
-                                            // 선택된 테마에 따라 셀 디자인을 바꿔주는 유일한 진입점.
-                                            // onDaySelected/onDayLongPressed 등 나머지 로직은 전혀 안 건드림.
-                                            defaultBuilder:
-                                                (context, day, focusedDay) {
-                                              // ⭐ 6번째 줄 화~토는 빈 Container (범례/OT 카드가 그 자리를
-                                              // 대신 차지하는 테마에서만 - 아래 reclaimsSixthRow 참고)
-                                              if (_isRowSixReclaimed(
-                                                  day, focusedDay,
-                                                  reclaimsSixthRow:
-                                                      reclaimsSixthRow,
-                                                  reclaimsSixthRowButtons:
-                                                      reclaimsSixthRowButtons,
-                                                  includeAllShiftsCol:
-                                                      schedule.isRegular)) {
-                                                return Container();
-                                              }
-                                              return _buildThemedCell(
-                                                  day,
-                                                  false,
-                                                  false,
-                                                  schedule,
-                                                  focusedDay);
-                                            },
-                                            outsideBuilder:
-                                                (context, day, focusedDay) {
-                                              if (_isRowSixReclaimed(
-                                                  day, focusedDay,
-                                                  reclaimsSixthRow:
-                                                      reclaimsSixthRow,
-                                                  reclaimsSixthRowButtons:
-                                                      reclaimsSixthRowButtons,
-                                                  includeAllShiftsCol:
-                                                      schedule.isRegular)) {
-                                                return Container();
-                                              }
-                                              return _buildThemedCell(
-                                                  day,
-                                                  false,
-                                                  true,
-                                                  schedule,
-                                                  focusedDay);
-                                            },
-                                            todayBuilder:
-                                                (context, day, focusedDay) {
-                                              if (_isRowSixReclaimed(
-                                                  day, focusedDay,
-                                                  reclaimsSixthRow:
-                                                      reclaimsSixthRow,
-                                                  reclaimsSixthRowButtons:
-                                                      reclaimsSixthRowButtons,
-                                                  includeAllShiftsCol:
-                                                      schedule.isRegular)) {
-                                                return Container();
-                                              }
-                                              // ⭐ 위 _buildThemedCell 주석과 동일한 이유로, "오늘이 지금 이
-                                              // 페이지 기준 바깥달 날짜인가"도 상태(_focusedDay)가 아니라 이
-                                              // 콜백이 실제로 받은 focusedDay(그 페이지가 나타내는 달) 기준으로.
-                                              final isOutsideMonth = day
-                                                          .month !=
-                                                      focusedDay.month ||
-                                                  day.year != focusedDay.year;
-                                              return _buildThemedCell(
-                                                  day,
-                                                  true,
-                                                  isOutsideMonth,
-                                                  schedule,
-                                                  focusedDay);
-                                            },
-                                            selectedBuilder:
-                                                (context, day, focusedDay) {
-                                              if (_isRowSixReclaimed(
-                                                  day, focusedDay,
-                                                  reclaimsSixthRow:
-                                                      reclaimsSixthRow,
-                                                  reclaimsSixthRowButtons:
-                                                      reclaimsSixthRowButtons,
-                                                  includeAllShiftsCol:
-                                                      schedule.isRegular)) {
-                                                return Container();
-                                              }
-                                              return _buildThemedCell(
-                                                  day,
-                                                  isSameDay(
-                                                      day, DateTime.now()),
-                                                  false,
-                                                  schedule,
-                                                  focusedDay,
-                                                  isSelected: true);
-                                            },
-                                          ),
+                                                  onDaySelected: (selectedDay,
+                                                      focusedDay) {
+                                                    // ⭐ 이전/다음 달 날짜는 탭 무시
+                                                    if (selectedDay.month !=
+                                                            _focusedDay.month ||
+                                                        selectedDay.year !=
+                                                            _focusedDay.year) {
+                                                      return;
+                                                    }
 
-                                          onDaySelected:
-                                              (selectedDay, focusedDay) {
-                                            // ⭐ 이전/다음 달 날짜는 탭 무시
-                                            if (selectedDay.month !=
-                                                    _focusedDay.month ||
-                                                selectedDay.year !=
-                                                    _focusedDay.year) {
-                                              return;
-                                            }
+                                                    // ⭐ 6번째 줄 빈 칸은 탭 무시 (범례/OT 카드가 있는 테마만)
+                                                    if (_isRowSixReclaimed(
+                                                        selectedDay, focusedDay,
+                                                        reclaimsSixthRow:
+                                                            reclaimsSixthRow,
+                                                        reclaimsSixthRowButtons:
+                                                            reclaimsSixthRowButtons,
+                                                        includeAllShiftsCol:
+                                                            schedule
+                                                                .isRegular)) {
+                                                      return;
+                                                    }
 
-                                            // ⭐ 6번째 줄 빈 칸은 탭 무시 (범례/OT 카드가 있는 테마만)
-                                            if (_isRowSixReclaimed(
-                                                selectedDay, focusedDay,
-                                                reclaimsSixthRow:
-                                                    reclaimsSixthRow,
-                                                reclaimsSixthRowButtons:
-                                                    reclaimsSixthRowButtons,
-                                                includeAllShiftsCol:
-                                                    schedule.isRegular)) {
-                                              return;
-                                            }
+                                                    setState(() {
+                                                      _focusedDay = focusedDay;
+                                                    });
 
-                                            setState(() {
-                                              _focusedDay = focusedDay;
-                                            });
+                                                    if (_isMultiSelectMode) {
+                                                      _toggleDateSelection(
+                                                          selectedDay);
+                                                    } else {
+                                                      _showDayDetailPopup(
+                                                          selectedDay,
+                                                          schedule);
+                                                    }
+                                                  },
 
-                                            if (_isMultiSelectMode) {
-                                              _toggleDateSelection(selectedDay);
-                                            } else {
-                                              _showDayDetailPopup(
-                                                  selectedDay, schedule);
-                                            }
-                                          },
+                                                  onDayLongPressed:
+                                                      (selectedDay,
+                                                          focusedDay) {
+                                                    // ⭐ 이전/다음 달 날짜는 길게 누르기 무시
+                                                    if (selectedDay.month !=
+                                                            _focusedDay.month ||
+                                                        selectedDay.year !=
+                                                            _focusedDay.year) {
+                                                      return;
+                                                    }
 
-                                          onDayLongPressed:
-                                              (selectedDay, focusedDay) {
-                                            // ⭐ 이전/다음 달 날짜는 길게 누르기 무시
-                                            if (selectedDay.month !=
-                                                    _focusedDay.month ||
-                                                selectedDay.year !=
-                                                    _focusedDay.year) {
-                                              return;
-                                            }
+                                                    // ⭐ 6번째 줄 빈 칸은 길게 누르기 무시 (범례/OT 카드가 있는 테마만)
+                                                    if (_isRowSixReclaimed(
+                                                        selectedDay, focusedDay,
+                                                        reclaimsSixthRow:
+                                                            reclaimsSixthRow,
+                                                        reclaimsSixthRowButtons:
+                                                            reclaimsSixthRowButtons,
+                                                        includeAllShiftsCol:
+                                                            schedule
+                                                                .isRegular)) {
+                                                      return;
+                                                    }
 
-                                            // ⭐ 6번째 줄 빈 칸은 길게 누르기 무시 (범례/OT 카드가 있는 테마만)
-                                            if (_isRowSixReclaimed(
-                                                selectedDay, focusedDay,
-                                                reclaimsSixthRow:
-                                                    reclaimsSixthRow,
-                                                reclaimsSixthRowButtons:
-                                                    reclaimsSixthRowButtons,
-                                                includeAllShiftsCol:
-                                                    schedule.isRegular)) {
-                                              return;
-                                            }
+                                                    if (!_isMultiSelectMode) {
+                                                      _enterMultiSelectMode(
+                                                          selectedDay);
+                                                    }
+                                                  },
 
-                                            if (!_isMultiSelectMode) {
-                                              _enterMultiSelectMode(
-                                                  selectedDay);
-                                            }
-                                          },
-
-                                          onPageChanged: (focusedDay) {
-                                            setState(() {
-                                              _focusedDay = focusedDay;
-                                            });
-                                            // ⭐ 새 달의 메모 로드
-                                            _loadMemosForMonth(focusedDay);
-                                          },
-                                        )),
+                                                  onPageChanged:
+                                                      _onMonthChanged,
+                                                ))),
                                       ),
 
                                       // ⭐ 6번째 줄 화~토 (원래 빈 공간이었던 곳) - 이 자리를 재활용하는
@@ -971,9 +1095,10 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                       // 제스처를 아래 TableCalendar로 전달(다른 재활용 테마와 동일).
                                       if (reclaimsSixthRow)
                                         Positioned(
-                                          top: 28.h + rowH * 5, // 요일 헤더 + 5줄
-                                          left: 6.w,
-                                          right: 6.w,
+                                          top: _weekdayHeight +
+                                              rowH * 5, // 요일 헤더 + 5줄
+                                          left: _staticPreview ? 6.w : 0,
+                                          right: _staticPreview ? 6.w : 0,
                                           height: rowH,
                                           child: Row(
                                             children: [
@@ -1014,9 +1139,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                       // "친구 추가" 빈 상태로 감(에러 아님).
                                       if (reclaimsSixthRowButtons)
                                         Positioned(
-                                          top: 28.h + rowH * 5,
-                                          left: 6.w,
-                                          right: 6.w,
+                                          top: _weekdayHeight + rowH * 5,
+                                          left: _staticPreview ? 6.w : 0,
+                                          right: _staticPreview ? 6.w : 0,
                                           height: rowH,
                                           // ⭐ 2026-09-11(사용자 요청) - 이 버튼 3칸(목/금/토) 위에서도
                                           // 좌우 스와이프로 월 이동이 되게 바깥을 _wrapWithMonthSwipe로
@@ -1092,53 +1217,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                             ],
                                           )),
                                         ),
-                                      // ⭐ "맨 아랫줄은 가로줄이 없어서 부자연스럽다"는 지적 - 1번은
-                                      // 세로선(칸 왼쪽 테두리)만 있고 가로선은 요일행 밑 구분선
-                                      // 하나뿐이라, 그리드 맨 밑을 닫아주는 선이 없어 어색해
-                                      // 보였음. 요일행 밑 구분선과 같은 톤으로 6번째 줄 맨
-                                      // 밑에도 하나 그어서 사각형 그리드처럼 딱 닫히게 함.
-                                      if (theme == CalendarThemeId.minimal)
-                                        Positioned(
-                                          top: 28.h + rowH * 6 - 1,
-                                          left: 6.w,
-                                          right: 6.w,
-                                          height: 1,
-                                          child: Container(
-                                              color: Colors.grey.shade200),
-                                        ),
-                                      // ⭐ 2026-09-13 - 다크 그리드(굵은 격자형)만의 추가 지적 - 토(오늘
-                                      // 버튼) 칸은 위 _isSixthRowButtonCell 규칙상 항상 reclaim되어
-                                      // row6에 실제 셀이 안 그려지므로, 5번째 줄 토요일 칸 밑 가로
-                                      // 테두리가 (이웃 칸들처럼 위아래 두 셀 테두리가 겹쳐 두꺼워지는
-                                      // 것과 달리) row5 자신의 테두리 한 겹만 남아 얇아 보임 - 같은
-                                      // 굵기(0.6)의 선을 하나 더 겹쳐 그어서 다른 칸들과 두께를 맞춤.
-                                      // 목(전체근무표) 칸은 불규칙+근무 미배정일 때 이제 reclaim되지
-                                      // 않아(위 case 4 수정) 실제 셀이 그대로 그려지므로 자동으로
-                                      // 두꺼워짐 - 여기서 따로 안 그려도 됨.
-                                      if (theme == CalendarThemeId.boldGrid)
-                                        Positioned(
-                                          top: 28.h + rowH * 5 - 0.6,
-                                          left: 6.w,
-                                          right: 6.w,
-                                          height: 0.6,
-                                          child: Row(
-                                            children: [
-                                              const Expanded(
-                                                  flex: 4,
-                                                  child: SizedBox.shrink()),
-                                              const Expanded(
-                                                  child: SizedBox
-                                                      .shrink()), // 목 - 자동으로 두꺼워짐
-                                              const Expanded(
-                                                  child:
-                                                      SizedBox.shrink()), // 금
-                                              Expanded(
-                                                  child: Container(
-                                                      color: Colors
-                                                          .grey.shade600)), // 토
-                                            ],
-                                          ),
-                                        ),
                                     ],
                                   );
                                 },
@@ -1211,8 +1289,121 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // 절반 "주별 근무시간")의 fontSize 각각 따로. 색은 항상 colorScheme.*만
   // 참조하므로 다크에서 자동으로 다크 배색을 받음(이 함수는 2026-09-01 배경
   // 버그와 무관 - 애초부터 하드코딩 색이 없었음).
+  Widget _buildAppFrameHeader(CalendarThemeId theme, ShiftSchedule schedule) =>
+      _monthFeedback(() => _buildAppFrameHeaderCore(theme, schedule));
+
+  Widget _buildAppFrameHeaderCore(
+      CalendarThemeId theme, ShiftSchedule schedule) {
+    final base = AppUiPalette.of(context);
+    final reading = _readingColors;
+    final p = theme == CalendarThemeId.boldGrid && reading != null
+        ? base.copyWith(
+            background: reading.darkBand,
+            text: reading.onDarkBand,
+            secondaryText: reading.onDarkBand,
+            primary: reading.onDarkBand)
+        : base;
+    final locale = Localizations.localeOf(context);
+    final month = locale.languageCode == 'ko'
+        ? '${_focusedDay.year}년 ${_focusedDay.month}월'
+        : DateFormat.yMMMM(locale.toString()).format(_focusedDay);
+    return ColoredBox(
+        key: const ValueKey('calendar-app-header'),
+        color: p.background,
+        child: SizedBox(
+            height: _headerHeight,
+            child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: _layoutLength(AppUiMetrics.compactCardPadding)),
+                child: Row(children: [
+                  if (_isMultiSelectMode)
+                    IconButton(
+                        onPressed: _exitMultiSelectMode,
+                        tooltip: context.l10n.commonCancel,
+                        icon: Icon(Icons.close,
+                            color: p.text,
+                            size: _contractActive
+                                ? CalendarFrameRatios.titleFont * _layoutUnit
+                                : AppUiMetrics.calendarIconSize)),
+                  Flexible(
+                      flex: theme.hasLegend && !_isMultiSelectMode ? 3 : 1,
+                      child: GestureDetector(
+                          onTap:
+                              _isMultiSelectMode ? null : _showMonthYearPicker,
+                          child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                        _isMultiSelectMode
+                                            ? context.l10n.calendarNSelected(
+                                                _selectedDates.length)
+                                            : month,
+                                        textScaler: TextScaler.noScaling,
+                                        style: AppTypography.style(
+                                                context, AppTextRole.toolbar)
+                                            .copyWith(
+                                                color: p.text,
+                                                fontSize: _contractActive
+                                                    ? CalendarFrameRatios
+                                                            .titleFont *
+                                                        _layoutUnit
+                                                    : null)),
+                                    if (!_isMultiSelectMode)
+                                      Icon(Icons.expand_more_rounded,
+                                          color: p.secondaryText,
+                                          size: _contractActive
+                                              ? CalendarFrameRatios.titleFont *
+                                                  _layoutUnit
+                                              : AppUiMetrics.calendarIconSize),
+                                  ])))),
+                  if (theme.hasLegend && !_isMultiSelectMode)
+                    Expanded(
+                        flex: 7,
+                        child: CalendarHeaderActions(
+                            iconOnly: context.usesKoreanFeatures,
+                            palette: p,
+                            editorial: theme == CalendarThemeId.editorial,
+                            isKorean: context.usesKoreanFeatures,
+                            onToday: _jumpToToday,
+                            onAllShifts:
+                                schedule.isRegular ? _openAllShiftsView : null,
+                            onFriends: context.usesKoreanFeatures
+                                ? _openFriendShare
+                                : null)),
+                ]))));
+  }
+
+  CalendarDateGridBorder _dateGridBorder(
+          CalendarThemeId theme, ShiftSchedule schedule) =>
+      CalendarDateGridBorder(
+        side: BorderSide(
+          color: _readingColors?.line ??
+              (theme == CalendarThemeId.boldGrid
+                  ? Colors.grey.shade600
+                  : Colors.grey.shade200),
+          width: theme == CalendarThemeId.editorial
+              ? .5
+              : AppUiMetrics.calendarBorderWidth,
+        ),
+        lastRowColumns: theme.hasLegend
+            ? 2
+            : context.usesKoreanFeatures
+                ? (schedule.isRegular ? 4 : 5)
+                : (schedule.isRegular ? 5 : 6),
+        horizontalRows: theme != CalendarThemeId.minimal,
+      );
+
+  // The calendar grid owns its outline, including the reclaimed summary cells.
+  BorderSide get _mainCalendarGridSide => BorderSide(
+      color: _readingColors?.line ??
+          Theme.of(context).colorScheme.onSurface.withOpacity(
+              Theme.of(context).brightness == Brightness.dark ? 0.4 : 0.15),
+      width: AppUiMetrics.calendarBorderWidth);
+
   Widget _buildMonthlyOvertimeCard() =>
-      _fixedCalendarText(_buildMonthlyOvertimeCardCore());
+      _monthFeedback(() => _fixedCalendarText(_buildMonthlyOvertimeCardCore()));
 
   Widget _buildMonthlyOvertimeCardCore() {
     final colorScheme = Theme.of(context).colorScheme;
@@ -1236,6 +1427,53 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 countShiftChangeAsOt: workSettings.shiftChangeCountsAsOt,
               ));
         final hasOvertime = totalMinutes > 0;
+        final currentTheme =
+            context.availableCalendarTheme(ref.watch(calendarThemeProvider));
+        if (calendarUsesAppFrame(currentTheme,
+            preview: _staticPreview,
+            includeLegend: context.usesKoreanFeatures)) {
+          final integratedGrid = currentTheme == CalendarThemeId.mainWhite;
+          return _wrapWithMonthSwipe(CalendarWorkSummary(
+              layoutUnit: _contractActive ? _layoutUnit : null,
+              gridSide: integratedGrid ? _mainCalendarGridSide : null,
+              otLabel: context.l10n.shiftThisMonthOt,
+              otValue: formatOvertimeMinutes(context, totalMinutes),
+              weeklyLabel: context.l10n.shiftWeeklyWorkHours,
+              onOt: () => _showMonthlyOvertimeSheet(period),
+              onWeekly: _showWeeklyWorkHoursSheet,
+              actions: [
+                Expanded(
+                    flex: context.usesKoreanFeatures ? 2 : 3,
+                    child: const SizedBox.shrink()),
+                Expanded(
+                    child: (schedule?.isRegular ?? false)
+                        ? CalendarAppAction(
+                            icon: Icons.grid_view_rounded,
+                            label: context.l10n.shiftFullSchedule,
+                            onTap: _openAllShiftsView,
+                            iconOnly: true,
+                            layoutUnit: _contractActive ? _layoutUnit : null,
+                            integratedGrid: integratedGrid)
+                        : const SizedBox.shrink()),
+                if (context.usesKoreanFeatures)
+                  Expanded(
+                      child: CalendarAppAction(
+                          icon: Icons.people_alt_outlined,
+                          label: context.l10n.friendShareTitle,
+                          onTap: _openFriendShare,
+                          iconOnly: true,
+                          layoutUnit: _contractActive ? _layoutUnit : null,
+                          integratedGrid: integratedGrid)),
+                Expanded(
+                    child: CalendarAppAction(
+                        icon: Icons.today_rounded,
+                        label: context.l10n.commonToday,
+                        onTap: _jumpToToday,
+                        iconOnly: true,
+                        layoutUnit: _contractActive ? _layoutUnit : null,
+                        integratedGrid: integratedGrid)),
+              ]));
+        }
         // ⭐ 2026-09-05 - "(해당 날짜 탭하여 입력)" 안내문구 삭제 요청. OT가 0이어도
         // 그냥 0으로 포맷해서 보여줌(안내문 없이) - 다이어리 쪽 6번째 줄 버튼처럼
         // 이 카드도 값 있음/없음 구분 없이 항상 실제 값을 보여주는 게 더 일관됨.
@@ -1464,7 +1702,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     // 팝업을 열기 전에 그 기간을 명시적으로 로드해 캐시 누락을 방지함
     ref.read(overtimeProvider.notifier).loadForRange(period.start, period.end);
 
-    showModalBottomSheet(
+    showAppUiBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -1709,7 +1947,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     // ⭐ 이 시트가 보여주는 범위(월 앞뒤로 걸친 주 포함)를 명시적으로 로드
     ref.read(overtimeProvider.notifier).loadForRange(rangeStart, rangeEnd);
 
-    showModalBottomSheet(
+    showAppUiBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
@@ -1899,10 +2137,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   // ⭐ 달력 팝업 헤더에 들어가는 OT 30분 토글 컨트롤
   Widget _buildOvertimeToggle(String dateStr) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Consumer(
       builder: (context, ref, child) {
+        final colorScheme = Theme.of(context).colorScheme;
         ref.watch(overtimeProvider);
         final notifier = ref.read(overtimeProvider.notifier);
         final minutes = notifier.getForDate(dateStr);
@@ -1947,6 +2184,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildOvertimeStepButton(
+                      context: context,
                       icon: Icons.remove_rounded,
                       enabled: hasOvertime,
                       size: 26.w,
@@ -1955,6 +2193,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     ),
                     SizedBox(width: 6.w),
                     _buildOvertimeStepButton(
+                      context: context,
                       icon: Icons.add_rounded,
                       enabled: true,
                       size: 26.w,
@@ -1969,6 +2208,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildOvertimeStepButton(
+                      context: context,
                       icon: Icons.remove_rounded,
                       enabled: hasOvertime,
                       size: 26.w,
@@ -1977,6 +2217,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     ),
                     SizedBox(width: 6.w),
                     _buildOvertimeStepButton(
+                      context: context,
                       icon: Icons.add_rounded,
                       enabled: true,
                       size: 26.w,
@@ -1994,6 +2235,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   }
 
   Widget _buildOvertimeStepButton({
+    required BuildContext context,
     required IconData icon,
     required bool enabled,
     required VoidCallback onTap,
@@ -2252,7 +2494,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // project_ot_calendar_card 메모리의 "48.h로 도로 줄이지 말 것" 조건은 그대로
   // 유지됨 - 절대 픽셀값이 아니라 rowH 대비 비율 조건이라 영향 없음.)
   double _themeRowHeight(CalendarThemeId t, double availableHeight) {
-    return (availableHeight - 28.h) / 6; // 28.h = daysOfWeekHeight
+    return (availableHeight - _weekdayHeight) /
+        CalendarLayoutProfile.rows; // 28.h = daysOfWeekHeight
   }
 
   bool _themeHasSeparateFooter(CalendarThemeId t) =>
@@ -2276,8 +2519,33 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // 회색조 배경 자체를 없애고 흰색(=null, 다른 8개 테마와 동일)으로 되돌림 -
   // 카드 구분은 각 셀의 그림자(boxShadow)와 둥근 모서리만으로 충분하다고
   // 판단. 옅은 회색을 다시 쓰고 싶으면 아래 return을 다시 Color(0xFFF5F6FB)로.
+  AppUiPalette? _readingSource;
+  CalendarThemeId? _readingDesign;
+  CalendarReadingPalette? _readingCache;
+  CalendarReadingPalette? get _readingColors {
+    final design =
+        context.availableCalendarTheme(ref.watch(calendarThemeProvider));
+    if (!CalendarThemeRollout.usesReading(design, preview: _staticPreview))
+      return null;
+    final palette = AppUiPalette.of(context);
+    if (!identical(palette, _readingSource) || design != _readingDesign) {
+      _readingSource = palette;
+      _readingDesign = design;
+      _readingCache =
+          CalendarReadingPalette(palette, dark: design.isDark, design: design);
+    }
+    return _readingCache;
+  }
+
+  ColorScheme get _readingScheme =>
+      _readingColors?.scheme(Theme.of(context).colorScheme) ??
+      Theme.of(context).colorScheme;
+  // Background themes do not alter saved shift chip edges or fitted labels.
+  Border? _shiftOutline(Color fill) => null;
+
   Color? _themeBodyBackground(BuildContext context, CalendarThemeId t) {
-    return null;
+    return CalendarReadingPalette.maybeOf(context, t, preview: _staticPreview)
+        ?.surface;
   }
 
   // ⭐ "일정공유"(친구) 버튼도 위 전체근무표/오늘과 같은 원칙 - 자리는 테마마다
@@ -2340,11 +2608,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // (기존 년/월 선택 다이얼로그)를 씀 - 디자인만 다르고 동작은 그대로.
   // 🔧 각 case 안의 Text style fontSize/color가 그 테마 헤더 타이틀 크기·색.
   // 헤더 칸 자체의 세로 높이/여백은 이 함수가 아니라 build() 안 헤더
-  // SizedBox(height: 48.h)와 그 바깥 Padding(vertical: 4.h)이 결정함(모든
+  // 공통 calendarHeaderHeight와 내부 Padding(vertical: 4.h)이 결정함(모든
   // 테마 공용 - 테마마다 따로 못 바꿈, 바꾸면 9개 전부 영향).
   Widget _buildThemedHeaderTitle(CalendarThemeId theme) => widget.preview
       ? const SizedBox.shrink()
-      : _fixedCalendarText(_buildThemedHeaderTitleCore(theme));
+      : _monthFeedback(
+          () => _fixedCalendarText(_buildThemedHeaderTitleCore(theme)));
 
   Widget _buildThemedHeaderTitleCore(CalendarThemeId theme) {
     final y = _focusedDay.year;
@@ -2584,6 +2853,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       case CalendarThemeId.underline:
       case CalendarThemeId.editorial:
         return CalendarHeaderActions(
+          iconOnly: context.usesKoreanFeatures,
           editorial: theme == CalendarThemeId.editorial,
           isKorean: context.usesKoreanFeatures,
           onToday: _jumpToToday,
@@ -2702,6 +2972,44 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       {required IconData icon,
       required String label,
       required VoidCallback onTap}) {
+    if (calendarUsesAppFrame(theme,
+        preview: _staticPreview, includeLegend: context.usesKoreanFeatures)) {
+      return ColoredBox(
+          color: AppUiPalette.of(context).background,
+          child: CalendarAppAction(
+              icon: icon,
+              label: label,
+              onTap: onTap,
+              layoutUnit: _contractActive ? _layoutUnit : null,
+              padding: theme == CalendarThemeId.minimal
+                  ? EdgeInsets.fromLTRB(
+                      _contractActive
+                          ? CalendarFrameRatios.actionInset * _layoutUnit
+                          : AppUiMetrics.calendarControlPadding,
+                      _contractActive
+                          ? 2 * CalendarFrameRatios.actionInset * _layoutUnit
+                          : AppUiMetrics.calendarControlPadding * 2,
+                      _contractActive
+                          ? CalendarFrameRatios.actionInset * _layoutUnit
+                          : AppUiMetrics.calendarControlPadding,
+                      0)
+                  : theme == CalendarThemeId.materialCard
+                      ? EdgeInsets.fromLTRB(
+                          _contractActive
+                              ? CalendarFrameRatios.actionInset * _layoutUnit
+                              : AppUiMetrics.calendarControlPadding,
+                          (_contractActive
+                                  ? 2 *
+                                      CalendarFrameRatios.actionInset *
+                                      _layoutUnit
+                                  : AppUiMetrics.calendarControlPadding * 2) -
+                              _layoutLength(AppUiMetrics.calendarCardCellInset),
+                          _contractActive
+                              ? CalendarFrameRatios.actionInset * _layoutUnit
+                              : AppUiMetrics.calendarControlPadding,
+                          _layoutLength(AppUiMetrics.calendarCardCellInset))
+                      : null));
+    }
     if (theme == CalendarThemeId.diary)
       return _diaryRowSixButton(icon: icon, label: label, onTap: onTap);
     return _themedRowSixButton(theme, icon: icon, label: label, onTap: onTap);
@@ -2865,38 +3173,49 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         // 옅은 선을 그어서 합치면 그 구분선이 그대로 재현됨.
         return Container(
           decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.grey.shade200))),
+              border: Border(
+                  bottom: BorderSide(
+                      color: _usesSharedDateGrid(CalendarThemeId.minimal)
+                          ? Colors.transparent
+                          : (_readingColors?.line ?? Colors.grey.shade200)))),
           alignment: Alignment.center,
           // ⭐ 2026-09-01 - "요일(Mon/Tue) 글자색이 너무 연한 회색"이라는 지적으로
           // grey.shade500 → grey.shade700로 한 단계 더 진하게(materialCard 테마의
           // 요일 색과 동일한 톤).
           child: Text(calendarWeekdayLabel(context, i),
               style: TextStyle(
-                  fontSize: 11.sp,
+                  fontSize: _contractActive ? 11 * _layoutUnit : 11.sp,
                   fontWeight: FontWeight.w600,
-                  color:
-                      redSunday ? Colors.red.shade400 : Colors.grey.shade700)),
+                  color: redSunday
+                      ? (_readingColors?.holiday ?? Colors.red.shade400)
+                      : (_readingColors?.muted ?? Colors.grey.shade700))),
         );
       case CalendarThemeId.materialCard:
         return Center(
             child: Text(weekdayLabel(context, i),
                 style: TextStyle(
-                    fontSize: 11.5.sp,
+                    fontSize: _contractActive
+                        ? AppUiMetrics.calendarCardWeekdayFontSize * _layoutUnit
+                        : (!widget.preview && context.usesKoreanFeatures
+                                ? AppUiMetrics.calendarCardWeekdayFontSize
+                                : 11.5)
+                            .sp,
                     fontWeight: FontWeight.bold,
                     color: redSunday
-                        ? Colors.red.shade400
-                        : Colors.grey.shade700)));
+                        ? (_readingColors?.holiday ?? Colors.red.shade400)
+                        : (_readingColors?.muted ?? Colors.grey.shade700))));
       case CalendarThemeId.boldGrid:
         return Container(
-            color: const Color(0xFF37474F),
+            color: (_readingColors?.darkBand ?? const Color(0xFF37474F)),
             alignment: Alignment.center,
             child: Text(calendarWeekdayLabel(context, i),
                 style: TextStyle(
-                    fontSize: 10.5.sp,
+                    fontSize: _layoutLength(10.5),
                     fontWeight: FontWeight.bold,
                     color: redSunday
-                        ? Colors.redAccent.shade100
-                        : Colors.white70)));
+                        ? CalendarReadingPalette.redOn(
+                            _readingColors?.darkBand ?? const Color(0xFF37474F))
+                        : (_readingColors?.onDarkBand ?? Colors.white70))));
       case CalendarThemeId.initialBadge:
         return Center(
             child: Text(weekdayLabel(context, i),
@@ -2904,8 +3223,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     fontSize: 11.sp,
                     fontWeight: FontWeight.bold,
                     color: redSunday
-                        ? Colors.red.shade400
-                        : Colors.grey.shade500)));
+                        ? (_readingColors?.holiday ?? Colors.red.shade400)
+                        : (_readingColors?.muted ?? Colors.grey.shade500))));
       case CalendarThemeId.underline:
         return Center(
             child: Text(calendarWeekdayLabel(context, i, narrow: true),
@@ -2913,8 +3232,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
                     color: redSunday
-                        ? Colors.red.shade400
-                        : Colors.grey.shade400)));
+                        ? (_readingColors?.holiday ?? Colors.red.shade400)
+                        : (_readingColors?.muted ?? Colors.grey.shade400))));
       case CalendarThemeId.periwinkle:
       case CalendarThemeId.softMosaic:
         return Center(
@@ -2922,7 +3241,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 style: TextStyle(
                     fontSize: 11.5.sp,
                     fontWeight: FontWeight.w700,
-                    color: conceptInk)));
+                    color: _readingColors?.text ?? conceptInk)));
       case CalendarThemeId.eventChip:
         return Center(
             child: Text(calendarWeekdayLabel(context, i),
@@ -2930,35 +3249,42 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     fontSize: 10.5.sp,
                     fontWeight: FontWeight.bold,
                     color: redSunday
-                        ? Colors.red.shade400
-                        : Colors.grey.shade500)));
+                        ? (_readingColors?.holiday ?? Colors.red.shade400)
+                        : (_readingColors?.muted ?? Colors.grey.shade500))));
       case CalendarThemeId.editorial:
         return Container(
-          color: redSunday
-              ? Colors.red.shade50
-              : (context.usesKoreanFeatures && i == 6
-                  ? Colors.blue.shade50
-                  : Colors.grey.shade100),
+          color: _readingColors?.surface ??
+              (redSunday
+                  ? Colors.red.shade50
+                  : (context.usesKoreanFeatures && i == 6
+                      ? Colors.blue.shade50
+                      : Colors.grey.shade100)),
           alignment: Alignment.center,
           child: Text(calendarWeekdayLabel(context, i),
               style: TextStyle(
                   fontSize: 9.5.sp,
                   fontWeight: FontWeight.bold,
-                  color:
-                      redSunday ? Colors.red.shade400 : Colors.grey.shade600)),
+                  color: redSunday
+                      ? (_readingColors?.holiday ?? Colors.red.shade400)
+                      : (_readingColors?.muted ?? Colors.grey.shade600))),
         );
       case CalendarThemeId.mainWhite:
       case CalendarThemeId.mainDark:
         return Center(
             child: Text(weekdayLabel(context, i),
                 style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: _contractActive ? 13 * _layoutUnit : 13.sp,
                     fontWeight: FontWeight.bold,
-                    color: redSunday
-                        ? (Theme.of(context).brightness == Brightness.dark
-                            ? Colors.red.shade300
-                            : Colors.red)
-                        : Theme.of(context).colorScheme.onSurface)));
+                    color: _readingColors != null
+                        ? (redSunday
+                            ? _readingColors!.holiday
+                            : _readingColors!.text)
+                        : redSunday
+                            ? (Theme.of(context).brightness == Brightness.dark
+                                ? (_readingColors?.holiday ??
+                                    Colors.red.shade300)
+                                : Colors.red)
+                            : _readingScheme.onSurface)));
       // ⭐ 2026-09-01 신설 - 다이어리: 따뜻한 갈색 톤, 로케일 요일명 그대로
       // (Sun/Mon 약자 대신 실제 요일명 - 딱딱한 캘린더 느낌보다 다이어리에
       // 가깝게).
@@ -2969,8 +3295,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
                     color: redSunday
-                        ? const Color(0xFFD9534F)
-                        : const Color(0xFF8A6F5C))));
+                        ? (_readingColors?.holiday ?? const Color(0xFFD9534F))
+                        : (_readingColors?.muted ?? const Color(0xFF8A6F5C)))));
     }
   }
 
@@ -2978,12 +3304,92 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // OT/주별근무시간 푸터. 각 테마 실험판의 원래 디자인 그대로, 데이터만 실제
   // 값(_monthlyOtSummary)으로 교체. 메인 화이트/다크는 이 함수 자체를 안 씀
   // (6번째 줄 카드에 이미 다 있음).
+  AppUiPalette? get _appFramePalette {
+    final theme =
+        context.availableCalendarTheme(ref.read(calendarThemeProvider));
+    return calendarUsesAppFrame(theme,
+            preview: _staticPreview, includeLegend: context.usesKoreanFeatures)
+        ? AppUiPalette.of(context)
+        : null;
+  }
+
   Widget _buildThemedFooter(CalendarThemeId theme, ShiftSchedule schedule) =>
-      _fixedCalendarText(_buildThemedFooterCore(theme, schedule));
+      _monthFeedback(() => _buildThemedFooterSurface(theme, schedule));
+
+  Widget _buildThemedFooterSurface(
+      CalendarThemeId theme, ShiftSchedule schedule) {
+    final footer = _fixedCalendarText(_buildThemedFooterCore(theme, schedule));
+    final p = _appFramePalette;
+    return p == null
+        ? footer
+        : ColoredBox(
+            key: const ValueKey('calendar-app-footer'),
+            color: p.background,
+            child: footer);
+  }
 
   Widget _buildThemedFooterCore(CalendarThemeId theme, ShiftSchedule schedule) {
+    final p = _appFramePalette;
     final summary = _monthlyOtSummary(schedule);
     final otText = formatOvertimeMinutes(context, summary.totalMinutes);
+    if (_appFramePalette != null &&
+        _themeHasSeparateFooter(theme) &&
+        !_staticPreview) {
+      final primary = p?.text ?? Colors.indigo;
+      return Padding(
+          padding: EdgeInsets.fromLTRB(
+              _layoutLength(AppUiMetrics.compactCardPadding),
+              theme == CalendarThemeId.materialCard
+                  ? 0
+                  : _layoutLength(AppUiMetrics.calendarOutlinedFooterGap,
+                      vertical: true),
+              _layoutLength(AppUiMetrics.compactCardPadding),
+              theme == CalendarThemeId.materialCard
+                  ? _layoutLength(AppUiMetrics.calendarCardCellInset)
+                  : _layoutLength(AppUiMetrics.calendarOutlinedFooterGap,
+                      vertical: true)),
+          child: CalendarFooterActions(
+              gap: _contractActive
+                  ? CalendarFrameRatios.footerGap * _layoutUnit
+                  : 16,
+              minimumHeight: _layoutLength(
+                  AppUiMetrics.calendarOutlinedFooterActionHeight,
+                  vertical: true),
+              weeklyAlignment: Alignment.centerLeft,
+              actionPadding: EdgeInsets.symmetric(
+                  horizontal:
+                      _layoutLength(AppUiMetrics.calendarFooterLabelInset)),
+              actionDecoration: BoxDecoration(
+                  color: theme == CalendarThemeId.materialCard
+                      ? (_readingColors?.currentMonthCard ??
+                          Colors.grey.shade50)
+                      : (p?.surface ?? Colors.grey.shade50),
+                  borderRadius: BorderRadius.circular(
+                      theme == CalendarThemeId.materialCard
+                          ? _layoutLength(AppUiMetrics.calendarCardRadius)
+                          : _contractActive
+                              ? CalendarFrameRatios.actionRadius * _layoutUnit
+                              : AppUiMetrics.controlRadius),
+                  border: Border.all(
+                      color: theme == CalendarThemeId.materialCard
+                          ? (_readingColors?.currentMonthCardLine ??
+                              Colors.grey.shade300)
+                          : (p?.border ?? Colors.grey.shade300),
+                      width: AppUiMetrics.calendarBorderWidth)),
+              onMonthly: () => _showMonthlyOvertimeSheet(summary.period),
+              onWeekly: _showWeeklyWorkHoursSheet,
+              monthly: Text('${context.l10n.shiftThisMonthOt} $otText',
+                  style: TextStyle(
+                      fontSize: _contractActive ? 11 * _layoutUnit : 11.sp,
+                      color: primary,
+                      fontWeight: FontWeight.w700)),
+              weekly: Text('${context.l10n.shiftWeeklyWorkHours} ›',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                      fontSize: _contractActive ? 11 * _layoutUnit : 11.sp,
+                      color: primary,
+                      fontWeight: FontWeight.w600))));
+    }
     if (context.usesKoreanFeatures &&
         {
           CalendarThemeId.minimal,
@@ -2993,13 +3399,15 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           CalendarThemeId.eventChip,
         }.contains(theme)) {
       final dark = theme == CalendarThemeId.boldGrid;
-      final primary = dark ? const Color(0xFF263238) : Colors.indigo;
+      final primary =
+          p?.text ?? (dark ? const Color(0xFF263238) : Colors.indigo);
       return Container(
           margin:
               EdgeInsets.fromLTRB(12.w, dark ? 0 : 3.h, 12.w, dark ? 0 : 5.h),
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
           decoration: BoxDecoration(
-              color: dark ? const Color(0xFFECEFF1) : Colors.grey.shade50,
+              color: p?.surface ??
+                  (dark ? const Color(0xFFECEFF1) : Colors.grey.shade50),
               borderRadius: BorderRadius.circular(10.r)),
           child: CalendarFooterActions(
             minimumHeight: 24.h,
@@ -3047,15 +3455,16 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // GestureDetector 안 Text의 fontSize: 11.sp(각각 따로 조절 가능).
   Widget _themeDiaryFooter(
       ({int totalMinutes, DateTimeRange period}) summary, String otText) {
+    final p = _appFramePalette;
     return Container(
       margin: EdgeInsets.fromLTRB(
           12.w, (_isFoldCalendar ? 3 : 4).h, 12.w, (_isFoldCalendar ? 5 : 8).h),
       padding: EdgeInsets.symmetric(
           horizontal: 14.w, vertical: (_isFoldCalendar ? 5 : 9).h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF3E2),
+        color: p?.surface ?? const Color(0xFFFFF3E2),
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: const Color(0xFFF0DFC8)),
+        border: Border.all(color: p?.border ?? const Color(0xFFF0DFC8)),
       ),
       child: Row(
         children: [
@@ -3065,7 +3474,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               child: Text('${context.l10n.shiftThisMonthOt} $otText',
                   style: TextStyle(
                       fontSize: 11.sp,
-                      color: const Color(0xFFB5651D),
+                      color: p?.text ?? const Color(0xFFB5651D),
                       fontWeight: FontWeight.w700)),
             ),
           ),
@@ -3074,7 +3483,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             child: Text('${context.l10n.shiftWeeklyWorkHours} ›',
                 style: TextStyle(
                     fontSize: 11.sp,
-                    color: const Color(0xFF8A6F5C),
+                    color: p?.primary ?? const Color(0xFF8A6F5C),
                     fontWeight: FontWeight.w600)),
           ),
         ],
@@ -3086,7 +3495,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Widget _themeOtBar(
       ({int totalMinutes, DateTimeRange period}) summary, String otText,
       {bool compact = false}) {
-    final primary = Theme.of(context).colorScheme.primary;
+    final p = _appFramePalette;
+    final primary = p?.primary ?? Theme.of(context).colorScheme.primary;
     return Container(
       margin: EdgeInsets.fromLTRB(
           16.w,
@@ -3112,17 +3522,20 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                       : 8)
               .h),
       decoration: BoxDecoration(
-          color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8.r)),
+          color: p?.surface ?? Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(8.r)),
       child: CalendarFooterActions(
         minimumHeight: compact ? 30 : 48,
         onMonthly: () => _showMonthlyOvertimeSheet(summary.period),
         onWeekly: _showWeeklyWorkHoursSheet,
         monthly: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.access_time, size: 13.sp, color: primary.withOpacity(0.6)),
+          Icon(Icons.access_time,
+              size: 13.sp, color: p?.secondaryText ?? primary.withOpacity(0.6)),
           SizedBox(width: 5.w),
           Flexible(
               child: Text('${context.l10n.shiftThisMonthOt} $otText',
-                  style: TextStyle(fontSize: 11.sp, color: Colors.black87))),
+                  style: TextStyle(
+                      fontSize: 11.sp, color: p?.text ?? Colors.black87))),
         ]),
         weekly: Text('${context.l10n.shiftWeeklyWorkHours} ›',
             textAlign: TextAlign.right,
@@ -3134,13 +3547,14 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   Widget _theme2OtCardReal(
       ({int totalMinutes, DateTimeRange period}) summary, String otText) {
+    final p = _appFramePalette;
     return Container(
       margin: EdgeInsets.fromLTRB(
           12.w, (_isFoldCalendar ? 3 : 4).h, 12.w, (_isFoldCalendar ? 5 : 8).h),
       padding: EdgeInsets.symmetric(
           horizontal: 14.w, vertical: (_isFoldCalendar ? 5 : 9).h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: p?.surface ?? Colors.white,
         borderRadius: BorderRadius.circular(10.r),
         boxShadow: [
           BoxShadow(
@@ -3167,6 +3581,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   Widget _otChipReal(
       String label, String value, VoidCallback onTap, MaterialColor color) {
+    final p = _appFramePalette;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -3174,7 +3589,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           padding: EdgeInsets.symmetric(
               horizontal: 10.w, vertical: (_isFoldCalendar ? 4 : 6).h),
           decoration: BoxDecoration(
-              color: color.shade50, borderRadius: BorderRadius.circular(8.r)),
+              color: p?.soft ?? color.shade50,
+              borderRadius: BorderRadius.circular(8.r)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -3186,12 +3602,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                       softWrap: context.usesKoreanFeatures,
                       style: TextStyle(
                           fontSize: 9.sp,
-                          color: color.shade400,
+                          color: p?.secondaryText ?? color.shade400,
                           fontWeight: FontWeight.w600))),
               Text(value,
                   style: TextStyle(
                       fontSize: 12.sp,
-                      color: color.shade700,
+                      color: p?.text ?? color.shade700,
                       fontWeight: FontWeight.bold)),
             ],
           ),
@@ -3202,8 +3618,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   Widget _theme4FooterReal(
       ({int totalMinutes, DateTimeRange period}) summary, String otText) {
+    final p = _appFramePalette;
     return Container(
-      color: const Color(0xFFECEFF1),
+      color: p?.surface ?? const Color(0xFFECEFF1),
       padding: EdgeInsets.symmetric(
           horizontal: 14.w, vertical: (_isFoldCalendar ? 5 : 8).h),
       child: CalendarFooterActions(
@@ -3213,13 +3630,13 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF263238))),
+                color: p?.text ?? const Color(0xFF263238))),
         weekly: Text('${context.l10n.shiftWeeklyWorkHours} ▸',
             textAlign: TextAlign.right,
             style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF00695C))),
+                color: p?.primary ?? const Color(0xFF00695C))),
       ),
     );
   }
@@ -3236,7 +3653,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             // ⭐ "OT 3시간 30분도 아주 약간만 더 진하게" - black54→black87.
             // ⭐ "OT만 쓰지 말고 다른 테마들처럼 이번 달 OT로 통일" 요청 반영.
             child: Text('${context.l10n.shiftThisMonthOt} $otText',
-                style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
+                style: TextStyle(
+                    fontSize: 11.sp,
+                    color: _appFramePalette?.text ?? Colors.black87)),
           ),
           const Spacer(),
           // ⭐ "오늘 표시 밑줄은 그대로 두되, 주별 근무시간의 밑줄은 없애자 -
@@ -3248,7 +3667,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87)),
+                    color: _appFramePalette?.text ?? Colors.black87)),
           ),
         ],
       ),
@@ -3269,14 +3688,15 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               Text(context.l10n.shiftThisMonthOt,
                   style: TextStyle(
                       fontSize: 10.sp,
-                      color: Colors.grey.shade600,
+                      color: _appFramePalette?.secondaryText ??
+                          Colors.grey.shade600,
                       fontFamily: 'serif')),
               SizedBox(width: 4.w),
               Text(otText,
                   style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.brown.shade600,
+                      color: _appFramePalette?.primary ?? Colors.brown.shade600,
                       fontFamily: 'serif')),
             ]),
           ),
@@ -3286,7 +3706,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             child: Text('${context.l10n.shiftWeeklyWorkHours} →',
                 style: TextStyle(
                     fontSize: 11.sp,
-                    color: Colors.brown.shade500,
+                    color: _appFramePalette?.primary ?? Colors.brown.shade500,
                     fontFamily: 'serif')),
           ),
         ],
@@ -3300,6 +3720,14 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // 개수가 몇 개든 정렬이 항상 맞고 줄 수만 자연스럽게 늘어남).
   Widget _buildThemedLegend(CalendarThemeId theme, ShiftSchedule schedule) =>
       _fixedCalendarText(_buildThemedLegendCore(theme, schedule));
+
+  bool _usesSharedDateGrid(CalendarThemeId theme) =>
+      !_staticPreview &&
+      {
+        CalendarThemeId.minimal,
+        CalendarThemeId.boldGrid,
+        CalendarThemeId.editorial
+      }.contains(theme);
 
   bool get _usesWideCalendarCells =>
       WideCalendarCell.appliesTo(MediaQuery.sizeOf(context));
@@ -3315,7 +3743,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       decoration: BoxDecoration(
         border: Border.all(
-            color: useTriangle ? Colors.grey.shade200 : Colors.grey.shade300,
+            color: _readingColors?.line ??
+                (useTriangle ? Colors.grey.shade200 : Colors.grey.shade300),
             width: 0.7),
         borderRadius: useTriangle ? null : BorderRadius.circular(4.r),
       ),
@@ -3338,17 +3767,18 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                             child: Row(
                               children: [
                                 useTriangle
-                                    ? ClipPath(
+                                    ? (ClipPath(
                                         clipper: _CalendarTriangleClipper(),
                                         child: Container(
                                             width: 16.w,
                                             height: 16.w,
-                                            color: color))
+                                            color: color)))
                                     : Container(
                                         width: 16.w,
                                         height: 5.h,
                                         decoration: BoxDecoration(
                                             color: color,
+                                            border: _shiftOutline(color),
                                             borderRadius:
                                                 BorderRadius.circular(2.r))),
                                 SizedBox(width: useTriangle ? 4.w : 3.w),
@@ -3357,7 +3787,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                     child: Text(name,
                                         style: TextStyle(
                                             fontSize: 7.6.sp,
-                                            color: Colors.black87,
+                                            color: _readingColors?.text ??
+                                                Colors.black87,
                                             fontWeight: FontWeight.w600),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis)),
@@ -3395,19 +3826,80 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   Widget _buildThemedCell(DateTime day, bool isToday, bool isOutside,
-          ShiftSchedule schedule, DateTime focusedDay,
-          {bool isSelected = false}) =>
-      KeyedSubtree(
-          key: ValueKey('calendar-cell-${_dayKey(day)}'),
-          child: _buildThemedCellCore(
-              day, isToday, isOutside, schedule, focusedDay,
-              isSelected: isSelected));
+      ShiftSchedule schedule, DateTime focusedDay,
+      {bool isSelected = false}) {
+    final theme =
+        context.availableCalendarTheme(ref.watch(calendarThemeProvider));
+    final pattern = schedule.getPatternShiftForDate(day);
+    final actual = schedule.getShiftForDate(day);
+    final changed = !widget.preview &&
+        CalendarShiftChangeScope.supports(theme) &&
+        CalendarShiftChangeScope.isChanged(pattern, actual);
+    return KeyedSubtree(
+        key: ValueKey('calendar-cell-${_dayKey(day)}'),
+        child: CalendarShiftChangeScope(
+            originalColor:
+                changed ? _getShiftBackgroundColor(pattern, schedule) : null,
+            originalInk: changed ? _getShiftTextColor(pattern, schedule) : null,
+            child: _buildThemedCellCore(
+                day, isToday, isOutside, schedule, focusedDay,
+                isSelected: isSelected)));
+  }
 
   Widget _buildThemedCellCore(DateTime day, bool isToday, bool isOutside,
       ShiftSchedule schedule, DateTime focusedDay,
       {bool isSelected = false}) {
     final theme =
         context.availableCalendarTheme(ref.watch(calendarThemeProvider));
+    if (_usesLayoutContract(theme)) {
+      final d = _themedCellData(day, schedule);
+      final pattern = schedule.getPatternShiftForDate(day);
+      return ContractCalendarCell(
+          profile: CalendarLayoutProfile.forTheme(theme)!,
+          palette: _readingColors!,
+          day: day.day,
+          shift: d.hasShift ? d.shiftText : '',
+          shiftColor: d.shiftColor,
+          shiftTextColor: d.shiftTextColor,
+          memos: d.memos,
+          holiday: d.holidayName,
+          lunar: d.lunarText,
+          overtimeMinutes: d.overtimeMinutes,
+          overtimeSemanticLabel:
+              '${context.l10n.shiftOt} ${formatOvertimeMinutes(context, d.overtimeMinutes)}',
+          isToday: isToday && !isOutside,
+          isOutside: isOutside,
+          isRed: d.red,
+          isSelected: isSelected &&
+              (theme != CalendarThemeId.mainWhite || _isMultiSelectMode),
+          isModified:
+              pattern.isNotEmpty && d.hasShift && pattern != d.shiftText,
+          flushTop:
+              _isFirstRow(day, focusedDay) || _isSixthRow(day, focusedDay));
+    }
+    if (_readingColors != null &&
+        CalendarDetailProfile.forTheme(theme) != null &&
+        (context.usesKoreanFeatures || theme == CalendarThemeId.boldGrid)) {
+      final d = _themedCellData(day, schedule);
+      return DetailCalendarCell(
+          profile: CalendarDetailProfile.forTheme(theme)!,
+          palette: _readingColors!,
+          day: day.day,
+          shift: d.hasShift ? d.shiftText : '',
+          shiftColor: d.shiftColor,
+          shiftTextColor: d.shiftTextColor,
+          memos: d.memos,
+          holiday: d.holidayName,
+          lunar: d.lunarText,
+          overtimeMinutes: d.overtimeMinutes,
+          overtimeSemanticLabel:
+              '${context.l10n.shiftOt} ${formatOvertimeMinutes(context, d.overtimeMinutes)}',
+          phoneDecorations: context.usesKoreanFeatures && !_isFoldCalendar,
+          today: isToday && !isOutside,
+          outside: isOutside,
+          red: d.red,
+          selected: isSelected);
+    }
     if (theme == CalendarThemeId.periwinkle ||
         theme == CalendarThemeId.softMosaic) {
       final d = _themedCellData(day, schedule);
@@ -3417,8 +3909,13 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           (candidate) => _isSixthRowButtonCell(candidate, focusedDay,
                   includeAllShiftsCol: schedule.isRegular)
               ? ''
-              : schedule.getShiftForDate(candidate));
+              : schedule.getShiftForDate(candidate),
+          separatesDay: (candidate) => CalendarShiftChangeScope.isChanged(
+              schedule.getPatternShiftForDate(candidate),
+              schedule.getShiftForDate(candidate)));
+
       return GlobalConceptCalendarCell(
+          reading: _readingColors,
           coverMemoSize: 9.3.sp,
           theme: theme,
           date: day,
@@ -3436,6 +3933,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     if (WideCalendarCell.appliesTo(MediaQuery.sizeOf(context))) {
       final d = _themedCellData(day, schedule);
       return WideCalendarCell(
+        sharedGrid: _usesSharedDateGrid(theme),
+        reading: _readingColors,
         theme: theme,
         day: day.day,
         shift: d.hasShift ? d.shiftText : '',
@@ -3504,11 +4003,13 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   bool get _isFoldCalendar => AppLayout.of(context).usesBoundedCalendar;
 
   Widget _fixedCalendarText(Widget child) {
-    if (!_isFoldCalendar) return child;
+    if (!_contractActive && !_isFoldCalendar) return child;
     final media = MediaQuery.of(context);
     return MediaQuery(
         data: media.copyWith(
-            textScaler: media.textScaler.clamp(maxScaleFactor: 1)),
+            textScaler: _contractActive
+                ? TextScaler.noScaling
+                : media.textScaler.clamp(maxScaleFactor: 1)),
         child: child);
   }
 
@@ -3677,10 +4178,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   double _calendarMarkerSize(double size) =>
       size.w * MediaQuery.textScalerOf(context).scale(1);
 
-  TextScaler get _shiftTextScaler => calendarShiftTextScaler(
-      context.availableCalendarTheme(ref.read(calendarThemeProvider)),
-      MediaQuery.textScalerOf(context),
-      isBarPhone: !AppLayout.of(context).usesBoundedCalendar);
+  TextScaler get _shiftTextScaler => TextScaler.noScaling;
 
   double _shiftMarkerSize(double size) => size.w * _shiftTextScaler.scale(1);
 
@@ -3835,6 +4333,21 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // calendar_theme_lab_screen.dart의 목업(_mockShiftFor/_mockMemos 등) 대신
   // 실제 schedule.getShiftForDate/memoProvider를 씀 - 그 외 계산 방식(공휴일,
   // 일요일, 자동 대비 텍스트색 등)은 완전히 동일한 공식을 그대로 씀.
+  CalendarDayOvertime? _calendarDayOt;
+  CalendarDayOvertime _dayOvertime(ShiftSchedule schedule) {
+    final manual = ref.watch(overtimeProvider);
+    final countChanges =
+        ref.watch(workHoursSettingsProvider).shiftChangeCountsAsOt;
+    final old = _calendarDayOt;
+    if (old == null ||
+        !identical(old.schedule, schedule) ||
+        !identical(old.manual, manual) ||
+        old.countShiftChanges != countChanges) {
+      _calendarDayOt = CalendarDayOvertime(schedule, manual, countChanges);
+    }
+    return _calendarDayOt!;
+  }
+
   ({
     String shiftText,
     bool hasShift,
@@ -3843,7 +4356,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     bool red,
     String? holidayName,
     String? lunarText,
-    List<String> memos
+    List<String> memos,
+    int overtimeMinutes
   }) _themedCellData(DateTime day, ShiftSchedule schedule) {
     final shiftText = schedule.getShiftForDate(day);
     final hasShift = shiftText.isNotEmpty && shiftText != '미설정';
@@ -3861,10 +4375,18 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     // ⚠️ 2026-09-22 버그 수정 - 상세팝업(음력 X)은 한국어 로케일 조건이 있었는데 여기(메인
     // 달력 셀)는 빠뜨려서 영어 로케일에도 "(4.14)"가 그대로 보이던 문제. 공휴일 표시와
     // 동일한 기준(languageCode == 'ko')으로 맞춤.
+    final otDays =
+        !widget.preview && context.usesKoreanFeatures && _contractActive
+            ? _dayOvertime(schedule)
+            : null;
+    final overtimeMinutes = otDays?.minutesFor(day) ?? 0;
     String? lunarText;
     if (holidayName == null &&
         Localizations.localeOf(context).languageCode == 'ko') {
-      final labelDay = _lunarLabelDateForWeek(day, context);
+      final labelDay = calendarLunarLabelDate(day,
+          hasHoliday: (candidate) =>
+              _getHolidayName(candidate, context) != null,
+          hasOvertime: (candidate) => (otDays?.minutesFor(candidate) ?? 0) > 0);
       if (labelDay != null && isSameDay(labelDay, day)) {
         final lunar = solarToLunar(day);
         if (lunar != null) lunarText = formatLunarDateCompact(lunar);
@@ -3884,160 +4406,93 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       holidayName: context.usesKoreanFeatures ? holidayName : null,
       lunarText: lunarText,
       memos: memos,
+      overtimeMinutes: overtimeMinutes,
     );
   }
 
   // ⭐ 음력 표기(메인 달력) 공통 스타일 - 모든 테마가 동일하게 씀(사용자 요청: "폰트
-  // 디자인은 모든 테마가 동일"). 크기는 kLunarCellFontSize 하나로 조정, 색은 상세팝업의
-  // "(없음)" 텍스트와 같은 onSurfaceVariant 고정.
+  // 디자인은 모든 테마가 동일"). 크기는 각 테마의 기존 값, 색은 공통 음력 역할.
+  Color get _lunarInk =>
+      _readingColors?.lunar ??
+      CalendarContrast.lunarInk(Theme.of(context).colorScheme.onSurface,
+          Theme.of(context).colorScheme.surface);
+
   TextStyle _lunarCellTextStyle([TextStyle? holidayStyle]) => TextStyle(
         fontSize: holidayStyle?.fontSize ?? kLunarCellFontSize.sp,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        color: _lunarInk,
         fontWeight: holidayStyle?.fontWeight ?? FontWeight.w500,
         height: holidayStyle?.height ?? 1.1,
       );
+
+  final _lineHeights = <(TextStyle, TextScaler), double>{};
 
   // 실제 Text가 그려질 한 줄 높이(기본 글꼴·글자 크기 배율 반영).
   double _lineHeightOf(TextStyle style,
       {bool fixed = false, TextScaler? textScaler}) {
     final layout = AppLayout.of(context);
-    final baseStyle = DefaultTextStyle.of(context).style;
+    final resolved = DefaultTextStyle.of(context)
+        .style
+        .merge(
+            layout.usesBoundedCalendar ? const TextStyle(height: 1.15) : null)
+        .merge(style);
+    final scaler = fixed
+        ? TextScaler.noScaling
+        : textScaler ?? MediaQuery.textScalerOf(context);
+    final key = (resolved, scaler);
+    final cached = _lineHeights[key];
+    if (cached != null) return cached;
     final tp = TextPainter(
-        text: TextSpan(
-            text: '가9',
-            style: baseStyle
-                .merge(layout.usesBoundedCalendar
-                    ? const TextStyle(height: 1.15)
-                    : null)
-                .merge(style)),
+        text: TextSpan(text: '가9', style: resolved),
         textDirection: TextDirection.ltr,
-        textScaler: fixed
-            ? TextScaler.noScaling
-            : textScaler ?? MediaQuery.textScalerOf(context),
+        textScaler: scaler,
         maxLines: 1)
       ..layout();
-    return tp.height;
+    final height = tp.height;
+    tp.dispose();
+    if (_lineHeights.length >= 128) _lineHeights.clear();
+    _lineHeights[key] = height;
+    return height;
   }
 
   // 근무명 배지가 실제 글자 한 줄보다 낮으면 가운데 정렬이어도 글자가 배경 밖으로
   // 내려간다. 글자 배율을 반영하되 기존 테마의 최소 높이는 유지한다.
   // Symmetric leading and a centered line box, including fitted four-letter names.
-  Widget _shiftBadgeLabel(String text, TextStyle style) {
-    // Phone global themes: use the joined Periwinkle label's 15/19 cap.
-    // Korean and fold renderers retain their reviewed sizing.
-    if ((!context.usesKoreanFeatures && !_isFoldCalendar) ||
-        (_koreanCompactCalendar &&
-            ref.read(calendarThemeProvider) == CalendarThemeId.diary)) {
-      return LayoutBuilder(builder: (context, bounds) {
-        return Center(
-          key: const ValueKey('shift-badge-content'),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              text,
-              key: const ValueKey('shift-badge-text'),
-              maxLines: 1,
-              textScaler: TextScaler.noScaling,
-              textAlign: TextAlign.center,
-              style: style.copyWith(
-                inherit: false,
-                fontSize: bounds.maxHeight * 15 / 19,
-                height: 1.05,
-                leadingDistribution: TextLeadingDistribution.proportional,
-              ),
-            ),
-          ),
-        );
-      });
-    }
-    if (_reviewedTheme) {
-      final theme =
-          context.availableCalendarTheme(ref.read(calendarThemeProvider));
-      final length = text.characters.length;
-      final factor = theme == CalendarThemeId.diary
-          ? (length <= 2
-              ? 1.35
-              : length <= 4
-                  ? 1.12
-                  : 0.85)
-          : length <= 4
-              ? 1.06
-              : 1.0;
-      final enlarge = {
-            CalendarThemeId.minimal,
-            CalendarThemeId.boldGrid,
-            CalendarThemeId.eventChip
-          }.contains(theme) &&
-          length >= 2 &&
-          length <= 5;
-      style = style.copyWith(
-          fontSize: style.fontSize! * factor * (enlarge ? 1.05 : 1.0),
-          height: enlarge ? 1.05 : style.height);
-    }
-    return Center(
-      key: const ValueKey('shift-badge-content'),
-      child: !context.usesKoreanFeatures && !_reviewedTheme
-          ? SizedBox(
-              height: _lineHeightOf(style, textScaler: _shiftTextScaler),
-              child: EnglishCalendarLabel(text,
-                  style: style,
-                  textScaler: _shiftTextScaler,
-                  textKey: const ValueKey('shift-badge-text')))
-          : LayoutBuilder(builder: (context, bounds) {
-              final theme = context
-                  .availableCalendarTheme(ref.read(calendarThemeProvider));
-              final length = text.characters.length;
-              final groupLength = theme == CalendarThemeId.diary
-                  ? (length <= 2
-                      ? 2
-                      : length <= 4
-                          ? 4
-                          : 6)
-                  : ({
-                            CalendarThemeId.minimal,
-                            CalendarThemeId.boldGrid,
-                            CalendarThemeId.eventChip
-                          }.contains(theme) &&
-                          length == 5
-                      ? 5
-                      : (length <= 4 ? 4 : 6));
-              var fitted = style;
-              if (_reviewedTheme && theme != CalendarThemeId.initialBadge) {
-                final probe = TextPainter(
-                  text: TextSpan(
-                      text: (context.usesKoreanFeatures
-                              ? '근'
-                              : Localizations.localeOf(context).languageCode ==
-                                      'hi'
-                                  ? 'म'
-                                  : 'W') *
-                          groupLength,
-                      style: DefaultTextStyle.of(context).style.merge(style)),
-                  textDirection: TextDirection.ltr,
-                  textScaler: _shiftTextScaler,
-                )..layout();
-                final horizontal = bounds.maxWidth.isFinite
-                    ? math.max(0.0, bounds.maxWidth - 1.w) / probe.width
-                    : 1.0;
-                final vertical = bounds.maxHeight.isFinite
-                    ? math.max(0.0, bounds.maxHeight - 0.4.h) / probe.height
-                    : 1.0;
-                final ratio = math.min(1.0, math.min(horizontal, vertical));
-                probe.dispose();
-                fitted = style.copyWith(fontSize: style.fontSize! * ratio);
-              }
-              return FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(text,
-                      key: const ValueKey('shift-badge-text'),
-                      textScaler: _shiftTextScaler,
-                      style: fitted.copyWith(
-                          leadingDistribution: TextLeadingDistribution.even),
-                      maxLines: 1,
-                      textAlign: TextAlign.center));
-            }),
-    );
-  }
+  bool get _usesProportionalShiftLabel =>
+      context.usesKoreanFeatures &&
+      !widget.preview &&
+      !{
+        CalendarThemeId.initialBadge,
+        CalendarThemeId.underline,
+        CalendarThemeId.editorial
+      }.contains(
+          context.availableCalendarTheme(ref.read(calendarThemeProvider)));
+
+  ShiftChipProportions get _shiftLabelProportions =>
+      switch (context.availableCalendarTheme(ref.read(calendarThemeProvider))) {
+        CalendarThemeId.eventChip => ShiftChipProportions.eventCalendar,
+        CalendarThemeId.diary => ShiftChipProportions.diaryCalendar,
+        _ => ShiftChipProportions.calendarReview,
+      };
+
+  Widget _shiftBadgeLabel(String text, TextStyle style) =>
+      _usesProportionalShiftLabel
+          ? Center(
+              key: const ValueKey('shift-badge-content'),
+              child: ShiftChipLabel(
+                  label: text,
+                  color: style.color,
+                  textKey: const ValueKey('shift-badge-text'),
+                  proportions: _shiftLabelProportions))
+          : Center(
+              key: const ValueKey('shift-badge-content'),
+              child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+                  child: ShiftChipLabel(
+                      label: text,
+                      color: style.color,
+                      textKey: const ValueKey('shift-badge-text'))),
+            );
 
   double _shiftBadgeHeight(TextStyle style, double minimumHeight) {
     final requiredHeight =
@@ -4051,13 +4506,16 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // 같은 주의 셀들이 "날짜 · 근무 · 빨간날/음력 · 메모" 줄을 똑같이 나눠 씀.
   Widget _redDaySlot(
       String? holidayName, String? lunarText, TextStyle holidayStyle,
-      {TextAlign textAlign = TextAlign.center, double extraHeight = 0}) {
+      {TextAlign textAlign = TextAlign.center,
+      double extraHeight = 0,
+      Color? lunarColor}) {
     if (!context.usesKoreanFeatures &&
         holidayName == null &&
         lunarText == null) {
       return const SizedBox(height: 2);
     }
-    final lunarStyle = _lunarCellTextStyle(holidayStyle);
+    final lunarStyle =
+        _lunarCellTextStyle(holidayStyle).copyWith(color: lunarColor);
     final holidayH = _lineHeightOf(holidayStyle, fixed: true);
     final lunarH = _lineHeightOf(lunarStyle, fixed: true);
     final height = (holidayH > lunarH ? holidayH : lunarH) + extraHeight;
@@ -4142,15 +4600,18 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Widget _theme1Cell(DateTime day, bool isToday, bool isOutside,
       ShiftSchedule schedule, DateTime focusedDay) {
     final d = _themedCellData(day, schedule);
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = _readingScheme;
     final badgeStyle = TextStyle(
         fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor);
     final badgeHeight =
         (_shiftBadgeHeight(badgeStyle, 11.h) + (_reviewedTheme ? 0.5.h : 0)) *
             (!context.usesKoreanFeatures && !_isFoldCalendar ? 0.93 : 1.0);
     final numColor = isOutside
-        ? colorScheme.onSurfaceVariant.withOpacity(0.5)
-        : (d.red ? Colors.red.shade400 : colorScheme.onSurface);
+        ? (_readingColors?.outside ??
+            colorScheme.onSurfaceVariant.withOpacity(0.5))
+        : (d.red
+            ? (_readingColors?.holiday ?? Colors.red.shade400)
+            : colorScheme.onSurface);
     // ⭐ "그리드가 이미지보다 진하다"는 지적으로 왼쪽 선을 더 연하게.
     // ⭐ "맨 윗줄 근무명 영역이랑 요일행 밑 구분선 사이에 미세한 여백이 있다"는
     // 지적 - lab 원본도 첫 줄만 위쪽 패딩을 0으로 없앴었는데(다른 행끼리는
@@ -4158,6 +4619,10 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     // 아래쪽 패딩"이 없어서 그 틈이 붕 떠 보임) 그 조건을 이식할 때 빠뜨렸음 -
     // 첫 줄만 위쪽 패딩 0으로 복원.
     final isFirstRow = _isFirstRow(day, focusedDay);
+    // The sixth-row date strip starts on the same grid edge as the fifth-row
+    // trailing outline; do not leave the old inter-row gap above this strip.
+    final joinsLastRow = _usesSharedDateGrid(CalendarThemeId.minimal) &&
+        _isSixthRow(day, focusedDay);
     // ⭐ 2026-09-01 버그 수정 - "근무가 하나도 할당 안 된 날(불규칙 스케줄
     // 초기 상태)에는 평범한 날 셀들이 우측으로 쏠리고, 빨간날 셀도 약간
     // 흐트러져 보인다"는 지적의 원인 - table_calendar는 각 날짜 셀을 내부
@@ -4181,22 +4646,35 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-            border: Border(left: BorderSide(color: Colors.grey.shade200))),
+            border: Border(
+                left: BorderSide(
+                    color: _usesSharedDateGrid(CalendarThemeId.minimal)
+                        ? Colors.transparent
+                        : (_readingColors?.line ?? Colors.grey.shade200)))),
         padding: EdgeInsets.only(
-            top: isFirstRow ? 0 : 2.h, bottom: (_reviewedTheme ? 2.0 : 2).h),
+            top: isFirstRow || joinsLastRow ? 0 : 2.h,
+            bottom: (_reviewedTheme ? 2.0 : 2).h),
         child: Column(
           children: [
             // 글자 배율에 맞춰 배지 높이를 늘리고, 근무가 없는 날도 같은 자리를 비운다.
             if (d.hasShift)
-              Container(
-                width: double.infinity,
-                height: badgeHeight,
-                margin: EdgeInsets.only(top: isFirstRow ? 0 : 1.h),
-                color: d.shiftColor.withOpacity(0.85),
-                alignment: Alignment.center,
-                // Keep the full name on one line; shrink to the badge width.
-                child: _shiftBadgeLabel(d.shiftText, badgeStyle),
-              )
+              CalendarShiftChange(
+                  background: d.shiftColor.withOpacity(0.85),
+                  foreground: d.shiftTextColor,
+                  originalBackground: (color) => color.withValues(alpha: .85),
+                  builder: (bg, fg) => Container(
+                        width: double.infinity,
+                        height: badgeHeight,
+                        margin: EdgeInsets.only(
+                            top: isFirstRow || joinsLastRow ? 0 : 1.h),
+                        color: bg,
+                        foregroundDecoration:
+                            BoxDecoration(border: _shiftOutline(bg)),
+                        alignment: Alignment.center,
+                        // Keep the full name on one line; shrink to the badge width.
+                        child: _shiftBadgeLabel(
+                            d.shiftText, badgeStyle.copyWith(color: fg)),
+                      ))
             else
               SizedBox(height: badgeHeight + (isFirstRow ? 0 : 1.h)),
             // 🔧 근무명 배지 ↔ 날짜 숫자 사이 간격.
@@ -4211,8 +4689,10 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               decoration: isToday
                   ? BoxDecoration(
                       shape: BoxShape.circle,
-                      border:
-                          Border.all(color: Colors.indigo.shade400, width: 1.4))
+                      border: Border.all(
+                          color:
+                              (_readingColors?.today ?? Colors.indigo.shade400),
+                          width: 1.4))
                   : null,
               child: FittedBox(
                   fit: BoxFit.scaleDown,
@@ -4233,7 +4713,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 d.lunarText,
                 TextStyle(
                     fontSize: (_reviewedTheme ? 8.5 : 7.7).sp,
-                    color: Colors.red.shade400,
+                    color: (_readingColors?.holiday ?? Colors.red.shade400),
                     fontWeight: FontWeight.bold,
                     height: 1.1)),
             // 🔧 메모 시작 위치(날짜/빨간날 ↔ 첫 메모 사이 간격) - 이 SizedBox
@@ -4270,7 +4750,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Widget _theme2Cell(
       DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = _readingScheme;
     final badgeStyle = TextStyle(
         fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor);
     final badgeHeight =
@@ -4278,8 +4758,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     final joinedToday = isToday && _reviewedTheme;
     return ClipRect(
       child: Padding(
-        padding: EdgeInsets.all(
-            !context.usesKoreanFeatures && !_isFoldCalendar ? 1.5.w : 2.w),
+        padding: EdgeInsets.all(!context.usesKoreanFeatures && !_isFoldCalendar
+            ? 1.5.w
+            : AppUiMetrics.calendarCardCellInset.w),
         // ⭐ 2026-09-01 버그 수정 - "근무가 할당 안 된 날은 카드 배경이 1일이면
         // 좁은 세로줄, 10일이면 좀 더 넓은 세로줄처럼 내용 크기만큼만 그려진다.
         // 근무가 있으면 100% 폭이 유지된다"는 지적의 원인 - _theme1Cell의 같은
@@ -4293,10 +4774,15 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         child: Container(
           width: double.infinity,
           clipBehavior: joinedToday ? Clip.antiAlias : Clip.none,
-          foregroundDecoration: joinedToday
+          foregroundDecoration: joinedToday || _readingColors != null
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(6.r),
-                  border: Border.all(color: Colors.indigo.shade400, width: 1.4))
+                  border: Border.all(
+                      color: joinedToday
+                          ? (_readingColors?.today ?? Colors.indigo.shade400)
+                          : _readingColors!.cardLine(isOutside),
+                      width:
+                          joinedToday ? 1.4 : AppUiMetrics.calendarBorderWidth))
               : null,
           decoration: BoxDecoration(
             // ⭐ 2026-09-05 - "뿌옇게(투명도)는 이미 낮춰놨는데도 색 자체가
@@ -4310,12 +4796,15 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             // ⭐ 2026-09-22 - "다른 날들이 하얀색이라 F1F2F6이 칙칙해 보인다"는 재지적으로
             // kMaterialCardCurrentMonthCellColor(밝은 파스텔 블루)로 다시 교체(불투명 고정색
             // 방식 자체는 유지 - 그 위에 근무명 배지 등이 그대로 렌더링됨).
-            color: isOutside
-                ? colorScheme.surfaceVariant.withOpacity(0.15)
-                : kMaterialCardCurrentMonthCellColor,
+            color: _readingColors?.cardSurface(isOutside) ??
+                (isOutside
+                    ? colorScheme.surfaceVariant.withOpacity(0.15)
+                    : kMaterialCardCurrentMonthCellColor),
             borderRadius: BorderRadius.circular(6.r),
             border: isToday && !joinedToday
-                ? Border.all(color: Colors.indigo.shade400, width: 1.4)
+                ? Border.all(
+                    color: (_readingColors?.today ?? Colors.indigo.shade400),
+                    width: 1.4)
                 : null,
             boxShadow: isOutside
                 ? null
@@ -4330,20 +4819,28 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             children: [
               // 근무가 없는 날도 배지 높이와 위 여백만큼 자리를 비운다.
               if (d.hasShift)
-                Container(
-                  width: double.infinity,
-                  height: badgeHeight,
-                  margin: EdgeInsets.fromLTRB(_reviewedTheme ? 0 : 4.w,
-                      joinedToday ? 0 : 1.h, _reviewedTheme ? 0 : 4.w, 0),
-                  decoration: BoxDecoration(
-                      color: d.shiftColor,
-                      borderRadius:
-                          BorderRadius.circular(_reviewedTheme ? 6.r : 3.r)),
-                  alignment: Alignment.center,
-                  // ⭐ 영어 현지화: 위 셀과 동일한 이유로 강제 4글자 컷 제거,
-                  // 기존 overflow:ellipsis에 맡김.
-                  child: _shiftBadgeLabel(d.shiftText, badgeStyle),
-                )
+                CalendarShiftChange(
+                    background: d.shiftColor,
+                    foreground: d.shiftTextColor,
+                    builder: (bg, fg) => Container(
+                          width: double.infinity,
+                          height: badgeHeight,
+                          margin: EdgeInsets.fromLTRB(
+                              _reviewedTheme ? 0 : 4.w,
+                              joinedToday ? 0 : 1.h,
+                              _reviewedTheme ? 0 : 4.w,
+                              0),
+                          decoration: BoxDecoration(
+                              color: bg,
+                              border: _shiftOutline(bg),
+                              borderRadius: BorderRadius.circular(
+                                  _reviewedTheme ? 6.r : 3.r)),
+                          alignment: Alignment.center,
+                          // ⭐ 영어 현지화: 위 셀과 동일한 이유로 강제 4글자 컷 제거,
+                          // 기존 overflow:ellipsis에 맡김.
+                          child: _shiftBadgeLabel(
+                              d.shiftText, badgeStyle.copyWith(color: fg)),
+                        ))
               else
                 SizedBox(height: badgeHeight + (joinedToday ? 0 : 1.h)),
               // 🔧 근무명 배지 ↔ 날짜 숫자 간격.
@@ -4356,8 +4853,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     fontSize: (_reviewedTheme ? 11.7 : 11).sp,
                     fontWeight: isToday ? FontWeight.bold : FontWeight.w700,
                     color: isOutside
-                        ? colorScheme.onSurfaceVariant.withOpacity(0.5)
-                        : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
+                        ? (_readingColors?.outside ??
+                            colorScheme.onSurfaceVariant.withOpacity(0.5))
+                        : (d.red
+                            ? (_readingColors?.cardHoliday(isOutside) ??
+                                Colors.red.shade400)
+                            : colorScheme.onSurface),
                   )),
               // 🔧 빨간날 이름 - 크기: fontSize: 6.sp, 색: red.shade600. 위치는
               // 날짜 숫자 바로 아래 고정(Column 순서).
@@ -4366,9 +4867,11 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                   d.lunarText,
                   TextStyle(
                       fontSize: (_reviewedTheme ? 8 : 7).sp,
-                      color: Colors.red.shade600,
+                      color: (_readingColors?.cardHoliday(isOutside) ??
+                          Colors.red.shade600),
                       fontWeight: FontWeight.bold,
-                      height: 1.0)),
+                      height: 1.0),
+                  lunarColor: _readingColors?.cardLunar(isOutside)),
               // 🔧 메모 시작 위치(날짜/빨간날 ↔ 첫 메모 간격) = 이 SizedBox 높이.
               SizedBox(height: 3.5.h),
               // 🔧 메모 목록 - 최대 3개, fontSize: 7.5.sp. 메모끼리 간격은 Padding
@@ -4399,12 +4902,24 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Widget _theme4Cell(
       DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = _readingScheme;
     final annotationStyle = TextStyle(
         fontSize: 8.3.sp,
         height: 1.2,
         leadingDistribution: TextLeadingDistribution.even,
         fontWeight: FontWeight.bold);
+    final headerInset = AppUiMetrics.boldGridHeaderInset.w;
+    final chipLift = _usesProportionalShiftLabel ? headerInset : 0.0;
+    final dateRowHeight = _calendarMarkerSize(14);
+    Widget fitDateRow(Widget child) => chipLift == 0
+        ? child
+        : SizedBox(
+            height: dateRowHeight - chipLift,
+            child: OverflowBox(
+                alignment: Alignment.topCenter,
+                minHeight: dateRowHeight,
+                maxHeight: dateRowHeight,
+                child: child));
     return ClipRect(
       child: Container(
         // ⭐ shade300→shade400으로 한 번 진하게 했는데 "아직도 더 진해야 할듯"
@@ -4417,15 +4932,19 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         // 흰색으로 교체(원래부터 이 값이었음, 이번에 처음 바뀌는 것 - "원래
         // 이랬나"의 답은 "네, kAppSurface를 계속 이렇게 썼었음").
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade600, width: 0.6),
+          border: Border.all(
+              color: _usesSharedDateGrid(CalendarThemeId.boldGrid)
+                  ? Colors.transparent
+                  : (_readingColors?.line ?? Colors.grey.shade600),
+              width: 0.6),
           // ⭐ 2026-09-23 - 오늘을 셀 전체 노란 배경(0xFFFFF9C4)으로 칠하던 것을
           // "별로"라는 지적으로 날짜 숫자만 헤더와 같은 네이비 사각 배지로 감싸는
           // 방식으로 바꿈(아래 Row 참고) - 셀 배경은 다른 날과 같은 흰색.
           color: isOutside
               ? colorScheme.surfaceVariant.withOpacity(0.3)
-              : Colors.white,
+              : (_readingColors?.surface ?? Colors.white),
         ),
-        padding: EdgeInsets.symmetric(horizontal: 0.5.w, vertical: 2.w),
+        padding: EdgeInsets.symmetric(horizontal: 0.5.w, vertical: headerInset),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -4434,8 +4953,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             // 빨간날 이름 크기: fontSize: 5.5.sp, 날짜 숫자 오른쪽에 이어서 표시
             // (Expanded라 남는 폭을 다 씀 - 위치를 아래 줄로 내리려면 이 Row
             // 밖으로 꺼내 별도 줄로 빼야 함).
-            Transform.translate(
-              offset: Offset(-0.5.w, -2.w),
+            fitDateRow(Transform.translate(
+              offset: Offset(-0.5.w, -headerInset),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -4451,7 +4970,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     alignment: Alignment.center,
                     decoration: isToday && !isOutside
                         ? BoxDecoration(
-                            color: const Color(0xFF263238),
+                            color: (_readingColors?.today ??
+                                const Color(0xFF263238)),
                             borderRadius: BorderRadius.only(
                                 topRight: Radius.circular(2.r),
                                 bottomLeft: Radius.circular(2.r),
@@ -4464,14 +4984,18 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                 fontSize: (_reviewedTheme ? 11.2 : 10).sp,
                                 fontWeight: FontWeight.bold,
                                 color: isOutside
-                                    ? colorScheme.onSurfaceVariant
-                                        .withOpacity(0.5)
+                                    ? (_readingColors?.outside ??
+                                        colorScheme.onSurfaceVariant
+                                            .withOpacity(0.5))
                                     : isToday
                                         ? (d.red
-                                            ? Colors.red.shade200
-                                            : Colors.white)
+                                            ? (_readingColors?.todayHoliday ??
+                                                Colors.red.shade200)
+                                            : (_readingColors?.surface ??
+                                                Colors.white))
                                         : (d.red
-                                            ? Colors.red.shade600
+                                            ? (_readingColors?.holiday ??
+                                                Colors.red.shade600)
                                             : colorScheme.onSurface)))),
                   ),
                   if (d.holidayName != null)
@@ -4479,26 +5003,25 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                         child: SizedBox(
                             height: _calendarMarkerSize(14),
                             child: Align(
-                                alignment: Alignment.centerLeft,
+                                alignment: Alignment.centerRight,
                                 child: _annotationText(
                                     d.holidayName!,
                                     annotationStyle.copyWith(
-                                        color: Colors.red.shade600),
-                                    textAlign: TextAlign.left))))
+                                        color: (_readingColors?.holiday ??
+                                            Colors.red.shade600)),
+                                    textAlign: TextAlign.right))))
                   else if (d.lunarText != null)
                     Expanded(
                         child: SizedBox(
                             height: _calendarMarkerSize(14),
                             child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: _annotationText(
-                                    d.lunarText!,
-                                    annotationStyle.copyWith(
-                                        color: colorScheme.onSurfaceVariant),
-                                    textAlign: TextAlign.left)))),
+                                alignment: Alignment.centerRight,
+                                child: _annotationText(d.lunarText!,
+                                    annotationStyle.copyWith(color: _lunarInk),
+                                    textAlign: TextAlign.right)))),
                 ],
               ),
-            ),
+            )),
             // 🔧 근무명 배지(날짜 줄 바로 아래) - 크기: fontSize: 7.5.sp, 위아래
             // 여백은 margin vertical: 1.h. ⭐ 2026-09-23 - 예전엔 근무 없는 날 이
             // 자리를 아예 안 그려서 그날만 메모가 위로 올라붙었음 - 이제 보이지만
@@ -4514,27 +5037,37 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               maintainSize: true,
               maintainAnimation: true,
               maintainState: true,
-              child: Container(
-                height: _lineHeightOf(
-                        TextStyle(
-                            fontSize: 9.5.sp, fontWeight: FontWeight.bold),
-                        textScaler: _shiftTextScaler) +
-                    (_globalCompactCalendar ? 1.2.h : 0.4.h),
-                margin: EdgeInsets.symmetric(vertical: 0.2.h),
-                padding: EdgeInsets.symmetric(
-                    horizontal: 2.w,
-                    vertical: !context.usesKoreanFeatures && !_isFoldCalendar
-                        ? 0
-                        : 0.2.h),
-                width: double.infinity,
-                decoration: BoxDecoration(color: d.shiftColor),
-                child: _shiftBadgeLabel(
-                    d.shiftText,
-                    TextStyle(
-                        fontSize: 9.5.sp * (_globalCompactCalendar ? 1.06 : 1),
-                        fontWeight: FontWeight.bold,
-                        color: d.shiftTextColor)),
-              ),
+              child: CalendarShiftChange(
+                  background: d.shiftColor,
+                  foreground: d.shiftTextColor,
+                  builder: (bg, fg) => Container(
+                        height: _lineHeightOf(
+                                TextStyle(
+                                    fontSize: 9.5.sp,
+                                    fontWeight: FontWeight.bold),
+                                textScaler: _shiftTextScaler) +
+                            (_globalCompactCalendar ? 1.2.h : 0.4.h) +
+                            chipLift,
+                        margin: EdgeInsets.symmetric(vertical: 0.2.h),
+                        padding: _usesProportionalShiftLabel
+                            ? EdgeInsets.zero
+                            : EdgeInsets.symmetric(
+                                horizontal: 2.w,
+                                vertical: !context.usesKoreanFeatures &&
+                                        !_isFoldCalendar
+                                    ? 0
+                                    : 0.2.h),
+                        width: double.infinity,
+                        decoration:
+                            BoxDecoration(color: bg, border: _shiftOutline(bg)),
+                        child: _shiftBadgeLabel(
+                            d.shiftText,
+                            TextStyle(
+                                fontSize: 9.5.sp *
+                                    (_globalCompactCalendar ? 1.06 : 1),
+                                fontWeight: FontWeight.bold,
+                                color: fg)),
+                      )),
             ),
             // 🔧 메모 시작 위치(근무명 배지 ↔ 첫 메모 간격) = 이 SizedBox 높이.
             SizedBox(height: 4.0.h),
@@ -4563,10 +5096,13 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Widget _theme5Cell(
       DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = _readingScheme;
     final numColor = isOutside
-        ? colorScheme.onSurfaceVariant.withOpacity(0.5)
-        : (d.red ? Colors.red.shade400 : colorScheme.onSurface);
+        ? (_readingColors?.outside ??
+            colorScheme.onSurfaceVariant.withOpacity(0.5))
+        : (d.red
+            ? (_readingColors?.holiday ?? Colors.red.shade400)
+            : colorScheme.onSurface);
     // ⭐ "메모가 없으면 홀쭉해 보인다"는 지적의 진짜 원인은 셀 자체가 아니라
     // rowHeight를 75.h로 감으로 고정했던 것 - lab은 6줄을 Expanded로 화면
     // 남는 공간만큼 나눠 쓰는데 그 실제 값과 75.h가 안 맞아서 셀이 필요
@@ -4588,8 +5124,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       // 회색이었음. 거의 안 보일 만큼 연한 고정 회색으로 교체.
       decoration: BoxDecoration(
         border: isToday
-            ? Border.all(color: Colors.indigo.shade400, width: 1.4)
-            : Border.all(color: Colors.grey.shade200, width: 0.5),
+            ? Border.all(
+                color: (_readingColors?.today ?? Colors.indigo.shade400),
+                width: 1.4)
+            : Border.all(
+                color: (_readingColors?.line ?? Colors.grey.shade200),
+                width: 0.5),
         borderRadius: BorderRadius.circular(4.r),
       ),
       // ⭐ "스크린샷에서는 근무명·숫자가 셀 맨 위에 붙어있었는데 지금은 중간에
@@ -4618,7 +5158,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                           context.usesKoreanFeatures ? 15 : 14),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                          color: d.shiftColor, shape: BoxShape.circle),
+                          color: d.shiftColor,
+                          border: _shiftOutline(d.shiftColor),
+                          shape: BoxShape.circle),
                       child: _shiftBadgeLabel(
                           d.shiftText[0],
                           TextStyle(
@@ -4651,7 +5193,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                   d.lunarText,
                   TextStyle(
                       fontSize: (context.usesKoreanFeatures ? 8 : 7.5).sp,
-                      color: Colors.red.shade400,
+                      color: (_readingColors?.holiday ?? Colors.red.shade400),
                       fontWeight: FontWeight.bold,
                       height: 1.0)),
               // 🔧 메모 시작 위치 - 메모가 있을 때만 이 간격(1.2.h)이 붙음(메모가
@@ -4685,7 +5227,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Widget _theme8Cell(
       DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = _readingScheme;
     // 🔧 이 테마는 근무명 "글자"를 셀 안에 안 그림(색깔 막대만) - 근무 구분은
     // 6번째 줄 범례(_buildThemedLegend의 underline case)가 대신함. 근무명
     // 텍스트를 셀 안에도 넣고 싶으면 아래 막대 Container 안에 Text를 추가하면 됨.
@@ -4700,8 +5242,11 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 fontSize: 12.sp,
                 fontWeight: isToday ? FontWeight.bold : FontWeight.w400,
                 color: isOutside
-                    ? colorScheme.onSurfaceVariant.withOpacity(0.5)
-                    : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
+                    ? (_readingColors?.outside ??
+                        colorScheme.onSurfaceVariant.withOpacity(0.5))
+                    : (d.red
+                        ? (_readingColors?.holiday ?? Colors.red.shade400)
+                        : colorScheme.onSurface),
                 decoration: isToday ? TextDecoration.underline : null,
                 decorationThickness: 2,
               )),
@@ -4716,6 +5261,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 height: 3.0.h,
                 decoration: BoxDecoration(
                     color: d.shiftColor,
+                    border: _shiftOutline(d.shiftColor),
                     borderRadius: BorderRadius.circular(2.r)))
           else
             SizedBox(height: 7.0.h),
@@ -4726,7 +5272,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               d.lunarText,
               TextStyle(
                   fontSize: 6.sp,
-                  color: Colors.red.shade400,
+                  color: (_readingColors?.holiday ?? Colors.red.shade400),
                   fontWeight: FontWeight.bold)),
           // 🔧 메모 목록 - 최대 3개, fontSize: 7.8.sp("너무 연하고 작다"는
           // 지적으로 7.sp→7.8.sp, 색도 onSurfaceVariant→grey.shade700로 진하게
@@ -4739,7 +5285,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                   e.value,
                   TextStyle(
                       fontSize: 7.8.sp,
-                      color: Colors.grey.shade700,
+                      color: (_readingColors?.muted ?? Colors.grey.shade700),
                       fontWeight: FontWeight.w500)))),
         ],
       ),
@@ -4764,7 +5310,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Widget _reviewEventCell(
       DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
-    final colors = Theme.of(context).colorScheme;
+    final colors = _readingScheme;
     final infoStyle = TextStyle(
         fontSize: 8.sp,
         height: 1.1,
@@ -4801,7 +5347,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           margin: EdgeInsets.only(bottom: 1.2.h),
           decoration: isToday
               ? BoxDecoration(
-                  color: d.red ? Colors.red.shade400 : Colors.indigo.shade400,
+                  color: d.red
+                      ? (_readingColors?.holiday ?? Colors.red.shade400)
+                      : (_readingColors?.today ?? Colors.indigo.shade400),
                   shape: BoxShape.circle)
               : null,
           child: FittedBox(
@@ -4811,11 +5359,13 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                       fontSize: 13.2.sp,
                       fontWeight: FontWeight.w600,
                       color: isToday
-                          ? Colors.white
+                          ? (_readingColors?.onToday ?? Colors.white)
                           : isOutside
-                              ? colors.onSurfaceVariant.withOpacity(0.5)
+                              ? (_readingColors?.outside ??
+                                  colors.onSurfaceVariant.withOpacity(0.5))
                               : d.red
-                                  ? Colors.red.shade400
+                                  ? (_readingColors?.holiday ??
+                                      Colors.red.shade400)
                                   : colors.onSurface))),
         ),
         Visibility(
@@ -4829,10 +5379,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             child: Column(children: [
           band(
               d.holidayName ?? d.lunarText,
-              d.holidayName != null ? Colors.red.shade50 : null,
               d.holidayName != null
-                  ? Colors.red.shade400
-                  : colors.onSurfaceVariant),
+                  ? (_readingColors?.memoSurface ?? Colors.red.shade50)
+                  : null,
+              d.holidayName != null
+                  ? (_readingColors?.holiday ?? Colors.red.shade400)
+                  : _lunarInk),
           for (var i = 0; i < 3; i++)
             band(
                 i < d.memos.length ? d.memos[i] : null,
@@ -4850,7 +5402,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       return _reviewEventCell(day, isToday, isOutside, schedule);
     }
     final d = _themedCellData(day, schedule);
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = _readingScheme;
     return ClipRect(
       child: Container(
         width: double.infinity,
@@ -4868,8 +5420,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               margin: EdgeInsets.only(bottom: (_isFoldCalendar ? 2 : 1.2).h),
               decoration: isToday
                   ? BoxDecoration(
-                      color:
-                          d.red ? Colors.red.shade400 : Colors.indigo.shade400,
+                      color: d.red
+                          ? (_readingColors?.holiday ?? Colors.red.shade400)
+                          : (_readingColors?.today ?? Colors.indigo.shade400),
                       shape: BoxShape.circle)
                   : null,
               child: FittedBox(
@@ -4879,11 +5432,14 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                         fontSize: (_isFoldCalendar ? 11.5 : 12).sp,
                         fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
                         color: isToday
-                            ? Colors.white
+                            ? (_readingColors?.onToday ?? Colors.white)
                             : (isOutside
-                                ? colorScheme.onSurfaceVariant.withOpacity(0.5)
+                                ? (_readingColors?.outside ??
+                                    colorScheme.onSurfaceVariant
+                                        .withOpacity(0.5))
                                 : (d.red
-                                    ? Colors.red.shade400
+                                    ? (_readingColors?.holiday ??
+                                        Colors.red.shade400)
                                     : colorScheme.onSurface)),
                       ))),
             ),
@@ -4916,7 +5472,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 height: _themeChipHeight(),
                 child: d.holidayName != null
                     ? _themeChip(
-                        d.holidayName!, Colors.red.shade50, Colors.red.shade400,
+                        d.holidayName!,
+                        (_readingColors?.memoSurface ?? Colors.red.shade50),
+                        (_readingColors?.holiday ?? Colors.red.shade400),
                         annotation: true)
                     : (d.lunarText != null
                         ? Padding(
@@ -4967,26 +5525,34 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   Widget _themeChip(String text, Color bg, Color fg,
       {bool annotation = false, bool isShift = false, int? memoCount}) {
-    return Container(
-      width: double.infinity,
-      height: isShift ? _themeChipHeight(isShift: true) - 0.6.h : null,
-      margin: EdgeInsets.only(bottom: 0.6.h),
-      padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.1.h),
-      decoration:
-          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(2.5.r)),
-      child: isShift
-          ? _shiftBadgeLabel(
-              text, _themeChipTextStyle(fg).copyWith(fontSize: 8.5.sp))
-          : memoCount != null
-              ? _memoText(memoCount, text, _themeChipTextStyle(fg))
-              : _fitText(
-                  text,
-                  _themeChipTextStyle(fg).copyWith(
-                      fontSize: annotation && _koreanCompactCalendar
-                          ? 7.56.sp
-                          : null),
-                  textScaler: annotation ? TextScaler.noScaling : null),
-    );
+    return CalendarShiftChange(
+        background: bg,
+        foreground: fg,
+        enabled: isShift,
+        builder: (bg, fg) => Container(
+              width: double.infinity,
+              height: isShift ? _themeChipHeight(isShift: true) - 0.6.h : null,
+              margin: EdgeInsets.only(bottom: 0.6.h),
+              padding: isShift && _usesProportionalShiftLabel
+                  ? EdgeInsets.zero
+                  : EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.1.h),
+              decoration: BoxDecoration(
+                  color: bg,
+                  border: isShift ? _shiftOutline(bg) : null,
+                  borderRadius: BorderRadius.circular(2.5.r)),
+              child: isShift
+                  ? _shiftBadgeLabel(
+                      text, _themeChipTextStyle(fg).copyWith(fontSize: 8.5.sp))
+                  : memoCount != null
+                      ? _memoText(memoCount, text, _themeChipTextStyle(fg))
+                      : _fitText(
+                          text,
+                          _themeChipTextStyle(fg).copyWith(
+                              fontSize: annotation && _koreanCompactCalendar
+                                  ? 7.56.sp
+                                  : null),
+                          textScaler: annotation ? TextScaler.noScaling : null),
+            ));
   }
 
   // ⭐ 10번 · 매거진 에디토리얼형 (범례는 8번과 같은 이유로 이 화면에선 생략)
@@ -4996,7 +5562,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Widget _theme10Cell(
       DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = _readingScheme;
     // ⭐ "스크린샷보다 셀 테두리가 너무 진하다"는 지적으로 다른 테마들과 같은
     // 톤(grey.shade200)으로 낮춤. 메모 색도 "약간 더 진하게" - onSurfaceVariant
     // 대신 눈에 잘 띄는 고정 회색(grey.shade700)으로 교체.
@@ -5006,7 +5572,11 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     // 직접 바꿔야 함.
     return Container(
       decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade200, width: 0.5)),
+          border: Border.all(
+              color: _usesSharedDateGrid(CalendarThemeId.editorial)
+                  ? Colors.transparent
+                  : (_readingColors?.line ?? Colors.grey.shade200),
+              width: 0.5)),
       child: Stack(
         children: [
           // 🔧 근무 색 - 글자 없이 좌상단 삼각형 하나로만 표시. 크기: width/
@@ -5016,10 +5586,10 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             Positioned(
               top: 0,
               left: 0,
-              child: ClipPath(
+              child: (ClipPath(
                   clipper: _CalendarTriangleClipper(),
                   child: Container(
-                      width: 16.w, height: 16.w, color: d.shiftColor)),
+                      width: 16.w, height: 16.w, color: d.shiftColor))),
             ),
           // 🔧 날짜 숫자 - 크기: fontSize: 12.sp, 위치: 우측 상단 고정
           // (Align.topRight), 셀 위쪽 여백: padding top: 3.h.
@@ -5032,8 +5602,11 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     fontSize: 12.sp,
                     fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
                     color: isOutside
-                        ? colorScheme.onSurfaceVariant.withOpacity(0.5)
-                        : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
+                        ? (_readingColors?.outside ??
+                            colorScheme.onSurfaceVariant.withOpacity(0.5))
+                        : (d.red
+                            ? (_readingColors?.holiday ?? Colors.red.shade400)
+                            : colorScheme.onSurface),
                     decoration: isToday ? TextDecoration.underline : null,
                   )),
             ),
@@ -5054,7 +5627,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                   d.holidayName!,
                   TextStyle(
                       fontSize: 7.5.sp,
-                      color: Colors.red.shade400,
+                      color: (_readingColors?.holiday ?? Colors.red.shade400),
                       fontWeight: FontWeight.bold),
                   textAlign: TextAlign.right),
             )
@@ -5089,7 +5662,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                             d.memos.length,
                             e.value,
                             TextStyle(
-                                fontSize: 7.3.sp, color: Colors.grey.shade800),
+                                fontSize: 7.3.sp,
+                                color: (_readingColors?.text ??
+                                    Colors.grey.shade800)),
                             textAlign: TextAlign.right),
                       ))
                   .toList(),
@@ -5143,16 +5718,20 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     final balanceCoverMemos = CalendarMemoSizing.appliesTo(window) &&
         window.width < 600 &&
         window.height > window.width;
-    final colorScheme = Theme.of(context).colorScheme;
-    const borderColor = Color(0xFFE4D9C9); // 따뜻한 크림 라인(무채색 회색 대신)
+    final colorScheme = _readingScheme;
+    final borderColor =
+        _readingColors?.line ?? const Color(0xFFE4D9C9); // 따뜻한 크림 라인(무채색 회색 대신)
     final dateColor = isOutside
-        ? colorScheme.onSurfaceVariant.withOpacity(0.4)
-        : (d.red ? const Color(0xFFC0392B) : const Color(0xFF4A4038));
+        ? (_readingColors?.outside ??
+            colorScheme.onSurfaceVariant.withOpacity(0.4))
+        : (d.red
+            ? (_readingColors?.holiday ?? const Color(0xFFC0392B))
+            : (_readingColors?.text ?? const Color(0xFF4A4038)));
     final holidayStyle = TextStyle(
         fontSize: 8.sp,
         height: 1.2,
         leadingDistribution: TextLeadingDistribution.even,
-        color: const Color(0xFFC0392B),
+        color: (_readingColors?.holiday ?? const Color(0xFFC0392B)),
         fontWeight: FontWeight.w700);
     final holidayLineH = _lineHeightOf(holidayStyle, fixed: true);
     final lunarLineH = _lineHeightOf(
@@ -5167,7 +5746,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         width: double.infinity,
         margin: EdgeInsets.all(1.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: (_readingColors?.surface ?? Colors.white),
           border: Border.all(color: borderColor, width: 0.8),
           borderRadius: BorderRadius.circular(6.r),
         ),
@@ -5189,11 +5768,14 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               // IntrinsicHeight가 있어야 가운데 세로선(Container)이 Row의 실제
               // 높이만큼 늘어남(Row가 스스로 높이를 정하는 상황이라 필요).
               Container(
+                foregroundDecoration: d.hasShift
+                    ? BoxDecoration(border: _shiftOutline(d.shiftColor))
+                    : null,
                 decoration: BoxDecoration(
                     color: isToday && d.hasShift
                         ? d.shiftColor.withOpacity(0.85)
-                        : Colors.white,
-                    border: const Border(
+                        : (_readingColors?.surface ?? Colors.white),
+                    border: Border(
                         bottom: BorderSide(color: borderColor, width: 0.8))),
                 child: SizedBox(
                   height: 20.h,
@@ -5207,10 +5789,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                           padding: EdgeInsets.symmetric(
                               vertical: 1.h, horizontal: 0.5.w),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: (_readingColors?.surface ?? Colors.white),
                             border: isToday
                                 ? Border.all(
-                                    color: const Color(0xFF292929), width: 1.2)
+                                    color: (_readingColors?.text ??
+                                        const Color(0xFF292929)),
+                                    width: 1.2)
                                 : null,
                             borderRadius: isToday
                                 ? BorderRadius.only(
@@ -5229,29 +5813,45 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                         ),
                       ),
                       if (!isToday)
-                        const VerticalDivider(
+                        VerticalDivider(
                             width: 0.8, thickness: 0.8, color: borderColor),
                       Expanded(
                         flex: 65,
-                        child: Container(
-                          color: isToday
-                              ? Colors.transparent
-                              : d.hasShift
-                                  ? d.shiftColor.withOpacity(0.85)
-                                  : Colors.white,
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(
-                              vertical: _koreanCompactCalendar ? 1.h : 2.h,
-                              horizontal: 1.w),
-                          child: d.hasShift
-                              ? _shiftBadgeLabel(
-                                  d.shiftText,
-                                  TextStyle(
-                                      fontSize: (_isFoldCalendar ? 11 : 9.5).sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: d.shiftTextColor))
-                              : const SizedBox.shrink(),
-                        ),
+                        child: CalendarShiftChange(
+                            background: d.shiftColor.withOpacity(0.85),
+                            foreground: d.shiftTextColor,
+                            enabled: d.hasShift,
+                            originalBackground: (color) =>
+                                color.withValues(alpha: .85),
+                            builder: (bg, fg) => Container(
+                                  foregroundDecoration: d.hasShift
+                                      ? BoxDecoration(border: _shiftOutline(bg))
+                                      : null,
+                                  color: isToday
+                                      ? Colors.transparent
+                                      : d.hasShift
+                                          ? bg
+                                          : (_readingColors?.surface ??
+                                              Colors.white),
+                                  alignment: Alignment.center,
+                                  padding: _usesProportionalShiftLabel
+                                      ? EdgeInsets.zero
+                                      : EdgeInsets.symmetric(
+                                          vertical: _koreanCompactCalendar
+                                              ? 1.h
+                                              : 2.h,
+                                          horizontal: 1.w),
+                                  child: d.hasShift
+                                      ? _shiftBadgeLabel(
+                                          d.shiftText,
+                                          TextStyle(
+                                              fontSize:
+                                                  (_isFoldCalendar ? 11 : 9.5)
+                                                      .sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: fg))
+                                      : const SizedBox.shrink(),
+                                )),
                       ),
                     ],
                   ),
@@ -5271,7 +5871,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     ? Container(
                         alignment: Alignment.center,
                         padding: const EdgeInsets.symmetric(vertical: 2),
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                             border: Border(
                                 bottom: BorderSide(
                                     color: borderColor, width: 0.8))),
@@ -5315,7 +5915,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                         e.value,
                                         TextStyle(
                                             fontSize: 8.sp,
-                                            color: const Color(0xFF1A1A1A),
+                                            color: (_readingColors?.text ??
+                                                const Color(0xFF1A1A1A)),
                                             fontWeight: FontWeight.w600),
                                         scaleOverride: balanceCoverMemos
                                             ? switch (d.memos.length) {
@@ -5356,16 +5957,20 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     final balanceCoverMemos = CalendarMemoSizing.appliesTo(window) &&
         window.width < 600 &&
         window.height > window.width;
-    final colorScheme = Theme.of(context).colorScheme;
-    const borderColor = Color(0xFFE4D9C9); // 따뜻한 크림 라인(무채색 회색 대신)
+    final colorScheme = _readingScheme;
+    final borderColor =
+        _readingColors?.line ?? const Color(0xFFE4D9C9); // 따뜻한 크림 라인(무채색 회색 대신)
     final dateColor = isOutside
-        ? colorScheme.onSurfaceVariant.withOpacity(0.4)
-        : (d.red ? const Color(0xFFC0392B) : const Color(0xFF4A4038));
+        ? (_readingColors?.outside ??
+            colorScheme.onSurfaceVariant.withOpacity(0.4))
+        : (d.red
+            ? (_readingColors?.holiday ?? const Color(0xFFC0392B))
+            : (_readingColors?.text ?? const Color(0xFF4A4038)));
     final holidayStyle = TextStyle(
         fontSize: 8.sp,
         height: 1.2,
         leadingDistribution: TextLeadingDistribution.even,
-        color: const Color(0xFFC0392B),
+        color: (_readingColors?.holiday ?? const Color(0xFFC0392B)),
         fontWeight: FontWeight.w700);
     final holidayLineH = _lineHeightOf(holidayStyle, fixed: true);
     final lunarLineH = _lineHeightOf(
@@ -5380,7 +5985,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         width: double.infinity,
         margin: EdgeInsets.all(1.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: (_readingColors?.surface ?? Colors.white),
           border: Border.all(color: borderColor, width: 0.8),
           borderRadius: BorderRadius.circular(6.r),
         ),
@@ -5402,7 +6007,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               // IntrinsicHeight가 있어야 가운데 세로선(Container)이 Row의 실제
               // 높이만큼 늘어남(Row가 스스로 높이를 정하는 상황이라 필요).
               Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                     border: Border(
                         bottom: BorderSide(color: borderColor, width: 0.8))),
                 child: IntrinsicHeight(
@@ -5436,8 +6041,10 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                                       .sp,
                                               fontWeight: FontWeight.bold,
                                               color: d.red
-                                                  ? const Color(0xFFC0392B)
-                                                  : Colors.white))),
+                                                  ? (_readingColors?.holiday ??
+                                                      const Color(0xFFC0392B))
+                                                  : (_readingColors?.surface ??
+                                                      Colors.white)))),
                                 )
                               : Text('${day.day}',
                                   style: TextStyle(
@@ -5446,25 +6053,36 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                       color: dateColor)),
                         ),
                       ),
-                      const VerticalDivider(
+                      VerticalDivider(
                           width: 0.8, thickness: 0.8, color: borderColor),
                       Expanded(
-                        child: Container(
-                          color: d.hasShift
-                              ? d.shiftColor.withOpacity(0.85)
-                              : Colors.white,
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(
-                              vertical: 3.h, horizontal: 1.w),
-                          child: d.hasShift
-                              ? _shiftBadgeLabel(
-                                  d.shiftText,
-                                  TextStyle(
-                                      fontSize: (_isFoldCalendar ? 11 : 9.5).sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: d.shiftTextColor))
-                              : const SizedBox.shrink(),
-                        ),
+                        child: CalendarShiftChange(
+                            background: d.shiftColor.withOpacity(0.85),
+                            foreground: d.shiftTextColor,
+                            enabled: d.hasShift,
+                            originalBackground: (color) =>
+                                color.withValues(alpha: .85),
+                            builder: (bg, fg) => Container(
+                                  color: d.hasShift
+                                      ? bg
+                                      : (_readingColors?.surface ??
+                                          Colors.white),
+                                  alignment: Alignment.center,
+                                  padding: _usesProportionalShiftLabel
+                                      ? EdgeInsets.zero
+                                      : EdgeInsets.symmetric(
+                                          vertical: 3.h, horizontal: 1.w),
+                                  child: d.hasShift
+                                      ? _shiftBadgeLabel(
+                                          d.shiftText,
+                                          TextStyle(
+                                              fontSize:
+                                                  (_isFoldCalendar ? 11 : 9.5)
+                                                      .sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: fg))
+                                      : const SizedBox.shrink(),
+                                )),
                       ),
                     ],
                   ),
@@ -5484,7 +6102,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     ? Container(
                         alignment: Alignment.center,
                         padding: const EdgeInsets.symmetric(vertical: 2),
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                             border: Border(
                                 bottom: BorderSide(
                                     color: borderColor, width: 0.8))),
@@ -5525,7 +6143,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                         e.value,
                                         TextStyle(
                                             fontSize: 7.5.sp,
-                                            color: const Color(0xFF1A1A1A),
+                                            color: (_readingColors?.text ??
+                                                const Color(0xFF1A1A1A)),
                                             fontWeight: FontWeight.w600),
                                         scaleOverride: balanceCoverMemos
                                             ? switch (d.memos.length) {
@@ -5561,14 +6180,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule,
       {bool isSelected = false}) {
     final shiftText = schedule.getShiftForDate(day);
-    final patternShift = schedule.getPatternShiftForDate(day);
-
-    // ⭐ 패턴과 다른 경우 표시 (패턴이 있고, 현재가 다르고, 둘 다 유효한 경우)
-    final isModified = patternShift.isNotEmpty &&
-        shiftText.isNotEmpty &&
-        shiftText != '미설정' &&
-        patternShift != shiftText;
-
     final isRedSunday =
         context.usesKoreanFeatures && day.weekday == DateTime.sunday;
 
@@ -5582,6 +6193,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     final colorScheme = Theme.of(context).colorScheme;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
+    final reading = _readingColors;
+    final cellSurface = isSelected && _isMultiSelectMode
+        ? reading?.selectedSurface
+        : reading?.surface;
+    final shiftFill = _getShiftBackgroundColor(shiftText, schedule);
+    final shiftInk = _getShiftTextColor(shiftText, schedule);
     Color dateColor;
     if (isRedSunday || isHoliday) {
       // ⭐ 일요일 또는 공휴일
@@ -5596,11 +6213,25 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           : colorScheme.onSurface;
     }
 
+    if (reading != null) {
+      dateColor = isOutside
+          ? reading.outside
+          : (isRedSunday || isHoliday)
+              ? reading.holiday
+              : reading.text;
+    }
     return Container(
+      foregroundDecoration: reading != null && isSelected && _isMultiSelectMode
+          ? BoxDecoration(
+              border: Border.all(
+                  color: reading.selection,
+                  width: CalendarContrast.outlineWidth))
+          : null,
       decoration: BoxDecoration(
-        color: isSelected && _isMultiSelectMode
-            ? Theme.of(context).colorScheme.secondary.withOpacity(0.2)
-            : Colors.transparent,
+        color: cellSurface ??
+            (isSelected && _isMultiSelectMode
+                ? Theme.of(context).colorScheme.secondary.withOpacity(0.2)
+                : Colors.transparent),
       ),
       padding: EdgeInsets.only(
           left: 2.w, right: 2.w, top: 2.h), // ⭐ 모든 날짜 동일한 padding
@@ -5611,37 +6242,30 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           // 크기, 아래 Text). 근무 없는 날은 SizedBox(height: _mainBadgeHeight)로 자리를
           // 대신 비움 - 배지 높이를 바꾸면 이 SizedBox도 같이 맞출 것.
           if (shiftText.isNotEmpty && shiftText != '미설정')
-            Container(
-              height: _mainBadgeHeight,
-              decoration: BoxDecoration(
-                color: _getShiftBackgroundColor(shiftText, schedule),
-                // ⭐ 패턴과 다른 경우 좌측만 각지게
-                borderRadius: isModified
-                    ? BorderRadius.only(
-                        topRight: Radius.circular(3.r),
-                        bottomRight: Radius.circular(3.r),
-                      )
-                    : BorderRadius.circular(3.r),
-                // ⭐ 패턴과 다른 경우 좌측에 검정 세로 줄 표시
-                border: isModified
-                    ? Border(
-                        left: BorderSide(
-                            color: Theme.of(context).colorScheme.onSurface,
-                            width: 3))
-                    : null,
-              ),
-              child: Center(
-                child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 2.w),
-                    child: _shiftBadgeLabel(
-                        shiftText,
-                        TextStyle(
-                          fontSize: 11.sp,
-                          color: _getShiftTextColor(shiftText, schedule),
-                          fontWeight: FontWeight.bold,
-                        ))),
-              ),
-            )
+            CalendarShiftChange(
+                background: shiftFill,
+                foreground: shiftInk,
+                surface: cellSurface,
+                builder: (bg, fg) => Container(
+                      height: _mainBadgeHeight,
+                      decoration: BoxDecoration(
+                        color: bg,
+                        borderRadius: BorderRadius.circular(3.r),
+                      ),
+                      child: Center(
+                        child: Padding(
+                            padding: _usesProportionalShiftLabel
+                                ? EdgeInsets.zero
+                                : EdgeInsets.symmetric(horizontal: 2.w),
+                            child: _shiftBadgeLabel(
+                                shiftText,
+                                TextStyle(
+                                  fontSize: 11.sp,
+                                  color: fg,
+                                  fontWeight: FontWeight.bold,
+                                ))),
+                      ),
+                    ))
           else
             SizedBox(height: _mainBadgeHeight),
 
@@ -5707,13 +6331,18 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                 style: TextStyle(
                                   fontSize: 9.3.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: isOutside
-                                      ? (isDarkMode
-                                          ? Colors.red.shade300.withOpacity(0.5)
-                                          : Colors.red.withOpacity(0.3))
-                                      : (isDarkMode
-                                          ? Colors.red.shade300
-                                          : Colors.red),
+                                  color: reading != null
+                                      ? (isOutside
+                                          ? reading.outside
+                                          : reading.holiday)
+                                      : isOutside
+                                          ? (isDarkMode
+                                              ? Colors.red.shade300
+                                                  .withOpacity(0.5)
+                                              : Colors.red.withOpacity(0.3))
+                                          : (isDarkMode
+                                              ? Colors.red.shade300
+                                              : Colors.red),
                                 ),
                               ),
                             ),
@@ -5781,16 +6410,17 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                             decoration: shouldHighlightToday
                                 ? BoxDecoration(
                                     // ⭐ 다크모드 오늘 날짜 배경: 더 밝게
-                                    color: (isRedSunday || isHoliday)
-                                        ? (isDarkMode
-                                            ? Colors.amber.shade300
-                                            : Colors.lime
-                                                .shade300) // 다크모드: 밝은 amber
-                                        : (isDarkMode
-                                            ? Color(0xFFB4BFFF)
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .primary), // 다크모드: 더 밝은 인디고
+                                    color: reading?.today ??
+                                        ((isRedSunday || isHoliday)
+                                            ? (isDarkMode
+                                                ? Colors.amber.shade300
+                                                : Colors.lime
+                                                    .shade300) // 다크모드: 밝은 amber
+                                            : (isDarkMode
+                                                ? Color(0xFFB4BFFF)
+                                                : Theme.of(context)
+                                                    .colorScheme
+                                                    .primary)), // 다크모드: 더 밝은 인디고
                                     borderRadius: BorderRadius.circular(4.r),
                                   )
                                 : null,
@@ -5801,17 +6431,23 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
                                 // ⭐ 다크모드 오늘 날짜 텍스트: 명확한 대비
-                                color: shouldHighlightToday
-                                    ? (isRedSunday || isHoliday)
-                                        ? (isDarkMode
-                                            ? Colors.red.shade900
-                                            : Colors.red) // 다크모드: 진한 빨강
-                                        : (isDarkMode
-                                            ? Colors.white
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .onPrimary) // 다크모드: 순백
-                                    : dateColor,
+                                color: reading != null
+                                    ? (shouldHighlightToday
+                                        ? ((isRedSunday || isHoliday)
+                                            ? reading.todayHoliday
+                                            : reading.onToday)
+                                        : dateColor)
+                                    : shouldHighlightToday
+                                        ? (isRedSunday || isHoliday)
+                                            ? (isDarkMode
+                                                ? Colors.red.shade900
+                                                : Colors.red) // 다크모드: 진한 빨강
+                                            : (isDarkMode
+                                                ? Colors.white
+                                                : Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimary) // 다크모드: 순백
+                                        : dateColor,
                                 height: 1.0,
                               ),
                             ),
@@ -5839,13 +6475,16 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                 padding: EdgeInsets.symmetric(
                                     vertical: _mainMemoVerticalPadding),
                                 decoration: BoxDecoration(
-                                  color: isDarkMode
-                                      ? colorScheme.primary.withOpacity(0.3)
-                                      : colorScheme.surfaceVariant,
+                                  color: reading?.memoSurface ??
+                                      (isDarkMode
+                                          ? colorScheme.primary.withOpacity(0.3)
+                                          : colorScheme.surfaceVariant),
                                   border: Border.all(
-                                      color: isDarkMode
-                                          ? colorScheme.primary.withOpacity(0.5)
-                                          : colorScheme.outline,
+                                      color: reading?.line ??
+                                          (isDarkMode
+                                              ? colorScheme.primary
+                                                  .withOpacity(0.5)
+                                              : colorScheme.outline),
                                       width: 0.5),
                                   borderRadius: BorderRadius.circular(2.r),
                                 ),
@@ -5854,7 +6493,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                   memo.memoText,
                                   TextStyle(
                                     fontSize: 9.3.sp,
-                                    color: colorScheme.onSurface,
+                                    color: reading?.memoText ??
+                                        colorScheme.onSurface,
                                     fontWeight: FontWeight.w500,
                                     height: 1.0,
                                   ),
@@ -5903,7 +6543,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     final memoController = TextEditingController();
     TransitionRoute<dynamic>? detailRoute;
 
-    showModalBottomSheet(
+    showAppUiBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
@@ -5912,9 +6552,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           builder: (context, setState) {
             final popupColors = Theme.of(context).colorScheme;
             final memoFieldBorder = OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
-                borderSide:
-                    BorderSide(color: popupColors.onSurface.withOpacity(0.3)));
+                borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
+                borderSide: BorderSide(color: popupColors.outline));
             final popupLayout = AppLayout.of(context);
             final adaptivePopup = popupLayout.usesBoundedCalendar;
             final basePopupHeight = adaptivePopup
@@ -6001,10 +6640,10 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                       child: Text(
                                         '${DateFormat.MMMd(Localizations.localeOf(context).toString()).format(day)} (${_getWeekday(day, context)})',
                                         style: TextStyle(
-                                            fontSize: 24.sp,
+                                            fontSize: AppFontSize.display,
                                             fontWeight: FontWeight.bold),
                                       )),
-                                  // ⭐ 상세팝업의 "(없음)"과 같은 스타일(fontSize: 14.sp,
+                                  // ⭐ 상세팝업의 "(없음)"과 같은 스타일(fontSize: AppFontSize.body,
                                   // colorScheme.onSurfaceVariant)로 톤을 맞춤. 공휴일
                                   // 표시와 동일하게 한국어 로케일에서만 보임
                                   // (holiday_util.dart의 isKorean 분기와 같은 기준).
@@ -6017,7 +6656,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                       child: Text(
                                         formatLunarDateFull(solarToLunar(day)!),
                                         style: TextStyle(
-                                            fontSize: 14.sp,
+                                            fontSize: AppFontSize.body,
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .onSurfaceVariant),
@@ -6032,7 +6671,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                         key: const ValueKey(
                                             'national-holiday-detail'),
                                         style: TextStyle(
-                                            fontSize: 14.sp,
+                                            fontSize: AppFontSize.body,
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .onSurface,
@@ -6054,7 +6693,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                             children: [
                               Text(context.l10n.calendarShiftLabel,
                                   style: TextStyle(
-                                      fontSize: 16.sp,
+                                      fontSize: AppFontSize.section,
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurface,
@@ -6066,7 +6705,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                   children: [
                                     Text(context.l10n.commonPrevious,
                                         style: TextStyle(
-                                            fontSize: 12.sp,
+                                            fontSize: AppFontSize.meta,
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .onSurface,
@@ -6079,8 +6718,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                         color: Theme.of(context)
                                             .colorScheme
                                             .surfaceVariant,
-                                        borderRadius:
-                                            BorderRadius.circular(8.r),
+                                        borderRadius: BorderRadius.circular(
+                                            AppUiMetrics.controlRadius),
                                         border: Border.all(
                                             color: Theme.of(context)
                                                 .colorScheme
@@ -6089,7 +6728,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                       ),
                                       child: Text(patternShift,
                                           style: TextStyle(
-                                              fontSize: 16.sp,
+                                              fontSize: AppFontSize.section,
                                               fontWeight: FontWeight.bold,
                                               color: Theme.of(context)
                                                   .colorScheme
@@ -6111,7 +6750,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                   children: [
                                     Text(context.l10n.commonCurrent,
                                         style: TextStyle(
-                                            fontSize: 12.sp,
+                                            fontSize: AppFontSize.meta,
                                             color: Theme.of(context)
                                                 .colorScheme
                                                 .onSurface,
@@ -6123,8 +6762,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                       decoration: BoxDecoration(
                                         color: _getShiftBackgroundColor(
                                             currentShift, schedule),
-                                        borderRadius:
-                                            BorderRadius.circular(8.r),
+                                        borderRadius: BorderRadius.circular(
+                                            AppUiMetrics.controlRadius),
                                         border: Border.all(
                                             color: _getShiftTextColor(
                                                 currentShift, schedule),
@@ -6132,7 +6771,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                       ),
                                       child: Text(currentShift,
                                           style: TextStyle(
-                                              fontSize: 16.sp,
+                                              fontSize: AppFontSize.section,
                                               fontWeight: FontWeight.bold,
                                               color: _getShiftTextColor(
                                                   currentShift, schedule))),
@@ -6146,7 +6785,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                   decoration: BoxDecoration(
                                     color: _getShiftBackgroundColor(
                                         currentShift, schedule),
-                                    borderRadius: BorderRadius.circular(8.r),
+                                    borderRadius: BorderRadius.circular(
+                                        AppUiMetrics.controlRadius),
                                     border: Border.all(
                                         color: _getShiftTextColor(
                                             currentShift, schedule),
@@ -6154,7 +6794,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                   ),
                                   child: Text(currentShift,
                                       style: TextStyle(
-                                          fontSize: 16.sp,
+                                          fontSize: AppFontSize.section,
                                           fontWeight: FontWeight.bold,
                                           color: _getShiftTextColor(
                                               currentShift, schedule))),
@@ -6167,7 +6807,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                           // ⭐ 고정 알람
                           Text(context.l10n.calendarFixedAlarmLabel,
                               style: TextStyle(
-                                  fontSize: 14.sp,
+                                  fontSize: AppFontSize.body,
                                   color:
                                       Theme.of(context).colorScheme.onSurface,
                                   fontWeight: FontWeight.w600)),
@@ -6181,12 +6821,11 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                 loading: () => SizedBox(
                                     height: 20.h,
                                     width: 20.w,
-                                    child: CircularProgressIndicator(
-                                        strokeWidth: 2)),
+                                    child: AppUiLoading(strokeWidth: 2)),
                                 error: (_, __) => Text(
                                     context.l10n.statusErrorOccurred,
                                     style: TextStyle(
-                                        fontSize: 14.sp,
+                                        fontSize: AppFontSize.body,
                                         color: Theme.of(context)
                                             .colorScheme
                                             .error)),
@@ -6216,13 +6855,16 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                         final typeInfo = _getAlarmTypeInfo(
                                             alarm.alarmTypeId);
                                         return CalendarAlarmCard(
-                                          key: ValueKey('calendar-fixed-${alarm.id}'),
+                                          key: ValueKey(
+                                              'calendar-fixed-${alarm.id}'),
                                           time: alarm.time,
                                           label: typeInfo['label']!,
                                           leading: Text(typeInfo['emoji']!,
-                                              style: const TextStyle(fontSize: 14)),
-                                          onTap: () => _showAlarmTypeSelectionPopup(
-                                              alarm, setState),
+                                              style: const TextStyle(
+                                                  fontSize: 14)),
+                                          onTap: () =>
+                                              _showAlarmTypeSelectionPopup(
+                                                  alarm, setState),
                                         );
                                       }).toList(),
                                     );
@@ -6244,7 +6886,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                         return Text(
                                             '(${context.l10n.commonNone})',
                                             style: TextStyle(
-                                                fontSize: 14.sp,
+                                                fontSize: AppFontSize.body,
                                                 color: Theme.of(context)
                                                     .colorScheme
                                                     .onSurfaceVariant));
@@ -6259,23 +6901,16 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
                                       // 5단계: 10일 이후면 안내 문구
                                       if (daysDiff >= kAlarmRefreshWindowDays) {
-                                        return Text(
-                                          context.l10n
-                                              .calendarAutoGeneratedWithinDays(
-                                                  kAlarmRefreshWindowDays),
-                                          style: TextStyle(
-                                              fontSize: 13.sp,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .tertiary),
-                                        );
+                                        return AppUiInlineNotice(context.l10n
+                                            .calendarAutoGeneratedWithinDays(
+                                                kAlarmRefreshWindowDays));
                                       }
 
                                       // 6단계: 10일 이내인데 알람이 없으면 (없음) - 버그 상황
                                       return Text(
                                           '(${context.l10n.commonNone})',
                                           style: TextStyle(
-                                              fontSize: 14.sp,
+                                              fontSize: AppFontSize.body,
                                               color: Theme.of(context)
                                                   .colorScheme
                                                   .onSurfaceVariant));
@@ -6290,15 +6925,14 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                           // Watch the same provider as fixed alarms so native
                           // refresh/resume and cancellation update an open sheet.
                           Consumer(
-                            builder: (context, ref, child) => ref
-                                .watch(alarmNotifierProvider)
-                                .maybeWhen(
-                                  data: (alarms) => CalendarSnoozedAlarms(
-                                    day: day,
-                                    alarms: alarms,
-                                  ),
-                                  orElse: () => const SizedBox.shrink(),
-                                ),
+                            builder: (context, ref, child) =>
+                                ref.watch(alarmNotifierProvider).maybeWhen(
+                                      data: (alarms) => CalendarSnoozedAlarms(
+                                        day: day,
+                                        alarms: alarms,
+                                      ),
+                                      orElse: () => const SizedBox.shrink(),
+                                    ),
                           ),
 
                           SizedBox(height: 20.h),
@@ -6315,7 +6949,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                 children: [
                                   Text(context.l10n.calendarMemoColonLabel,
                                       style: TextStyle(
-                                          fontSize: 14.sp,
+                                          fontSize: AppFontSize.body,
                                           color: Theme.of(context)
                                               .colorScheme
                                               .onSurface,
@@ -6332,7 +6966,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                                   .colorScheme
                                                   .surfaceVariant,
                                               borderRadius:
-                                                  BorderRadius.circular(8.r),
+                                                  BorderRadius.circular(
+                                                      AppUiMetrics
+                                                          .controlRadius),
                                               border: Border.all(
                                                   color: Theme.of(context)
                                                       .colorScheme
@@ -6341,7 +6977,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                             child: Text(
                                               context.l10n.statusMemoLimit(3),
                                               style: TextStyle(
-                                                  fontSize: 14.sp,
+                                                  fontSize: AppFontSize.body,
                                                   color: Theme.of(context)
                                                       .colorScheme
                                                       .onSurfaceVariant),
@@ -6364,7 +7000,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                               hintText: context
                                                   .l10n.calendarMemoEnter,
                                               hintStyle: TextStyle(
-                                                  fontSize: 14.sp,
+                                                  fontSize: AppFontSize.body,
                                                   color: Theme.of(context)
                                                       .colorScheme
                                                       .onSurfaceVariant
@@ -6375,7 +7011,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                                       vertical: 8.h),
                                               border: OutlineInputBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(8.r),
+                                                    BorderRadius.circular(
+                                                        AppUiMetrics
+                                                            .controlRadius),
                                                 borderSide: BorderSide(
                                                     color: Theme.of(context)
                                                         .colorScheme
@@ -6383,7 +7021,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                               ),
                                               focusedBorder: OutlineInputBorder(
                                                 borderRadius:
-                                                    BorderRadius.circular(8.r),
+                                                    BorderRadius.circular(
+                                                        AppUiMetrics
+                                                            .controlRadius),
                                                 borderSide: BorderSide(
                                                     color: Theme.of(context)
                                                         .colorScheme
@@ -6392,7 +7032,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                               ),
                                             ),
                                             style: TextStyle(
-                                                fontSize: 14.sp,
+                                                fontSize: AppFontSize.body,
                                                 color: Theme.of(context)
                                                     .colorScheme
                                                     .onSurface),
@@ -6411,7 +7051,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                     variant: AppSecondButtonVariant.success,
                                     padding: EdgeInsets.symmetric(
                                         horizontal: 12.w, vertical: 10.h),
-                                    fontSize: 13.sp,
+                                    fontSize: AppFontSize.body,
                                     onPressed: isFull
                                         ? null
                                         : () {
@@ -6459,11 +7099,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                       color: Color.alphaBlend(
                                           popupColors.primary.withOpacity(0.06),
                                           popupColors.surface),
-                                      borderRadius: BorderRadius.circular(12.r),
+                                      borderRadius: BorderRadius.circular(
+                                          AppUiMetrics.controlRadius),
                                       clipBehavior: Clip.antiAlias,
                                       child: InkWell(
-                                        borderRadius:
-                                            BorderRadius.circular(12.r),
+                                        borderRadius: BorderRadius.circular(
+                                            AppUiMetrics.controlRadius),
                                         onTap: () {
                                           // 입력칸에 남아 있던 포커스를 먼저 해제해야
                                           // 상세 팝업을 닫았을 때 키보드가 다시 살아나지 않는다.
@@ -6476,12 +7117,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                                 color: popupColors.onSurface
                                                     .withOpacity(0.18),
                                                 width: 0.8),
-                                            borderRadius:
-                                                BorderRadius.circular(12.r),
+                                            borderRadius: BorderRadius.circular(
+                                                AppUiMetrics.controlRadius),
                                           ),
                                           decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(12.r),
+                                            borderRadius: BorderRadius.circular(
+                                                AppUiMetrics.controlRadius),
                                             boxShadow: [
                                               BoxShadow(
                                                 color: Theme.of(context)
@@ -6523,7 +7164,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                                       overflow:
                                                           TextOverflow.ellipsis,
                                                       style: TextStyle(
-                                                          fontSize: 14.sp,
+                                                          fontSize:
+                                                              AppFontSize.body,
                                                           color:
                                                               Theme.of(context)
                                                                   .colorScheme
@@ -6546,7 +7188,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                                       horizontal: 10.w,
                                                       vertical: 10.h),
                                                   child: Icon(
-                                                    Icons.delete,
+                                                    AppUiIcons.delete,
                                                     size: 18.sp,
                                                     color: Theme.of(context)
                                                         .colorScheme
@@ -6602,14 +7244,15 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   void _showAlarmTypeSelectionPopup(Alarm alarm, StateSetter parentSetState) {
     print(
         '🔍 알람 타입 선택 팝업 열림 - alarm.id: ${alarm.id}, alarmTypeId: ${alarm.alarmTypeId}');
-    showDialog(
+    showAppUiDialog(
       context: context,
       builder: (context) {
         print('🏗️ AlertDialog 빌드 시작');
         return AlertDialog(
           title: Text(
             context.l10n.calendarSelectAlarmType,
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: AppFontSize.toolbar, fontWeight: FontWeight.bold),
           ),
           content: SizedBox(
             width: double.maxFinite, // ⭐ 명시적 width 지정
@@ -6632,7 +7275,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                       Text(
                         alarm.shiftType!,
                         style: TextStyle(
-                            fontSize: 17.sp,
+                            fontSize: AppFontSize.section,
                             fontWeight: FontWeight.w700,
                             color: Theme.of(context).colorScheme.onSurface),
                       ),
@@ -6641,7 +7284,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     Text(
                       context.l10n.calendarAlarmAt(alarm.time),
                       style: TextStyle(
-                          fontSize: 17.sp,
+                          fontSize: AppFontSize.section,
                           fontWeight: FontWeight.w700,
                           color: Theme.of(context).colorScheme.onSurface),
                     ),
@@ -6652,6 +7295,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                   mainAxisSize: MainAxisSize.max, // ⭐ 명시적 설정
                   children: [
                     _buildAlarmTypeOption(
+                      context: context,
                       typeId: 1,
                       icon: Icons.volume_up_rounded,
                       label: context.l10n.alarmSoundVibration,
@@ -6666,6 +7310,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     ),
                     SizedBox(width: 8.w),
                     _buildAlarmTypeOption(
+                      context: context,
                       typeId: 2,
                       icon: Icons.vibration_rounded,
                       label: context.l10n.alarmVibration,
@@ -6680,6 +7325,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     ),
                     SizedBox(width: 8.w),
                     _buildAlarmTypeOption(
+                      context: context,
                       typeId: 3,
                       icon: Icons.notifications_off_rounded,
                       label: context.l10n.alarmSilent,
@@ -6722,17 +7368,18 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Future<void> _showDeleteAlarmConfirmation(
       Alarm alarm, StateSetter parentSetState) async {
     if (!mounted) return;
-    showDialog(
+    showAppUiDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text(
             context.l10n.calendarDeleteAlarmTitle,
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: AppFontSize.toolbar, fontWeight: FontWeight.bold),
           ),
           content: Text(
             context.l10n.calendarDeleteAlarmConfirm(alarm.time),
-            style: TextStyle(fontSize: 14.sp),
+            style: TextStyle(fontSize: AppFontSize.body),
           ),
           actions: [
             TextButton(
@@ -6786,10 +7433,10 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          AppUiSnackBar(
             content: Text(
                 '${context.l10n.calendarDeleteAlarmFailed}: ${context.localizedErrorDetail(e)}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppUiPalette.of(context).danger,
           ),
         );
       }
@@ -6799,13 +7446,11 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        AppUiSnackBar(
           content: Text(deletion.reservationFailed
               ? context.l10n.alarmRefreshUnconfirmed
               : context.l10n.alarmDeletedToast),
           behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
         ),
       );
     }
@@ -6813,6 +7458,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   // ⭐ 알람 타입 옵션 버튼
   Widget _buildAlarmTypeOption({
+    required BuildContext context,
     required int typeId,
     required IconData icon,
     required String label,
@@ -6838,7 +7484,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             color: isSelected
                 ? Theme.of(context).colorScheme.primary
                 : Theme.of(context).colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
             border: Border.all(
               color: isSelected
                   ? Theme.of(context).colorScheme.primary
@@ -6852,17 +7498,17 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 icon,
                 size: 24.sp,
                 color: isSelected
-                    ? Colors.white
+                    ? AppUiPalette.of(context).onPrimary
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               SizedBox(height: 4.h),
               AlarmModeLabel(
                 label,
                 style: TextStyle(
-                  fontSize: 11.sp,
+                  fontSize: AppFontSize.meta,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
-                      ? Colors.white
+                      ? AppUiPalette.of(context).onPrimary
                       : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -6913,7 +7559,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
     final screenHeight = MediaQuery.of(context).size.height;
 
-    showModalBottomSheet(
+    showAppUiBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) => Container(
@@ -6927,7 +7573,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               child: Text(
                 context.l10n
                     .calendarBulkChangeShiftTitle(_selectedDates.length),
-                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: AppFontSize.toolbar, fontWeight: FontWeight.bold),
               ),
             ),
             SizedBox(height: 24.h),
@@ -6973,7 +7620,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                               ? context.l10n.commonNone
                               : shiftType,
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: AppFontSize.body,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 1,
@@ -7004,7 +7651,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     // ⭐ "없음"을 "미설정"으로 변환
     final actualShiftType = shiftType == '없음' ? '미설정' : shiftType;
 
-    // ⭐ 2026-09-15 (AUD-01) - 예전엔 showDialog(barrierDismissible: false) + 끝에서 Navigator.pop(context)였음.
+    // ⭐ 2026-09-15 (AUD-01) - 예전엔 showAppUiDialog(barrierDismissible: false) + 끝에서 Navigator.pop(context)였음.
     // 시스템 뒤로가기는 막지 못해서 로딩 중 뒤로가기로 진행창이 먼저 닫히면, 끝의 pop이 다른 route(메인 화면)를
     // 닫아 빈 화면이 될 수 있었음. runWithBlockingProgress는 뒤로가기를 막고 자기가 띄운 진행창만 닫음(성공·예외 모두).
     try {
@@ -7045,21 +7692,21 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         final partial = alarmOutcome != null && alarmOutcome.partiallyFailed;
         ScaffoldMessenger.of(context).showSnackBar(
           partial
-              ? SnackBar(
+              ? AppUiSnackBar(
                   content: Text(
                       '⚠️ ${context.l10n.alarmSchedulePartialFailed(alarmOutcome.failed, alarmOutcome.attempted)}'),
-                  backgroundColor: Colors.orange,
+                  backgroundColor: AppUiPalette.of(context).warning,
                 )
-              : SnackBar(content: Text(context.l10n.statusShiftAssigned)),
+              : AppUiSnackBar(content: Text(context.l10n.statusShiftAssigned)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          AppUiSnackBar(
             content: Text(
                 '${context.l10n.statusShiftAssignFailed}: ${context.localizedErrorDetail(e)}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppUiPalette.of(context).danger,
           ),
         );
       }

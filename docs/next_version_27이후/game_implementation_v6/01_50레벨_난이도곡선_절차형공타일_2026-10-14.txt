@@ -1,0 +1,53 @@
+GAME-01 현행50레벨 / 경량 공·블록 타일 — 2026-10-14
+
+범위
+- packages/sync_path_ui, packages/sync_path_tools의 저작 도구, examples/sync_path_lab 및 새 후속 원장만 수정했다.
+- 기존 ShiftBell dev/prod, 달력/권한/알람/광고/다국어 리소스, 기존 인계·설계·UI 원장은 수정하지 않았다.
+- 핵심 SimulationEngine/충돌/Solver 규칙은 constant-cell-speed-v2 그대로다. 칸당 동일 속도, 기본1.5배(약433.3ms/칸), 긴 이동은 오래 걸린다.
+- release/실기기설치/Play 배포/Deferred Components 도입은 수행하지 않았다.
+
+레벨링
+- 1~5는 분리 안전 경로→직관적 교차 회피→필수2칸 우회 튜토리얼. 1번의 가능한 완성 계획에는 충돌이 없다. 2/3번은 충돌 경로가 있으나 추가거리 없이 해결 가능하다.
+- 1~14는2공,15~29는3공,30~50은4공. 새4공 도입30번은2공 우회로 해결하도록 조정했다.
+- 보드는5×5=13,6×6=14,7×7=23개. 후반까지 작은 맵을 섞었다. 27번은5×5/3공/필수2공 우회다.
+- 모든 공은 Goal과 Manhattan거리3 이상. 4번 이후 각 공의 최소 경로는4칸 이상, 최소2명령 이상이다. 모든 공이 경로 충돌 조율에 관여하고30번부터는 각 공의 최단경로도 충돌 관계에 참여한다.
+- 50개 바닥 구조는 회전/반사/이동을 고려해도 서로 다르다. 후보2354개의 유한 경로를 평가하고 지형·시작위치·목표·명령수·충돌 제약을 함께 선정했다.
+- 필수 추가거리/필수 우회공/선택 경로 수/해답 비율/최소 명령수로 저작 점수를 산정했다. 모든 레벨의 점수와5레벨 평균은 증가하고,4번 이후 인접 점수 상승은 최대0.778로 제한했다.
+- 45~50은 최소3공이 우회하고 총12칸 이상의 추가 이동이 필요하다. 50번은 고유 안전 해답3개다.
+- 분석 점수는 인간의 난이도 척도가 아니다. 실기기 체감 난이도/재미는 사용자 플레이로 확인할 후속이다.
+
+표현/선택
+- 이미지 없는 입체 공: 점/띠/십자/마름모로 구분하고3D 표면 방향을2D로 투영한다. 이동 중 몸체가 떠다니지 않고 지상 경로를 굴러간다.
+- BallRotation은 UI에서 절대 재생 위치와 논리 trace를 읽어 계산한다. 좌우/상하 회전축과 방향전환 누적,seek/정지/재생이 결정적이며 엔진에 역으로 값을 쓰지 않는다.
+- 선택공은 약1.22배/자체색 링/상단표식/안내패널로 표시한다. 갈 수 있는 다음 종점은 동일색 채움/테두리/점으로 표시하고 다른 공은 계획 중65%로 표시한다.
+- 선택카드의 무늬 범례도 UnitVisual이 제공한다. 자동 다음공 선택 시 패널은 공통160ms 전환,동작줄이기는 즉시 전환한다.
+- 깔끔한 입체 블록의 포인트색은5레벨 구간별,표면디테일5종은10레벨 구간별로 바뀐다. 바닥/벽/Goal/합법 종점을 구분하고 판정은 변경하지 않는다.
+- 320px에서도7×7 모든 열이44px 칸으로 보이도록 수평 여백을6~20px 토큰에서 계산한다. 모든 버튼은 세로 스크롤로 접근 가능하다.
+- Shader/표면motif/글자/이미지대체경계를 재사용하고 종료 시 캐시/ticker를 정리한다. 사운드/Flame/추가런타임패키지는 없다.
+
+경량화
+- 원본10,414,588byte 폰트와 생성atlas2장은 소스에 보존하되 앱에 등록하지 않는다.
+- 현행 축소폰트84,472bytes,291코드포인트,가변굵기100~900. 게임 문구와50레벨의 글자 누락0. 개발용fontTools만 사용하며 런타임에는 들어가지 않는다.
+- 게임 전용 리소스170,792bytes(약0.171MB),APK내 압축61,475bytes다. 컴파일게임코드/Flutter 공통리소스/플랫폼Launcher는 제외한 값이다.
+- ShiftBell에 추가되는 실제 배포/설치 용량은 통합 release/AAB로 측정하지 않았다. 수백레벨도1~3MB 목표는 가능하나 현행수치를 총추가용량 PASS로 표현하지 않는다.
+
+검증
+- Python bitset 저작 결과와 별도Dart Solver/독립 셀·반칸 간선Oracle의 결과를 비교했다. 모든 원시명령경로, 모든 고유경로쌍, 모든 고유 안전해답 및 레벨별40개 추가 전체 계획을 확인했다.
+- 40,608쌍의 충돌 결과, 874개 고유 안전해답 집합 및 저작원장/실제Dart 해답 수가 일치했다. 모든 힌트의 전체 경로도 안전하다.
+- UI42개+독립호스트2개 검사 PASS, 두 Flutter 패키지 analyze 문제0. 기존 core98/tools13 증거는 엔진 영향이 없어 v4에 보존하며 재실행하지 않았다.
+- 새50개 보드320px 마지막열/버튼접근/유닛계약/해답을 모두 확인하고,320/412/736 및 동작줄이기/복귀/표현교체/충돌 고정점의 역사적 회귀도 유지했다.
+- Android dev debug APK 및 dev웹 빌드 PASS. APK/웹에50개 현행JSON과축소폰트가 정확히 포함되고 atlas/전체폰트가 없음을 확인했다.
+- Android/Web 빌드 직전 기존 Flutter/GradleWrapper 빌드가 없음을09:15:07/09:18:10에 확인했다. 실행기는 다른 빌드가 있으면 대기한다.
+- 독립 lab Gradle만 힙2GB/작업자2/단일사용daemon/in-processKotlin으로 제한했다. 다른프로세스는 종료하지 않았다.
+
+설치 결과물
+- 앱: Sync Path Lab DEV 0.4.0+6
+- ID: dev.shiftbell.experiments.sync_path_lab.dev
+- APK: examples/sync_path_lab/build/app/outputs/flutter-apk/app-dev-debug.apk
+- APK bytes: 147142099 (debug,실제제품추가용량이 아님)
+- SHA256: A19198B7C191AECA869A636F016D7E431FD11EBC47BCA84E63AB4F6A5629CC1C
+- 설치: examples/sync_path_lab에서 flutter install --debug --flavor dev
+- 새저장키 syncPathLab.dev.v4.campaign50.progress는 이전30레벨 및 다른게임 기록을 보존한다.
+
+상세증거
+campaign_design.json / quality_checks.json / level_verification.json / independent_verification.txt / font_size_report.json / check_summary.txt / apk_asset_verification.json / web_asset_verification.json / apk_badging.txt / ui_previews / 50-level-layout-review.png / 02_50레벨_설계목록.txt

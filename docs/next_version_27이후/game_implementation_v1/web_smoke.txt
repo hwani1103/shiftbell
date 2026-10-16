@@ -1,0 +1,1 @@
+PASS: JS 12 witnesses, 20 collision vectors, float rejection, early arrival, 64-cell map

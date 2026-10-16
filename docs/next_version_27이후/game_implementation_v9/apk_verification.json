@@ -1,0 +1,11 @@
+{
+  "version": "0.7.0+9",
+  "apkBytes": 147168111,
+  "sha256": "58a615a2fb74ae15eb42fbd69b4463c406e7f83dd24bc4469c1aca5577cc79bf",
+  "levelCount": 50,
+  "gateLevels": 20,
+  "uiTests": 52,
+  "hostTests": 2,
+  "sourceAssetsMatch": true,
+  "device": "NOT_TESTED"
+}

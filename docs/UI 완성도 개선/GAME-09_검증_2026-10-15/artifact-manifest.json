@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-15",
+  "scope": "Sync Path Lab DEV debug",
+  "testsPassed": 46,
+  "deviceInstalled": false,
+  "files": [
+    {
+      "path": "examples/sync_path_lab/artifacts/game09/app-dev-debug.apk",
+      "bytes": 147274682,
+      "sha256": "fd16d2cf685381cec93df71a48fc8b8c9ca5462ce8379c191a397de184c4ab5f"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/board.dart",
+      "bytes": 15489,
+      "sha256": "5bdd5b2d968b7422ff64739e46458c4c62c2d8464fcf64709b0d19bb64a08c61"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/session.dart",
+      "bytes": 15410,
+      "sha256": "cd8c030ef820aa39bb35d993aa8b1bd98d8c1abd97ddd787f103c4ab9e92af3b"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/game_app.dart",
+      "bytes": 27947,
+      "sha256": "573afe7de8376b522e4fe1b13b900a8ae0a080f9b318c6dc53f2a4e088770d3b"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/unit_thumbnail.dart",
+      "bytes": 1981,
+      "sha256": "2c6500d1c62ed27f2d6a0843e1ca673e18ac38204fa052633617c252d58c7f7a"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/skin.dart",
+      "bytes": 15789,
+      "sha256": "d242c6913213e30f431a3eebed8d909eb8788eec7903f94641406b5cfb14eaf7"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/gate_visual.dart",
+      "bytes": 4995,
+      "sha256": "a430a904c9598d9a313de94989d668252f7c47726ed0b01131a0027d6ec3e8dd"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/portal_visual.dart",
+      "bytes": 3783,
+      "sha256": "46f1d055a15cc5a7f597497ff0d1e69f039d10c6f847d9e5af36429eba96309c"
+    },
+    {
+      "path": "packages/sync_path_ui/assets/fonts/GameSansSubset.ttf",
+      "bytes": 97636,
+      "sha256": "e1a8a18f11d2d56e545e11a13fcf2bc2603e7159fcdad06a17e24b32d757e0d0"
+    },
+    {
+      "path": "examples/sync_path_lab/assets/pilot_copy.json",
+      "bytes": 121619,
+      "sha256": "b3ebfe0cb2beaa7b1289460a8d47dafca3320183734c9d1a2bc7bb52449cbf8d"
+    },
+    {
+      "path": "examples/sync_path_lab/build/web/main.dart.js",
+      "bytes": 8548987,
+      "sha256": "9a09ef1fc1b184c0226e272a3638b71866b8b50e23c7fc3f3486e4fef1d78a54"
+    }
+  ],
+  "builds": {
+    "androidDevDebug": "PASS",
+    "webDebug": "PASS"
+  }
+}

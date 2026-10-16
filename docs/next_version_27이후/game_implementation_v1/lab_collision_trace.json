@@ -1,0 +1,131 @@
+{
+  "outcome": "collision",
+  "motions": [
+    {
+      "unitId": "A",
+      "step": 1,
+      "start": [
+        2,
+        0
+      ],
+      "end": [
+        1,
+        0
+      ]
+    },
+    {
+      "unitId": "B",
+      "step": 1,
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        1,
+        0
+      ]
+    },
+    {
+      "unitId": "C",
+      "step": 1,
+      "start": [
+        4,
+        0
+      ],
+      "end": [
+        1,
+        0
+      ]
+    }
+  ],
+  "arrivals": [],
+  "earliestCollisions": [
+    {
+      "step": 1,
+      "localTime": [
+        1,
+        1
+      ],
+      "globalTime": [
+        1,
+        1
+      ],
+      "position": [
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "unitIds": [
+        "A",
+        "B"
+      ]
+    },
+    {
+      "step": 1,
+      "localTime": [
+        1,
+        1
+      ],
+      "globalTime": [
+        1,
+        1
+      ],
+      "position": [
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "unitIds": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "step": 1,
+      "localTime": [
+        1,
+        1
+      ],
+      "globalTime": [
+        1,
+        1
+      ],
+      "position": [
+        [
+          1,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "unitIds": [
+        "B",
+        "C"
+      ]
+    }
+  ],
+  "durationInSteps": [
+    1,
+    1
+  ],
+  "levelIdentity": {
+    "packId": "dev-pilot-12",
+    "levelId": "L09",
+    "revision": 1,
+    "ruleSetId": "shared-goal-v1"
+  },
+  "routeRevision": 1,
+  "ruleSetId": "shared-goal-v1"
+}

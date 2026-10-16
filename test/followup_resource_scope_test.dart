@@ -10,7 +10,6 @@ import 'package:shiftbell/models/friend_schedule.dart';
 import 'package:shiftbell/screens/friend_calendar_view.dart';
 import 'package:shiftbell/screens/friend_list_screen.dart';
 import 'package:shiftbell/screens/my_share_code_screen.dart';
-import 'package:shiftbell/screens/condition_tab.dart';
 import 'package:shiftbell/screens/schedule_management_tab.dart';
 import 'package:shiftbell/widgets/calendar_header_actions.dart';
 import 'package:shiftbell/widgets/friend_web_calendar.dart';
@@ -78,7 +77,6 @@ void main() {
       for (final child in <Widget>[
         const FriendListScreen(),
         const MyShareCodeScreen(),
-        ConditionTab(onDisabled: () {}, onConfirmed: () async {}),
         ScheduleManagementTab(onDisabled: () {}, onConfirmed: () async {}),
         FriendCalendarView(friendName: 'Test', data: data)
       ]) {

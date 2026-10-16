@@ -3,16 +3,7 @@ package com.hwani1103.shiftbell
 import android.content.Context
 import java.util.Calendar
 
-/**
- * ⭐ 위젯에서 "빨간날 숫자를 빨간색으로" 표시하기 위한 공휴일 데이터.
- * calendar_tab.dart의 _fixedHolidays/_lunarHolidays를 그대로 복제함 - 이름(문구)까지는
- * 필요 없고(위젯엔 공휴일 이름 텍스트를 안 보여줌, 숫자 색만 바뀌면 됨) 날짜만 있으면 됨.
- *
- * ⚠️ 이건 Dart 쪽 목록의 "스냅샷 복제"라 두 파일이 서로 다른 언어라서 자동으로 동기화되지
- * 않음. 나중에 앱에서 공휴일 목록을 갱신/연장할 때(업데이트_가이드.md 참고) 이 파일도
- * 같이 업데이트해야 위젯의 빨간날 표시가 계속 맞음 - 지금은 2029년까지 커버되어 있어서
- * 당장은 여유 있음.
- */
+/** Calendar red dates plus offline names shared with the app's reviewed sources. */
 object CalendarWidgetHolidays {
     // ⭐ 고정 공휴일 (매년 동일, MM-dd)
     private val FIXED_HOLIDAYS = setOf(
@@ -48,24 +39,54 @@ object CalendarWidgetHolidays {
      * ⭐ 2026-09-23 (1.0.24 D) - Firebase 원격 변경분(holiday_sync_service.dart가 채널 setHolidayOverrides로 넘겨 줌).
      * add = 공휴일로 추가할 날짜, remove = 하드코딩 목록에서 뺄 날짜(yyyy-MM-dd). 없으면 하드코딩 목록만 사용.
      */
-    data class Overrides(val add: Set<String> = emptySet(), val remove: Set<String> = emptySet()) {
+    data class Overrides(val add: Set<String> = emptySet(), val remove: Set<String> = emptySet(),
+        val names: Map<String, String> = emptyMap()) {
         companion object { val EMPTY = Overrides() }
     }
 
     private const val PREFS = "holiday_overrides"
 
-    fun saveOverrides(context: Context, add: Collection<String>, remove: Collection<String>) {
+    fun saveOverrides(context: Context, add: Collection<String>, remove: Collection<String>, names: Map<String, String> = emptyMap()) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putStringSet("add", add.toSet())
             .putStringSet("remove", remove.toSet())
+            .putString("names", org.json.JSONObject(names).toString())
             .apply()
     }
 
     fun overrides(context: Context): Overrides = try {
         val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        Overrides(p.getStringSet("add", emptySet())!!.toSet(), p.getStringSet("remove", emptySet())!!.toSet())
+        val json = org.json.JSONObject(p.getString("names", "{}") ?: "{}")
+        val names = json.keys().asSequence().associateWith { json.optString(it) }
+        Overrides(p.getStringSet("add", emptySet())!!.toSet(), p.getStringSet("remove", emptySet())!!.toSet(), names)
     } catch (e: Exception) {
         Overrides.EMPTY
+    }
+
+    @Volatile private var bundledNames: org.json.JSONObject? = null
+    private fun names(context: Context): org.json.JSONObject {
+        bundledNames?.let { return it }
+        return synchronized(this) {
+            bundledNames ?: context.assets.open("calendar_holiday_names.json").bufferedReader().use {
+                org.json.JSONObject(it.readText()).also { parsed -> bundledNames = parsed }
+            }
+        }
+    }
+
+    fun name(context: Context, day: Calendar, overrides: Overrides = overrides(context)): String? {
+        // Match the app calendar: only Korean displays holiday names.
+        // Other locales retain their existing national red-date policy.
+        if (!ReleaseLocalePolicy.koreanFeatures(context)) return null
+        val date = CalendarWidgetProvider.dateKeyFor(day)
+        val data = try { names(context) } catch (_: Exception) { return null }
+        overrides.names[date]?.takeIf { date in overrides.add && it.isNotBlank() }?.let { return it }
+        if (date !in overrides.add && date in overrides.remove) return null
+        val kr = data.optJSONObject("KR") ?: return null
+        val fixed = kr.optJSONObject("fixed")?.optString(date.substring(5)).orEmpty()
+        val varying = kr.optJSONObject("days")?.optString(date).orEmpty()
+        return fixed.ifEmpty { varying }.ifEmpty {
+            if (date in overrides.add) context.getString(R.string.widget_public_holiday) else ""
+        }.takeIf { it.isNotEmpty() }
     }
 
     fun isHoliday(cal: Calendar, overrides: Overrides = Overrides.EMPTY): Boolean {

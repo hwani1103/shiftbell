@@ -1,6 +1,7 @@
 // lib/providers/work_hours_settings_provider.dart
 
 import 'data_revision_provider.dart';
+import '../services/app_analytics.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -139,8 +140,10 @@ class WorkHoursSettingsNotifier extends StateNotifier<WorkHoursSettings> {
   // ⭐ 2026-09-14 (출시전 수정 연결 - docs/release_audit/contracts.md §3) - 원본 저장이 성공한 뒤에만 변경 통지.
   // 계산 쪽(G3 컨디션·수면 provider)이 이 revision을 watch해 다시 계산함. 저장 실패·예외면 올리지 않음.
   void _notifyChanged(bool saved) {
+    if (!saved) return;
+    AppAnalytics.track(AnalyticsEvent.workHoursSettingsSaved);
     final ref = _ref;
-    if (!saved || ref == null) return;
+    if (ref == null) return;
     ref.read(dataRevisionProvider(DataDomain.workHoursSettings).notifier).state++;
   }
 

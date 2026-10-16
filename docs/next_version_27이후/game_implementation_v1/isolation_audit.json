@@ -1,0 +1,31 @@
+{
+  "trackedBaselineCount": 1427,
+  "existingTrackedChangedSinceStart": [
+    "AGENTS.md"
+  ],
+  "missingTrackedFiles": [],
+  "note": "Existing-file changes may belong to the concurrent app session; this game task writes only the allowlisted new directories. No reset/restore performed.",
+  "gameTaskWriteRoots": [
+    "packages/sync_path_core",
+    "packages/sync_path_tools",
+    "examples/sync_path_lab",
+    "docs/next_version_27이후/game_implementation_v1"
+  ],
+  "designInputs": [
+    {
+      "file": "08_pilot_levels.json",
+      "sha256": "073DB203CDC9009C23AED10D0852DE61FF1790F9C60EFDCDA7A38981460818CB",
+      "bytes": 7864
+    },
+    {
+      "file": "09_pilot_certificates.json",
+      "sha256": "B4B2E272C139C423EDF33D951172510D475B3497F7D47268ACC84DD1A59E74FA",
+      "bytes": 89247
+    },
+    {
+      "file": "10_collision_fixtures.json",
+      "sha256": "0A9CDE35FABE4B47D380888B4612E94255FFAE74BF1298679A2585A6A00FB710",
+      "bytes": 9267
+    }
+  ]
+}

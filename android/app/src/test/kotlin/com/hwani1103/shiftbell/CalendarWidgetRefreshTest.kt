@@ -52,6 +52,14 @@ class CalendarWidgetRefreshTest {
                 })
             }
             CalendarWidgetProvider.requestUpdate(ctx)
+            // A normal refresh primes both neighbouring months from one local DB
+            // snapshot. Navigating one month must not reload the same range.
+            val month = CalendarWidgetMonths.month(Calendar.getInstance(), CalendarWidgetMonths.index(Calendar.getInstance()))
+            CalendarWidgetMonthCache.get(ctx, month)
+            val cachedLoads = CalendarWidgetMonthCache.loads
+            for (delta in listOf(-1, 1)) CalendarWidgetMonthCache.get(ctx,
+                (month.clone() as Calendar).apply { add(Calendar.MONTH, delta) })
+            assertEquals(cachedLoads, CalendarWidgetMonthCache.loads)
             for (id in listOf(week, three)) {
                 val root = shadow.getViewFor(id)
                 assertEquals("Renamed shift", root.findViewById<TextView>(R.id.pill_0_0).text.toString())
@@ -70,6 +78,34 @@ class CalendarWidgetRefreshTest {
             for (id in listOf(week, three)) {
                 assertEquals("Changed again", shadow.getViewFor(id).findViewById<TextView>(R.id.pill_0_0).text.toString())
                 assertEquals(android.view.View.GONE, shadow.getViewFor(id).findViewById<TextView>(R.id.memo1_0_0).visibility)
+            }
+            // Seed an older frame for both providers. Only one then receives
+            // the host tick, as with widgets on separate home-screen pages.
+            val evening = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 18); set(Calendar.MINUTE, 17)
+            }
+            for ((id, single) in listOf(week to true, three to false)) {
+                val old = CalendarWidgetProvider.buildRemoteViews(ctx, single, now = evening)
+                old.setTextViewText(R.id.hdr_0, "stale frame")
+                manager.updateAppWidget(id, old)
+            }
+            save("Week provider tick")
+            WeekCalendarWidgetProvider().onUpdate(ctx, manager, intArrayOf(week))
+            val expectedColor = android.graphics.Color.parseColor(
+                if (CalendarWidgetProvider.isDaytime(Calendar.getInstance())) "#355B54" else "#444C77")
+            for (id in listOf(week, three)) {
+                assertNotEquals("stale frame",
+                    shadow.getViewFor(id).findViewById<TextView>(R.id.hdr_0).text.toString())
+                assertEquals(expectedColor,
+                    shadow.getViewFor(id).findViewById<TextView>(R.id.hdr_0).currentTextColor)
+                assertEquals("Week provider tick",
+                    shadow.getViewFor(id).findViewById<TextView>(R.id.pill_0_0).text.toString())
+            }
+            save("Three provider tick")
+            CalendarWidgetProvider().onUpdate(ctx, manager, intArrayOf(three))
+            for (id in listOf(week, three)) {
+                assertEquals("Three provider tick",
+                    shadow.getViewFor(id).findViewById<TextView>(R.id.pill_0_0).text.toString())
             }
         } finally { DatabaseHelper.resetInstanceForTest() }
     }

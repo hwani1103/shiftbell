@@ -1,0 +1,4 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/examples/sync_path_lab/test/lab_isolation_test.dart
+00:00 +0: Bundled prototype atlases decode and release in the independent host
+00:00 +1: only independent devDebug application ID and no app service dependencies
+00:00 +2: All tests passed!

@@ -1,0 +1,15 @@
+{
+  "levels": 70,
+  "uniqueFloorGeometriesIgnoringRotationReflection": 70,
+  "first50Preserved": true,
+  "boardSizes": [
+    5,
+    6,
+    7
+  ],
+  "maximumUnits": 4,
+  "minimumStartGoalManhattan": 3,
+  "portalsEssentialAllNewLevels": true,
+  "portalAssetImages": 0,
+  "humanPlaytest": "NOT_TESTED"
+}

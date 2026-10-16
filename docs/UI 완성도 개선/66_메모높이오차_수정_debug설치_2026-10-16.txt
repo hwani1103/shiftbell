@@ -1,0 +1,22 @@
+2026-10-16 UI66 메모 높이 오차 수정 및 dev 설치
+
+UI65 실기기 원인 조사 후 사용자 즉시 수정 지시.
+변경: CompleteCellMemoText의 높이 판정에 Flutter precisionErrorTolerance(1e-10)를 적용. Rect 좌표 차감의 부동소수점 오차만 허용. 폰트/칩/셀/메모 배치, 너비 안전 영역, 실제 높이 부족 차단 유지.
+
+검증
+- 신규 유한 높이 3조건: 정확히 같은 높이/7e-15 부족/0.25 부족. 수정 전 7e-15 조건만 FAIL, 수정 후 PASS.
+- complete_cell_memo_text/calendar_layout_contract/calendar_detail_contract/calendar_reading_palette 총36검사 PASS.
+- 수정2파일 dart analyze No issues found.
+- dev debug build exit0. 이번 변경은 메모 렌더러와 해당 검사만으로 P0·출시언어 구조 변경 없음; 기존 통합 UI64 필수 -Build 근거 보존, 이번에는 대상 검사와 dev debug 빌드 수행. release/웹 배포 없음.
+- SM-S948N R5KL20DHWAE 업데이트 설치 Success, 설치base.apk SHA256 산출물과 일치.
+- 실제 2026년10월 소프트카드10/16에 ㄱㄴ / ㅇㄷㅇㄷ / ㅂㅈㅇㄷ 세 줄 표시 확인. after_launch.png.
+
+prod 영향 확인/정정
+게시 기준 v1.0.24+27(a5ea3916cc983196326f3e27d635668c827cdb28)에도 painter.height <= height 코드 존재. 해당 태그에는 새 ContractCalendarCell/CalendarLayoutContract 없음. 따라서 dev에서만 존재하는 버그라고 단정하지 않는다. prod 실기기 동일 증상 재현은 미실시. 수정은 현재 dev에 반영됐으며 출시 prod는 미변경.
+
+데이터 관찰
+설치 직후17/18테이블 동일. shift_schedule의3개빈맵필드 null→{} 변경, 자동백업시간/해시 변경. 이후 실행 중 근무명/패턴/색과 team_schedule_config 변경 관측, 사용자 편집 여부 확인 중. 임의 원복 없음. 메모 테이블은 전후 동일. 전체18테이블 완전동일로 표현하지 않음.
+
+APK artifacts/memo_height_fix_2026_10_16/ShiftBell_memo_height_dev_debug.apk
+SHA256 82cedff8019ac0f8b768941a64bc0c07534ebf5bc1985839bdbc7c036181ff0c
+증거: 같은 폴더 before_test.log / after_test.log / build.log / install.json / installed_apk_hash.txt / after_launch.png / device_* / *_differences.json.

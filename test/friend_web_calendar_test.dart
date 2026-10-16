@@ -34,7 +34,8 @@ void main() {
     updatedAt: DateTime(2026, 9, 30, 6),
   );
 
-  testWidgets('vertical drag over shared calendar reaches the footer', (tester) async {
+  testWidgets('vertical drag over shared calendar reaches the footer',
+      (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(360, 698);
     addTearDown(tester.view.resetPhysicalSize);
@@ -42,27 +43,46 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       locale: const Locale('en'),
       supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: const [AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate
+      ],
       theme: ThemeData(fontFamily: 'CalendarTest'),
       builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.3)),
-        child: child!),
-      home: FriendWebCalendar(friendName: schedule.ownerName, data: schedule,
-        initialDay: DateTime(2026, 10, 3), showInstallPrompt: true, showPwaAddressBarHint: true,
-        showQuickInstallButton: true, onQuickInstallTap: () {}, onInstallTap: () {}),
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: const TextScaler.linear(1.3)),
+          child: child!),
+      home: FriendWebCalendar(
+          friendName: schedule.ownerName,
+          data: schedule,
+          initialDay: DateTime(2026, 10, 3),
+          showInstallPrompt: true,
+          showPwaAddressBarHint: true,
+          showQuickInstallButton: true,
+          onQuickInstallTap: () {},
+          onInstallTap: () {}),
     ));
     await tester.pumpAndSettle();
-    final scroll = tester.state<ScrollableState>(find.descendant(
-      of: find.byKey(const ValueKey('friend-web-scroll')),
-      matching: find.byType(Scrollable)).first).position;
+    final scroll = tester
+        .state<ScrollableState>(find
+            .descendant(
+                of: find.byKey(const ValueKey('friend-web-scroll')),
+                matching: find.byType(Scrollable))
+            .first)
+        .position;
     expect(scroll.maxScrollExtent, greaterThan(0));
-    await tester.drag(find.byKey(const ValueKey('friend-web-grid')), const Offset(0, -250));
+    await tester.drag(
+        find.byKey(const ValueKey('friend-web-grid')), const Offset(0, -250));
     await tester.pumpAndSettle();
-    expect(scroll.pixels, greaterThan(0), reason: 'Calendar must not swallow vertical scrolling');
-    expect(tester.getRect(find.byKey(const ValueKey('friend-web-app-banner'))).bottom,
-      lessThanOrEqualTo(698));
+    expect(scroll.pixels, greaterThan(0),
+        reason: 'Calendar must not swallow vertical scrolling');
+    expect(
+        tester
+            .getRect(find.byKey(const ValueKey('friend-web-app-banner')))
+            .bottom,
+        lessThanOrEqualTo(698));
     expect(tester.takeException(), isNull);
   });
 
@@ -110,13 +130,7 @@ void main() {
     expect(label.maxLines, 1);
     expect(label.softWrap, false);
     expect(label.overflow, isNot(TextOverflow.ellipsis));
-    expect(
-        tester
-            .widget<FittedBox>(find
-                .ancestor(of: labelFinder, matching: find.byType(FittedBox))
-                .first)
-            .fit,
-        BoxFit.scaleDown);
+    expect(label.textScaler, TextScaler.noScaling);
     final band = tester
         .getRect(find.byKey(const ValueKey('friend-shift-band-2026-10-01')));
     final labelRect = tester.getRect(labelFinder);

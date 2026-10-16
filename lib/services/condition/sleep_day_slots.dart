@@ -1,4 +1,7 @@
+import '../../utils/calendar_dates.dart';
 // lib/services/condition/sleep_day_slots.dart
+// Current UI (2026-10-14): compact cards keep two nap slots; full-calendar
+// views expose every entry in allNaps. Totals include all naps in both views.
 //
 // ⭐ "최근 수면 기록" 미니 달력 카드 / 전체보기 화면이 공유하는 순수 그룹핑
 // 로직. DB 스키마는 전혀 바뀌지 않는다 - `sleep_records`는 여전히 평범한 행의
@@ -170,7 +173,7 @@ DateTime attributedSleepDay(SleepRecord record, ShiftPatternAnalyzer? analyzer) 
 /// 아래 본문 주석 참고). 오늘이 휴무면 21시 앵커 그대로.
 DateTime _attributedDay(SleepRecord r, ShiftPatternAnalyzer? analyzer) {
   final startDay = _dayOnly(r.start);
-  final prevDay = startDay.subtract(const Duration(days: 1));
+  final prevDay = shiftLocalCalendarDay(startDay, -1);
   // 21시부터 시작하는 통상 밤잠 창은 자정을 넘어 새벽 6시에 닫힌다.
   // 주간/휴무 뒤 00~05시에 잠들어도 전날의 밤잠으로 표시한다.
   // 전날 야간 근무였다면 아래 퇴근 후 회복수면 규칙이 우선한다.
@@ -207,7 +210,7 @@ DateTime _attributedDay(SleepRecord r, ShiftPatternAnalyzer? analyzer) {
   // 몇 시든 항상 같은 규칙으로 갈리고(고정 시각 가정 없음), 오늘이 휴무면 비교할
   // 출근 시각이 없으므로 기존 21시 앵커가 그대로 쓰인다.
   //
-  // 예) 야간1 19~07시 / 야간2 19~07시 → 경계 13:00
+  // 예) 야간1 19~07시 / 야간2 19~07시 → 1시간 조기퇴근 보정 후 경계 12:30
   //     08~13시 수면 = 야간1의 주수면(어제 칸) · 14~17시 수면 = 야간2의 출근 전 수면(오늘 칸)
   final todayInst = analyzer.instanceForDate(startDay);
   if (todayInst.isWorkDay && todayInst.start != null && todayInst.start!.isAfter(effectiveEnd)) {
@@ -283,7 +286,7 @@ List<SleepDaySlots> buildSleepDaySlots({
   final start = _dayOnly(from);
   final end = _dayOnly(to);
   final result = <SleepDaySlots>[];
-  for (var d = start; !d.isAfter(end); d = d.add(const Duration(days: 1))) {
+  for (var d = start; !d.isAfter(end); d = shiftLocalCalendarDay(d, 1)) {
     final dayRecords = byDay[d];
     SleepRecord? main;
     final naps = <SleepRecord>[];

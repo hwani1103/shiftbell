@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "existingTests": 144,
+  "exitCode": 0,
+  "command": "flutter test --no-pub --reporter expanded (13 test files)",
+  "tests": [
+    "test/night_shift_sleep_attribution_test.dart",
+    "test/sleep_day_slots_test.dart",
+    "test/sleep_overlap_test.dart",
+    "test/sleep_opportunity_test.dart",
+    "test/sleep_history_test.dart",
+    "test/sleep_by_category_stats_test.dart",
+    "test/sleep_estimate_minimum_test.dart",
+    "test/recovery_briefing_engine_test.dart",
+    "test/recovery_briefing_overlap_scenarios_test.dart",
+    "test/condition_rule_engine_v2_test.dart",
+    "test/condition_baseline_load_test.dart",
+    "test/memo_category_classifier_test.dart",
+    "test/optional_features_defaults_test.dart"
+  ],
+  "scope": "host Flutter tests only; no device/build/release",
+  "initialAttempt": "restricted SDK lockfile failed, rerun using exec escalation succeeded",
+  "additionalBoundaryTests": 17,
+  "additionalExitCode": 0,
+  "totalPassed": 161
+}

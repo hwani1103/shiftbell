@@ -1,11 +1,14 @@
 // lib/services/update_service.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show appFlavor;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/l10n_extensions.dart';
+
+enum ManualUpdateStatus { available, upToDate, unavailable }
 
 class UpdateService {
   static const String _notifiedVersionKey = 'notified_update_version';
@@ -62,7 +65,7 @@ class UpdateService {
           await prefs.setInt(_notifiedVersionKey, latestVersionCode);
 
           if (result) {
-            await _openPlayStore();
+            await openPlayStore();
           }
         }
         // result가 null이면 저장하지 않음 → 다음 실행 시 다시 표시(실수로 뒤로가기 눌렀을
@@ -73,6 +76,26 @@ class UpdateService {
       debugPrint('Play 업데이트 확인 실패: $e');
     } finally {
       _checkInProgress = false;
+    }
+  }
+
+  /// Explicit checks bypass reminder cooldown and per-version dismissal.
+  /// Dev is a separate package, so Play cannot compare it with the product.
+  static Future<ManualUpdateStatus> checkManually() async {
+    if (appFlavor == 'dev') return ManualUpdateStatus.unavailable;
+    try {
+      final info = await InAppUpdate.checkForUpdate()
+          .timeout(const Duration(seconds: 15));
+      return switch (info.updateAvailability) {
+        UpdateAvailability.updateAvailable ||
+        UpdateAvailability.developerTriggeredUpdateInProgress =>
+          ManualUpdateStatus.available,
+        UpdateAvailability.updateNotAvailable => ManualUpdateStatus.upToDate,
+        UpdateAvailability.unknown => ManualUpdateStatus.unavailable,
+      };
+    } catch (e) {
+      debugPrint('Manual Play update check unavailable: $e');
+      return ManualUpdateStatus.unavailable;
     }
   }
 
@@ -199,10 +222,13 @@ class UpdateService {
   }
 
   /// Play Store 열기
-  static Future<void> _openPlayStore() async {
-    final uri = Uri.parse(_playStoreUrl);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+  static Future<bool> openPlayStore() async {
+    try {
+      return await launchUrl(Uri.parse(_playStoreUrl),
+          mode: LaunchMode.externalApplication);
+    } catch (e) {
+      debugPrint('Play Store launch failed: $e');
+      return false;
     }
   }
 }

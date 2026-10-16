@@ -267,19 +267,19 @@
       }
     }
   },
-  "onboardingCreateSchedule": "교대근무 스케줄 생성",
-  "onboardingShiftNameTitle": "내 교대근무에 사용하는 근무명을 모두 선택해 주세요.",
-  "onboardingShiftNameSubHint": "연차나 휴가처럼 가끔 쓰는 근무도 함께 두면, 나중에 달력에서 간편하게 변경할 수 있어요.\n\n쓰지 않는 근무명은 ×로 지우고, 목록에 없는 근무명은 + 추가로 만들어 주세요.",
-  "onboardingPatternHint": "최대 40일까지 지정 가능합니다.\n패턴의 근무 칩을 누르면 삭제돼요.",
-  "onboardingPatternHowTo": "근무가 반복되는 순서대로 칩을 눌러 주세요.",
-  "onboardingShortNamesHint": "달력에서 한눈에 알아보기 쉽도록 근무명은 가급적 짧은 이름이나 약어로 입력해 주세요. 나중에 설정 탭에서 수정할 수 있어요.",
-  "onboardingTapToCompletePattern": "버튼을 탭해서 패턴을 완성해주세요",
-  "onboardingIrregularChoiceTitle": "날짜별로 직접 지정할게요",
-  "onboardingIrregularChoiceDescription": "반복되는 패턴이 없는 교대 근무라면?",
+  "onboardingCreateSchedule": "근무 설정",
+  "onboardingShiftNameTitle": "근무명을 지정해요",
+  "onboardingShiftNameSubHint": "사용되는 근무명을 선택해주세요.",
+  "onboardingPatternHint": "근무명을 탭하면 지워져요.",
+  "onboardingPatternHowTo": "교대 패턴의 순서대로 근무명을 눌러주세요.",
+  "onboardingShortNamesHint": "근무명은 가급적 짧게, 약어로 써주세요.",
+  "onboardingTapToCompletePattern": "내 교대 패턴을 만들어요",
+  "onboardingIrregularChoiceTitle": "날짜별로 직접 지정",
+  "onboardingIrregularChoiceDescription": "정해진 교대 패턴이 없나요?",
   "onboardingNoPattern": "탭하면 이곳에 패턴이 생성됩니다.",
   "onboardingAddShiftName": "근무명 추가",
-  "onboardingSetFixedAlarmPerShift": "근무별 고정 알람을 설정하세요",
-  "onboardingMaxAlarmsPerShift": "각 근무당 최대 {max}개까지 설정 가능합니다.",
+  "onboardingSetFixedAlarmPerShift": "근무별 알람을 설정해요",
+  "onboardingMaxAlarmsPerShift": "근무마다 최대 {max}개까지 설정할 수 있어요.",
   "@onboardingMaxAlarmsPerShift": {
     "placeholders": {
       "max": {
@@ -288,12 +288,12 @@
     }
   },
   "onboardingCanChangeInSettings": "고정 알람은 해당 근무일 당일, 전날, 다음날에 모두 설정 가능해요.",
-  "onboardingAlarmOptional": "알람은 지금 설정하지 않고 넘어가도 괜찮아요",
+  "onboardingAlarmOptional": "알람 없이 시작해도 괜찮아요.",
   "onboardingFinishSetup": "설정 완료",
   "onboardingSaving": "근무표를 만드는 중...",
   "onboardingSaveFailed": "저장하지 못했습니다. 잠시 후 다시 시도해주세요.",
   "onboardingTapToSet": "탭하여 설정",
-  "onboardingTodayShiftQuestion": "오늘({date})은 어떤 근무인가요?",
+  "onboardingTodayShiftQuestion": "오늘 : {date}",
   "@onboardingTodayShiftQuestion": {
     "placeholders": {
       "date": {
@@ -338,7 +338,7 @@
     }
   },
   "onboardingWelcomePopupTitle": "교대시계를 설치해 주셔서\n감사합니다",
-  "onboardingWelcomePopupBody": "처음 한 번만 근무표와 알람을 등록해 두면, 내 근무에 맞춰 정해진 시간에 알람이 자동으로 울려요.\n\n📅  달력에서 날짜별 근무 한눈에 보기\n🗓️  일정 관리와 일정 알림\n🌙  수면·회복 관리\n👥  친구와 근무표 공유",
+  "onboardingWelcomePopupBody": "처음 한 번만 근무표와 알람을 등록해 두면, 내 근무에 맞춰 정해진 시간에 알람이 자동으로 울려요.\n\n📅  달력에서 날짜별 근무 한눈에 보기\n🗓️  일정 관리와 일정 알림\n🌙  수면·회복 관리\n👥  친구와 근무표 공유\n\n😴  설정에서 수면·회복 기능을 선택해서 사용하세요.",
   "onboardingWelcomePopupStartButton": "시작하기",
   "onboardingShiftAssignPopupTitle": "근무 배정, 이렇게 하면 돼요",
   "onboardingShiftAssignPopupBody": "불규칙 근무는 정해진 패턴이 없어서, 날짜마다 직접 근무를 지정해줘야 해요.\n\n근무를 지정할 날짜를 길게 눌러 선택 모드로 들어간 뒤, 원하는 날짜들을 이어서 탭하고 하단의 근무명을 탭하여 근무를 지정하세요.\n\n지정한 근무는 언제든 같은 방법으로 다시 바꿀 수 있어요.",
@@ -395,7 +395,7 @@
   "settingsDataBackupSuccessToast": "백업이 Download/ShiftBell에 저장되었어요. 재설치 후에는 첫 화면에서 이 파일을 직접 선택해 복구하세요.",
   "settingsDataBackupFailedToast": "백업에 실패했어요(Android 10 이상 필요, 또는 일시적 오류)",
   "backupRestoreFoundTitle": "이 백업으로 복구할까요?",
-  "backupRestoreFoundDesc": "복구하면 근무표·알람·메모 등 데이터를 그대로 이어서 사용할 수 있어요.",
+  "backupRestoreFoundDesc": "복구하면 근무표·알람·메모 등 데이터를 그대로 이어서 사용할 수 있어요.\n\n수면 기록도 복원 대상에 포함됩니다.",
   "backupRestoreLastSavedAt": "백업 시각: {date}",
   "@backupRestoreLastSavedAt": {
     "placeholders": {
@@ -414,7 +414,7 @@
   "backupRestoreIncompleteToast": "복구를 끝까지 마치지 못했어요. 알람은 지금 데이터 기준으로 다시 맞춰 두었어요. 앱을 다시 열면 이어서 완료할 수 있어요.",
   "settingsRestoreFromBackupEmptyToast": "이 백업에는 근무 일정이 없어서 불러오지 않았어요. 지금 데이터는 그대로예요.",
   "restoreInterruptedTitle": "백업 복원이 완료되지 않았어요",
-  "restoreInterruptedDesc": "이전에 시작한 복원이 중간에 멈췄어요. 이어서 완료하면 그 백업 내용으로 데이터를 맞추고, 멈춘 뒤에 바뀐 내용은 덮어써져요. 지금 데이터로 계속 쓸 수도 있어요. 어느 쪽이든 알람은 선택한 데이터 기준으로 다시 맞춰져요.",
+  "restoreInterruptedDesc": "이전에 시작한 복원이 중간에 멈췄어요. 이어서 완료하면 그 백업 내용으로 데이터를 맞추고, 멈춘 뒤에 바뀐 내용은 덮어써져요. 지금 데이터로 계속 쓸 수도 있어요. 어느 쪽이든 알람은 선택한 데이터 기준으로 다시 맞춰져요.\n\n수면 기록도 복원 대상에 포함됩니다.",
   "restoreInterruptedResumeButton": "이어서 복원하기",
   "restoreInterruptedKeepButton": "지금 데이터로 계속 쓰기",
   "restoreInterruptedCopyLost": "복원에 쓰던 파일을 찾을 수 없어서 이어서 할 수 없어요. 알람과 일정 알림은 지금 데이터 기준으로 다시 맞춰 둘게요.",
@@ -422,10 +422,10 @@
   "settingsRestoreFromBackupTitle": "백업 불러오기",
   "settingsRestoreFromBackupDesc": "다른 백업 파일로 지금 데이터를 덮어써요",
   "settingsRestoreFromBackupWarningTitle": "백업 데이터 불러오기",
-  "settingsRestoreFromBackupWarningBody": "지금 이 기기에 저장된 근무표·알람·메모·수면 기록 등 모든 데이터가 선택하는 백업 파일의 내용으로 완전히 덮어써집니다. 되돌릴 수 없으니 신중하게 진행해주세요.\n\n다음 화면에서 파일 선택 창이 뜨면 아래 위치의 파일을 선택해주세요.\n\n경로: Download → ShiftBell\n파일명: ShiftBell_Backup_manual_(직접 백업) 또는 ShiftBell_Backup_auto_(자동 백업)로 시작하고 끝에 날짜와 시각이 붙은 파일(예: ShiftBell_Backup_auto_260917_060412.json)\n보통 두 파일 중 날짜·시각이 더 최근인 것을 고르세요. 고른 뒤 다음 화면에서 그 백업의 저장 시각을 다시 확인할 수 있습니다.",
+  "settingsRestoreFromBackupWarningBody": "지금 이 기기에 저장된 근무표·알람·메모·수면 기록 등 모든 데이터가 선택하는 백업 파일의 내용으로 완전히 덮어써집니다. 되돌릴 수 없으니 신중하게 진행해주세요.\n\n다음 화면에서 파일 선택 창이 뜨면 아래 위치의 파일을 선택해주세요.\n\n경로: Download → ShiftBell\n파일명: ShiftBell_Backup_manual_(직접 백업) 또는 ShiftBell_Backup_auto_(자동 백업)로 시작하고 끝에 날짜와 시각이 붙은 파일(예: ShiftBell_Backup_auto_260917_060412.json)\n보통 두 파일 중 날짜·시각이 더 최근인 것을 고르세요. 고른 뒤 다음 화면에서 그 백업의 저장 시각을 다시 확인할 수 있습니다.\n\n수면 기록도 복원 대상에 포함됩니다.",
   "settingsRestoreFromBackupPickButton": "파일 선택하기",
   "settingsRestoreFromBackupConfirmTitle": "이 백업으로 복구할까요?",
-  "settingsRestoreFromBackupConfirmBody": "{date}에 저장된 백업이에요. 복구하면 지금 이 기기의 데이터는 모두 사라지고 이 백업 내용으로 바뀝니다.",
+  "settingsRestoreFromBackupConfirmBody": "{date}에 저장된 백업이에요. 복구하면 지금 이 기기의 데이터는 모두 사라지고 이 백업 내용으로 바뀝니다.\n\n수면 기록도 복원 대상에 포함됩니다.",
   "@settingsRestoreFromBackupConfirmBody": {
     "placeholders": {
       "date": {
@@ -494,17 +494,17 @@
   "settingsResetScheduleConfirm": "교대 스케줄과 알람을 모두 초기화할까요?\n\n전체 조 근무표와 알람 이력, 생성 기록도 삭제됩니다. 내 일정 공유도 중지됩니다. 인터넷 연결이 없으면 연결 후 중지되며, 그전에는 기존 공유가 보일 수 있습니다.",
   "privacyIntro": "교대시계에서 만드는 데이터는 기본적으로 사용자의 기기에 저장됩니다. 아래에서는 기기에 저장되는 정보, Google 서비스를 통해 처리되는 정보와 사용자가 문의할 때 개발자에게 전달되는 정보를 안내합니다.",
   "privacyNoCollectionTitle": "기본 - 기기 안에 저장되는 데이터",
-  "privacyNoCollectionBody": "근무 스케줄, 알람 설정과 알람 기록, 메모/일정, 근무시간·OT, 수면 기록, 친구 목록 등 앱에서 만드는 데이터는 사용자의 기기 안에 저장되며 개발자에게 전송되지 않습니다. 자동 수면 추정도 화면이 켜져 있는지, 충전 중인지만 기기 안에서 확인하고 그 결과를 밖으로 보내지 않습니다.\n\n다만 아래 '사용 통계', '일정공유', '광고' 항목에 적힌 범위의 정보는 Google 서비스로 전송됩니다.\n\n진단 파일은 Android 10 이상에서 기기 안의 Download/ShiftBell/log 폴더에 자동 저장·갱신됩니다. 이 파일에는 기기·Android 버전, 권한과 배터리 설정 상태, 알람 예약·울림 기록, 백업 기록이 들어가며 메모·일정 내용, 근무명, 친구 이름은 들어가지 않아요. 앱이 이 파일을 자동으로 전송하지 않으며, 필요할 때 사용자가 직접 찾아 보내실 수 있어요.\n\n설정 → 부가 기능 → 진단 로그 이메일로 보내기를 누르면 공유용 .txt 파일을 앱의 임시 폴더에 만듭니다. 전송은 사용자가 메일 앱에서 직접 완료합니다. 이메일로 보내면 로그 파일, 메일에 적은 내용과 발신자 이메일 주소가 개발자에게 전달됩니다. 교대시계는 이메일 계정 정보에 접근하거나 로그를 자동 전송하지 않습니다.",
+  "privacyNoCollectionBody": "근무 스케줄, 알람 설정과 알람 기록, 메모/일정, 근무시간·OT, 수면 기록, 친구 목록 등 앱에서 만드는 데이터는 사용자의 기기 안에 저장되며 개발자에게 전송되지 않습니다. 자동 수면 추정도 화면이 켜져 있는지, 충전 중인지만 기기 안에서 확인하고 그 결과를 밖으로 보내지 않습니다.\n\n다만 아래 '사용 통계', '일정공유', '광고' 항목에 적힌 범위의 정보는 Google 서비스로 전송됩니다.\n\n진단 파일은 Android 10 이상에서 기기 안의 Download/ShiftBell/log 폴더에 자동 저장·갱신됩니다. 이 파일에는 기기·Android 버전, 권한과 배터리 설정 상태, 알람 예약·울림 기록, 백업 기록이 들어가며 메모·일정 내용, 근무명, 친구 이름은 들어가지 않아요. 앱이 이 파일을 자동으로 전송하지 않으며, 필요할 때 사용자가 직접 찾아 보내실 수 있어요.\n\n설정 → 부가 기능 → 진단 로그 이메일로 보내기를 누르면 공유용 .txt 파일을 앱의 임시 폴더에 만듭니다. 전송은 사용자가 메일 앱에서 직접 완료합니다. 이메일로 보내면 로그 파일, 메일에 적은 내용과 발신자 이메일 주소가 개발자에게 전달됩니다. 교대시계는 이메일 계정 정보에 접근하거나 로그를 자동 전송하지 않습니다.\n\n수면·회복 기능의 수면 시작·종료 시각과 확인 상태도 기기에 저장됩니다. 수면 추정은 기능을 켠 경우에만 화면 꺼짐과 충전 상태를 주기적으로 확인해 기기 안에서 처리합니다. 이 관찰값이나 수면 기록 내용을 서버로 전송하지 않습니다.",
   "privacyAnalyticsTitle": "사용 통계(Google Firebase Analytics)",
-  "privacyAnalyticsBody": "앱을 개선하기 위해 Google Firebase Analytics가 앱 실행·화면 이용 같은 이용 기록, 앱 버전, 기기 종류·OS 버전, 대략적인 지역 정보와 앱 설치별 식별자를 자동으로 수집합니다. 또 어떤 기능이 얼마나 쓰이는지 알 수 있도록 알람 끄기·다시 알림 횟수, 메모·일정·수면 기록·백업 같은 기능을 사용한 횟수만 함께 기록합니다. 웹 뷰어에서 친구 근무표를 정상적으로 연 횟수는 앱 사용과 별도로 집계하며, 공유 코드나 친구 이름은 이 이벤트에 넣지 않습니다. 근무표·메모·수면 기록·알람 시각 같은 앱 데이터의 내용은 통계에 넣지 않습니다. 수집된 통계는 Google의 개인정보처리방침에 따라 처리됩니다.\n\n앱 안정성을 확인하기 위해 알람 예약·울림 진입·갱신 및 기기 재부팅 관측 횟수, 권한과 배터리 제한 상태의 분류, 기기 제조사 범주를 Google Firebase Analytics로 전송할 수 있습니다. 원본 진단 파일이나 알람 식별자·시각, 근무표·메모·수면 기록의 내용은 이 통계에 포함하지 않습니다. 일부 관측은 다음 앱 실행 때 전송되어 실제 발생 시점과 보고 날짜가 다를 수 있습니다.",
+  "privacyAnalyticsBody": "앱을 개선하기 위해 Google Firebase Analytics가 앱 실행·화면 이용 같은 이용 기록, 앱 버전, 기기 종류·OS 버전, 대략적인 지역 정보와 앱 설치별 식별자를 자동으로 수집합니다. 또 어떤 기능이 얼마나 쓰이는지 알 수 있도록 알람 끄기·다시 알림 횟수, 메모·일정·수면 기록·백업 같은 기능을 사용한 횟수만 함께 기록합니다. 웹 뷰어에서 친구 근무표를 정상적으로 연 횟수는 앱 사용과 별도로 집계하며, 공유 코드나 친구 이름은 이 이벤트에 넣지 않습니다. 근무표·메모·수면 기록·알람 시각 같은 앱 데이터의 내용은 통계에 넣지 않습니다. 수집된 통계는 Google의 개인정보처리방침에 따라 처리됩니다.\n\n앱 안정성을 확인하기 위해 알람 예약·울림 진입·갱신 및 기기 재부팅 관측 횟수, 권한과 배터리 제한 상태의 분류, 기기 제조사 범주를 Google Firebase Analytics로 전송할 수 있습니다. 원본 진단 파일이나 알람 식별자·시각, 근무표·메모·수면 기록의 내용은 이 통계에 포함하지 않습니다. 일부 관측은 다음 앱 실행 때 전송되어 실제 발생 시점과 보고 날짜가 다를 수 있습니다.\n\n수면 기능 사용 횟수 같은 이벤트는 통계에 포함될 수 있지만, 수면 시작·종료 시각과 수면 기록 내용은 포함하지 않습니다.",
   "privacyFirebaseTitle": "일정공유 기능을 쓰는 경우(Google Firebase)",
   "privacyFirebaseBody": "'일정공유'를 켜면 친구에게 보여줄 이름과 근무 스케줄(근무 패턴·시작일·근무별 색상·날짜별 근무 변경)이 Google Firebase 서버에 저장되고, 공유 코드나 링크를 가진 사람은 누구나 볼 수 있습니다. 이를 위해 앱이 자동으로 만드는 익명 식별자가 함께 쓰이며, 메모·OT·수면 기록·알람 설정은 전송하지 않습니다.\n\n공유를 중지하면 기기에서는 바로 꺼지고 서버의 공유 내용을 제거하는 요청이 전송됩니다. v2 공유에서는 오래된 전송이 공유를 다시 활성화하지 못하도록 중지 상태와 최소 버전 정보를 남길 수 있습니다. 인터넷에 연결되어 있지 않으면 연결된 뒤 다시 보내며, 그 전까지는 친구가 이전 근무표를 볼 수 있습니다. 친구 기기에 이미 받아 둔 근무표나 캡처는 회수할 수 없습니다.\n\n앱을 삭제하고 다시 설치하면 새 익명 식별자가 만들어져, 이전에 공유한 데이터를 앱에서 지울 수 없게 됩니다. 재설치 전에 공유를 중지해 주세요.\n\n한국 공휴일 변경분을 확인하려고 Firebase의 공개 문서를 드물게 읽습니다. 이 조회에 근무표·수면 기록 등 앱 내용은 보내지 않습니다. 업데이트 가능 여부는 Google Play에서 확인합니다.\n\n이전 버전은 Firebase의 공개 업데이트 설정을 읽을 수 있으며, 이 조회에 근무표나 메모 내용을 넣지 않습니다.",
   "privacyAdsTitle": "광고 제공(Google AdMob)",
-  "privacyAdsBody": "앱 화면 일부에 Google AdMob 배너 광고가 표시됩니다. 광고 제공과 성과 측정을 위해 광고 SDK가 기기 식별자, IP 주소, 앱 상호작용 및 진단 정보를 처리할 수 있습니다. 앱은 근무표·알람 시각·메모 내용을 광고 요청에 넣지 않습니다.\n\nGoogle의 동의 시스템에서 요구하는 경우 광고 관련 선택을 요청합니다. 설정에 광고 개인정보 설정이 표시되면 선택을 다시 확인하거나 변경할 수 있습니다. Google의 정보 처리 방식은 Google 개인정보처리방침에서 확인할 수 있습니다.",
+  "privacyAdsBody": "앱 화면 일부에 Google AdMob 배너 광고가 표시됩니다. 광고 제공과 성과 측정을 위해 광고 SDK가 기기 식별자, IP 주소, 앱 상호작용 및 진단 정보를 처리할 수 있습니다. 앱은 근무표·알람 시각·메모 내용을 광고 요청에 넣지 않습니다.\n\nGoogle의 동의 시스템에서 요구하는 경우 광고 관련 선택을 요청합니다. 설정에 광고 개인정보 설정이 표시되면 선택을 다시 확인하거나 변경할 수 있습니다. Google의 정보 처리 방식은 Google 개인정보처리방침에서 확인할 수 있습니다.\n\n수면 기록 내용도 광고 요청에 포함하지 않습니다.",
   "privacyPermissionsTitle": "앱이 요청하는 권한",
-  "privacyPermissionsBody": "• 알림: 알람 사전 안내, 알람 상태 표시, 일정 알림\n• 다른 앱 위에 표시: 다른 앱 사용 중에도 알람 화면을 띄우기 위함\n• 정확한 알람: 설정한 시각에 알람을 예약하기 위함\n\n권한을 허용하지 않아도 앱은 계속 쓸 수 있지만, 위 기능 중 일부가 제한될 수 있습니다.\n\n• 잠금화면 알람 표시: 휴대전화가 잠겼을 때 알람 화면을 표시하기 위한 전체 화면 알림 권한입니다.",
+  "privacyPermissionsBody": "• 알림: 알람 사전 안내, 알람 상태 표시, 일정 알림\n• 다른 앱 위에 표시: 다른 앱 사용 중에도 알람 화면을 띄우기 위함\n• 정확한 알람: 설정한 시각에 알람을 예약하기 위함\n\n권한을 허용하지 않아도 앱은 계속 쓸 수 있지만, 위 기능 중 일부가 제한될 수 있습니다.\n\n• 잠금화면 알람 표시: 휴대전화가 잠겼을 때 알람 화면을 표시하기 위한 전체 화면 알림 권한입니다.\n\n수면·회복 기능을 켠 경우에는 수면 추정 상태를 주기적으로 확인하는 예약에도 정확한 알람 기능을 사용합니다.",
   "privacyDataRetentionTitle": "데이터 보관 및 삭제",
-  "privacyDataRetentionBody": "기기 안의 데이터는 앱을 삭제하면 함께 삭제됩니다.\n\n단, '백업' 기능(자동 백업 포함)으로 만든 파일은 기기의 다운로드/ShiftBell 폴더에 남아 앱을 삭제해도 지워지지 않습니다. 이 파일은 암호화되지 않았고 근무표·알람 기록·메모/일정·OT·수면 기록·친구 목록 등이 들어 있으니 다른 사람에게 보내지 않도록 주의하고, 필요 없으면 파일 관리자에서 직접 삭제해 주세요. 백업 파일은 자동으로 외부에 전송되지 않지만, 클라우드 동기화 폴더 등으로 옮기면 그 서비스의 정책이 적용됩니다.\n\nDownload/ShiftBell/log의 진단 파일도 앱 삭제 후 남을 수 있습니다. 이 파일에는 기기 정보, 권한 상태, 알람·백업 기록이 들어 있으므로 필요 없으면 파일 관리자에서 직접 삭제해 주세요.\n\n백업은 Android 10 이상에서만 지원됩니다. 앱을 삭제하고 다시 설치하면 이전 백업을 자동으로 찾지 못하므로, 첫 화면의 '기존에 쓰시던 분이라면'에서 '불러오기'를 눌러 파일을 직접 골라야 합니다.\n\n일정공유 데이터의 삭제는 위 '일정공유' 안내를, 사용 통계·광고 데이터의 보관은 Google의 정책을 따릅니다.\n\n공유용 진단 로그는 앱의 임시 폴더에 저장되며 앱을 삭제하면 함께 삭제됩니다. 사용자가 이메일이나 다른 앱으로 보낸 사본은 해당 서비스와 수신자가 보관합니다.\n\n이전 버전에서 만든 데이터는 현재 화면에 해당 기능이 없어도 사용자가 삭제하거나 앱을 제거하기 전까지 기기에 남을 수 있습니다.\n\n개발자가 이메일로 받은 문의 내용, 발신자 이메일 주소와 진단 첨부파일은 문의 대응과 문제 확인을 위해 사용하며, 문의 해결 후 30일 이내에 삭제합니다. lowvibe07@gmail.com으로 삭제를 요청하면 지체 없이 삭제합니다. 메일 서비스가 별도로 보관하는 사본에는 해당 서비스의 정책이 적용됩니다.",
+  "privacyDataRetentionBody": "기기 안의 데이터는 앱을 삭제하면 함께 삭제됩니다.\n\n단, '백업' 기능(자동 백업 포함)으로 만든 파일은 기기의 다운로드/ShiftBell 폴더에 남아 앱을 삭제해도 지워지지 않습니다. 이 파일은 암호화되지 않았고 근무표·알람 기록·메모/일정·OT·수면 기록·친구 목록 등이 들어 있으니 다른 사람에게 보내지 않도록 주의하고, 필요 없으면 파일 관리자에서 직접 삭제해 주세요. 백업 파일은 자동으로 외부에 전송되지 않지만, 클라우드 동기화 폴더 등으로 옮기면 그 서비스의 정책이 적용됩니다.\n\nDownload/ShiftBell/log의 진단 파일도 앱 삭제 후 남을 수 있습니다. 이 파일에는 기기 정보, 권한 상태, 알람·백업 기록이 들어 있으므로 필요 없으면 파일 관리자에서 직접 삭제해 주세요.\n\n백업은 Android 10 이상에서만 지원됩니다. 앱을 삭제하고 다시 설치하면 이전 백업을 자동으로 찾지 못하므로, 첫 화면의 '기존에 쓰시던 분이라면'에서 '불러오기'를 눌러 파일을 직접 골라야 합니다.\n\n일정공유 데이터의 삭제는 위 '일정공유' 안내를, 사용 통계·광고 데이터의 보관은 Google의 정책을 따릅니다.\n\n공유용 진단 로그는 앱의 임시 폴더에 저장되며 앱을 삭제하면 함께 삭제됩니다. 사용자가 이메일이나 다른 앱으로 보낸 사본은 해당 서비스와 수신자가 보관합니다.\n\n이전 버전에서 만든 데이터는 현재 화면에 해당 기능이 없어도 사용자가 삭제하거나 앱을 제거하기 전까지 기기에 남을 수 있습니다.\n\n개발자가 이메일로 받은 문의 내용, 발신자 이메일 주소와 진단 첨부파일은 문의 대응과 문제 확인을 위해 사용하며, 문의 해결 후 30일 이내에 삭제합니다. lowvibe07@gmail.com으로 삭제를 요청하면 지체 없이 삭제합니다. 메일 서비스가 별도로 보관하는 사본에는 해당 서비스의 정책이 적용됩니다.\n\n수면 기록도 백업에 포함됩니다. 수면·회복 기능을 끄거나 탭을 숨겨도 이미 저장한 수면 기록은 삭제되지 않습니다.",
   "privacyChildrenTitle": "아동 대상 서비스가 아닙니다",
   "privacyChildrenBody": "본 앱은 만 14세 미만 아동을 대상으로 하지 않으며, 아동의 개인정보를 의도적으로 수집하지 않습니다.",
   "privacyContactTitle": "문의처",
@@ -513,7 +513,7 @@
   "workHoursNoScheduleYet": "근무 스케줄을 먼저 설정해주세요",
   "workHoursShiftChangeOtTitle": "근무 변경 시 OT에 합산",
   "workHoursShiftChangeOtDesc": "달력에서 근무를 바꾸는 경우(예: 휴무 → 주간), 해당 근무의 기본 근무시간을 OT시간에 반영할지 정합니다.\n(월별 / 주별 근무시간에는 자동으로 합산됩니다.)",
-  "workHoursDefaultDurationDesc": "출근/퇴근 시각을 입력하면 근무시간이 자동으로 계산돼요. 달력의 \"이번 달 총 근무시간\"과 \"주별 근무시간\", 수면·회복 탭의 분석까지 여기 값을 기준으로 계산돼요.",
+  "workHoursDefaultDurationDesc": "출근/퇴근 시각을 입력하면 근무시간이 자동으로 계산돼요. 달력의 \"이번 달 총 근무시간\"과 \"주별 근무시간\", 수면·회복 탭의 분석까지 여기 값을 기준으로 계산돼요.\n\n수면·회복 기능을 켜면 이 시간을 수면 기록의 날짜 구분과 근무 사이 회복 안내에도 사용합니다.",
   "workHoursShiftTimeClockIn": "출근",
   "workHoursShiftTimeClockOut": "퇴근",
   "workHoursResetShiftTime": "출퇴근 시각 지우기(--:--로 되돌리기)",
@@ -645,7 +645,7 @@
       }
     }
   },
-  "themeMainWhite": "메인테마 - 화이트",
+  "themeMainWhite": "메인",
   "themeMainDark": "메인테마 - 다크",
   "themeMinimal": "심플 라인",
   "themeMaterialCard": "소프트 카드",
@@ -767,11 +767,11 @@
   "helpCalendarHomeWidgetBody": "홈 화면을 길게 눌러 위젯 메뉴에서 3주 달력 또는 1주 달력을 추가하세요. 3주 달력은 연도·월과 전주·이번 주·다음 주를, 1주 달력은 요일과 이번 주만 표시합니다. 날짜별 근무명과 메모를 최대 3개 보여줍니다. 가로 폭을 조절해도 표시하는 주 수는 바뀌지 않습니다.\n\n긴 근무명은 생략하지 않고 글자를 줄여 표시합니다. 요일 순서와 빨간 날짜는 앱의 국가별 기준을 따릅니다. 배경과 낮·밤 표시는 기기의 현지 시각 기준이며 날씨 정보가 아닙니다.",
   "helpBackupSectionTitle": "백업 및 복구",
   "helpBackupDataStorageTitle": "내 데이터는 어디에 저장되나요",
-  "helpBackupDataStorageBody": "알람, 근무 스케줄, 메모, 일정, 수면 기록 같은 데이터는 전부 내 기기 안에만 저장돼요. 외부 서버로 보내지 않고, 앱을 지우면 함께 사라져요. 그래서 백업이 중요해요.\n\n예외는 친구 공유예요. 공유를 켜면 근무 패턴, 색상처럼 공유에 꼭 필요한 정보만 서버(Firestore)에 올라가요. 메모, OT, 근로시간, 알람 설정은 그때도 올라가지 않아요.",
+  "helpBackupDataStorageBody": "알람, 근무 스케줄, 메모, 일정, 수면 기록 같은 데이터는 전부 내 기기 안에만 저장돼요. 외부 서버로 보내지 않고, 앱을 지우면 함께 사라져요. 그래서 백업이 중요해요.\n\n예외는 친구 공유예요. 공유를 켜면 근무 패턴, 색상처럼 공유에 꼭 필요한 정보만 서버(Firestore)에 올라가요. 메모, OT, 근로시간, 알람 설정은 그때도 올라가지 않아요.\n\n수면 기록도 기기에 저장되며 로컬 백업에 포함됩니다.",
   "helpBackupAutoBackupTitle": "자동 백업은 언제 이루어지나",
   "helpBackupAutoBackupBody": "앱을 백그라운드로 전환할 때(홈 버튼을 누르거나 다른 앱으로 이동할 때), 그사이 실제로 데이터가 바뀐 경우에만 자동으로 백업돼요. 백업 파일은 기기 안 다운로드 폴더(Download/ShiftBell)에 저장되고, 클라우드나 다른 기기로는 자동으로 보내지 않아요. 설정 → 부가 기능 → 데이터 백업 → 백업 저장하기에서 직접 백업을 저장할 수도 있어요.",
   "helpBackupRestoreTitle": "새 기기로 옮기거나 재설치 후 복구하는 법",
-  "helpBackupRestoreBody": "앱을 지웠다가 다시 설치했다면 첫 화면의 \"기존에 쓰시던 분이라면\"에서 \"불러오기\"를 눌러 백업 파일을 골라 주세요. 앱을 사용 중이라면 설정 → 부가 기능 → 데이터 백업 → 백업 불러오기에서도 복구할 수 있어요. 파일은 Download/ShiftBell 폴더에 있어요.\n\n다른 기기로 옮길 때는 이전 기기의 Download/ShiftBell 폴더에 있는 백업 파일을 새 기기로 먼저 복사해 두세요.\n\n백업 파일은 직접 백업(manual)과 자동 백업(auto) 두 개만 남아요. 새로 만들면 같은 종류의 파일만 바뀌어서, 자동 백업이 직접 백업을 지우지 않아요.\n\n복구가 끝나면 알림, 정확한 알람 같은 권한은 안전을 위해 다시 물어봐요.",
+  "helpBackupRestoreBody": "앱을 지웠다가 다시 설치했다면 첫 화면의 \"기존에 쓰시던 분이라면\"에서 \"불러오기\"를 눌러 백업 파일을 골라 주세요. 앱을 사용 중이라면 설정 → 부가 기능 → 데이터 백업 → 백업 불러오기에서도 복구할 수 있어요. 파일은 Download/ShiftBell 폴더에 있어요.\n\n다른 기기로 옮길 때는 이전 기기의 Download/ShiftBell 폴더에 있는 백업 파일을 새 기기로 먼저 복사해 두세요.\n\n백업 파일은 직접 백업(manual)과 자동 백업(auto) 두 개만 남아요. 새로 만들면 같은 종류의 파일만 바뀌어서, 자동 백업이 직접 백업을 지우지 않아요.\n\n복구가 끝나면 알림, 정확한 알람 같은 권한은 안전을 위해 다시 물어봐요.\n\n수면 기록도 복원 대상에 포함됩니다.",
   "helpBackupRestoreManualTitle": "복구가 자동으로 안 될 때",
   "helpBackupRestoreManualBody": "안드로이드는 앱을 지우면 그 앱이 만든 파일을 새로 설치한 앱에 자동으로 보여주지 않아서, 재설치한 뒤에는 이전 백업을 자동으로 찾을 수 없어요. 이럴 땐 첫 화면의 \"기존에 쓰시던 분이라면\" 옆 \"불러오기\"로 파일 선택 창을 열고, Download/ShiftBell 폴더에서 가장 최근 백업 파일을 직접 골라 주세요.",
   "helpTroubleshootSectionTitle": "문제 해결",
@@ -935,7 +935,7 @@
   "permissionOpenOemSettings": "권한 설정 열기",
   "permissionOpenFullScreenSettings": "전체 화면 알림 설정 열기",
   "permissionStillDenied": "아직 허용되지 않았어요",
-  "publicWebIntroBody": "교대근무자를 위한 일정 관리와 알람 앱입니다.\n근무 일정과 수면 리듬을 한곳에서 편하게 관리해 보세요.",
+  "publicWebIntroBody": "교대근무자를 위한 일정 관리와 알람 앱입니다.\n근무 일정과 수면 리듬을 한곳에서 편하게 관리해 보세요.\n\nAndroid 앱에서는 수면·회복 기능도 선택해서 사용할 수 있습니다.",
   "publicWebShareTitle": "친구와 근무 일정 공유",
   "publicWebShareBody": "친구에게 받은 공유 링크는 그대로 열면 최신 근무 일정을 확인할 수 있습니다.",
   "publicWebPrivacyBody": "앱의 데이터 처리와 광고·분석 이용 안내를 확인할 수 있습니다.",
@@ -965,5 +965,1456 @@
   "diagnosticBody": "겪으신 문제와 발생 시간을 적어 주세요.\n\n문제 내용:\n발생 시간:",
   "diagnosticExportFailed": "로그를 전송할 메일 앱을 열지 못했습니다. 다른 앱을 선택하거나 다시 시도해 주세요.",
   "teamLegacyRecoverAction": "이전 전체근무표 복구",
-  "teamLegacyRecoverBody": "기기에 남아 있는 이전 교대조와 근무 위치를 복구할까요?\n\n현재 내 근무표와 일치하는 조를 내 조로 복구합니다. 내 근무표·알람·메모는 변경하지 않습니다."
+  "teamLegacyRecoverBody": "기기에 남아 있는 이전 교대조와 근무 위치를 복구할까요?\n\n현재 내 근무표와 일치하는 조를 내 조로 복구합니다. 내 근무표·알람·메모는 변경하지 않습니다.",
+  "onboardingNextPattern": "다음 : 근무 패턴 지정하기",
+  "onboardingNextToday": "오늘 표시하기",
+  "onboardingNextAlarms": "다음: 알람 설정",
+  "onboardingTodayPositionHint": "패턴에서 오늘의 근무를 선택해 주세요.",
+  "onboardingEditPattern": "패턴 수정",
+  "onboardingPatternLabel": "패턴",
+  "onboardingTodayMarker": "오늘",
+  "onboardingProvidedShiftNames": "기본 제공 근무명",
+  "onboardingStart": "시작하기",
+  "onboardingCompletePattern": "패턴 확정",
+  "onboardingEditAlarms": "알람 편집",
+  "onboardingRemoveUnusedShiftNamesHint": "사용하지 않는 근무명은 탭하면 지워져요.",
+  "onboardingShiftNamesReadyHint": "사용되는 근무명이 확정되면 아래의 다음 버튼을 눌러주세요.",
+  "onboardingSelectedShiftNames": "선택된 근무명",
+  "uiThemePreviewTitle": "테마 미리보기",
+  "uiThemeDawn": "새벽",
+  "uiThemeMorning": "아침",
+  "uiThemeDaytime": "주간",
+  "uiThemeEvening": "저녁",
+  "uiThemeNight": "밤",
+  "uiThemeAutomatic": "자동",
+  "uiThemeSaveFailed": "테마를 저장하지 못했어요. 다시 선택해 주세요.",
+  "sleepText000": "수면·회복",
+  "@sleepText000": {
+    "description": "Sleep/recovery message 0. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText001": "불러오지 못했습니다: {arg0}",
+  "@sleepText001": {
+    "description": "Sleep/recovery message 1. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText002": "먼저 근무 스케줄을 설정해주세요.\n(달력 탭에서 설정할 수 있어요)",
+  "@sleepText002": {
+    "description": "Sleep/recovery message 2. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText003": "{arg0}건은 이미 기록된 수면과 겹쳐서 확인하지 않았어요. 남은 카드에서 \"기록하지 않기\"나 \"수정\"을 눌러 주세요.",
+  "@sleepText003": {
+    "description": "Sleep/recovery message 3. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText004": "보이는 기록 모두 확인",
+  "@sleepText004": {
+    "description": "Sleep/recovery message 4. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText005": "확인을 기다리는 자동 기록이 {arg0}건 더 있어요. 위 카드를 처리하면 이어서 보여드려요.",
+  "@sleepText005": {
+    "description": "Sleep/recovery message 5. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText006": "오늘의 컨디션을 보려면 근무시간이 필요해요",
+  "@sleepText006": {
+    "description": "Sleep/recovery message 6. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText007": "쓰고 있는 근무 중 하나 이상의 출퇴근 시각을 입력하면, 근무 사이 회복시간과 퇴근 후 실제 수면을 바탕으로 몇 시까지 잠자리에 들지·카페인을 언제 끊을지 같은 오늘 챙길 일을 알려드려요.\n수면 기록은 지금도 아래 \"최근 수면 기록\"에서 남길 수 있어요.",
+  "@sleepText007": {
+    "description": "Sleep/recovery message 7. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText008": "근무시간 입력하기",
+  "@sleepText008": {
+    "description": "Sleep/recovery message 8. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText009": "오늘의 컨디션",
+  "@sleepText009": {
+    "description": "Sleep/recovery message 9. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText010": "최근 근무·수면",
+  "@sleepText010": {
+    "description": "Sleep/recovery message 10. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText011": "아직 살펴볼 내용이 없어요.",
+  "@sleepText011": {
+    "description": "Sleep/recovery message 11. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText012": "추천 행동",
+  "@sleepText012": {
+    "description": "Sleep/recovery message 12. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText013": "지금 따로 챙길 행동은 없어요. 평소 수면 리듬을 유지하세요.",
+  "@sleepText013": {
+    "description": "Sleep/recovery message 13. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText014": "근거 접기",
+  "@sleepText014": {
+    "description": "Sleep/recovery message 14. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText015": "근거 보기",
+  "@sleepText015": {
+    "description": "Sleep/recovery message 15. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText016": "근무 부담 보통",
+  "@sleepText016": {
+    "description": "Sleep/recovery message 16. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText017": "주의가 필요한 날",
+  "@sleepText017": {
+    "description": "Sleep/recovery message 17. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText018": "회복 부담이 큰 날",
+  "@sleepText018": {
+    "description": "Sleep/recovery message 18. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText019": "수면·교대근무 연구를 참고한 일반적인 안내예요(의학적 진단이 아니에요).",
+  "@sleepText019": {
+    "description": "Sleep/recovery message 19. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText020": "최근 수면",
+  "@sleepText020": {
+    "description": "Sleep/recovery message 20. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText021": "판단 범위",
+  "@sleepText021": {
+    "description": "Sleep/recovery message 21. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText022": "수면 시각 수정",
+  "@sleepText022": {
+    "description": "Sleep/recovery message 22. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText023": "진행 중",
+  "@sleepText023": {
+    "description": "Sleep/recovery message 23. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText024": "이때 주무셨나요?",
+  "@sleepText024": {
+    "description": "Sleep/recovery message 24. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText025": "{arg0} ~ {arg1}, 약 {arg2} 동안의 주기적인 화면 꺼짐 확인을 바탕으로 수면을 추정했어요. 실제 수면과 다를 수 있어요.",
+  "@sleepText025": {
+    "description": "Sleep/recovery message 25. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText026": "{arg0}부터 수면 중인 것으로 추정됩니다.\n(잠시 후 기상 시각이 추정되면 다시 표시돼요)",
+  "@sleepText026": {
+    "description": "Sleep/recovery message 26. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText027": "확인한 기록만 오늘의 컨디션에 반영돼요. 수면이 아니었다면 \"기록하지 않기\"를 눌러주세요(다음부터 덜 잡혀요).",
+  "@sleepText027": {
+    "description": "Sleep/recovery message 27. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText028": "기록하지 않기",
+  "@sleepText028": {
+    "description": "Sleep/recovery message 28. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText029": "수정",
+  "@sleepText029": {
+    "description": "Sleep/recovery message 29. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText030": "맞아요",
+  "@sleepText030": {
+    "description": "Sleep/recovery message 30. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText031": "최근 수면 기록",
+  "@sleepText031": {
+    "description": "Sleep/recovery message 31. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText032": "전체보기",
+  "@sleepText032": {
+    "description": "Sleep/recovery message 32. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText033": "칸을 눌러 수면을 기록·수정할 수 있어요. 옆으로 밀면 지난 날짜가 보여요 →",
+  "@sleepText033": {
+    "description": "Sleep/recovery message 33. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText034": "내 근무별 수면 패턴",
+  "@sleepText034": {
+    "description": "Sleep/recovery message 34. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText035": "최근 30일 중 수면 기록이 있는 날을 근무 유형별로 비교해요.",
+  "@sleepText035": {
+    "description": "Sleep/recovery message 35. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText036": "아직 평균을 만드는 중이에요. 같은 근무 유형의 수면이 3일 쌓이면 주 수면과 낮잠을 나눠 보여드려요.",
+  "@sleepText036": {
+    "description": "Sleep/recovery message 36. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText037": "평균 준비 중 · 유형별 3일 필요",
+  "@sleepText037": {
+    "description": "Sleep/recovery message 37. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText038": "{arg0} {arg1}/{arg2}일",
+  "@sleepText038": {
+    "description": "Sleep/recovery message 38. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText039": "하루의 주 수면과 기록된 낮잠을 모두 합산해요. 기록하지 않은 날은 평균에서 제외하며, 빠진 수면이 있으면 평균이 낮게 보일 수 있어요.",
+  "@sleepText039": {
+    "description": "Sleep/recovery message 39. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText040": "휴무일",
+  "@sleepText040": {
+    "description": "Sleep/recovery message 40. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText041": "{arg0} 근무일",
+  "@sleepText041": {
+    "description": "Sleep/recovery message 41. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText042": "주 수면",
+  "@sleepText042": {
+    "description": "Sleep/recovery message 42. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText043": "낮잠",
+  "@sleepText043": {
+    "description": "Sleep/recovery message 43. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText044": "참고 기준 7시간",
+  "@sleepText044": {
+    "description": "Sleep/recovery message 44. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText045": "평균 {arg0}",
+  "@sleepText045": {
+    "description": "Sleep/recovery message 45. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText046": "({arg0}일)",
+  "@sleepText046": {
+    "description": "Sleep/recovery message 46. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText047": "주 수면 {arg0} · 낮잠 {arg1}",
+  "@sleepText047": {
+    "description": "Sleep/recovery message 47. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText048": "주 수면 {arg0}",
+  "@sleepText048": {
+    "description": "Sleep/recovery message 48. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText049": "+ 기록",
+  "@sleepText049": {
+    "description": "Sleep/recovery message 49. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText050": "{arg0}~ 진행중",
+  "@sleepText050": {
+    "description": "Sleep/recovery message 50. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText051": "수면 기록 전체보기",
+  "@sleepText051": {
+    "description": "Sleep/recovery message 51. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText052": "이 달에는 표시할 날짜가 없어요.",
+  "@sleepText052": {
+    "description": "Sleep/recovery message 52. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText053": "{arg0}년 {arg1}월",
+  "@sleepText053": {
+    "description": "Sleep/recovery message 53. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText054": "{arg0}~ 진행 중",
+  "@sleepText054": {
+    "description": "Sleep/recovery message 54. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText055": "수면 시각 입력",
+  "@sleepText055": {
+    "description": "Sleep/recovery message 55. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText056": "기상 시각이 취침보다 빨라요",
+  "@sleepText056": {
+    "description": "Sleep/recovery message 56. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText057": "아직 지나지 않은 시각은 기록할 수 없어요",
+  "@sleepText057": {
+    "description": "Sleep/recovery message 57. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText058": "{arg0} 수면",
+  "@sleepText058": {
+    "description": "Sleep/recovery message 58. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText059": "취침",
+  "@sleepText059": {
+    "description": "Sleep/recovery message 59. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText060": "기상",
+  "@sleepText060": {
+    "description": "Sleep/recovery message 60. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText061": "삭제",
+  "@sleepText061": {
+    "description": "Sleep/recovery message 61. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText062": "취소",
+  "@sleepText062": {
+    "description": "Sleep/recovery message 62. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText063": "저장",
+  "@sleepText063": {
+    "description": "Sleep/recovery message 63. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText064": "{arg0} 수정",
+  "@sleepText064": {
+    "description": "Sleep/recovery message 64. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText065": "{arg0} 기록",
+  "@sleepText065": {
+    "description": "Sleep/recovery message 65. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText066": "이미 기록된 수면({arg0}~{arg1})",
+  "@sleepText066": {
+    "description": "Sleep/recovery message 66. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText067": "진행 중인 수면({arg0}부터)",
+  "@sleepText067": {
+    "description": "Sleep/recovery message 67. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText068": "{arg0}과 시간이 겹쳐요. 시각을 고치거나 그 기록을 먼저 수정해 주세요.",
+  "@sleepText068": {
+    "description": "Sleep/recovery message 68. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText069": "근거 자료",
+  "@sleepText069": {
+    "description": "Sleep/recovery message 69. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText070": "근거 수준: {arg0}",
+  "@sleepText070": {
+    "description": "Sleep/recovery message 70. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText071": "퇴근길엔 선글라스 등으로 강한 햇빛을 줄이면 이후 잠들기 쉬워요. 많이 졸리면 운전하지 말고 대중교통이나 동승을 이용하세요.",
+  "@sleepText071": {
+    "description": "Sleep/recovery message 71. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText072": "출근 전에 짧게 눈을 붙이면 야간 졸림을 줄이는 데 도움이 될 수 있어요. 깬 직후엔 잠깐 멍할 수 있으니 바로 운전하지는 마세요.",
+  "@sleepText072": {
+    "description": "Sleep/recovery message 72. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText073": "자정~06시에는 식사량을 줄이고 가벼운 음식 위주로 드세요.",
+  "@sleepText073": {
+    "description": "Sleep/recovery message 73. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText074": "아래 \"최근 수면 기록\"에 수면 시간을 남겨주세요. 기록이 쌓이면 실제로 잔 시간을 바탕으로 더 정확하게 알려드릴게요.",
+  "@sleepText074": {
+    "description": "Sleep/recovery message 74. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText075": "{arg0}분",
+  "@sleepText075": {
+    "description": "Sleep/recovery message 75. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText076": "{arg0}시간",
+  "@sleepText076": {
+    "description": "Sleep/recovery message 76. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText077": "{arg0}시간 {arg1}분",
+  "@sleepText077": {
+    "description": "Sleep/recovery message 77. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText078": "오늘 {arg0}",
+  "@sleepText078": {
+    "description": "Sleep/recovery message 78. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText079": "내일 {arg0}",
+  "@sleepText079": {
+    "description": "Sleep/recovery message 79. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText080": "어제 {arg0}",
+  "@sleepText080": {
+    "description": "Sleep/recovery message 80. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText081": "모레 {arg0}",
+  "@sleepText081": {
+    "description": "Sleep/recovery message 81. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText082": "다음 근무 {arg0} {arg1}",
+  "@sleepText082": {
+    "description": "Sleep/recovery message 82. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText083": "다음 근무 {arg0}(시각 미입력)",
+  "@sleepText083": {
+    "description": "Sleep/recovery message 83. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText084": "지금 {arg0} 근무 중 · {arg1} 퇴근 ({arg2} 남음)",
+  "@sleepText084": {
+    "description": "Sleep/recovery message 84. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText085": "곧 {arg0} 출근 · {arg1} ({arg2} 뒤)",
+  "@sleepText085": {
+    "description": "Sleep/recovery message 85. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText086": "{arg0} 근무 마친 지 {arg1}{arg2}",
+  "@sleepText086": {
+    "description": "Sleep/recovery message 86. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText087": "오늘은 휴무{arg0}",
+  "@sleepText087": {
+    "description": "Sleep/recovery message 87. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText088": "오늘 {arg0} 근무 · {arg1} 출근 ({arg2} 뒤)",
+  "@sleepText088": {
+    "description": "Sleep/recovery message 88. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText089": "오늘은 근무 일정이 없는 날이에요",
+  "@sleepText089": {
+    "description": "Sleep/recovery message 89. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText090": "오늘 {arg0} 근무 (출퇴근 시각 미입력)",
+  "@sleepText090": {
+    "description": "Sleep/recovery message 90. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText091": " (출근 전 {arg0} 포함)",
+  "@sleepText091": {
+    "description": "Sleep/recovery message 91. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText092": "지난 24시간 수면 {arg0}{arg1}{arg2}",
+  "@sleepText092": {
+    "description": "Sleep/recovery message 92. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText093": "지난 24시간 수면 기록이 없어요",
+  "@sleepText093": {
+    "description": "Sleep/recovery message 93. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText094": "퇴근({arg0}) 후 수면 {arg1}{arg2}",
+  "@sleepText094": {
+    "description": "Sleep/recovery message 94. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText095": "지금 수면 중으로 기록돼 있어요",
+  "@sleepText095": {
+    "description": "Sleep/recovery message 95. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText096": "퇴근({arg0}) 후 기록된 수면이 아직 없어요",
+  "@sleepText096": {
+    "description": "Sleep/recovery message 96. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText097": "어제({arg0}) 수면 {arg1}{arg2}",
+  "@sleepText097": {
+    "description": "Sleep/recovery message 97. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText098": "어제({arg0}) 수면 기록이 없어요",
+  "@sleepText098": {
+    "description": "Sleep/recovery message 98. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText099": "어제",
+  "@sleepText099": {
+    "description": "Sleep/recovery message 99. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText100": "그제",
+  "@sleepText100": {
+    "description": "Sleep/recovery message 100. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText101": "{arg0} {arg1} 수면 {arg2}, 개인 평균 {arg3}보다 {arg4} 적어요 (최근 30일 {arg5}일 기준)",
+  "@sleepText101": {
+    "description": "Sleep/recovery message 101. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      },
+      "arg3": {
+        "type": "String"
+      },
+      "arg4": {
+        "type": "String"
+      },
+      "arg5": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText102": "최근 {arg0} 수면이 평소보다 적었어요. 다음 수면 기회에는 다른 일정보다 회복할 시간을 조금 더 넉넉히 잡아보세요.",
+  "@sleepText102": {
+    "description": "Sleep/recovery message 102. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText103": "근무 사이 회복시간 {arg0} ({arg1} 퇴근 → {arg2} 출근){arg3}",
+  "@sleepText103": {
+    "description": "Sleep/recovery message 103. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      },
+      "arg3": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText104": "야간 {arg0}일 연속 근무 후",
+  "@sleepText104": {
+    "description": "Sleep/recovery message 104. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText105": "연속 야간 {arg0}일째",
+  "@sleepText105": {
+    "description": "Sleep/recovery message 105. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText106": "야간 근무가 휴무 없이 매우 오래 이어진 후",
+  "@sleepText106": {
+    "description": "Sleep/recovery message 106. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText107": "연속 야간 근무가 휴무 없이 매우 오래 이어지고 있음",
+  "@sleepText107": {
+    "description": "Sleep/recovery message 107. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText108": "{arg0}. 연속될수록 피로와 실수가 쌓이기 쉬워요",
+  "@sleepText108": {
+    "description": "Sleep/recovery message 108. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText109": "(전체 연속근무는 {arg0}일째)",
+  "@sleepText109": {
+    "description": "Sleep/recovery message 109. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText110": "{arg0}시간 이상 근무 {arg1}일 연속{arg2}",
+  "@sleepText110": {
+    "description": "Sleep/recovery message 110. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText111": "{arg0}시간 이상 근무가 휴무 없이 매우 오래 이어지고 있어요",
+  "@sleepText111": {
+    "description": "Sleep/recovery message 111. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText112": "{arg0}시간 근무가 {arg1} 이어졌어요. 근무 조정이 가능하다면 이어서 {arg2}일 정도는 쉬어보세요.",
+  "@sleepText112": {
+    "description": "Sleep/recovery message 112. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText113": "{arg0}일째 연속 근무 중이에요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요",
+  "@sleepText113": {
+    "description": "Sleep/recovery message 113. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText114": "휴무 없이 매우 오래 근무가 이어지고 있어요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요",
+  "@sleepText114": {
+    "description": "Sleep/recovery message 114. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText115": "연속 근무가 길게 이어지고 있어요. 근무 조정이 가능하다면 하루라도 쉬는 날을 만들어보세요.",
+  "@sleepText115": {
+    "description": "Sleep/recovery message 115. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText116": "{arg0}일째 연속 근무",
+  "@sleepText116": {
+    "description": "Sleep/recovery message 116. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText117": "휴무 없이 매우 오래 근무가 이어지고 있어요",
+  "@sleepText117": {
+    "description": "Sleep/recovery message 117. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText118": "최근 7일 실근무시간 {arg0}, 평소(주 {arg1} 안팎)보다 {arg2} 많아요",
+  "@sleepText118": {
+    "description": "Sleep/recovery message 118. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText119": "최근 7일 근무시간이 평소보다 많이 쌓였어요. 가능하면 추가 근무를 줄이고 쉬는 시간부터 먼저 챙기세요.",
+  "@sleepText119": {
+    "description": "Sleep/recovery message 119. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText120": "이번 주는 평소보다 근무가 좀 더 많아요. 가능하면 추가 근무를 줄이고 휴식을 챙겨보세요.",
+  "@sleepText120": {
+    "description": "Sleep/recovery message 120. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText121": "역방향 교대 전환({arg0} → {arg1}). 정방향보다 몸이 적응하기 어려운 편이에요",
+  "@sleepText121": {
+    "description": "Sleep/recovery message 121. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText122": "{arg0} 이후엔 커피·에너지음료를 피하세요(잠드는 목표 {arg1}).",
+  "@sleepText122": {
+    "description": "Sleep/recovery message 122. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText123": "잠드는 목표({arg0})까지 6시간이 안 남았어요. 지금부터는 커피·에너지음료를 피하세요.",
+  "@sleepText123": {
+    "description": "Sleep/recovery message 123. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText124": "퇴근 후 다음 출근까지 잘 수 있는 시간이 거의 없어요. 가능하다면 근무 조정을 요청하거나 근무 중에라도 잠깐 쉴 수 있는지 알아보세요.",
+  "@sleepText124": {
+    "description": "Sleep/recovery message 124. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText125": "퇴근 후 잘 수 있는 시간은 {arg0}~{arg1}, 약 {arg2}뿐이에요. 퇴근하면 다른 일정보다 수면을 먼저 챙기세요.",
+  "@sleepText125": {
+    "description": "Sleep/recovery message 125. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText126": "퇴근 후엔 수면을 먼저 챙기세요. {arg0}쯤 잠들면 다음 출근 전까지 7시간 이상 잘 수 있어요.",
+  "@sleepText126": {
+    "description": "Sleep/recovery message 126. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText127": "퇴근 후엔 다른 일정보다 수면을 먼저 챙기세요.",
+  "@sleepText127": {
+    "description": "Sleep/recovery message 127. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText128": "지난 24시간 수면이 권장량보다 적어요. 이번 근무를 마치면({arg0}쯤) 다른 일정보다 수면을 먼저 챙기세요.",
+  "@sleepText128": {
+    "description": "Sleep/recovery message 128. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText129": "야간 근무 뒤에는 수면이 우선이에요. ",
+  "@sleepText129": {
+    "description": "Sleep/recovery message 129. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText130": "{arg0} 더 자려면",
+  "@sleepText130": {
+    "description": "Sleep/recovery message 130. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText131": "7시간을 자려면",
+  "@sleepText131": {
+    "description": "Sleep/recovery message 131. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText132": "{arg0}다음 출근({arg1}) 전에 {arg2} 늦어도 {arg3}에는 잠자리에 드세요.",
+  "@sleepText132": {
+    "description": "Sleep/recovery message 132. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      },
+      "arg3": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText133": "{arg0}지금 바로 자도 출근 준비 전까지 최대 {arg1}이에요. 다른 일정은 미루고 수면부터 챙기세요.",
+  "@sleepText133": {
+    "description": "Sleep/recovery message 133. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText134": "곧 잠들어야 해요. 지금부터는 커피·에너지음료를 피하세요.",
+  "@sleepText134": {
+    "description": "Sleep/recovery message 134. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText135": "야간 근무 뒤에는 다른 일정보다 수면을 먼저 챙기세요.",
+  "@sleepText135": {
+    "description": "Sleep/recovery message 135. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText136": "오늘은 7시간 이상 자는 걸 목표로 하세요.",
+  "@sleepText136": {
+    "description": "Sleep/recovery message 136. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText137": "어제까지 야간 {arg0}일 연속 근무",
+  "@sleepText137": {
+    "description": "Sleep/recovery message 137. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText138": "어제까지 야간 근무가 휴무 없이 매우 오래 이어짐",
+  "@sleepText138": {
+    "description": "Sleep/recovery message 138. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText139": "야간 근무 뒤 휴무예요. 약속이나 집안일보다 수면 회복을 먼저 챙기세요.",
+  "@sleepText139": {
+    "description": "Sleep/recovery message 139. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText140": "다음 근무({arg0}, {arg1})에 맞춰 7시간을 자려면 늦어도 {arg2}에는 잠자리에 드세요.",
+  "@sleepText140": {
+    "description": "Sleep/recovery message 140. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText141": "최근 수면이 권장량(7시간)보다 적었어요. 쉬는 날엔 수면 시간을 넉넉히 잡아보세요.",
+  "@sleepText141": {
+    "description": "Sleep/recovery message 141. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText142": "최근 7일 평균 수면 {arg0} (기록한 {arg1}일 기준){arg2}",
+  "@sleepText142": {
+    "description": "Sleep/recovery message 142. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      },
+      "arg1": {
+        "type": "String"
+      },
+      "arg2": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText143": "연속 야간 근무가 휴무 없이 매우 오래 이어지고 있어요",
+  "@sleepText143": {
+    "description": "Sleep/recovery message 143. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText144": "연속 야간 {arg0}일째예요",
+  "@sleepText144": {
+    "description": "Sleep/recovery message 144. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText145": "{arg0}. 운전이나 위험한 작업은 특히 조심하세요.",
+  "@sleepText145": {
+    "description": "Sleep/recovery message 145. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText146": "최근 2주 수면 기록이 없어 근무 일정만 보고 안내했어요.",
+  "@sleepText146": {
+    "description": "Sleep/recovery message 146. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText147": "최근 7일 중 기록이 {arg0}일뿐이라 평균 수면은 계산하지 않았어요.",
+  "@sleepText147": {
+    "description": "Sleep/recovery message 147. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText148": "{arg0} 근무는 출퇴근 시각이 없어 그날은 계산에서 빠졌어요. (설정 → 근무시간 및 OT 설정)",
+  "@sleepText148": {
+    "description": "Sleep/recovery message 148. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText149": "확인하지 않은 자동 수면 기록 {arg0}건은 반영하지 않았어요.",
+  "@sleepText149": {
+    "description": "Sleep/recovery message 149. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText150": "일반",
+  "@sleepText150": {
+    "description": "Sleep/recovery message 150. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText151": "이 근무 패턴은 평균 주 {arg0} 안팎이에요. 간호사 주 60시간 권고와 EU 주 48시간 기준에 도달하거나 초과해요. 해당 자료와의 비교이며, 거주 국가의 법적 기준 위반을 판단하는 것은 아니에요.",
+  "@sleepText151": {
+    "description": "Sleep/recovery message 151. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText152": "이 근무 패턴은 평균 주 {arg0} 안팎으로, EU 주 48시간 기준에 도달하거나 초과해요. 해당 자료와의 비교이며, 본인에게 적용되는 근로시간 규정을 판단하는 것은 아니에요.",
+  "@sleepText152": {
+    "description": "Sleep/recovery message 152. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText186": "교대 방향(정방향/역방향)",
+  "@sleepText186": {
+    "description": "Sleep/recovery message 186. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText190": "Knauth & Hornberger (NIOSH Module 5 인용)",
+  "@sleepText190": {
+    "description": "Sleep/recovery message 190. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText191": "근무 사이 최소 회복시간",
+  "@sleepText191": {
+    "description": "Sleep/recovery message 191. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText195": "EU Directive 2003/88/EC (Working Time Directive) 제3조",
+  "@sleepText195": {
+    "description": "Sleep/recovery message 195. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText196": "근무 사이 최소 회복시간(법제 기준)",
+  "@sleepText196": {
+    "description": "Sleep/recovery message 196. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText200": "장시간 근무와 사고/부상 상대위험",
+  "@sleepText200": {
+    "description": "Sleep/recovery message 200. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText204": "연속 근무 후 휴식일(근무시간대별 일반화)",
+  "@sleepText204": {
+    "description": "Sleep/recovery message 204. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText208": "야간근무 후 수면",
+  "@sleepText208": {
+    "description": "Sleep/recovery message 208. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText212": "야간근무 전 낮잠",
+  "@sleepText212": {
+    "description": "Sleep/recovery message 212. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText216": "카페인과 수면",
+  "@sleepText216": {
+    "description": "Sleep/recovery message 216. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText220": "야간근무 후 귀가길 빛 노출",
+  "@sleepText220": {
+    "description": "Sleep/recovery message 220. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText224": "야간근무 중 식사",
+  "@sleepText224": {
+    "description": "Sleep/recovery message 224. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText227": "National Sleep Foundation, Sleep Health 저널(2015) — 다학제 전문가 패널 합의",
+  "@sleepText227": {
+    "description": "Sleep/recovery message 227. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText228": "성인 권장 수면시간",
+  "@sleepText228": {
+    "description": "Sleep/recovery message 228. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText232": "EU Directive 2003/88/EC (Working Time Directive) 제6조",
+  "@sleepText232": {
+    "description": "Sleep/recovery message 232. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText233": "주간 최대 근무시간(법제 기준)",
+  "@sleepText233": {
+    "description": "Sleep/recovery message 233. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText236": "Folkard S, Tucker P. Occup Med (Lond). 2003 (Frontiers 2024 rapid evidence review에 재인용된 수치 기준)",
+  "@sleepText236": {
+    "description": "Sleep/recovery message 236. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText237": "연속 야간근무 횟수와 사고 위험",
+  "@sleepText237": {
+    "description": "Sleep/recovery message 237. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText241": "Institute of Medicine, Keeping Patients Safe (2004); 2014년 체계적 검토 (둘 다 NIOSH Training for Nurses Module 5에 인용된 수치로 확인)",
+  "@sleepText241": {
+    "description": "Sleep/recovery message 241. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText242": "주간 누적 근무시간 상한",
+  "@sleepText242": {
+    "description": "Sleep/recovery message 242. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText246": "월",
+  "@sleepText246": {
+    "description": "Sleep/recovery message 246. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText247": "화",
+  "@sleepText247": {
+    "description": "Sleep/recovery message 247. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText248": "수",
+  "@sleepText248": {
+    "description": "Sleep/recovery message 248. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText249": "목",
+  "@sleepText249": {
+    "description": "Sleep/recovery message 249. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText250": "금",
+  "@sleepText250": {
+    "description": "Sleep/recovery message 250. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText251": "토",
+  "@sleepText251": {
+    "description": "Sleep/recovery message 251. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText252": "일",
+  "@sleepText252": {
+    "description": "Sleep/recovery message 252. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText253": "주간",
+  "@sleepText253": {
+    "description": "Sleep/recovery message 253. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText254": "오후",
+  "@sleepText254": {
+    "description": "Sleep/recovery message 254. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText255": "야간",
+  "@sleepText255": {
+    "description": "Sleep/recovery message 255. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText256": "휴무",
+  "@sleepText256": {
+    "description": "Sleep/recovery message 256. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText257": "시각 미입력",
+  "@sleepText257": {
+    "description": "Sleep/recovery message 257. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText258": ", 권장 7시간보다 적어요",
+  "@sleepText258": {
+    "description": "Sleep/recovery message 258. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText259": ", 다음 출근 전까지 7시간을 채우긴 어려워요",
+  "@sleepText259": {
+    "description": "Sleep/recovery message 259. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText260": ", 권장 최소 11시간보다 짧아요",
+  "@sleepText260": {
+    "description": "Sleep/recovery message 260. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText261": "{arg0}일",
+  "@sleepText261": {
+    "description": "Sleep/recovery message 261. See sleep global translation inventory for source and conditions.",
+    "placeholders": {
+      "arg0": {
+        "type": "String"
+      }
+    }
+  },
+  "sleepText262": "휴무 없이 매우 오래",
+  "@sleepText262": {
+    "description": "Sleep/recovery message 262. See sleep global translation inventory for source and conditions."
+  },
+  "sleepText263": " 다만 오늘은 가용 시간이 권장 범위보다 짧습니다.",
+  "@sleepText263": {
+    "description": "Sleep/recovery message 263. See sleep global translation inventory for source and conditions."
+  },
+  "disableTabButtonLabel": "{tab} 화면 사용하지 않기",
+  "@disableTabButtonLabel": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
+  "disableTabDialogBody": "확인 버튼을 누르면 화면 하단의 목록에서 사라집니다.\n설정에서 다시 원복할 수 있습니다.",
+  "@disableTabDialogBody": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "scheduleTabSyncFailed": "화면 설정을 바꾸지 못했어요. 잠시 후 다시 시도해주세요.",
+  "@scheduleTabSyncFailed": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "settingsConditionFeatureTitle": "수면회복 컨디션 기능",
+  "@settingsConditionFeatureTitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "settingsConditionFeatureSubtitle": "수면 기록과 근무시간 기반 회복 안내",
+  "@settingsConditionFeatureSubtitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "settingsEnableFeatureConfirm": "메인 탭에 추가하여 {feature} 기능을 사용하시겠습니까?",
+  "@settingsEnableFeatureConfirm": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsEnableFeatureAction": "추가하여 사용하기",
+  "@settingsEnableFeatureAction": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "settingsEnablingFeature": "메인 탭에 추가하는 중…",
+  "@settingsEnablingFeature": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "settingsEnableFeatureFailed": "기능을 켜지 못했습니다. 다시 시도해 주세요.",
+  "@settingsEnableFeatureFailed": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "settingsEnableFeatureHideHint": "탭 하단에서 다시 숨길 수 있습니다.",
+  "@settingsEnableFeatureHideHint": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "settingsConditionFeatureDescription": "직접 입력하거나 자동 추정된 수면 기록으로 평균 수면시간을 확인하고, 근무시간과 함께 회복 상태와 컨디션을 살펴볼 수 있습니다.",
+  "@settingsConditionFeatureDescription": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "onboardingConditionTabPopupTitle": "수면·회복 탭, 이렇게 써보세요",
+  "@onboardingConditionTabPopupTitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "onboardingConditionTabPopupBody": "수면·회복 탭에서 수면을 기록해 보세요! 근무시간을 설정하면 내 근무와 수면 기록을 바탕으로 회복 상태와 쉬기 좋은 시간을 확인할 수 있어요.",
+  "@onboardingConditionTabPopupBody": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "sleepClockGap": "시계가 앞으로 바뀌어 이 지역에는 없는 시각이에요. 다른 시각을 선택해주세요.",
+  "@sleepClockGap": {
+    "description": "Sleep input validation or explicit choice for DST clock changes."
+  },
+  "sleepClockRepeatedTitle": "두 번 나타나는 시각이에요",
+  "@sleepClockRepeatedTitle": {
+    "description": "Sleep input validation or explicit choice for DST clock changes."
+  },
+  "sleepClockRepeatedBody": "시계가 뒤로 바뀐 날이에요. 실제로 잠들거나 깬 시각을 선택해주세요.",
+  "@sleepClockRepeatedBody": {
+    "description": "Sleep input validation or explicit choice for DST clock changes."
+  },
+  "sleepTooShort": "수면은 2분 이상으로 기록해주세요.",
+  "@sleepTooShort": {
+    "description": "Sleep input validation or explicit choice for DST clock changes."
+  },
+  "helpConditionSectionTitle": "수면·회복",
+  "@helpConditionSectionTitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpConditionWhatIsItTitle": "수면·회복 탭은 무엇인가",
+  "@helpConditionWhatIsItTitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpConditionWhatIsItBody": "선택적으로 켜는 이 탭은 내 근무 일정과 확인된 수면 기록을 연결해요. 근무 사이 회복시간, 퇴근 후 수면, 연속 야간근무 같은 사실과 수면·카페인·퇴근길에 관한 추천 행동을 보여줘요. 건강 점수나 의학적 진단을 제공하지 않아요. 근무 부담 단계는 근무 일정으로 판단하며, 수면 기록은 수면 관련 안내에 반영돼요. 기록이나 출퇴근 시각이 없으면 그 한계를 따로 알려드려요. 안내는 수면·산업보건 연구를 참고해요.",
+  "@helpConditionWhatIsItBody": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpConditionEvidenceListTitle": "수면·회복 안내 근거",
+  "@helpConditionEvidenceListTitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpConditionSetupNeededTitle": "오늘의 컨디션을 보려면 먼저 해야 할 설정",
+  "@helpConditionSetupNeededTitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpConditionSetupNeededBody": "설정 → 근무시간 및 OT 설정에서 사용 중인 근무명 하나 이상의 출퇴근 시각을 입력해주세요. 모든 근무를 채울 필요는 없어요. 시각을 입력하지 않아도 수면을 기록하고 가능한 수면 요약은 볼 수 있지만, 근무와 연결한 회복 안내에는 출퇴근 시각이 필요해요.",
+  "@helpConditionSetupNeededBody": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpSleepSectionTitle": "수면 기록",
+  "@helpSleepSectionTitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpSleepWidgetTitle": "수면 기록 위젯이란",
+  "@helpSleepWidgetTitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpSleepWidgetBody": "홈 화면에 수면 위젯을 추가하고, 자기 전에 “수면”, 일어난 뒤에 “기상” 버튼을 눌러 기록해보세요. 오늘의 근무명도 함께 보여요. 기록은 수면·회복 탭에서 근무 일정과 함께 볼 수 있어요. 먼저 설정에서 기능을 켜주세요. 기능을 끄면 위젯 기록과 자동 추정도 멈춰요.",
+  "@helpSleepWidgetBody": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpSleepAutoDetectTitle": "자동으로 수면을 추정해주는 기능",
+  "@helpSleepAutoDetectTitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpSleepAutoDetectBody": "기능이 켜져 있으면, 근무 일정에서 정한 수면 가능 시간대에 화면 꺼짐과 충전 상태를 주기적으로 확인해 수면을 추정해요. 폰 사용을 연속으로 감시하거나 실제로 잤는지를 확인하는 기능은 아니에요. 자동 후보는 최소 5시간 이상일 때만 보여줘요. 짧은 낮잠이나 근무 중에 잔 잠은 직접 입력하거나 위젯으로 기록해주세요.\n\n추정은 확인한 뒤에만 수면 요약에 반영돼요. 수정하거나 기록하지 않기를 선택할 수 있어요. 수면·회복 기능을 끄면 이후 자동 추정도 멈춰요.",
+  "@helpSleepAutoDetectBody": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpSleepMiniCalendarTitle": "최근 수면 기록 확인/수정하기",
+  "@helpSleepMiniCalendarTitle": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpSleepMiniCalendarBody": "미니 달력에서 확정된 수면을 귀속 날짜별로 볼 수 있어요. 칸을 탭해 기록을 만들거나 수정·삭제하고, “전체보기”에서 이전 달도 살펴볼 수 있어요. 수면 패턴 카드는 최근 30일의 주 수면과 기록된 모든 낮잠을 비교해요. 근무 유형별 기록이 3일 이상일 때 평균을 표시하고, 기록하지 않은 날은 제외해요.\n\n야간근무 후 수면은 그 근무가 시작된 날짜에 묶일 수 있어요. 2시간 이상이라고 모두 주 수면은 아니에요. 근무와 겹치거나 야간 출근 전에 준비하며 잔 잠은 낮잠이 될 수 있고, 주 수면 후보 중 가장 긴 기록을 주 수면으로 표시해요.\n\n시각은 기기의 현재 시간대를 기준으로 해요. 시계 변경으로 없는 시각은 입력할 수 없고, 두 번 나타나는 시각은 첫 번째인지 두 번째인지 선택해요. 수면 길이는 실제로 흐른 시간으로 계산해요.",
+  "@helpSleepMiniCalendarBody": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "helpConditionEvidenceListBody": "아래 14개 자료를 참고해요. 일반 연속근무 경고나 개인 평균 비교의 일부 경계값은 앱 자체 규칙이에요. 연구의 집단별 상대위험은 개인의 사고 확률이 아니에요. EU 법제와 간호사 권고는 비교 자료이며, 거주 국가에 그대로 적용되는 법률이라는 뜻은 아니에요.\n\nEVIDENCE-001 · 교대 방향(정방향/역방향) — 정방향 교대(주간→오후→야간)가 역방향보다 적응하기 쉽다고 보고됨. (NIOSH)\n\nEVIDENCE-002 · 근무 사이 최소 회복시간 — 두 근무 사이 최소 11시간의 회복시간을 둘 것을 권장. (Knauth & Hornberger, NIOSH Module 5 인용)\n\nEVIDENCE-003 · 근무 사이 최소 회복시간(법제 기준) — EU 지침은 24시간마다 최소 11시간의 연속 휴식을 규정하며, 적용 범위·예외·국가별 이행을 고려해야 함. (EU 근로시간지침 제3조)\n\nEVIDENCE-004 · 장시간 근무와 사고·부상 위험 — 8시간 근무 대비 10시간 근무는 상대위험 약 +13%, 12시간 근무는 약 +27% 증가하는 것으로 모델링됨. (Folkard & Lombardi, 2006)\n\nEVIDENCE-005 · 연속 근무 후 휴식일 — 8시간 근무 5일 또는 10시간 근무 4일 연속 뒤에는 1~2일, 12시간 근무 3일 연속 뒤에는 2일의 휴식을 계획할 것을 권고. 며칠 몰아 일하고 몰아 쉬는 패턴은 피하라고도 함. (NIOSH)\n\nEVIDENCE-006 · 야간근무 후 수면 — 야간근무 후에는 수면을 확보하는 것을 우선할 것을 권고. (NIOSH)\n\nEVIDENCE-007 · 야간근무 전 낮잠 — 조건부로 도움이 될 수 있다고 보고되나, 가이드라인 스스로 근거 수준이 매우 낮다고 명시함. 낮잠 직후 졸림에 주의. (AASM, 2025년 5월 공개 의견수렴판)\n\nEVIDENCE-008 · 카페인과 수면 — 연구에서 취침 6시간 전 카페인 400mg 섭취도 총 수면시간을 1시간 이상 유의하게 감소시킴. (Drake 외, 2013)\n\nEVIDENCE-009 · 야간근무 후 귀가길 빛 노출 — 강한 빛 노출을 줄이면 이후 수면에 도움이 될 수 있음(단, 졸음운전 위험이 있으면 안전 우선). (NIOSH)\n\nEVIDENCE-010 · 야간근무 중 식사 — 자정~새벽 6시 사이 식사량을 줄이고 가벼운 음식 위주로 할 것을 권고. (NIOSH)\n\nEVIDENCE-011 · 성인 권장 수면시간 — 만 18~64세 권장 수면시간은 7~9시간. (National Sleep Foundation, 2015)\n\nEVIDENCE-012 · 주간 최대 근무시간(법제 기준) — 평균 주간 근무시간(연장근무 포함)이 48시간을 넘지 않아야 함. (EU 근로시간지침 제6조)\n\nEVIDENCE-013 · 연속 야간근무 횟수와 사고 위험 — 야간근무가 연속될수록 사고·부상 상대위험이 누적됨(2일째 약 +6%, 3일째 약 +17%, 4일째 약 +36% — 낮/오후근무 연속보다 야간근무 연속에서 위험 증가가 더 가파름). (Folkard & Tucker, 2003)\n\nEVIDENCE-014 · 주간 누적 근무시간 상한 — 간호사 근무시간을 24시간 안에 12시간, 7일 안에 60시간을 넘지 않게 제한할 것을 권고. 2014년 체계적 검토는 주 40시간을 넘는 근무가 환자 안전 저하와 연관된다고 보고. (IOM, 2004 / NIOSH Module 5 인용)",
+  "@helpConditionEvidenceListBody": {
+    "description": "Shared optional feature or sleep/recovery copy."
+  },
+  "settingsUpdateToLatest": "최신 버전으로 업데이트",
+  "settingsUpdateDescription": "업데이트를 확인하고 Google Play로 이동해요.",
+  "updateAlreadyLatest": "Google Play에서 현재 제공되는 최신 버전입니다.",
+  "updateCheckUnavailable": "현재 업데이트 가능 여부를 확인할 수 없어요. Google Play에서 직접 확인해 주세요.",
+  "updateOpenPlayStore": "Google Play 열기",
+  "updateStoreOpenFailed": "Google Play를 열 수 없어요. 잠시 후 다시 시도해 주세요.",
+  "allShiftsTimelineLayout": "두 구역 보기",
+  "allShiftsOverviewLayout": "한눈에 보기",
+  "settingsMiniGamesTitle": "미니게임",
+  "uiThemeOriginalWhite": "화이트",
+  "uiThemeOriginalDark": "다크"
 }

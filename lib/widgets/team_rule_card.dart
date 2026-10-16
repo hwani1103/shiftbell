@@ -1,7 +1,7 @@
+import '../theme/app_ui_theme.dart';
 import 'package:flutter/material.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/team_rule.dart';
-import '../theme/app_colors.dart';
 import 'team_label.dart';
 
 /// Team identity remains the selection target even when today's shifts match.
@@ -37,13 +37,14 @@ class TeamRuleCard extends StatelessWidget {
                 color: isMine
                     ? colors.surfaceContainerHighest
                     : selected
-                        ? kAppSurface
-                        : Colors.white,
+                        ? AppUiPalette.of(context).soft
+                        : AppUiPalette.of(context).surface,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                     side: BorderSide(
-                        color:
-                            selected ? kAppMainAccent : colors.outlineVariant,
+                        color: selected
+                            ? AppUiPalette.of(context).primary
+                            : colors.outlineVariant,
                         width: selected ? 2 : 1)),
                 clipBehavior: Clip.antiAlias,
                 child: InkWell(
@@ -60,7 +61,8 @@ class TeamRuleCard extends StatelessWidget {
                                     child: Text(
                                         isMine
                                             ? (locked
-                                                ? l.teamRuleLocked.replaceFirst(' · ', '\n')
+                                                ? l.teamRuleLocked
+                                                    .replaceFirst(' · ', '\n')
                                                 : l.teamRuleCurrentTeam)
                                             : r == null
                                                 ? l.teamRuleMissing
@@ -78,7 +80,7 @@ class TeamRuleCard extends StatelessWidget {
                                       selected
                                           ? Icons.check_circle
                                           : Icons.chevron_right,
-                                      color: kAppMainAccent),
+                                      color: AppUiPalette.of(context).primary),
                               ]),
                               if (r != null) ...[
                                 const SizedBox(height: 10),

@@ -1,0 +1,84 @@
+Sync Paths → Shiftbell 통합 안내
+2026-10-16 / GAME-14 기준
+
+후속: 이 안내는 본체 편입 전의 당시 기록이다. 같은 날 GAME-15에서
+설정→부가기능→미니게임→1.Sync Paths 경로의 본체 소스 연결을 완료했다.
+현행 상태/검증은 docs/UI 완성도 개선/GAME-15_Shiftbell본체_미니게임통합_2026-10-16.txt,
+최종 빌드 순서는 통합빌드_인계_2026-10-16.txt를 따른다.
+
+현재 상태
+게임은 독립 dev debug 실험 앱에서 수정했다. 아직 Shiftbell 본체에 편입하지 않았다.
+SyncPaths 최종출시준비.txt는 2026-10-15 당시 원장으로 보존한다.
+그 문서의 3단계 힌트 제공/SP-04 문구 대기는 이번 GAME-14의 4페이지 도움말·힌트 미제공 계약으로 대체한다.
+나머지 테스트 토글 제거/본체 통합/실기기·청음/출시 AAB 확인은 계속 별도 잔여다.
+
+1. 진입 화면 연결
+추천 진입점은 Shiftbell 설정의 'Sync Paths' 항목이다. 메뉴 위치/제공 언어를 확정한 뒤 연결한다.
+lib/screens/sync_paths_screen.dart 같은 호스트 화면을 만들고 본체 Navigator로 push한다.
+게임 스플래시는 게임 진입에만 표시한다. Shiftbell 시작·알람 표시와 연결하지 않는다.
+게임 안의 나가기: 플레이 → 레벨 목록. 목록에서 뒤로가기: Shiftbell 이전 화면.
+
+주의: 현재 SyncPathGameApp은 자체 MaterialApp/Navigator를 갖고,
+onExit 필드를 선언만 했으며 실제 복귀 콜백에 연결하지 않았다.
+위젯을 본체에 넣는 것만으로 복귀 동작이 완성되지 않는다.
+통합 시 게임 본문을 독립 화면 위젯으로 추출하거나 임베드 모드를 제공하고,
+허브의 뒤로가기에서 호스트 onExit를 호출하도록 구현/검증해야 한다.
+본체에서는 SystemNavigator.pop()으로 앱을 종료하지 않는다.
+
+2. 공유 패키지 연결
+본체 pubspec.yaml에 로컬 path 의존성 추가:
+  sync_path_core: path packages/sync_path_core
+  sync_path_ui: path packages/sync_path_ui
+core는 규칙/판정, ui는 세션/보드/하트/도움말이다.
+독립 lab의 main()/allowedLab/dev 전용 applicationId를 본체 진입점으로 복사하지 않는다.
+본체의 기존 DB/권한/알람/프로바이더 구조를 유지한다.
+
+3. 필요한 자산만 등록
+- assets/pilot_levels.json → 본체 게임 전용 assets/sync_paths/levels.json 등.
+- assets/art/sync_paths_splash.webp → 본체 게임 전용 이미지 경로.
+- 부분 글꼴은 sync_path_ui 패키지의 GameSansSubset.ttf 등록을 이용.
+- 효과음 6개는 본체 android/app/src/main/assets/sync_paths_audio/로 복사.
+- pilot_copy.json(힌트), 전체 NotoSansKR.ttf, 원본 atlas, 해답/증명서는 앱에 넣지 않는다.
+- main.dart의 LevelParser 검증 실패 처리도 호스트에 유지한다.
+
+4. 저장과 세션 수명
+본체 SharedPreferences에 독립 키(예: shiftbell.syncPaths.progress.v1)를 사용한 ProgressStore 구현.
+캠페인 pack identity/schemaVersion을 임의 변경하지 않는다.
+독립 실험 앱의 저장은 앱 샌드박스가 달라 자동 이관되지 않는다.
+실험 진행을 이관하려면 별도 export/import를 명시적으로 설계해야 한다.
+GameSessionController.initialize 완료 후 표시하며 playbackRate는 현재 1.5를 유지.
+showIntro:true로 Lv1 최초 규칙 연결. rulesSeen/하트/클리어/음소거가 같은 진행 저장에 포함된다.
+컨트롤러 및 visuals의 소유자는 하나로 정하고 종료 시 flush/dispose를 보장.
+게임이 가려진 때도 재생/음향/하트 시간이 올바르게 처리되도록 앱 생명주기와 화면 진입·이탈을 검사.
+
+5. 효과음 연결
+examples/sync_path_lab/lib/game_audio.dart의 어댑터와 sync_paths/effects 채널을 재사용.
+독립 MainActivity의 SoundPool 구현을 본체의 별도 오디오 클래스/채널로 이식한다.
+본체 MainActivity 전체를 덮어쓰지 않는다.
+onSound: audio.play / onSilence: audio.stop 연결.
+알람/화면 잠금/게임 이탈/백그라운드에서 소리를 멈추고 필요 시 리소스 해제.
+현재 독립 호스트에는 게임 화면 종료용 SoundPool release 채널이 없으므로,
+본체 통합에서 화면 소유 수명 또는 앱 전체 공유 수명을 명시적으로 결정한다.
+오디오 준비 실패로 게임이 중단되지 않는 기존 계약 유지.
+
+6. 출시용 정리와 언어
+허브 잠금 아이콘과 toggleTesting 진입을 제거하거나 개발 빌드에서만 허용.
+출시 실행은 unlockAllForTesting:false이고 저장 데이터로 테스트 상태가 살아나지 않아야 한다.
+현행 게임 문구는 한국어/영어 두 종류. 독립 호스트는 시스템 언어 ko만 한국어, 나머지는 영어.
+본체 편입 시 앱 내 선택 언어와 출시 언어별 제공 범위를 먼저 확정하고 그 정책을 따른다.
+게임 전용 문구와 기존 한국어 전용/common ARB의 경계를 유지하며 빈 번역으로 우회하지 않는다.
+
+7. 검증 순서
+먼저 docs/next_version/dev_출시전_핵심코어_체크리스트.txt를 읽고 통합 영향 ID만 갱신.
+- 단위/위젯: 정상 잠금·하트·4페이지 도움말·Lv1 최초 1페이지·저장·복귀·효과음.
+- 본체 dev debug: 진입/뒤로가기/레벨복귀/앱 복귀 및 기존 알람 표시 영향.
+- 실기기: 하트0 차단과 회복, 마지막 공 경로 점 제거, 작은 화면 도움말,
+  문·포탈, 재생 중 잠금/알람/복귀, 실제 스피커·이어폰 청음.
+- 본체 P0 또는 출시 언어 기능 범위/리소스 구조 변경 시 필수:
+  powershell -File tools/check_critical_release.ps1 -Build
+- release는 사용자의 별도 명시 요청이 있을 때만 실행.
+  출시 AAB의 증가량은 같은 조건의 통합 전/후 AAB 차이로 측정.
+독립 debug 빌드 성공을 본체 통합/실기기/출시 PASS로 기록하지 않는다.
+
+최신 수정/검증 원장:
+docs/UI 완성도 개선/GAME-14_하트입력차단_4페이지도움말_2026-10-16.txt

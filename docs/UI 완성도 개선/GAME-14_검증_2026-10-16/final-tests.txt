@@ -1,0 +1,33 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: (setUpAll)
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:02 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:02 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:02 +3: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:02 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:02 +5: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:02 +6: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:02 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:02 +8: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:02 +9: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:02 +10: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +11: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +12: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +13: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:08 +14: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:09 +15: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:09 +16: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:09 +17: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:09 +18: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:09 +19: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:09 +20: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:10 +21: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:10 +22: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:10 +23: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:10 +24: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:16 +25: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:17 +26: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Four general help pages and back navigation at 320px (false)
+00:18 +27: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Last non-goal endpoint shows red counter and undo restores it
+00:18 +28: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Failure prioritizes fresh restart; partial edit remains in menu
+00:20 +29: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Only Lv1 first entry opens basic rules, persisted after dismissal
+00:22 +30: All tests passed!

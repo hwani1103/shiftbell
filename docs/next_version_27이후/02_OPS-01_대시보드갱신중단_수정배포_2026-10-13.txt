@@ -1,0 +1,56 @@
+OPS-01 웹 대시보드 갱신 중단 — 수정·재집계·배포
+작성: 2026-10-13 / 상태: 운영 재집계·웹 배포·HTTP 및 로그인 화면 검증 완료
+
+범위
+- 사용자 요청: 원인 조사→수정→웹 빌드→배포까지.
+- 앱 prod/release 및 광고 실패 재시도 코드는 변경하지 않음.
+- 기존 dev 미커밋 작업 보존. main의 관리 대시보드 관련 파일만 좁은 커밋/푸시. 동일 수정 패치를 dev 작업 트리에도 적용하여 후속 작업에서 되돌아가지 않도록 보존.
+
+저장 실패 원인
+- 마지막 이전 성공: 10/12 20:14 KST, run38241379756.
+- 10/13 00:20/09:37 예약 실행은 Element at index 0 should not be an empty string 오류로 실패.
+- Firestore SDK는 빈 map field name을 허용하지 않음. countryTrend는 GA4의 빈 국가명을 series의 키로 사용했고, batch.set에서 전체 저장이 중단됨.
+- 같은 오류를 실제 SDK의 네트워크 없는 batch.set으로 재현. 빈 이벤트 키도 방어가 없던 경로를 함께 보완.
+- 수정 후 실제 GA4 로그에서 countryDaily.country 빈 값 1행 확인. 국가·언어 추이, 국가 요약, 제조사 및 기간별 이벤트 요약에도 빈 차원값이 관측됨.
+- 과거 실패 당시 원시 payload는 보존되지 않았으므로 그 시점의 행 값을 직접 재확인한 것은 아님. 코드 재현 및 복구 실행의 실제 countryDaily 관측을 근거로 저장 중단 경로를 확인함.
+
+수집량/실행 공백 판단
+- 기존 성공 수집 약5.7초, 실패 약4~6초, 최초 복구5622ms/최종 복구12921ms. 8~13시간 수집에 걸린 문제가 아님.
+- cron은 원래3시간 간격이었으나 실제 예약 실행 사이에 긴 공백이 존재. 예: 10/13 00:20→09:37. 누락/지연 자체의 GitHub 내부 원인은 미확정.
+- 과거8~9시간 공백 모두가 같은 저장 오류였다고 단정하지 않음. 저장 실패와 예약 실행 지연/누락은 별개.
+- GitHub schedule은 지연/누락 가능: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule
+
+구현
+- 국가/언어/제조사 빈 값은 (missing)(미제공)으로 정규화하고 해당 수치를 보존. 기존 GA4 (not set)(확인 불가)와 분리하여 중복 사용자 수를 합산하거나 동일 선택키로 충돌하지 않음.
+- 이름 없는 이벤트는 실제 기능으로 집계하지 않음. 리포트 경로/열/행 수는 summary.dataQuality 및 로그로 관측. 사용자 원시 정보/인증키는 로그에 남기지 않음.
+- Firestore 저장 전 빈 필드명을 검사하여 이후 오류는 정확한 문서 경로를 제공. 기존 단일 배치의 원자적 저장 유지.
+- 매시간17분 실행(17 * * * *)으로 누락·실패 구간을 따라잡음. 성공한3시간 구간은 GA4 호출 전 건너뜀. 정상 수집은 하루8개 구간 유지. 실패한 실행은 성공 구간으로 기록되지 않음.
+- 웹6시간 이상 미갱신 시 집계 지연을 표시(종전36시간)하고 안내를 새 방식에 맞춤.
+- GitHub 예약 자체는 계속 best effort이므로 정시 실행/향후 누락0건을 보장하지 않음. 다음 실제 자동 예약 발화는 미래 관측 항목.
+
+검증
+- node --test 36/36 PASS. 실제 Firestore SDK의 빈 국가/이벤트 처리, unknown 수치 보존, 국가·언어 그룹 정렬 기존 검사, 시간별 따라잡기/중복 건너뛰기 포함.
+- 웹 build 14assets 및 JS syntax 검사 PASS.
+- 복구 run38329541206 SUCCESS: 최신2026-10-12,20일치,DAU176/MAU370,5622ms. 10/13 09:54:40 KST 문서 생성,09:54:42 저장 완료.
+- 중복 검사 run38329717665 SUCCESS: Already synchronized in this 3-hour slot. 실데이터 재수집/덮어쓰기 없음.
+- 커밋4ad1f30edc8bee5a8faedeea5675e75b86ca4991 / 안내909b883 / 빈 값 버킷 분리ee545d1b02a0220c0b2d6dda01d1fbff1553c33b (main push 완료).
+- Firebase hosting site shiftbell-ops-29f31만 배포. 앱용 hosting/release는 미배포.
+- 최종 웹 버전 cd3d5f533fc68b89. 운영 build-info.json과 로컬 버전 일치 확인.
+- 버킷 분리 최종 복구 run38330030448 SUCCESS: 10/13 10:00:51 KST 저장 완료,20일/최신10-12/DAU176/MAU370/12921ms.
+- 로그인 화면에서 최신 기준일10-12,DAU176/MAU370 및 최근 동기화 표시 확인. 대한민국-한국어/대한민국-영어가 미국 행보다 위에서 함께 표시되고 알람 생성 열 유지.
+- 실기기는 이 서버/웹 이슈 검증에 불필요. 연결 기기를 사용하거나 앱을 설치/변경하지 않음.
+
+증거
+artifacts/dashboard_sync_2026_10_13/fixed_tests.log
+artifacts/dashboard_sync_2026_10_13/recovery_run.log
+artifacts/dashboard_sync_2026_10_13/hosting_deploy_final.log
+artifacts/dashboard_sync_2026_10_13/dashboard_fix.patch
+원본 조사: docs/UI 완성도 개선/18번 보존. 후속 기능 이력은 이 폴더로 연결.
+https://github.com/hwani1103/shiftbell/actions/runs/38329541206
+https://github.com/hwani1103/shiftbell/actions/runs/38329717665
+https://shiftbell-ops-29f31.web.app/
+
+최종 실행: https://github.com/hwani1103/shiftbell/actions/runs/38330030448
+추가 증거: final_recovery_run.log / dashboard_missing_bucket.patch (동일 artifacts 폴더).
+
+최종 로그인 웹 검증 추가: 국가·언어 행13개/선택키13개(중복0), 미제공/영어 차트 선택 정상, 기존 대한민국 언어 그룹 유지, console error0. dev 작업 트리 동일 패치 적용 후36검사 PASS. 화면 증거 deployed_dashboard.png 및 dev_patch_tests.log. 다음 자동 예약 실행은 아직 관측 전이며, 위 두 수동 실행의 성공을 자동 예약 발화 PASS로 확장하지 않음.

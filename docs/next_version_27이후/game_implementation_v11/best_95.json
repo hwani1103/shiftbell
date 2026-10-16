@@ -1,0 +1,288 @@
+{
+  "level": {
+    "id": "L95",
+    "revision": 1,
+    "width": 7,
+    "height": 7,
+    "rows": [
+      ".......",
+      "#.##.#.",
+      ".#...#.",
+      "...#..#",
+      ".#..#..",
+      "#....#.",
+      "..#.#.."
+    ],
+    "goal": [
+      0,
+      6
+    ],
+    "units": [
+      {
+        "id": "A",
+        "start": [
+          5,
+          3
+        ]
+      },
+      {
+        "id": "B",
+        "start": [
+          2,
+          0
+        ]
+      },
+      {
+        "id": "C",
+        "start": [
+          6,
+          6
+        ]
+      },
+      {
+        "id": "D",
+        "start": [
+          6,
+          2
+        ]
+      }
+    ],
+    "maxCommands": 10,
+    "requiredMechanics": [
+      "straight-motion",
+      "absorbing-shared-goal",
+      "timed-gates"
+    ],
+    "gates": [
+      {
+        "id": "1",
+        "trigger": [
+          3,
+          2
+        ],
+        "door": [
+          5,
+          0
+        ],
+        "openFor": 3
+      },
+      {
+        "id": "2",
+        "trigger": [
+          4,
+          0
+        ],
+        "door": [
+          4,
+          3
+        ],
+        "openFor": 2
+      }
+    ]
+  },
+  "design": {
+    "id": "L95",
+    "score": 40.10490439172668,
+    "canonicalDomains": [
+      126,
+      344,
+      1,
+      55
+    ],
+    "canonicalSolutions": 1,
+    "baseSolutions": 9075,
+    "minimumRequiredMaxCommands": 10,
+    "minimumTotalCommands": 39,
+    "minimumExtraDistance": 10,
+    "constraintBits": 21.184904391726675,
+    "conflictParticipation": [
+      3,
+      3,
+      3,
+      3
+    ],
+    "gateRemovalAdds": [
+      179,
+      6706
+    ],
+    "witness": [
+      {
+        "unitId": "A",
+        "endpoints": [
+          [
+            5,
+            4
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            6
+          ]
+        ]
+      },
+      {
+        "unitId": "B",
+        "endpoints": [
+          [
+            4,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            6
+          ]
+        ]
+      },
+      {
+        "unitId": "C",
+        "endpoints": [
+          [
+            6,
+            4
+          ],
+          [
+            5,
+            4
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            6
+          ]
+        ]
+      },
+      {
+        "unitId": "D",
+        "endpoints": [
+          [
+            6,
+            0
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            0,
+            6
+          ]
+        ]
+      }
+    ]
+  },
+  "attempt": 505
+}

@@ -1,3 +1,4 @@
+import 'package:shiftbell/utils/calendar_cell_annotations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftbell/models/shift_schedule.dart';
 import 'package:shiftbell/providers/work_hours_settings_provider.dart';
@@ -193,6 +194,13 @@ void main() {
         end: b,
         manualOtByDate: manual,
         countShiftChangeAsOt: true);
+    for (final enabled in [false, true]) {
+      final cells = CalendarDayOvertime(schedule, manual, enabled);
+      for (final entry in enabled ? on : off) {
+        expect(cells.minutesFor(entry.date), entry.totalMinutes);
+      }
+      expect(cells.minutesFor(DateTime(2026, 3, 30)), 0);
+    }
     expect(computeOtDisplayTotal(off), 105);
     expect(computeOtDisplayTotal(on), 825);
     expect(on.first.impliedMinutes, 720);

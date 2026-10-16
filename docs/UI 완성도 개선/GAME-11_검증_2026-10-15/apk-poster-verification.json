@@ -1,0 +1,9 @@
+{
+  "apk": "examples\\sync_path_lab\\artifacts\\game11\\app-dev-debug.apk",
+  "apkBytes": 161973323,
+  "apkSha256": "d16e75f76bab60eb29ecc001ef87879fb954c74be821e50072939afd96d71712",
+  "posterInApk": "assets/flutter_assets/assets/art/sync_paths_splash.webp",
+  "posterBytes": 20584,
+  "posterSha256": "8573edb5cf71040b742a9cf319ff16a2ff7ff51ae4ac3a674ee836701da4f977",
+  "onlyOnePosterAsset": true
+}

@@ -1,0 +1,91 @@
+00:00 +0: loading test\collision_resolver_test.dart
+00:00 +0: test\rational_test.dart: E01 sign, gcd, zero, equality/hash and exact arithmetic
+00:00 +1: test\collision_resolver_test.dart: C01_cross_same_time
+00:00 +2: test\rational_test.dart: E01 exact order remains transitive across bounded fractions
+00:00 +3: test\rational_test.dart: E01 exact order remains transitive across bounded fractions
+00:00 +4: test\collision_resolver_test.dart: C03_head_on_fraction
+00:00 +5: test\collision_resolver_test.dart: C04_overtake
+00:00 +6: test\collision_resolver_test.dart: C05_same_velocity
+00:00 +7: test\collision_resolver_test.dart: C06_swap_adjacent
+00:00 +8: test\collision_resolver_test.dart: C07_meet_endpoint
+00:00 +9: test\collision_resolver_test.dart: C08_same_start
+00:00 +10: test\collision_resolver_test.dart: C09_stationary_hit
+00:00 +11: test\collision_resolver_test.dart: C10_stationary_same
+00:00 +12: test\collision_resolver_test.dart: C11_identical_motion
+00:00 +13: test\collision_resolver_test.dart: C12_stationary_separate
+00:00 +14: test\collision_resolver_test.dart: C13_contact_after_step
+00:00 +15: test\collision_resolver_test.dart: C14_contact_before_step
+00:00 +16: test\collision_resolver_test.dart: C15_parallel_rows
+00:00 +17: test\collision_resolver_test.dart: C16_goal_endpoint
+00:00 +18: test\collision_resolver_test.dart: C17_goal_interior_invalid_route
+00:00 +19: test\collision_resolver_test.dart: C18_coordinate_roots_disagree
+00:00 +20: test\collision_resolver_test.dart: C19_follow_endpoint
+00:00 +21: test\collision_resolver_test.dart: C20_diverging
+00:00 +22: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +23: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:00 +24: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:00 +25: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:00 +26: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:00 +27: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:00 +28: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:00 +29: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:00 +30: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:00 +31: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:00 +32: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:00 +33: test\simulation_engine_test.dart: L06 witness succeeds deterministically regardless of Unit/route order
+00:00 +34: test\validation_test.dart: V01..V04 float width
+00:00 +35: test\validation_test.dart: V01..V04 float width
+00:00 +36: test\validation_test.dart: V01..V04 float width
+00:00 +37: test\validation_test.dart: V01..V04 float width
+00:00 +38: test\simulation_engine_test.dart: L08 witness succeeds deterministically regardless of Unit/route order
+00:00 +39: test\simulation_engine_test.dart: L08 witness succeeds deterministically regardless of Unit/route order
+00:00 +40: test\validation_test.dart: V01..V04 rows length
+00:00 +41: test\simulation_engine_test.dart: L08 failure matches exact earliest pair(s), time, position
+00:00 +42: test\validation_test.dart: V01..V04 row character
+00:00 +43: test\simulation_engine_test.dart: L09 witness succeeds deterministically regardless of Unit/route order
+00:00 +44: test\simulation_engine_test.dart: L09 witness succeeds deterministically regardless of Unit/route order
+00:00 +45: test\validation_test.dart: V01..V04 small board
+00:00 +46: test\simulation_engine_test.dart: L09 failure matches exact earliest pair(s), time, position
+00:00 +47: test\validation_test.dart: V01..V04 schema
+00:00 +48: test\simulation_engine_test.dart: L10 witness succeeds deterministically regardless of Unit/route order
+00:00 +49: test\simulation_engine_test.dart: L10 witness succeeds deterministically regardless of Unit/route order
+00:00 +50: test\validation_test.dart: V01..V04 mechanic
+00:00 +51: test\simulation_engine_test.dart: L10 failure matches exact earliest pair(s), time, position
+00:00 +52: test\validation_test.dart: V01..V04 duplicate id
+00:00 +53: test\simulation_engine_test.dart: L11 witness succeeds deterministically regardless of Unit/route order
+00:00 +54: test\simulation_engine_test.dart: L11 witness succeeds deterministically regardless of Unit/route order
+00:00 +55: test\validation_test.dart: V01..V04 invalid id charset
+00:00 +56: test\simulation_engine_test.dart: L11 failure matches exact earliest pair(s), time, position
+00:00 +57: test\validation_test.dart: V01..V04 duplicate start
+00:00 +58: test\simulation_engine_test.dart: L12 witness succeeds deterministically regardless of Unit/route order
+00:00 +59: test\simulation_engine_test.dart: L12 witness succeeds deterministically regardless of Unit/route order
+00:00 +60: test\validation_test.dart: V01..V04 blocked placement
+00:00 +61: test\validation_test.dart: V01..V04 blocked placement
+00:00 +62: test\simulation_engine_test.dart: E11/E12 A arrives on Step 1, B on Step 3, no filler pieces
+00:00 +63: test\simulation_engine_test.dart: E11/E12 A arrives on Step 1, B on Step 3, no filler pieces
+00:00 +64: test\simulation_engine_test.dart: E11/E12 A arrives on Step 1, B on Step 3, no filler pieces
+00:00 +65: test\validation_test.dart: V01..V04 fraction coordinate
+00:00 +66: test\simulation_engine_test.dart: E10/E13 shared Goal endpoint is safe; everyone finishes before N
+00:00 +67: test\simulation_engine_test.dart: E10/E13 shared Goal endpoint is safe; everyone finishes before N
+00:00 +68: test\validation_test.dart: V01..V04 unreachable within N
+00:00 +69: test\simulation_engine_test.dart: E16 Goal arrival at forbidden collision time is recorded but cannot win
+00:00 +70: test\simulation_engine_test.dart: E16 Goal arrival at forbidden collision time is recorded but cannot win
+00:00 +71: test\validation_test.dart: V01..V04 oversize ID
+00:00 +72: test\simulation_engine_test.dart: E17 boundary collision belongs to previous Step once; future arrival suppressed
+00:00 +73: test\validation_test.dart: V10 hostile JSON is bounded before decode, malformed/huge numeric tokens rejected
+00:00 +74: test\simulation_engine_test.dart: E19 input list mutation cannot change a plan snapshot
+00:00 +75: test\validation_test.dart: Goal participates in connectivity but stops rays and allows entry
+00:00 +76: test\simulation_engine_test.dart: Splitting changes time, so geometry-equivalent paths may change outcome
+00:00 +77: test\validation_test.dart: V05..V08 diagonal
+00:00 +78: test\validation_test.dart: V05..V08 zero
+00:00 +79: test\validation_test.dart: V05..V08 outside
+00:00 +80: test\validation_test.dart: V05..V08 goal pass
+00:00 +81: test\validation_test.dart: V05..V08 after goal
+00:00 +82: test\validation_test.dart: V05..V08 too many
+00:00 +83: test\validation_test.dart: V05..V08 empty
+00:00 +84: test\validation_test.dart: V05..V08 incomplete
+00:00 +85: test\validation_test.dart: Mid-ray wall is rejected even with walkable endpoint
+00:00 +86: test\validation_test.dart: Exact Unit set: missing, extra, duplicate and drafts cannot execute
+00:00 +87: test\validation_test.dart: V09 stale identity/revision rejected and plan JSON round trip preserves binding
+00:00 +88: test\validation_test.dart: R10 split, reverse and revisiting commands are preserved
+00:00 +89: All tests passed!

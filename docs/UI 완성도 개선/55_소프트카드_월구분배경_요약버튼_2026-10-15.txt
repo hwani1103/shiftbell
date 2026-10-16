@@ -1,0 +1,30 @@
+소프트카드 월 구분 배경 / 요약 버튼 (2026-10-15)
+
+기준/원인
+- UI47~54 규칙/증거를 보존. 실제 한글 소프트카드 및 관련 Wide 경로 대상.
+- 이번달 카드가 reading.surface=앱 배경과 같고 전후달만 surfaceVariant15% 반투명으로 덮어 일부 화면색에서 전후달 카드만 보였음.
+
+공통 카드 역할
+- CalendarReadingPalette.currentMonthCard/outsideMonthCard 및 각 cardLine 역할 추가. 모두 최종 불투명 배경으로 계산.
+- 최초 현재달=lerp(배경,일반글자색,.08) 실기기 검토 후 사용자 피드백:저녁/밤은 괜찮으나 새벽/아침/주간은 칙칙함.
+- 최종 밝은 화면:current=lerp(배경,흰색,.85), outside=lerp(배경,검정,.025).
+- 최종 저녁/밤:current=lerp(배경,흰색,.08), outside=lerp(배경,흰색,.025). 사용자 확인한 어두운 화면값 유지.
+- 현재/전후달 테두리는 일반글자색 alpha.22/.12,1dp foreground로 그려 기존 내용 폭/높이를 소비하지 않음. 오늘1.4 강조 유지.
+- 공휴일은 cardHoliday=redOn(실제카드배경), 음력은 cardLunar=배경과 혼합 후4.5 대비 확보. 날짜/메모/근무색과 글자비율은 기존값 유지.
+- WideCalendarCell의 카드 배경/선/annotation도 같은 역할. 외국어 reading 미적용 경로와 미리보기 기존 배색은 보존. Fold 실물 검증 완료를 뜻하지 않음.
+
+요약 버튼/높이
+- UI54 공통 outlined 요약 경로에 materialCard 포함. 글자11.sp 및 OT w700/주별w600 유지, 둘 다 왼쪽 정렬.
+- 소프트카드는6.r 반경, 현재달 카드배경/테두리 역할 사용. 카드 스타일과 요약 버튼 연결.
+- top3.h + min버튼30.h + bottom0 =33.h. 기존42.h보다9.h 줄여 달력 Expanded 높이로 반환.6행3버튼은 기존 rowH 계산에 연결되어 같이 이동/확장.
+- 심플라인은 기존35.h 그대로. UI54 최소높이/위gap 토큰명은 calendarOutlinedFooterActionHeight/TopGap으로 일반화,값 변경 없음.
+
+적용/검증
+- 초기 핫리로드48/2162,2867ms.실제 카드 대비 연결12/2162,1590ms. 밝은 카드 재조정1/2162,811ms 성공.
+- artifacts/soft_card_palette_footer_2026_10_15/ 수정 전 소스/diff/test.log/현재기기 화면.
+- 새 대비검사는 모든 AppUiTimeTheme에서 현재달·전후달 구분/불투명/날짜·공휴일·음력4.5 이상 및 밝은 카드가 배경보다 어두워지지 않음을 검증.
+- 기존 ko/materialCard 및 ko/minimal 팔레트·배치·오늘 동작 검사 실행.최종 결과 test.log와 후속 확정 기록 참조.
+- 사용자 저녁/밤 관찰과 밝은3색 재조정 피드백을 기록하되 수정 후6색 실기기 전수PASS로 확대하지 않음.
+- 알람/권한/출시 언어 리소스 기능 변경 없음.release/APK 빌드 없음.
+
+후속 정정은 UI56 참조: 사용자 광고 간격/대칭 지시로 footer 높이 수식을 갱신함. 최초 test.log는 대비1실패+프레임2PASS이며 실패를 숨기지 않음. daytime 전후달 빨강4.478 문제는 redOn의 기존 빨강 후보가 모두 부족한 경우에만 사용할 진한 빨강#B71C1C를 후보 마지막에 추가해 보완. test_final.log 최종3PASS.

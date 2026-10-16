@@ -1,0 +1,54 @@
+GAME-01 / 캠페인30 및 기본1.5배 속도 — 2026-10-13
+현행: 독립 Sync Path Lab DEV 0.3.0+4. 기존 dev/prod 변경·설치·release 빌드 없음.
+
+1. 사용자 요청 및 현재 구성
+기존12레벨을 튜토리얼5개로 압축, 새25개 추가하여 총30개. 5개씩 목표 난이도 상승.
+1–5:튜토리얼2–3 / 6–10:3–4 / 11–15:4–5 / 16–20:5–6 / 21–25:6–7 / 26–30:7–8.
+튜토리얼은 옛L01/L02/L03/L10/L07 순서로 조작/동시충돌/시간차교차/따라가기/왕복을 소개한다.
+이후25개는 연결성·도달 가능성과 Solver 완전 SAT를 통과한 후보 중 선정했다.
+10800개 후보 시도, 완전 해답·선택성 기준을 통과한264개 풀에서25개 선정. 단순 회전/반사/평행이동 복제 없음.
+
+난이도는 실제 플레이 시간이 측정된 점수가 아닌 설계 목표다.
+단순한 명령 분할을 같은 temporal trajectory로 묶어 해답 개수를 계산했다.
+선택 조합/정답 비율, 필요한 우회 거리, 우회해야 하는 유닛 수, 명령 수, 유닛 수를 함께 사용했다.
+내부 지표는10점 체감 점수와 다르다. 튜토리얼 이후5개 묶음의 평균지표:6.41→8.25→10.53→13.29→17.06.
+26번은 최소2유닛/4칸,28번은 최소3유닛/8칸,29번은 최소2유닛/8칸,30번은 최소2유닛/6칸의 추가 우회가 필요하다.
+30번의 공동 정답은 분할 중복을 제외하면1개다. 개별 유닛 길이만 짧게 잡는 것으로는 풀리지 않는다.
+맵과 각 레벨 메타데이터/힌트 원본 witness는 campaign_design.json, 실제 판정 인증서는 level_verification.json 참조.
+
+2. 속도
+사용자의 추가 요청대로 기본 재생1.5배:한 칸650ms→약433.3ms.
+모든 Unit에 하나의 공통 playbackRate를 적용한다. 길이가 길면 그만큼 오래 걸리는 규칙 유지.
+논리 시간, 판정, 도착 순서, 동시/반칸 충돌, Goal 흡수는 변경하지 않았다.
+애니메이션 보폭은 실제 이동거리에서 나오며 1.5배에서는 Run 표현을 사용한다.
+Goal cue의 나이도 재생 배율을 반영한다. pause/background/reduced-motion/수동 한 칸 재생 계약 유지.
+
+3. UI/앱 연결
+30개 목록을5개씩 목표 난이도와 함께 표시. 기본실험 설정은 전부 잠금 해제.
+시작 버튼은 첫 미완료 레벨이며 처음 설치하면1번으로 간다. 전체 잠금 해제 때문에30번에서 시작하던 동작을 수정했다.
+최대5유닛에 맞춰D/E를 green/gold로 구분. 기존 atlas 재사용이며 엔진은 에셋과 무관하다.
+packId=dev-campaign-30 / packRevision=1 / 각 levelRevision=1 / ruleSetId=constant-cell-speed-v2.
+저장 키syncPathLab.dev.v3.campaign30.progress. 번호·맵 재편성으로 옛v1/v2 진행은 새 팩에 잘못 매핑하지 않고 별도 보존한다.
+
+4. 검증
+분석4패키지 PASS. core98/tools13/UI36/lab2 =149검사 PASS.
+30개 모두 개별 경로 전체를 독립 DFS와 비교. 모든 서로 다른 유닛 쌍·temporal경로 쌍9969건의 최초 충돌을 독립 oracle와 비교.
+독립 호환성 행렬로 얻은 공동 정답 집합321개가 Solver의 집합과 정확히 일치한다.
+모든 공동 정답과 레벨당 추가40개 계획의 전체 engine/oracle 결과를 확인했다.
+힌트의 원본 완전 경로도 새 지도/정체성에서 SUCCESS인지 확인했다.
+1.5배/1배가 서로 대응하는 실제 시간에서 같은 좌표/도착/충돌/trace를 보이는 회귀 검사 PASS.
+기존12개 실기기 피드백 경로는 previous_12_levels.json에 고정하여 캠페인 재편 이후에도 회귀를 유지한다.
+회전/반사/평행이동 기준30개 모두 서로 다른 구성 PASS. 지표 평균 상승 검사 PASS.
+320/412 화면에서4·5유닛/8열 맵/실행 버튼/30번 접근 검증. 기존320/360/412/736 회귀 유지.
+실기기 설치·FPS·재미·해결 시간 검증은 수행하지 않았다. 난이도 사람 보정은 후속이다.
+
+5. 빌드/재현
+APK:examples/sync_path_lab/build/app/outputs/flutter-apk/app-dev-debug.apk
+applicationId=dev.shiftbell.experiments.sync_path_lab.dev, version0.3.0/code4, app label Sync Path Lab DEV.
+APK 크기155052374 bytes. 실제 SHA256은 apk_hash.json 참조.
+check_game_lab.ps1은 독립4패키지/캠페인 검사를 실행하며 -Build도devDebug와DEV debug web만 허용한다.
+root P0 출시/기존 앱 빌드 스크립트는 실행하지 않았다. 기존 공통 UI와 생산 앱 코드는 이 작업 범위 밖이며 수정하지 않았다.
+
+설치:
+cd C:\Users\Administrator\Desktop\shiftbell\examples\sync_path_lab
+flutter install --debug --flavor dev

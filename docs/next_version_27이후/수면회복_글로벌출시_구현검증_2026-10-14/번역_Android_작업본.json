@@ -1,0 +1,79 @@
+{
+  "app_widget_sleep_label": [
+    "수면 기록",
+    "Sleep log",
+    "Schlafprotokoll",
+    "Registro de sono",
+    "नींद रिकॉर्ड"
+  ],
+  "sleep_widget_brand": [
+    "교대시계",
+    "ShiftBell",
+    "ShiftBell",
+    "ShiftBell",
+    "ShiftBell"
+  ],
+  "sleep_widget_description": [
+    "버튼으로 취침/기상을 기록해요.",
+    "Record bedtime and wake-up with the buttons.",
+    "Schlafbeginn und Aufwachen per Taste erfassen.",
+    "Registre quando dorme e acorda pelos botões.",
+    "बटन से सोने और जागने का समय दर्ज करें।"
+  ],
+  "sleep_widget_no_shift": [
+    "근무없음",
+    "No shift",
+    "Keine Schicht",
+    "Sem turno",
+    "शिफ़्ट नहीं"
+  ],
+  "sleep_widget_not_set": [
+    "미설정",
+    "Not set",
+    "Nicht festgelegt",
+    "Não definido",
+    "तय नहीं"
+  ],
+  "sleep_widget_sleep": [
+    "수면",
+    "Sleep",
+    "Schlafen",
+    "Dormir",
+    "सोना"
+  ],
+  "sleep_widget_tab_off": [
+    "탭 꺼짐",
+    "Feature off",
+    "Deaktiviert",
+    "Desativado",
+    "सुविधा बंद"
+  ],
+  "sleep_widget_unknown": [
+    "정보 없음",
+    "No information",
+    "Keine Angaben",
+    "Sem informações",
+    "जानकारी नहीं"
+  ],
+  "sleep_widget_wake": [
+    "기상",
+    "Wake up",
+    "Aufwachen",
+    "Acordar",
+    "जागना"
+  ],
+  "sleep_widget_restore_busy": [
+    "백업 복원 중이에요. 잠시 후 다시 눌러주세요.",
+    "A backup is being restored. Try again shortly.",
+    "Ein Backup wird wiederhergestellt. Versuche es gleich noch einmal.",
+    "Um backup está sendo restaurado. Tente novamente em instantes.",
+    "बैकअप बहाल हो रहा है। थोड़ी देर बाद फिर कोशिश करें।"
+  ],
+  "sleep_widget_too_short": [
+    "너무 짧아서 기록하지 않았어요",
+    "Too short to save",
+    "Zu kurz zum Speichern",
+    "Muito curto para salvar",
+    "बहुत छोटा होने के कारण सेव नहीं हुआ"
+  ]
+}

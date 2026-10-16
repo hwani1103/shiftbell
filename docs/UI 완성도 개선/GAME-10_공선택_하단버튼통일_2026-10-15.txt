@@ -1,0 +1,28 @@
+GAME-10 / 2026-10-15 / 독립 Sync Path Lab DEV
+
+사용자 후속 지시: GAME-09의 보드 공 탭 해제/가장자리 입력 분리를 원복하고 하단 공 버튼으로 유닛을 선택한다.
+GAME-09 원장과 APK는 당시 증거로 보존한다. 이 문서가 선택 조작의 현행 계약이다.
+
+변경
+- 선택 및 전환은 하단 공 그림 버튼으로 한다. 같은 버튼을 다시 눌러도 선택 상태를 유지한다.
+- 보드 탭은 경로 입력만 한다. 선택이 없을 때는 공을 탭해도 선택하지 않는다.
+- 자기 출발 칸의 공 중앙을 탭해도 경로의 종점으로 입력한다. 별도의 가장자리 입력/탭 선택 해제/접근성 보조 동작/반경 토큰을 제거했다.
+- 선택 안내와 도움말도 하단 공 버튼 조작으로 맞춘다.
+- GAME-09의 축소 공 그림 버튼, 열쇠·문 금색/파란색과 오른쪽 시간 점, 포탈 IN/OUT과 출구 테두리 위치는 유지한다.
+- 레벨/엔진/문 지속 시간/하트/저장 규칙은 변경하지 않았다.
+
+검증 증거: GAME-10_검증_2026-10-15/
+analyze.txt: Flutter 정적 분석 결과.
+selection-tests.txt: 하단 선택/전환, 출발 칸 중앙 재방문, 선택 없는 보드 탭 무시, 기존 경로 보존, 좁은/넓은 화면 조작 회귀.
+font_report.json: 변경 문구의 폰트 생성/누락 검사.
+android-dev-debug-build.txt / web-debug-build.txt: 최종 독립 DEV debug 빌드 결과.
+
+최종 APK: examples/sync_path_lab/artifacts/game10/app-dev-debug.apk
+이전 GAME-09 APK 보존. release 빌드/기기 설치/배포 없음.
+ShiftBell 본체의 P0 권한·알람 및 출시 언어 리소스 구조는 수정하지 않았다. root critical_release 대상 아님.
+
+검증 완료: Flutter analyze PASS, 선택/경로 조작 회귀 9개 PASS.
+폰트 생성 결과 누락 0, 97,948바이트. 공 버튼 렌더/열쇠·문/포탈 코드와 힌트 JSON은 GAME-09 해시와 동일함을 확인했다.
+
+최종 빌드: Android dev debug PASS(115.3초), 웹 debug PASS(65.8초).
+GAME-10 APK와 빌드 산출물 해시 일치. 상세 SHA256은 artifact-manifest.json 참조.

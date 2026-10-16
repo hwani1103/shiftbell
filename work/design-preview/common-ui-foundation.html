@@ -1,0 +1,104 @@
+<div id="shiftbell-foundation" class="viz-dotted-background" aria-label="교대시계 공통 디자인 초안">
+  <div class="sf-stage" aria-label="세이지 공통 구조">
+    <section class="sf-phone" aria-label="근무명 설정 화면">
+      <div class="sf-top"><span>교대시계</span><span class="sf-meta">시작 설정</span></div>
+      <div class="sf-content">
+        <div class="sf-step">근무명 → 패턴 → 오늘 근무 → 알람</div>
+        <h2>사용할 근무명을 만들어요</h2>
+        <p class="sf-muted">근무에 맞는 이름을 추가한 뒤, 순서를 정할 수 있어요.</p>
+        <div class="sf-card">
+          <div class="sf-card-title">내 근무명</div>
+          <div class="sf-chips"><span class="sf-chip">주간</span><span class="sf-chip">야간</span><span class="sf-chip">휴무</span></div>
+          <button class="sf-button sf-secondary cursor-interaction" type="button" data-open="name"><i data-lucide="plus" aria-hidden="true"></i>근무명 추가</button>
+        </div>
+        <button class="sf-link cursor-interaction" type="button" data-open="restore"><i data-lucide="folder-open" aria-hidden="true"></i>백업에서 가져오기</button>
+      </div>
+      <div class="sf-footer"><button class="sf-button sf-primary cursor-interaction" type="button" data-open="pattern">다음: 근무 패턴</button></div>
+      <div class="sf-overlay" hidden>
+        <section class="sf-dialog" role="dialog" aria-modal="true" aria-labelledby="sf-dialog-title">
+          <div class="sf-dialog-head"><h3 id="sf-dialog-title">근무명 추가</h3><button class="sf-icon cursor-interaction" type="button" aria-label="닫기" data-close><i data-lucide="x" aria-hidden="true"></i></button></div>
+          <div class="sf-dialog-body"></div>
+          <div class="sf-actions"><button class="sf-button sf-secondary cursor-interaction" type="button" data-close>취소</button><button class="sf-button sf-primary cursor-interaction" type="button" data-confirm>추가</button></div>
+        </section>
+      </div>
+    </section>
+    <section class="sf-kit" aria-label="공통 버튼·입력·선택 초안">
+      <h3>공통 요소</h3>
+      <label class="sf-label" for="sf-sample-name">근무명</label>
+      <input id="sf-sample-name" class="sf-field" value="주간" aria-label="근무명 예시">
+      <div class="sf-caption">이름 입력 · 둥근 테두리 · 명확한 포커스</div>
+      <div class="sf-kit-group"><button class="sf-button sf-primary cursor-interaction" type="button" data-feedback="저장 예시">저장</button><button class="sf-button sf-secondary cursor-interaction" type="button" data-feedback="취소 예시">취소</button><button class="sf-button sf-danger cursor-interaction" type="button" data-open="delete">삭제</button><button class="sf-button" disabled type="button">저장</button></div>
+      <div class="sf-label">선택과 의미 색상</div>
+      <div class="sf-chips"><button class="sf-chip sf-choice cursor-interaction" aria-pressed="true" type="button">당일</button><button class="sf-chip sf-choice cursor-interaction" aria-pressed="false" type="button">전날</button><button class="sf-chip sf-choice cursor-interaction" aria-pressed="false" type="button">다음날</button></div>
+      <div class="sf-caption">알람 시·분은 기존 탭·휠 조작 유지</div>
+      <div class="sf-error" role="status">입력 오류는 글과 색을 함께 표시</div>
+      <div class="sf-feedback" aria-live="polite"></div>
+    </section>
+  </div>
+  <style>
+    #shiftbell-foundation .sf-stage{--sf-bg:light-dark(#f3f5ef,#19221d);--sf-surface:light-dark(#fffefa,#232e28);--sf-text:light-dark(#2a3c37,#e8f1ed);--sf-muted:light-dark(#63756c,#b0bfb7);--sf-line:light-dark(#dde4d9,#3b4b41);--sf-accent:light-dark(#44685a,#b6d5c3);--sf-on:light-dark(#ffffff,#21382c);--sf-soft:light-dark(#eaf1e6,#34463a);--sf-danger:light-dark(#a93c44,#ffafb5);--sf-danger-bg:light-dark(#fff0f0,#43292e);--sf-disabled:light-dark(#e3e8e1,#354239);--sf-disabled-text:light-dark(#657167,#b0bfb7);--sf-radius:20px;--sf-button-radius:12px;--sf-pad:20px;font-family:"Segoe UI","Malgun Gothic",sans-serif;color:var(--sf-text);font-size:14px;line-height:1.5;display:grid;grid-template-columns:minmax(0,360px) minmax(0,270px);gap:24px;justify-content:center;padding:58px 16px 24px;align-items:start}
+    #shiftbell-foundation .sf-stage *{box-sizing:border-box;word-break:keep-all;overflow-wrap:anywhere}
+    #shiftbell-foundation button,#shiftbell-foundation input{font:inherit}
+    #shiftbell-foundation button{color:inherit}
+    #shiftbell-foundation .sf-phone{background:var(--sf-bg);border:1px solid var(--sf-line);border-radius:28px;position:relative;min-height:550px;overflow:hidden;display:flex;flex-direction:column}
+    #shiftbell-foundation .sf-top{display:flex;justify-content:space-between;gap:16px;padding:24px var(--sf-pad) 16px;font-weight:600}
+    #shiftbell-foundation .sf-meta,#shiftbell-foundation .sf-step,#shiftbell-foundation .sf-caption{font-size:12px;color:var(--sf-muted)}
+    #shiftbell-foundation .sf-content{padding:8px var(--sf-pad) 24px;flex:1}
+    #shiftbell-foundation h2{font-size:23px;line-height:1.4;margin:18px 0 10px;font-weight:600;letter-spacing:-.6px}
+    #shiftbell-foundation h3{font-size:17px;margin:0;font-weight:600}
+    #shiftbell-foundation .sf-muted{color:var(--sf-muted);margin:0 0 26px}
+    #shiftbell-foundation .sf-card,#shiftbell-foundation .sf-kit{background:var(--sf-surface);border:1px solid var(--sf-line);border-radius:var(--sf-radius);padding:var(--sf-pad)}
+    #shiftbell-foundation .sf-card-title{font-weight:600;margin-bottom:14px}
+    #shiftbell-foundation .sf-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+    #shiftbell-foundation .sf-chip{background:var(--sf-soft);border:1px solid var(--sf-line);color:var(--sf-text);border-radius:10px;padding:9px 12px;min-height:42px;display:inline-flex;align-items:center;justify-content:center}
+    #shiftbell-foundation .sf-choice[aria-pressed=true]{border-color:var(--sf-accent);background:var(--sf-accent);color:var(--sf-on)}
+    #shiftbell-foundation .sf-button{border:0;border-radius:var(--sf-button-radius);min-height:46px;padding:12px 18px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;background:var(--sf-disabled);color:var(--sf-disabled-text)}
+    #shiftbell-foundation .sf-primary{background:var(--sf-accent);color:var(--sf-on)}
+    #shiftbell-foundation .sf-stage[data-button=gradient] .sf-primary{background:linear-gradient(130deg,color-mix(in srgb,var(--sf-accent) 85%,var(--sf-surface)),var(--sf-accent));box-shadow:0 4px 10px color-mix(in srgb,var(--sf-accent) 22%,transparent);border:2px solid color-mix(in srgb,var(--sf-accent) 65%,var(--sf-surface))}
+    #shiftbell-foundation .sf-secondary{background:var(--sf-soft);color:var(--sf-text)}
+    #shiftbell-foundation .sf-danger{background:var(--sf-danger-bg);color:var(--sf-danger)}
+    #shiftbell-foundation .sf-button:disabled{background:var(--sf-disabled);color:var(--sf-disabled-text)}
+    #shiftbell-foundation .sf-link{background:transparent;border:0;display:inline-flex;gap:8px;align-items:center;margin:20px 0 0;padding:10px 0;color:var(--sf-muted);min-height:44px}
+    #shiftbell-foundation .sf-footer{padding:var(--sf-pad);background:var(--sf-surface);border-top:1px solid var(--sf-line)}
+    #shiftbell-foundation .sf-footer .sf-button{width:100%}
+    #shiftbell-foundation .sf-kit h3{margin:0 0 22px}
+    #shiftbell-foundation .sf-label{display:block;font-size:13px;margin:0 0 8px;font-weight:600}
+    #shiftbell-foundation .sf-field{width:100%;min-height:46px;background:var(--sf-surface);color:var(--sf-text);border:1px solid var(--sf-line);border-radius:12px;padding:12px;font-size:16px}
+    #shiftbell-foundation .sf-caption{margin:8px 0 0}
+    #shiftbell-foundation .sf-kit-group{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}
+    #shiftbell-foundation .sf-error{margin:22px 0 0;color:var(--sf-danger);font-size:13px}
+    #shiftbell-foundation .sf-feedback{min-height:22px;color:var(--sf-muted);font-size:12px;margin-top:12px}
+    #shiftbell-foundation .sf-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:16px;background:light-dark(#263a3559,#00000080)}
+    #shiftbell-foundation [hidden]{display:none!important}
+    #shiftbell-foundation .sf-dialog{width:100%;background:var(--sf-surface);border-radius:var(--sf-radius);padding:20px}
+    #shiftbell-foundation .sf-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px}
+    #shiftbell-foundation .sf-icon{height:44px;width:44px;display:flex;align-items:center;justify-content:center;border:0;background:transparent;color:var(--sf-muted);border-radius:12px;flex:none}
+    #shiftbell-foundation .sf-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:24px}
+    #shiftbell-foundation .sf-dialog-body p{margin:0;color:var(--sf-muted)}
+    @media(max-width:600px){#shiftbell-foundation .sf-stage{grid-template-columns:minmax(0,360px);padding:58px 8px 20px;gap:18px}}
+  </style>
+  <script>
+    (()=>{
+      const root=document.getElementById('shiftbell-foundation');
+      const stage=root.querySelector('.sf-stage');
+      const state={palette:'sage',button:'flat',radius:20,padding:20};
+      const overlay=root.querySelector('.sf-overlay');
+      const title=root.querySelector('#sf-dialog-title');
+      const body=root.querySelector('.sf-dialog-body');
+      const confirm=root.querySelector('[data-confirm]');
+      let mode='name',lastFocus=null;
+      const palettes={sage:['#44685a','#b6d5c3','#f3f5ef','#19221d','#eaf1e6','#34463a','#2a3c37','#e8f1ed','#21382c'],blue:['#385fa4','#adc8ff','#f3f6fa','#161e29','#eaf0fb','#293b57','#253449','#edf1f7','#182846'],oat:['#586780','#c1cee5','#f5f1e9','#211e19','#eceef3','#39404c','#3c3b39','#f1ece5','#253044']};
+      function render(){const p=palettes[state.palette]||palettes.sage;stage.dataset.button=state.button;stage.style.setProperty('--sf-radius',state.radius+'px');stage.style.setProperty('--sf-pad',state.padding+'px');stage.style.setProperty('--sf-accent','light-dark('+p[0]+','+p[1]+')');stage.style.setProperty('--sf-bg','light-dark('+p[2]+','+p[3]+')');stage.style.setProperty('--sf-soft','light-dark('+p[4]+','+p[5]+')');stage.style.setProperty('--sf-text','light-dark('+p[6]+','+p[7]+')');stage.style.setProperty('--sf-on','light-dark(#ffffff,'+p[8]+')');}
+      function close(){overlay.hidden=true;if(lastFocus)lastFocus.focus();}
+      function open(next){mode=next;lastFocus=document.activeElement;confirm.classList.toggle('sf-danger',mode==='delete');confirm.classList.toggle('sf-primary',mode!=='delete');if(mode==='name'){title.textContent='근무명 추가';body.innerHTML='<label class="sf-label" for="sf-new-name">새 근무명</label><input id="sf-new-name" class="sf-field" placeholder="예: 오후 근무" maxlength="10"><div class="sf-caption">시안용 입력 · 실제 저장 없음</div>';confirm.textContent='추가';}else if(mode==='delete'){title.textContent='근무명을 삭제할까요?';body.innerHTML='<p>선택한 항목의 삭제를 확인하는 짧은 창입니다.</p>';confirm.textContent='삭제';}else if(mode==='restore'){title.textContent='백업에서 가져오기';body.innerHTML='<p>기존 백업 확인과 복원 절차는 유지합니다.</p>';confirm.textContent='파일 선택';}else{title.textContent='다음 단계';body.innerHTML='<p>다음은 근무 패턴을 정하는 단계입니다.</p>';confirm.textContent='확인';}overlay.hidden=false;const input=body.querySelector('input');(input||root.querySelector('[data-close]')).focus();}
+      root.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>open(b.dataset.open)));
+      root.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',close));
+      confirm.addEventListener('click',()=>{const input=body.querySelector('input');if(mode==='name'&&input&&input.value.trim()){const chip=document.createElement('span');chip.className='sf-chip';chip.textContent=input.value.trim();root.querySelector('.sf-card .sf-chips').append(chip);}close();});
+      root.querySelectorAll('[data-feedback]').forEach(b=>b.addEventListener('click',()=>root.querySelector('.sf-feedback').textContent=b.dataset.feedback+' · 시안에서만 표시'));
+      root.querySelectorAll('.sf-choice').forEach(b=>b.addEventListener('click',()=>{root.querySelectorAll('.sf-choice').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));}));
+      root.addEventListener('keydown',e=>{if(overlay.hidden)return;if(e.key==='Escape'){close();return;}if(e.key==='Tab'){const items=[...overlay.querySelectorAll('button,input')];const first=items[0],last=items[items.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
+      render();
+      if(globalThis.Tweak){const tweak=new Tweak({container:stage,onChange:render});tweak.addSelect(state,'palette',{label:'색상 토큰',options:[{label:'세이지',value:'sage'},{label:'블루',value:'blue'},{label:'오트밀',value:'oat'}]});tweak.addSelect(state,'button',{label:'주요 버튼',options:[{label:'단색',value:'flat'},{label:'그라데이션 강조',value:'gradient'}]});tweak.addSlider(state,'radius',{label:'카드·창 모서리',min:12,max:24,unit:'px'});tweak.addSlider(state,'padding',{label:'카드 안 여백',min:16,max:24,unit:'px'});}
+    })();
+  </script>
+</div>

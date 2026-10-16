@@ -26,6 +26,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../constants/alarm_day_offset.dart';
 import '../l10n/l10n_extensions.dart';
 import 'app_shift_chip.dart';
+import '../theme/app_ui_theme.dart';
+import 'app_ui_components.dart';
 
 String dayOffsetLabel(BuildContext context, int dayOffset) {
   switch (dayOffset) {
@@ -45,13 +47,28 @@ String dayOffsetLabel(BuildContext context, int dayOffset) {
 /// 같은 기본 크기(테두리 두께 포함)를 씀. dense였을 때 테두리가 더 얇아서
 /// "재사용한 게 맞는지" 헷갈렸던 것도 이걸로 같이 해결됨(이제 진짜 동일).
 class DayOffsetSelector extends StatelessWidget {
-  const DayOffsetSelector({super.key, required this.value, required this.onChanged});
+  const DayOffsetSelector(
+      {super.key, required this.value, required this.onChanged});
 
   final int value;
   final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
+    if (Theme.of(context).extension<AppUiPalette>() != null) {
+      return Row(children: [
+        for (final offset in kAlarmDayOffsets)
+          Expanded(
+              child: Padding(
+                  padding: EdgeInsets.only(
+                      right: offset == kAlarmDayOffsets.last ? 0 : 6),
+                  child: AppUiShiftChip(
+                      name: dayOffsetLabel(context, offset),
+                      selected: value == offset,
+                      size: AppChipSize.compact,
+                      onTap: () => onChanged(offset))))
+      ]);
+    }
     return Wrap(
       alignment: WrapAlignment.center,
       runSpacing: 8.h,
@@ -73,7 +90,8 @@ class DayOffsetSelector extends StatelessWidget {
 /// 이미 정해진 전날/당일/다음날 값을 시간/근무명 텍스트 옆에 붙여 보여주는
 /// 표시 전용 칩(탭 불가) - 근무명 태그와 같은 모양(AppShiftChip)을 재사용.
 class DayOffsetBadge extends StatelessWidget {
-  const DayOffsetBadge({super.key, required this.dayOffset, this.large = false});
+  const DayOffsetBadge(
+      {super.key, required this.dayOffset, this.large = false});
 
   final int dayOffset;
 
@@ -84,6 +102,16 @@ class DayOffsetBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (Theme.of(context).extension<AppUiPalette>() != null) {
+      final p = AppUiPalette.of(context);
+      return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+              color: p.soft,
+              borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius)),
+          child: AppUiText(dayOffsetLabel(context, dayOffset),
+              role: AppTextRole.supporting));
+    }
     return AppShiftChip(
       label: dayOffsetLabel(context, dayOffset),
       dense: !large,

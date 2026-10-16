@@ -1,0 +1,7 @@
+수면·회복 근거 표기 후속 (2026-10-14)
+
+AASM의 연결된 May2025 문서는 public-comment draft이다. 완성된 2025 지침으로 단정하던 source 표기를 public-comment draft로 정정했다. 도움말 5개 언어에도 초안과 조건부 권고임을 반영했다. 연구 근거의 한계와 앱의 자체 수면 분류 정책을 분리한다.
+원문: https://aasm.org/wp-content/uploads/2025/08/Extrinsic-CRSWD-CPG_SWD_May2025.pdf
+공식 의견 수렴: https://sleep.limesurvey.net/662391?lang=en
+
+소스 주석의 컨디션매니저_근거자료.md 파일은 현재 작업공간 파일 목록에서 찾지 못했다. 따라서 기존 원본을 갱신했다고 기록하지 않고 이 후속 원장으로 정정을 보존한다.

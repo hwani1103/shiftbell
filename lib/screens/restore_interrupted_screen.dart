@@ -1,3 +1,5 @@
+import '../widgets/app_ui_feedback.dart';
+import '../theme/app_ui_theme.dart';
 import '../widgets/adaptive_layout.dart';
 // lib/screens/restore_interrupted_screen.dart
 //
@@ -17,14 +19,14 @@ import 'package:flutter/material.dart';
 import '../l10n/l10n_extensions.dart';
 import '../services/app_restart.dart';
 import '../services/restore_coordinator.dart';
-import '../theme/app_colors.dart';
 import '../widgets/app_button.dart';
 
 class RestoreInterruptedScreen extends StatefulWidget {
   const RestoreInterruptedScreen({super.key});
 
   @override
-  State<RestoreInterruptedScreen> createState() => _RestoreInterruptedScreenState();
+  State<RestoreInterruptedScreen> createState() =>
+      _RestoreInterruptedScreenState();
 }
 
 class _RestoreInterruptedScreenState extends State<RestoreInterruptedScreen> {
@@ -42,7 +44,7 @@ class _RestoreInterruptedScreenState extends State<RestoreInterruptedScreen> {
     if (!mounted) return;
     setState(() => _working = false);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.backupRestoreIncompleteToast)),
+      AppUiSnackBar(content: Text(context.l10n.backupRestoreIncompleteToast)),
     );
   }
 
@@ -80,40 +82,53 @@ class _RestoreInterruptedScreenState extends State<RestoreInterruptedScreen> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: Colors.white,
-        body: AdaptiveFormBody(child: SafeArea(
+        backgroundColor: AppUiPalette.of(context).surface,
+        body: AdaptiveFormBody(
+            child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 48),
-                const Icon(Icons.restore, size: 64, color: kAppMainAccent),
+                Icon(Icons.restore,
+                    size: 64, color: AppUiPalette.of(context).primary),
                 const SizedBox(height: 24),
                 Text(
                   l10n.restoreInterruptedTitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  style: const TextStyle(
+                      fontSize: AppFontSize.toolbar,
+                      fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  _copyLost ? l10n.restoreInterruptedCopyLost : l10n.restoreInterruptedDesc,
+                  _copyLost
+                      ? l10n.restoreInterruptedCopyLost
+                      : l10n.restoreInterruptedDesc,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.5),
+                  style: TextStyle(
+                      fontSize: AppFontSize.body,
+                      color: AppUiPalette.of(context).secondaryText,
+                      height: 1.5),
                 ),
                 const SizedBox(height: 36),
                 if (_working)
                   Column(
                     children: [
-                      const CircularProgressIndicator(),
+                      const AppUiLoading(),
                       const SizedBox(height: 12),
-                      Text(l10n.restoreInterruptedInProgress, textAlign: TextAlign.center),
+                      Text(l10n.restoreInterruptedInProgress,
+                          textAlign: TextAlign.center),
                       if (_waitingAlarm) ...[
                         const SizedBox(height: 12),
                         Text(
                           l10n.restoreWaitingAlarmEnd,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.5),
+                          style: TextStyle(
+                              fontSize: AppFontSize.body,
+                              color: AppUiPalette.of(context).secondaryText,
+                              height: 1.5),
                         ),
                       ],
                     ],

@@ -1,0 +1,15 @@
+00:00 +0: loading test\constant_speed_oracle_test.dart
+00:00 +0: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +1: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +2: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +3: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +4: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +5: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +6: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +7: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +8: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +9: test\generator_test.dart: S09 preserved every traversed seed cell, even cells between endpoints
+00:02 +10: test\generator_test.dart: S09 preserved every traversed seed cell, even cells between endpoints
+00:02 +11: test\generator_test.dart: UNKNOWN budget never exports verified candidate
+00:02 +12: test\generator_test.dart: S10 early arrival preserved; invalid seed witness and bounds refused
+00:02 +13: All tests passed!

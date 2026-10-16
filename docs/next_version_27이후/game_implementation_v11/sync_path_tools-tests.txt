@@ -1,0 +1,22 @@
+00:00 +0: loading test\constant_speed_oracle_test.dart
+00:00 +0: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:00 +1: loading test\gate_export_test.dart
+00:00 +1: test\gate_export_test.dart: Generator/export retain gate positions, duration and safe witness
+00:01 +2: loading test\generator_test.dart
+00:01 +2: test\generator_test.dart: S07/S08 deterministic seeded mutation preserves witness, revision and export verification
+00:01 +3: test\generator_test.dart: S09 preserved every traversed seed cell, even cells between endpoints
+00:01 +4: test\generator_test.dart: UNKNOWN budget never exports verified candidate
+00:01 +5: test\generator_test.dart: S10 early arrival preserved; invalid seed witness and bounds refused
+00:01 +6: loading test\portal_tools_test.dart
+00:01 +6: test\portal_tools_test.dart: Portal solver domain equals unpruned enumeration and independent exact oracle
+00:02 +7: test\portal_tools_test.dart: Portal export round trips and generator preserves both portal cells
+00:02 +8: loading test\solver_test.dart
+00:02 +8: test\solver_test.dart: S01/S03/S04/S05/S06 all domains, 359 outcomes, 47 assignments and diagnostics match independent certificates
+00:03 +9: test\solver_test.dart: S02 budget exhaustion is UNKNOWN, never UNSAT or zero exactCount
+00:03 +10: test\solver_test.dart: S02 solution cap means SAT/lowerBound/truncated, not unique/exact
+00:03 +11: test\solver_test.dart: S02 domain memory budget reports UNKNOWN
+00:03 +12: test\solver_test.dart: Exhaustive no-solution level is UNSAT despite individual reachability
+00:03 +13: test\solver_test.dart: S08 deterministic order, immutable results, cache-free equivalence
+00:03 +14: test\solver_test.dart: Budgets are bounded before allocating any search space
+00:03 +15: test\solver_test.dart: S01 certificate mismatch fails closed
+00:03 +16: All tests passed!

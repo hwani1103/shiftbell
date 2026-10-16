@@ -1,0 +1,286 @@
+{
+  "level": {
+    "id": "L95",
+    "revision": 1,
+    "width": 7,
+    "height": 7,
+    "rows": [
+      "...#...",
+      ".#.#.#.",
+      "#...#..",
+      ".##....",
+      "....#.#",
+      "..##...",
+      ".#...#."
+    ],
+    "goal": [
+      2,
+      6
+    ],
+    "units": [
+      {
+        "id": "A",
+        "start": [
+          2,
+          1
+        ]
+      },
+      {
+        "id": "B",
+        "start": [
+          3,
+          2
+        ]
+      },
+      {
+        "id": "C",
+        "start": [
+          1,
+          4
+        ]
+      },
+      {
+        "id": "D",
+        "start": [
+          3,
+          4
+        ]
+      }
+    ],
+    "maxCommands": 10,
+    "requiredMechanics": [
+      "straight-motion",
+      "absorbing-shared-goal",
+      "timed-gates"
+    ],
+    "gates": [
+      {
+        "id": "1",
+        "trigger": [
+          4,
+          3
+        ],
+        "door": [
+          6,
+          2
+        ],
+        "openFor": 2
+      },
+      {
+        "id": "2",
+        "trigger": [
+          6,
+          0
+        ],
+        "door": [
+          2,
+          4
+        ],
+        "openFor": 1
+      }
+    ]
+  },
+  "design": {
+    "id": "L95",
+    "score": 54.99176095548918,
+    "canonicalDomains": [
+      43,
+      536,
+      180,
+      572
+    ],
+    "canonicalSolutions": 21,
+    "baseSolutions": 5872,
+    "minimumRequiredMaxCommands": 10,
+    "minimumTotalCommands": 38,
+    "minimumExtraDistance": 22,
+    "constraintBits": 26.751760955489175,
+    "conflictParticipation": [
+      3,
+      3,
+      3,
+      3
+    ],
+    "gateRemovalAdds": [
+      19,
+      5197
+    ],
+    "witness": [
+      {
+        "unitId": "A",
+        "endpoints": [
+          [
+            2,
+            0
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            2,
+            6
+          ]
+        ]
+      },
+      {
+        "unitId": "B",
+        "endpoints": [
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            2,
+            6
+          ]
+        ]
+      },
+      {
+        "unitId": "C",
+        "endpoints": [
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            2,
+            6
+          ]
+        ]
+      },
+      {
+        "unitId": "D",
+        "endpoints": [
+          [
+            3,
+            3
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            4,
+            6
+          ],
+          [
+            2,
+            6
+          ]
+        ]
+      }
+    ],
+    "seed": 28601123,
+    "attempts": 1124,
+    "author": "boss100-deep-goal-seeds-v4"
+  }
+}

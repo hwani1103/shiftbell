@@ -27,10 +27,28 @@ def audit(root):
     keys = {key for key in arbs['ko'] if not key.startswith('@')}
     korean_only = json.loads((root / 'lib/l10n/korean_only/messages_ko.json').read_text('utf-8'))
     scoped_keys = {key for key in korean_only if not key.startswith('@')}
+    migrations = [json.loads((root / f'lib/l10n/{scope}_scope_migration.json').read_text('utf-8'))
+                  for scope in ['sleep', 'calendar']]
+    moved = {}
+    for migration in migrations:
+        assert not set(moved) & set(migration['keys']), 'duplicate scope migration key'
+        moved.update(migration['keys'])
+    preserved_copy = {**korean_only, **{key: change['before'] for key, change in moved.items()}}
+    preserved_keys = scoped_keys | set(moved)
     args = lambda text: set(re.findall(r'\{(\w+)[},]', text))
     formats = lambda text: sorted(re.findall(r'%(?:\d+\$)?[sdif]', text))
     report = {'errors': [], 'languages': {}, 'limits':
               'Structure only. ICU generation, semantic review and device layout review are separate.'}
+    for key, change in moved.items():
+        if key in scoped_keys or arbs['ko'].get(key) != change['after']:
+            report['errors'].append([key, 'scope migration ledger mismatch'])
+        for language in languages:
+            if key not in arbs[language]:
+                report['errors'].append([language, key, 'migrated common key missing'])
+    for key in {key for migration in migrations for key in migration['nativeKeys']}:
+        for language in languages:
+            if key not in xmls[language]:
+                report['errors'].append([language, key, 'migrated native common key missing'])
     for flavor, expected in [('dev', 'ShiftBell (Test)'), ('prod', 'ShiftBell')]:
         for lang in ['en', 'pt', 'de', 'hi']:
             path = root / f'android/app/src/{flavor}/res/values-{lang}/strings.xml'
@@ -62,10 +80,10 @@ def audit(root):
                 else:
                     changes[key] = change
         for key, change in changes.items():
-            if key not in scoped_keys or change['before'] != original.get(key) or change['after'] != korean_only.get(key):
+            if key not in preserved_keys or change['before'] != original.get(key) or change['after'] != preserved_copy.get(key):
                 report['errors'].append([key, 'Korean copy change ledger mismatch'])
-        for key in scoped_keys:
-            if original.get(key) != korean_only[key] and key not in changes:
+        for key in preserved_keys:
+            if original.get(key) != preserved_copy[key] and key not in changes:
                 report['errors'].append([key, 'Korean scoped text changed'])
         report['korean_preserved_scoped_messages'] = len(scoped_keys)
     report['native_korean_only_messages'] = len(native_scoped)

@@ -1,0 +1,63 @@
+위젯 색 갱신 / 알람 갱신 실패 집계 / 설정 수동 업데이트 (2026-10-15)
+
+범위
+- prod 사용자의 18:17 1줄 위젯 파랑 / 다른 홈 페이지의3줄 초록 관찰 및 앱 왕복 후 일치 원인 검토.
+- 대시보드 알람 재등록 갱신 실패1회의 의미 검토.
+- dev부터 설정에 최신 버전으로 업데이트 기능 구현.
+- 달력 레이아웃 원인/수정은 UI34. 기존 원장은 당시 증거로 보존.
+
+WIDGET-01 원인과 보완
+- 두 위젯 모두 CalendarWidgetProvider.isDaytime의 기기 로컬06~17시=낮,18~05시=밤 규칙을 공유함.1줄/3줄의 시간대나 색상 판정식이 다른 문제가 아님.
+- 각 provider의 onUpdate는 기존에 전달된 자신의 ids만 갱신함. XML 주기1800000ms(30분)는 시스템이 요청하는 주기이며18시 경계 동시 갱신 계약이 아님.
+- 명시적 requestUpdate/앱 복귀/AlarmGuard 하트비트는 원래부터 두 종류를 함께 갱신함. 그러므로 한쪽 주기 수신 후 다른 쪽이 옛 그림을 유지하고 앱 왕복 시 맞춰지는 관찰과 부합함.
+- 서로 다른 홈 페이지라는 조건은 런처의 호출/표시 지연 가능성도 있음. 당시 broadcast/런처 로그가 없어 특정 제조사의 지연 원인으로 확정하지 않음.
+- dev 소스 보완: 어느 provider의 onUpdate 또는 크기 옵션 변경이 와도 requestUpdate로 모든 pinned 달력 위젯을 갱신. 한번 잡은 now를 모든 RemoteViews 크기/종류에 전달하여 경계 시각의 계산도 일치시킴.
+- 주기/알람 예약/권한/DB 저장/알람 로직을 추가 또는 변경하지 않음.18시 정각 자동 반영과 화면 밖 런처의 즉시 그리기까지 보장하지 않음.
+- 회귀: 기존 위젯 저장·이름·메모·폭/언어/주야 검사에 더해 한 provider만 갱신하는18:17 및06시 경계에서 두 위젯의 글자색을 검증함.
+- 공식 제약: https://developer.android.com/develop/ui/views/appwidgets/advanced (30분 이상 주기, 브로드캐스트 지연 가능).
+
+OPS-03 알람 재등록 갱신 실패1회
+- prod main과 조사 시점 dev의 AlarmRefreshEngine.kt / OperationsSnapshot.kt / operations_analytics.dart가 동일함을 git diff main으로 확인함. 이번에 이 운영/알람 경로를 수정하지 않음.
+- AlarmRefreshEngine.refresh의 doRefresh가 Exception을 던지면 DiagLog REFRESH_FAIL(error=예외종류)을 남기고 false를 반환함.
+- 복원 잠금/다른 갱신과의 락 경합 스킵(false)은 REFRESH_FAIL을 남기지 않으므로 단순히 겹쳐서 생기는 건수가 아님.
+- OperationsSnapshot이 최근72시간 중 REFRESH_FAIL을 alarm_refresh_failed로 매핑. 토큰/이벤트/시각만 Dart에 제공함.
+- OperationsAnalytics는 최초 관측을 기준선으로 삼고 이후 아직 본 적 없는 토큰을 중복 제거하여 보냄. 한 보고당 이벤트별 최대40건, 전체 스냅샷 최대1000건. dev 통계는 전송하지 않음.
+- 상세 error/알람ID/내용/원래 발생시각은 서버 이벤트에 싣지 않음. 보고 시점은 앱의 추후 보고 시점이므로 대시보드 날짜가 실제 실패 시각과 일치하지 않을 수 있음.
+- 대시보드 count1은 집계된 실패 이벤트1건. 실패한 사용자 수1명 또는 실패 알람1개 또는 실제 미울림1회라는 뜻이 아님. 한 사람에게 여러 번도 가능함.
+- 기존 미래 알람을 일괄 삭제 후 재생성하지 않고 diff 트랜잭션으로 적용함. DB 내부 예외는 롤백되며, 커밋 뒤 OS예약은 실패ID를 보관하고 다음 triggerCheck/갱신에서 재시도함. 성공한 경우에만 오늘 갱신완료/정책버전을 기록함.
+- 따라서 재시도와 기존 예약 유지가 완충 장치인 것은 맞으나, 실패의 시점/종류와 울림까지 남은 시간에 따라 영향이 달라짐. 단1건이라는 수치로 영향 확률을 계산하거나 미울림 없음/복구 완료를 확정할 수 없음.
+- 추가 계측 한계: REFRESH_DONE은 doRefresh가 예외 없이 끝났음을 뜻하며, 내부 개별 OS예약 FAILED가 남아도 기록될 수 있음. 전체 갱신 예외와 개별 예약 실패는 서로 다른 이벤트임. 성공 집계가 뒤에 있다는 이유만으로 특정 실패 건의 복구라고 연결하면 안 됨.
+- 실제1건의 원인 확정에는 해당 설치의 로컬 진단 로그가 필요함. 이번에 사용자 기기의 prod 로그를 수집/수정하거나 운영 대시보드를 배포하지 않음.
+
+UPDATE-01 설정 수동 업데이트
+- 이미 쓰는 in_app_update/Google Play를 재사용함. Firebase 조회/Remote Config/Firestore 버전 문서 및 새 의존성은 불필요.
+- 설정 도움말 그룹에 최신 버전으로 업데이트 항목. 탭하면 Play에서 이 기기/계정에 제공되는 업데이트를 조회하고 새 버전/현재 최신/확인불가로 구분하여 Google Play 열기 제공.
+- 수동 조회는 기존 자동 안내6시간 cooldown과 버전별 나중에 선택 이력을 우회하며 이력을 수정하지 않음. 자동 안내 정책은 보존.
+- 통신/플러그인 실패·unknown·15초 초과는 확인불가. 최신으로 오인하지 않음. 중복 탭 차단, 화면 이탈 안전 처리, 조회 종료 후 로딩 정지, 스토어 열기 실패 안내.
+- dev는 com.hwani1103.shiftbell.dev로 Play 제품과 다른 앱이므로 제품의 최신 버전과 비교할 수 없음. dev는 확인불가 안내 후 제품 com.hwani1103.shiftbell의 Google Play 페이지로 이동함. dev가 스토어에서 직접 업데이트된다고 표시하지 않음.
+- Play의 동일 application ID/서명/계정 소유/제공버전 조건: https://developer.android.com/guide/playcore/in-app-updates/test.
+- common ARB6키×5언어를 추가하고 gen-l10n 생성기로 갱신. 한국어 fallback/빈 번역 없이 기존 공개 웹 리소스 감사 및 생성 검사 실행.
+
+검증 및 인계
+- artifacts/followup_review_2026_10_15/update_checks.log:12 PASS/조건부 dev 전용1 skip. 실제 dev 조건은 별도 실행.
+- 대상 검사·정적 분석·필수 tools/check_critical_release.ps1 -Build의 최종 결과와 APK 해시는 완료 후 아래에 연결.
+- 호스트/Robolectric/빌드는 실기기 잠금알람·런처 PASS가 아님. prod/release 빌드·운영 배포 없음.
+
+추가 검사에서 발견된 별도 잔여 — WIDGET-02 (수정하지 않음)
+- CalendarWidgetsTest.fullShiftNamesAndThreeNotesFitWithEqualGuttersInEveryLanguage: ko-KR/250dp/fontScale1.0에서 메모 높이7, layout6, topPadding2로 한 줄 높이 단언 실패.
+- 이번 변경 전 보존본과 현재의 buildRemoteViews 및 이후 모든 측정/렌더링 함수가 동일함을 비교했다. 해당 검사는 onUpdate/requestUpdate를 호출하지 않고 이 렌더러를 직접 호출한다.
+- 증거: native_targeted.log / widget_renderer_unchanged.txt. 색상 갱신 수정의 성공으로 이 레이아웃 잔여를 닫지 않으며, 위젯 메모 높이 보완은 별도 범위로 남긴다.
+- 초기 새 색상 검사의 SystemClock 모의는 Java Calendar의 호스트 시계와 일치하지 않아 실패했다. 실제 시계를 바꾸지 않고 오래된 RemoteViews를 먼저 저장한 후 한쪽 provider만 갱신하여 양쪽 새 프레임/근무명/색상 일치를 검사하도록 테스트만 정리했다. 실제 주야 경계는 기존 buildRemoteViews/isDaytime 경계 검사와 함께 확인한다.
+- Flutter 테스트 병렬 시작 중 native_assets/windows/sqlite3.dll 파일 복사 충돌1회 및 예약된 FLUTTER_APP_FLAVOR define 사용 오류는 실패 로그로 보존. 정식 --flavor dev로 다른 Flutter 검사 시작과 분리해 최종 검사한다.
+
+2026-10-15 최종 검증/인계
+- 대상 검사61 PASS: calendar_checks.log 43 / update_checks.log 12 / dev_update_check_pass.log 1 / native_targeted_final.log 및 native_final_summary.json 5.
+- 필수 tools/check_critical_release.ps1 -Build 단독 최종 실행 exit0. Flutter 기능/언어/DB, native 기능/권한/DB, dev debug APK 및 공개 웹 빌드 성공. 로그 critical_build_final.log / critical_build_final.exit.txt.
+- 최초 중복 Gradle 실행에서 발생한 테스트 클래스8개 ClassNotFoundException은 native_collision_reports/에 보존. 단독 최종 실행은 전부 통과했다. 제품 P0 실패로 기록하지 않음.
+- 웹 빌드의 기존 wasm dry-run/아이콘 font 경고는 원본 로그에 보존. build/web은 생성했지만 웹/앱 출시 배포 없음.
+- APK artifacts/followup_review_2026_10_15/shiftbell-dev-debug.apk (com.hwani1103.shiftbell.dev,1.0.25-dev/28).
+- APK SHA256: 45a0d7e2ab333956e218b5198e062c905e450193fcc1a1f4734ea65b3565ffc9
+- 실기기 연결 SM-S948N은 확인했으나 사용자가 직접 확인하기로 변경. 연결/화면크기/밀도/dev 접근 가능 여부/설치된 instrumentation 목록만 읽었으며 설치,UI 조작,기기 시각·권한·테마·위젯 배치·DB 변경은 하지 않았다.
+- prod 알람 실패1회의 기기 진단 로그는 확보하지 않았다. 재시도/실제 울림 결과 미확정 상태를 유지한다.
+- UPDATE-01은 구현/호스트 검사와 별개로 사용자 지정 출시 전 필수 미완료. 상세10번 원장과 핵심 코어 체크리스트 상단/하단에 연결했다. 자동/수동 안내 및 실제 Play 업데이트 설치까지 완료 증거가 있어야 닫는다.
+- 별도 WIDGET-02 메모 높이 레이아웃 잔여는 이번 색상 갱신 및 필수 기능 회귀 PASS로 닫지 않음.

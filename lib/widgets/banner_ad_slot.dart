@@ -26,9 +26,13 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../constants/ad_config.dart';
 import '../services/ad_consent_service.dart';
 import '../services/ad_service.dart';
+import '../theme/app_ui_theme.dart';
 
 class BannerAdSlot extends StatefulWidget {
-  const BannerAdSlot({super.key});
+  const BannerAdSlot({super.key, this.showTopBorder = true});
+
+  // An adjacent calendar table can own the shared horizontal boundary.
+  final bool showTopBorder;
 
   @override
   State<BannerAdSlot> createState() => _BannerAdSlotState();
@@ -141,11 +145,16 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = Theme.of(context).extension<AppUiPalette>();
+    final borderSide = BorderSide(
+        color: palette?.border ?? kAdSlotDebugBorder,
+        width: AppUiMetrics.calendarBorderWidth);
     return LayoutBuilder(builder: (context, constraints) {
     final height = _height;
     final orientation = MediaQuery.orientationOf(context);
     _scheduleSize(constraints.maxWidth.floor(), orientation);
-    return SizedBox(
+    return ColoredBox(color: palette?.background ?? Colors.transparent,
+      child: SizedBox(
       // 로드 상태로 높이를 바꾸지 않는다. 창 크기에 따른 측정값만 반영한다.
       height: height,
       width: double.infinity,
@@ -155,11 +164,14 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
           // 1) 광고 영역 표시용 배경 (출시 전 kAdSlotDebugTint = false로 끄면 사라짐)
           if (kAdSlotDebugTint)
             ColoredBox(
-              color: kAdSlotDebugFill,
+              color: palette?.background ?? kAdSlotDebugFill,
               child: Center(
                 child: Text(
                   '광고 영역 ${height.toStringAsFixed(0)}dp',
-                  style: TextStyle(
+                  style: palette != null
+                      ? AppTypography.style(context, AppTextRole.supporting,
+                          tone: AppTextTone.secondary)
+                      : const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: kAdSlotDebugBorder,
@@ -191,13 +203,17 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
             IgnorePointer(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  border: Border.all(color: kAdSlotDebugBorder, width: 1),
+                  border: Border(
+                    top: widget.showTopBorder ? borderSide : BorderSide.none,
+                    left: borderSide,
+                    right: borderSide,
+                    bottom: borderSide),
                 ),
               ),
             ),
         ],
       ),
-    );
+    ));
     });
   }
 }

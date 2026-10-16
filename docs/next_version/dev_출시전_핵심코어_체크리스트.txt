@@ -1,6 +1,13 @@
 교대시계 dev 출시 전 핵심 코어 체크리스트
+
+2026-10-16 U06/UI 색상·이관 후속: 기준색16역할 공통 계산/6색상/기존 사용자 고정·신규 자동 이관 및 다음 알람 연결. 대상151검사·정적분석(error0/warning0) PASS. 필수 회귀(-Build 없음)는 병행 Flutter 검사의 Windows sqlite3.dll 파일 잠금으로 두 시도 중단(exit1); 전체 PASS 아님. 검사 종료 뒤 -Build 없이 재개 필요. 빌드·설치·실기기 미실시(사용자 지시). 기존 PASS/실기기 잔여 보존. docs/UI 완성도 개선/THEME-01_공통색상수식_6색상_기존사용자이관_2026-10-16.txt 참조.
+
+2026-10-16 U05/U06/R04 회귀 완료 후속: UI64 통합 세션의 실제 critical_build.log에서 check_critical_release.ps1 -Build 전체 PASS(Flutter563/native 기능·DB/dev debug APK/JS웹)를 확인했다. APK 직접 SHA256과 기존 설치 해시 증거 일치. 아래 ROSTER-01의 임시 달력 컴파일 중단은 이후 해결되었으며, 이 세션의 중복 재실행은 PASS 확인 후 중단했다. 새 빌드/설치/제품 수정 없음. 상세: docs/UI 완성도 개선/ROSTER-02_전체회귀완료_교차확인_2026-10-16.txt 및 UI64. 실기기 P0 잔여는 유지.
+
+2026-10-16 U05/U06/R04 영향 후속(기존 PASS/잔여 보존): 전체근무표 두 보기 선택 저장·공통 팔레트 및 Sync Paths 본체 진입을 구현했다. 대상71검사/정적분석 PASS. 필수 스크립트 Flutter563/네이티브 기능 PASS 뒤 병행 달력 코드의 임시 컴파일 오류로 마지막 DB 단계 중단(exit1); DB15검사는 Dart 재컴파일 제외 분리 실행 PASS. 사용자의 단일 통합빌드 요청으로 -Build/설치/release 보류. 최종 gate는 달력 완료 뒤 재실행한다. 증거: docs/UI 완성도 개선/ROSTER-01_검증_2026-10-16/verification-result.txt, ROSTER-01/GAME-15 원장, 루트 통합빌드_인계_2026-10-16.txt. 실기기 P0 PASS로 확대하지 않는다.
 최종 갱신: 2026-10-12 KST
 상태: 10/12 TABLET11-SYNC/NEXT-TAPS·U06-NAME 코드 수정/필수 -Build 및 Samsung SRTL 실측 PASS / 잠금 대표 경로 부분 PASS·재부팅은 RTL 세션 종료로 미확인·Doze 잔여 / U06-SLEEP-WIDGET 보류 / 기존 PASS·F01/C01 수용 및 R01/R02/R04 잔여 보존
+[사용자 필수 대기 2026-10-15] U02/UPDATE-01: 이번 dev 작업분 출시 전 Google Play 실제 업데이트 확인 필수. dev 별도 패키지/호스트 검사만으로 PASS 금지. 절차: docs/next_version_27이후/10_UPDATE-01_출시전_필수확인_2026-10-15.txt
 
 다음 세션은 이 문서에서 시작한다. 사용자 요청(10/11)에 따라 남은 작업·운영 방법·쉬운 요약의 단일 최신 문서는 C:\Users\Administrator\Desktop\최종 출시 준비문서.txt이며, 이 체크리스트는 ID 상태·증거·변경 영향만 연결한다.
 교대시계_최신문서.txt는 제품 계약·상세 이력, 날짜별 보고서/원장은 당시 증거다. 과거의 ‘다음/미실시’ 문구를 현재 지시로 다시 실행하지 않는다.
@@ -248,3 +255,84 @@
 [x] R01/A09 전체근무표 HOLD 해제(이번 수정 범위): 실제 Play25→27 기존14표 원래 필드/preferences 동일, 4조/C 표시. 실제27 최신 사용자 null marker 백업의 명시 복구·재실행 유지. 원래 데이터/다크테마 복원; 백업복원 이력 ID 재부여/추가 로그와 순수 업데이트 차이 구분. Dev 원래APK/17표 exact 복원. 상세: 전체근무표_이관_긴급후속_2026-10-12.txt / artifacts/release_finish_2026_10_12/final_result.json.
 [x] R01/R04 최종1.0.24+27 prod AAB 고정·Play 동일본 검증: SHA2569a9191133bfe695803be640eaa976eec138bdf26ae8ff6f19b61926b52531b6f. 필수 -Build exit0·운영ID/라이선스/64bit LOAD 정렬 근거 확인. 이전25→26 판정 당시 미검사 로스터 범위를 이번 검사로 보완. ARM64 실제16KB 신규PASS 아님.
 [x] U04 관리자 DAU 선택기간7/30/100/365·MAU28일 유지 배포7343516a97c234e5. R02 독일어 운영동의 메시지 추가 게시. 내부 트랙은 검증 후 다시중지/본인 참여 종료. 사용자 Play27 설치 유지. 프로덕션 공개/공개버전 갱신/메타데이터19개 게시 후순위 유지.
+
+[2026-10-12 사용자 공개 게시 후 직접 확인]
+[x] R03/R04 프로덕션27 활성/Google Play에 제공됨/17:22게시, 게시 준비변경목록 없음. worms계정 웹스토어 정상명/새노트 확인. 내부트랙 paused 유지·남아 있던 본인 참여허용 목록 해제저장(선택목록0), 실제 참여 종료는 앞선 별도 확인. 휴대폰 내부베타 표시는 캐시/반영지연 추정, 원격 전화확정 아님. 공개버전 Firestore 변경은 이번에 하지 않음. 상세: 전체근무표_이관_긴급후속_2026-10-12.txt 마지막 절.
+
+10/12 UI 개선 후속 — A09/A05 변경 영향
+온보딩1·2단계/권한 시작·경고 창 공통 디자인, 같은 화면 오늘 위치 지정, 재사용 근무명 칩의 고정 배율·실측 자동 축소 적용. 데이터/예약·권한 판정 정책 보존. 대상315 및 최종 여백62검사 PASS, 필수 -Build exit0(Flutter338/native 기능·DB 이관/dev debug·JS웹). 기기 PASS/최종 출시 승인으로 대체하지 않음. 상세: docs/UI 완성도 개선/08_온보딩수정_공통근무칩_2026-10-12.txt. 기존 PASS/원장/다른 미커밋 작업 보존.
+
+[x] A05/A09 온보딩 UI 후속(2026-10-12): 공통 제목/여백/근무명4열 카드, 패턴4열 고정 면적/오늘 선택 모드 유지, 정규·불규칙 공통 알람 목록 및 5개 편집 팝업, 시간/타입/권한 안내 공통 테마 적용. 권한 상태 판정·설정 복귀·알람 저장/예약·DB29 보존. 대상 화면69·공통 흐름/권한 레이아웃56·공통 테마 시간 기능6검사 PASS, 최종 analyze exit0. 필수 -Build exit0/Flutter·native·리소스·DB이관/dev debug APK·JS웹 PASS. 실기기 신규 PASS 아님. 상세 docs/UI 완성도 개선/10_온보딩일관성_패턴고정카드_알람설정_2026-10-12.txt; APK artifacts/onboarding_round4/ShiftBell_Onboarding_consistency_dev_debug.apk (SHA256 232314105CD3E9235A3EBC2C0A4975DBF990FBCD65907103B09D9BC1E9FADB9E).
+
+[x] A05/A09 온보딩 마감 후속(2026-10-12): 시작하기 제목, 동일 카드 제목 여백/타이포, 패턴2개부터 완성 버튼→같은 화면 오늘 위치 선택→다음 활성, 예약 액션 영역과 내부40개 제한, 근무명 표시 전용/우측 고정 알람 편집 버튼, 상위 공통 팔레트 전달. 대상119검사·파란 팔레트 변경·analyze exit0 및 필수 -Build exit0(Flutter/native/리소스/DB이관/dev debug/JS웹) PASS. DB29/권한 판정·복귀/저장·예약 계약 유지. 실기기 신규 PASS 아님. 세부 docs/UI 완성도 개선/11_온보딩_패턴완성흐름_알람편집_2026-10-12.txt. APK artifacts/onboarding_round5/ShiftBell_Onboarding_staged_dev_debug.apk SHA256 C2DDDD51A4339B60E10085A02BCA63A6014C75A0101069AAEED4062AA8412C51. 다음 수정 항목은12원장에 기록만 하고 이 빌드에 미적용.
+
+[2026-10-12 온보딩 6차 후속 증거] 공통 텍스트 계층/단계 표시/칩 인덱스/활성 버튼 시각적 변경. 권한 기능과 DB/출시 언어 범위 변경 없음. 123 테스트 PASS, analyzer exit 0, dev debug APK 성공(artifacts/onboarding_round6_*). 직전 5차 P0 -Build PASS 보존. 첫 실행 순간 표시 원인 조사: docs/UI 완성도 개선/14번 원장. 호스트 재배치 재현은 실기기 PASS로 취급하지 않음.
+
+[2026-10-13 A05/A09 권한 첫 프레임 후속] dev 최초 snapshot 완료 전 임시 카드/버튼 미노출, 모두허용 시 자동 다음 안내 flash 방지. 새 첫 조회5검사 및 다국어/레이아웃 포함56 PASS. 필수 check_critical_release.ps1 -Build PASS(Flutter343/native 권한·언어·알람/DB/dev debug/JS웹). SM_S948N Android16 임시 최초진입+오버레이 미허용 첫 카드1개 직접 표시 및 모두허용 안내 미노출 실측 PASS. 데이터·권한 원복/설치 APK 해시 확인. 신규설치/release/잠금알람/OEM전수 PASS 아님. prod/main 보존. 상세 docs/UI 완성도 개선/16번 원장, artifacts/startup_device_2026-10-13/fix_* 및 artifacts/onboarding_round7/.
+
+[2026-10-13 A05/A06 온보딩 후속] 5언어3키/문구 및 이름삭제·패턴 확정·오늘안내 공통 모션. 대상79 PASS, 정적분석0, 필수 -Build exit0(Flutter343/native 기능·언어·DB/dev debug/JS웹). prod/release 배포 없음, DB버전 유지. 상세 docs/UI 완성도 개선/17번 원장. APK artifacts/onboarding_round8/ShiftBell_Onboarding_finish_dev_debug.apk. 실기기 결과로 확대하지 않음.
+
+[2026-10-13 U04 수집 중단 조사] 마지막저장10/12 20:14, 10/13 00:20예약 수집 Firestore빈필드명 오류로 실패(run38269560902). 3개빈키변환경로 오프라인SDK재현, 실제문서경로는로그부족으로미확정. 기본main/3시간cron/active 확인, 뒤예약실행누락도관측. 수정·운영재집계 아직없음. 상세 UI완성도개선18번 원장. A00 배너읽기확인: 실제AdMob Google최적화 자동갱신 활성, 실패시dispose/무재시도 코드보완점19번. 실제주기실측/광고설정변경없음.
+
+[x] U04/OPS-01 후속(2026-10-13): 빈 국가 map key의 Firestore 저장 오류 방어 및 빈 이벤트 처리, 매시간 확인/3시간 성공 구간 가드 유지. 36검사 PASS·운영 GA4 재집계38329541206(20일/최신10-12/5622ms)·같은 구간 중복 생략38329717665 PASS. main4ad1f30/909b883/ee545d1 push, 관리웹 cd3d5f533fc68b89 배포·HTTP/로그인 화면 확인. 미제공 버킷을 GA4 not set과 분리한 최종 집계38330030448 PASS. 앱 prod·release·광고 코드는 변경 없음. GitHub 예약 지연/누락은 best effort 한계이며 다음 자동 예약은 미래 관측. 새 기능 이슈 원장: docs/next_version_27이후/02_OPS-01_대시보드갱신중단_수정배포_2026-10-13.txt. AD-01은 같은 폴더01번에 수정 대기로 기록.
+
+[x] U06/UI 후속(2026-10-13): 시스템 스플래시 배경을 온보딩 공통 primary 생성 resource로 연결, 아이콘 유지. 오늘 근무 안내 2.4초 지속 반복/선택 후 정지/동작 줄이기 유지. 대상79검사·dev debug 빌드 exit0·APK compiled palette 확인. 실기기/출시 배포는 미실시. 상세 docs/UI 완성도 개선/20번 원장 및 artifacts/onboarding_round9/.
+
+[x] U06/UI24 후속(2026-10-13): 권한 안내~온보딩/팝업 역할 팔레트 5개, 기기 로컬 시간 자동 전환/사용자 고정 및 선택 영속 저장. native 스플래시는 #EEF6FD 고정으로 런타임과 분리. 대상17+추가68검사 PASS, 필수 -Build exit0(Flutter343/native 기능·DB/dev debug/JS 웹). 이후 계측 추가와 lint 정리 후 최종 dev debug APK 빌드 exit0 및 분석7대상 issues0. 연결 기기 1/3 선택기/밤 저장 확인. 전 앱 중앙화·실기기 잠금 알람 PASS로 확대하지 않는다. 상세 UI24 원장.
+[x] U04/OPS-02 후속(2026-10-13): 국가별 언어 rowspan/확인 불가 union 조회/기능 열 확대, Node41 PASS·main0f421f3 push·관리웹3eb751bcc27502a7 배포·강제집계38342575043 success·인증 실데이터/언어 추이 확인. 근무시간 설정 계측은 dev에 추가했으며 production은 다음 앱 출시부터 집계. 상세 next_version_27이후/03번. 기존 U04/OPS-01 및 앱27 상태 보존.
+2026-10-13 U06 달력 공통 프레임 UI 후속
+[x] U06 승인 범위 구현: 날짜 셀·사용자 근무색·제외2테마 보존, 상하단 프레임 및 6번째줄 작업영역/별도 OT footer 색상에 공통5팔레트 연결. 한국어/외국어 기존 배치 유지.
+[x] 최종 check_critical_release.ps1 -Build exit0: Flutter344건/native 검사/dev debug/JS웹 빌드 성공. 추가 UI matrix20·좁은/넓은12·최종 경계/시스템바/권한 초기화13 PASS. 증거는 UI30 후속 원장과 artifacts/calendar_app_frame_critical_build.log에 연결.
+[ ] 실기기 설치/레이아웃/시스템바 실표시: 사용자가 연결 해제 및 APK만 준비 요청, 미실행. 기존 P0 실기기 상태를 변경하지 않음. release/prod/웹 배포 없음.
+APK SHA256: E6D026C1D36CF5FBED7070E8276AF923DD5EFD2EA565AB5485765BB03D6DA9B6
+2026-10-13 U06 달력 셀 읽기 팔레트 후속 (UI31)
+[x] 한글 선택 가능10테마(언더라인/매거진 포함)에 셀 읽기용 표면·역할색·근무 칩/색 표시 대비 보호 구현. 저장된 근무색/DB 및 외국어 내부/미리보기 보존. 기존 상태 source ZIP/APK와 frame/legacy 재빌드 옵션 확보.
+[x] 기본 화면20+대비3, 좁은10/넓은10, 복구 모드 각4 PASS. 최종 보완 후 대비/글자공간4 및 화면4 추가 PASS. -Build exit0 (Flutter344/native 검사/dev debug/JS웹). 상세 증거는 UI31과 artifacts/calendar_cells_* 로그.
+[ ] 실기기 확인은 사용자 연결 해제 요청으로 미실행. 기존 권한/잠금 알람 실기기 상태를 변경하지 않음. release/prod/웹 배포 없음.
+APK SHA256: 46422D5200E2609AC690F9A39EEC0B5FA8A6C253B9E10735CE1B3AC59C333E95
+
+[2026-10-14 수면·회복 글로벌 후속 — 기존 PASS/잔여 보존]
+A06/U06/R02 변경 영향: 수면만5언어로확대,외국어기본off/일정·친구제외유지. ARB222수면키+연결문구/위젯번역,DST instant·날짜귀속보완. 필수 check_critical_release.ps1 -Build 06로그실제exit0(dev debug+JS웹),SM-X400실제입력/5언어/10시간대모델·native수면계측/동일dev업데이트PASS. 최종devAPK03 SHA256 5b915c3f5b70483fee948b6677b2f2ed2e1d13a0a8bd07c41644851c2710b224 설치본일치.
+U06 실제Play prod27→Play서명후보 업데이트는아직미완료(dev와서명/패키지다름). R02외부개인정보는5언어게시후보만준비,게시전. 신규잠금알람/제조사전수PASS로확대하지않음. 기존R01/R04등무관항목상태유지.
+최종원본dev17테이블·자동백업복구확인,태블릿충전중화면유지15절대원복안함. 상세: docs/next_version_27이후/수면회복_글로벌출시_구현검증_2026-10-14/07_출시판정과남은결정.txt, UI32원장.
+
+[2026-10-14 동일 후속 최종]
+A06/U06 수면위젯 실기기에서 per-app언어XML캐시와 on/off 재사용표시/리스너잔존 발견→명시적번역·상태초기화수정. SleepWidgetReapplyTest 포함 필수07 -Build exit0. 최종후보04 SHA256 e549a26cc08eb947dbc0cd8ffdaf55ee844cad055297ae2858c5e69fd84d16b7 설치본일치,실제홈5언어/활성전환/2분52초기록·앱삭제PASS. 원본17테이블재확인/시험위젯제거/충전중화면유지15. 위후보03은당시검증으로보존. 공개출시HOLD의 Play서명업데이트/R02게시 단계는유지. 상세 새폴더09번최종결과.
+
+2026-10-14 수면 글로벌 최종 후속 — A06/U06/R01/R02 변경 영향
+A06: 수면5언어 리소스/변수/의미검토 및 실제 화면 근거는 next_version_27이후/수면회복_글로벌출시_구현검증_2026-10-14/12번 최종 원장. 독립 원어민 감수와 절대 무오류 보장 아님.
+U06/R01 수면 관련: 동일 Play 패키지/서명 prod27→28 및 원본16테이블/15설정 보존 PASS, 한국어/외국어 opt-in·계산 동일성 확인. 한국어27 복원/시험 배포 정리 완료. 수면 기능 개발·내부검증 PASS이며 다른 기존P0/16KB/Doze 잔여를 닫지 않음.
+R02: 공개 개인정보5언어 후보 실제 게시 전, 공개 출시 HOLD 유지. 내부28 이력 남음/후속 공개는 새 버전코드 필요. 상세12번 원장 및11번 실제 증거 연결.
+
+2026-10-15 사용자 지정 출시 필수 확인 — U02/UPDATE-01
+[ ] U02/UPDATE-01 설정의 최신 버전으로 업데이트: 이번 dev 작업분 출시 전에 실제 Play 가용성 조회→제품 페이지→업데이트 설치→설치 후 최신 재확인을 반드시 실측한다. dev 별도 패키지의 조회불가/스토어 이동 및 호스트 검사·빌드 성공만으로 PASS 처리하지 않는다.
+    필수 절차/증거 작성란: docs/next_version_27이후/10_UPDATE-01_출시전_필수확인_2026-10-15.txt. 구현/자동 검사 및 한계는 같은 폴더09번 원장. Firebase 추가 없음. 실제 Play/서명 조건 검증은 아직 미실시. 이 문서화로 release 빌드/Play 배포를 실행하지 않는다.
+
+2026-10-15 변경 영향/검증 — U06/A06/U02
+[x] U06 달력 탭 복귀 치수 변화: 공통 프레임의 TextTheme 치수를 보존하며 팔레트만 적용. 한글10테마×2폭×주간/밤40조건 및 관련3검사 PASS. UI34 원장.
+[x] U06/A06 위젯 두 provider 동기 갱신 및 설정 수동 Play 확인 구현, common6키×5언어/생성기 갱신. 필수 check_critical_release.ps1 -Build 단독 최종 exit0: 기능·언어·DB/native/dev debug/웹 PASS. 추가 대상61검사 PASS. 증거 artifacts/followup_review_2026_10_15/final_result.json 및 기능09번 원장.
+[ ] U02/UPDATE-01 실제 Play/서명/계정 조건에서의 새 버전 조회·스토어 이동·업데이트 후 재확인: 출시 전 사용자 지정 필수, 미실시 유지.10번 원장. dev 호스트/빌드 PASS로 닫지 않음.
+[ ] U06 실기기 달력 전환/다른 홈 화면 위젯: 사용자가 직접 확인하기로 변경, 이번에는 연결 확인만. 기존 P0 실기기/출시 잔여 상태 보존. 별도 기존 WIDGET-02 메모 높이 검사 실패는09번 원장에 후속으로 기록.
+
+[2026-10-16 A09 월 스와이프/초기복구제안 후속] 표 경계를 월 페이지 내부로 연결, 드래그 종료 후 월 조회/동일값 알림 생략/글자높이 캐시. 대상20+22+3검사 및 필수 -Build PASS, dev debug 설치/실기기 세 테마 표 이동 및4테마 debug 느린프레임 감소 확인. 기존 prod 미배포. 초기복구제안 실제 노출 조건 조사, 명시 Back 추가/root 이탈 검증. 간헐 기존 차단 원인은 미재현. 상세 UI60/next_version_27이후16 원장; artifacts/calendar_swipe_2026_10_16/. 기존 출시/P0 실기기 PASS 범위 확대 없음.
+
+[2026-10-16 A09/U05 메인통합·나머지테마 후속] 기존 메인화이트/다크→메인+원래 고정 화면색상 일회 이관/저장 근무색 보존. 한글9개 정렬 및 나머지6개 공통 정보 규격, 해외2개 팔레트·메모 대비/외곽0·요약행 정리. 대상57+22+48 PASS, 정적 error/warning0, 필수 check_critical_release.ps1 옵션 없이 exit0(Flutter563/native 기능·DB이관/리소스). 사용자 '빌드하지 말고' 지시로 추가 테마 APK/웹 빌드·설치·실기기 검증 미실시. UI60 설치본과 구분, A09 전체 시각 승인/접힘펼침 미완료 상태 유지. 상세 UI61/62 및 next_version_27이후17, artifacts/calendar_theme_refresh_2026_10_16/.
+
+[2026-10-16 A09 통합 debug 설치 후속] 달력/전체근무표/Sync Paths 합본 사용자 승인 -Build exit0(Flutter563/native 기능·DB/APK/JS웹). SM-S948N dev 업데이트 설치/동일 APK 해시/정상 달력 실행, 설치 전후 및 첫 실행후 DB18표 동일. 메인화이트→화이트 고정 이관 확인. UI64/통합빌드 인계 완료 연결, artifacts/integrated_debug_2026_10_16/. OT 표시 논의는 UI63 검토만/미적용. 전 기기/게임·로스터 신규 전수/P0 잠금알람 PASS로 확대하지 않음.
+
+[x] U06/UI66(2026-10-16): 공통 메모 높이 비교 오차 수정. 수정 전 실패/후36검사PASS·분석0·dev debug 설치/10월16일 소프트카드3메모 실표시 PASS. P0/출시언어 구조 무변경. 출시27에도 비교 코드 존재하나 prod 재현/배포 없음. UI65/66과 artifacts/memo_height_fix_2026_10_16/ 참조.
+
+[x] U06/ROSTER-03(2026-10-16): 전체근무표 측정기반2단계카드/점유율축소/전체보기월스와이프·헤더여백 수정. 대상60검사+폰트렌더5검사/정적분석PASS·dev debug 빌드완료. P0/출시언어 구조 무변경. 사용자 지시로 설치·실기기 확인 미실시. 상세 ROSTER-03 및 artifacts/roster_refinement_2026_10_16/.
+
+[x] A09/U06 ROSTER-04/UI67(2026-10-16): 두줄 원형 복원/한 화면 보존, 년월·OT 즉시 갱신/인접월 선조회. 로스터55+보강28 및 달력관련41+최종19검사 PASS. dev debug 합본 설치, 드래그 중 년월/OT 변경 실측 및 DB18표/설정 동일. P0·출시언어 구조/prod 변경 없음. 상세 각 후속 원장.
+
+2026-10-16 U06 위젯/출시 언어 후속 WIDGET-01: 한국어만 공휴일 이름(3~6주), 비한국어 숫자 빨강 유지, 6주 전용 전체 월 이동·로컬 캐시 구현. 정적7검사/생성·리소스 구조 오류0. 사용자 빌드 금지로 native 회귀와 필수 전체 -Build 미실시이며 합본 세션에 인계. 기존 PASS는 당시 범위로 보존. 상세 UI WIDGET-01 원장.
+
+2026-10-16 U05/U06/R04 UI69/70 통합 후속: 날짜별OT·음력 이동/다음알람 스크롤·공통강조버튼/전체근무표 가림 소스와 집중79·달력통합43 등 대상검사 PASS, 분석 error0/warning0. WIDGET01 native14중12PASS/2FAIL로 전체 완료 아님. 사용자 추가 작업 후 합본 지시로 필수 -Build/APK·웹·설치 보류; 다음 최종 빌드에 -Build 필수. 기존 PASS/실기기 잔여 유지. 루트 다음세션_인계_2026-10-16_OT_알람_위젯.txt 및 UI69/70/WIDGET01 후속 참조.
+
+2026-10-16 A09/U05/U06/R04 — UI71 최종 후속
+[x] 변경 영향 범위 공통 UI·한국어 수면 표시·위젯 좁은 메모 높이 보완 및 기존 대기 변경 통합. 필수 -Build exit0: Flutter563/native 기능·DB/dev debug/JS웹. 위젯14/14 PASS. 마지막 미리보기 색상은 별도4검사/최종 debug APK 확인.
+[x] SM-S948N 최종 dev 업데이트·설치 해시 일치, DB18표/Flutter 설정 전체 동일. 6팔레트 화면과 보완 팝업/키보드 실측, 최종 실행 예외/넘침0. 상세 UI71 및 artifacts/ui71_all_layout_2026_10_16/.
+[ ] 기존 실제 폴더블/잠금알람/런처 위젯 애니메이션·실제 Play 업데이트/출시 잔여는 유지. 이 dev 검증을 prod·전 기기 PASS로 확대하지 않는다. 원본 인계/보고서는 보존.
+
+[A09/U06 후속] 2026-10-16 UI72: 사용자 후속으로 수면회복/일정관리 탭 없애기 버튼의 배경·글자 동일색 오류를 공통 danger 버튼으로 수정하고, 다음 알람의 남는 세로 공간 분배/하단 버튼 여백을 조정했다. 대상24+화면크기 회귀1 PASS, 분석 오류·경고0(기존 info12), dev debug 빌드 exit0/소스 변경0. 폰 추가 사용 없이 APK만 보관하며 UI71 설치본과 구분한다. 상세 UI72 원장 및 artifacts/ui72_final_followup_2026_10_16/.

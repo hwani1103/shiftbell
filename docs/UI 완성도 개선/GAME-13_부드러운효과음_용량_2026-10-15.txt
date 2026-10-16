@@ -1,0 +1,42 @@
+GAME-13 부드러운 효과음 6종
+
+범위
+- 사용자가 지정한 공 선택, 경로 지정, 되돌리기, 출발, 충돌 실패, 전체 공 클리어.
+- 직접 합성한 순음 기반 효과음: 165~523Hz, 부드러운 attack/release, 노이즈/고음 타격 없음.
+- generate_soft_effects.py로 재현 가능. 22.05kHz/16bit/mono WAV, 각 0.14~0.91초.
+- 음원 총109,418 bytes. 외부 음원/재생 라이브러리 추가 없음.
+- 경로 입력/되돌리기 성공 시만 재생. 자동 공 선택과 경로 입력 효과음을 중복 재생하지 않는다.
+- 마지막 공까지 성공한 레벨 결과에서 clear 1회. 실패 결과에서 failure 1회.
+- 효과음 메뉴 체크로 음소거 가능, 기존 저장 자료에 soundEnabled 추가. 이전 저장 기본값 true.
+- 나가기/백그라운드/음소거/컨트롤러 dispose 시 정지. Android Activity onPause/onDestroy에서도 정지/해제.
+- 동시 재생 최대3개. 미리 로드되지 않은 음원은 지연 재생하지 않고 생략.
+- Android 기본 SoundPool / USAGE_GAME / 미디어 볼륨 사용. 독립 Android 호스트에만 어댑터 연결.
+- 공유 UI는 플랫폼 독립 이벤트 콜백만 제공. ShiftBell 이식 시 Native 채널/음원/호스트 어댑터도 연결해야 한다.
+- 웹은 기존 무음 동작 유지. 이번 효과음은 Android 대상.
+
+검증
+- sound_test + session_test + finale_session_test: 22 PASS.
+- host 전체5검사 PASS (6종 채널 전달, 오디오 실패 허용, 기존 격리/스플래시).
+- UI/host analyze 모두 PASS.
+- 폰트 새 문구 누락0, 효과음 포함 게임 전용 자산467,461 bytes (<500,000 budget).
+- 최신 실기기 청음은 미실시. 음색/음량 최종 체감은 APK에서 확인 필요.
+- 본체 권한/알람/출시 언어 리소스 구조 변경 없음.
+
+용량 측정 계약
+- 독립 호스트의 devDebug-only 제한 유지, release 빌드/배포 없음.
+- dev debug APK와 dev debug AAB를 생성한다. AAB에서 자산별 실제 저장 크기를 측정한다.
+- debug 전체 파일 크기는 출시 게임 크기로 제시하지 않는다.
+- 실제 ShiftBell 출시 AAB의 증가량은 통합 전/후 동일조건 release AAB 차이로 확정해야 한다.
+- 게임 AOT/DEX의 추정은 자산 실측값과 구분하고 기존 Flutter 엔진을 중복 계산하지 않는다.
+- 측정 스크립트: examples/sync_path_lab/tools/measure_game_bundle.py
+- 증거: GAME-13_검증_2026-10-15/assets.json, bundle-size.json.
+최종 빌드 / 측정
+- dev debug APK PASS: 87.0초. artifacts/game13/app-dev-debug.apk.
+- dev debug AAB PASS: 111.2초. build/app/outputs/bundle/devDebug/app-dev-debug.aab.
+- APK SHA256 f1772563cf7405a33fb326158fe35171a4c3570a34e601064521d701c87492ad.
+- AAB 실제 ZIP 엔트리 합산: 게임 전용 자산185,240 bytes (180.90KiB), 효과음92,896 bytes (90.72KiB).
+- 압축 전 자산467,461 bytes, 효과음109,418 bytes. AAB/API 전달용 ZIP 메타데이터는 합산 제외.
+- AAB와 APK의 6개 WAV 모두 원본 바이트 일치. 모두1초 미만 mono16bit22050Hz.
+- 파형 시작/끝 샘플0, 최대 peak0.149~0.199. Native 재생 gain0.65.
+- ShiftBell 통합 후 코드/아이콘/Native 포함 증가분은 복수ABI AAB 기준 대략1~3MB를 보수적 계획치로 제시한다. 이는 AOT 실측값이나 보장 상한이 아니다.
+- 실측 총량 확정은 통합 완료 후 동일 설정 출시 AAB의 전/후 비교로 한다. debug VM/kernel 용량으로 추정하지 않는다.

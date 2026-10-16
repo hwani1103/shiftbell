@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shiftbell/l10n/generated/app_localizations.dart';
 import 'package:shiftbell/widgets/sleep_edit_dialog.dart';
 
 void main() {
@@ -15,6 +16,9 @@ void main() {
     final start = end.subtract(const Duration(hours: 6));
     await tester.pumpWidget(
       MaterialApp(
+        locale: const Locale('ko'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context)
               .copyWith(textScaler: const TextScaler.linear(1.5)),

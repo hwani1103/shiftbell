@@ -1,0 +1,19 @@
+name: sync_path_ui
+description: Independent offline UI for the sync path puzzle.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.11.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  sync_path_core:
+    path: ../sync_path_core
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  fonts:
+    - family: GameSans
+      fonts:
+        - asset: assets/fonts/GameSansSubset.ttf

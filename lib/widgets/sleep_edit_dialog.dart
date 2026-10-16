@@ -1,3 +1,6 @@
+import '../theme/app_ui_theme.dart';
+import '../utils/sleep_wall_time.dart';
+import '../utils/calendar_dates.dart';
 import '../l10n/l10n_extensions.dart';
 import '../widgets/unavailable_feature.dart';
 // lib/widgets/sleep_edit_dialog.dart
@@ -19,7 +22,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/sleep_record.dart';
 import '../providers/sleep_record_provider.dart';
 import '../services/condition/sleep_day_slots.dart';
-import '../theme/app_colors.dart';
 import '../utils/sleep_format_util.dart';
 import 'app_second_button.dart';
 
@@ -42,9 +44,9 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
   required DateTime initialStart,
   required DateTime initialEnd,
   bool showDeleteButton = false,
-  String title = '수면 시각 입력',
+  String? title,
 }) async {
-  if (!context.usesKoreanFeatures) return null;
+  if (!context.supportsSleepFeatures) return null;
   var start = initialStart;
   var end = initialEnd;
 
@@ -54,41 +56,86 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
       initialDate: initial,
       // 전체보기에서는 오래된 달도 탐색할 수 있으므로 편집 날짜도 같은 범위를 허용한다.
       firstDate: DateTime(2000),
-      lastDate: DateTime.now().add(const Duration(days: 1)),
+      lastDate: shiftLocalCalendarDay(DateTime.now(), 1),
     );
     if (date == null) return null;
     if (!sheetContext.mounted) return null;
     final time = await showTimePicker(
         context: sheetContext, initialTime: TimeOfDay.fromDateTime(initial));
     if (time == null) return null;
-    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    if (!sheetContext.mounted) return null;
+    final candidates = sleepWallTimeCandidates(
+        DateTime.utc(date.year, date.month, date.day, time.hour, time.minute));
+    if (candidates.isEmpty) {
+      // Keep the explanation above the modal editor and keyboard.
+      // A Scaffold SnackBar is hidden behind the sleep bottom sheet here.
+      await showDialog<void>(
+        context: sheetContext,
+        builder: (ctx) => AlertDialog(
+          content: Text(ctx.l10n.sleepClockGap),
+          actions: [
+            AppSecondButton(
+              variant: AppSecondButtonVariant.neutral,
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
+            ),
+          ],
+        ),
+      );
+      return null;
+    }
+    if (candidates.length == 1) return candidates.single;
+    return showDialog<DateTime>(
+      context: sheetContext,
+      builder: (ctx) => SimpleDialog(
+        title: Text(ctx.l10n.sleepClockRepeatedTitle),
+        children: [
+          SimpleDialogOption(child: Text(ctx.l10n.sleepClockRepeatedBody)),
+          for (var i = 0; i < candidates.length; i++)
+            SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, candidates[i]),
+              child: Text(
+                  '${i == 0 ? ctx.l10n.alarmClockFirstOccurrence : ctx.l10n.alarmClockSecondOccurrence} · ${sleepUtcOffset(candidates[i])}'),
+            ),
+        ],
+      ),
+    );
   }
 
   return showModalBottomSheet<SleepSlotEditResult>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
+    backgroundColor: AppUiPalette.of(context).surface,
     shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
     builder: (sheetContext) {
-          if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
+      if (!sheetContext.supportsSleepFeatures)
+        return const UnavailableFeature();
       return StatefulBuilder(
         builder: (sheetContext, setState) {
-          if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
+          if (!sheetContext.supportsSleepFeatures)
+            return const UnavailableFeature();
           // ⭐ 2026-09-01 후속7 - "미래 시각은 입력할 수 없어야 한다"는 요청
           // (예: 지금 낮 12시인데 오늘 밤 22시~다음날 06시를 미리 저장하는 건
           // 말이 안 됨 - 아직 안 일어난 일이므로). end.isAfter(start) 검증에
           // "취침/기상 둘 다 지금 시각을 넘지 않아야 한다"는 조건을 추가.
           final now = DateTime.now();
           final isFuture = start.isAfter(now) || end.isAfter(now);
-          final valid = end.isAfter(start) && !isFuture;
+          final tooShort =
+              end.difference(start).inMinutes < kMinMeaningfulSleepMinutes;
+          final valid = end.isAfter(start) && !isFuture && !tooShort;
           final String message;
           if (!end.isAfter(start)) {
-            message = '기상 시각이 취침보다 빨라요';
+            message = context.l10n.sleepText056;
           } else if (isFuture) {
-            message = '아직 지나지 않은 시각은 기록할 수 없어요';
+            message = context.l10n.sleepText057;
+          } else if (tooShort) {
+            message = context.l10n.sleepTooShort;
           } else {
-            message = '${fmtDuration(end.difference(start))} 수면';
+            message = context.l10n.sleepText058((fmtDuration(
+                    end.difference(start),
+                    localizations: context.l10n))
+                .toString());
           }
           // ⭐ 2026-09-01 후속5 - "SafeArea가 없다"는 피드백으로 SafeArea(top: false,
           // 바텀시트라 위쪽은 필요 없음) 추가 - 제스처 내비게이션 바 등 하단 시스템
@@ -110,14 +157,15 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
                         width: 36,
                         height: 4,
                         decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
+                            color: AppUiPalette.of(context).border,
                             borderRadius: BorderRadius.circular(2)),
                       ),
                     ),
                     const SizedBox(height: 14),
-                    Text(title,
+                    Text(title ?? context.l10n.sleepText055,
                         style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w700),
+                            fontSize: AppFontSize.section,
+                            fontWeight: FontWeight.w700),
                         textAlign: TextAlign.center),
                     const SizedBox(height: 18),
                     LayoutBuilder(
@@ -128,7 +176,7 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
                             constraints.maxWidth < 300 || textScale > 1.3;
                         final startCard = _TimeCard(
                           icon: '🌙',
-                          label: '취침',
+                          label: context.l10n.sleepText059,
                           time: start,
                           onTap: () async {
                             final picked = await pick(sheetContext, start);
@@ -137,7 +185,7 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
                         );
                         final endCard = _TimeCard(
                           icon: '☀️',
-                          label: '기상',
+                          label: context.l10n.sleepText060,
                           time: end,
                           onTap: () async {
                             final picked = await pick(sheetContext, end);
@@ -148,10 +196,11 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
                           return Column(
                             children: [
                               startCard,
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.symmetric(vertical: 4),
                                 child: Icon(Icons.arrow_downward,
-                                    color: Colors.black26, size: 18),
+                                    color: AppUiPalette.of(context).border,
+                                    size: 18),
                               ),
                               endCard,
                             ],
@@ -160,10 +209,11 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
                         return Row(
                           children: [
                             Expanded(child: startCard),
-                            const Padding(
+                            Padding(
                               padding: EdgeInsets.symmetric(horizontal: 6),
                               child: Icon(Icons.arrow_forward,
-                                  color: Colors.black26, size: 18),
+                                  color: AppUiPalette.of(context).border,
+                                  size: 18),
                             ),
                             Expanded(child: endCard),
                           ],
@@ -175,9 +225,11 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
                       child: Text(
                         message,
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: AppFontSize.body,
                           fontWeight: FontWeight.w600,
-                          color: valid ? kAppMainAccent : Colors.red.shade400,
+                          color: valid
+                              ? AppUiPalette.of(context).primary
+                              : AppUiPalette.of(context).danger,
                         ),
                       ),
                     ),
@@ -198,29 +250,29 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
                             variant: AppSecondButtonVariant.danger,
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 18, vertical: 12),
-                            fontSize: 14,
+                            fontSize: AppFontSize.body,
                             onPressed: () => Navigator.of(sheetContext)
                                 .pop(SleepSlotDeleted()),
-                            child: const Text('삭제'),
+                            child: Text(context.l10n.sleepText061),
                           ),
                         AppSecondButton(
                           variant: AppSecondButtonVariant.neutral,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 18, vertical: 12),
-                          fontSize: 14,
+                          fontSize: AppFontSize.body,
                           onPressed: () => Navigator.of(sheetContext).pop(),
-                          child: const Text('취소'),
+                          child: Text(context.l10n.sleepText062),
                         ),
                         AppSecondButton(
                           variant: AppSecondButtonVariant.success,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 18, vertical: 12),
-                          fontSize: 14,
+                          fontSize: AppFontSize.body,
                           onPressed: valid
                               ? () => Navigator.of(sheetContext)
                                   .pop(SleepSlotSaved(start, end))
                               : null,
-                          child: const Text('저장'),
+                          child: Text(context.l10n.sleepText063),
                         ),
                       ],
                     ),
@@ -248,27 +300,33 @@ class _TimeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: AppUiPalette.of(context).soft,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppUiPalette.of(context).border),
         ),
         child: Column(
           children: [
-            Text(icon, style: const TextStyle(fontSize: 20)),
+            Text(icon, style: const TextStyle(fontSize: AppFontSize.toolbar)),
             const SizedBox(height: 4),
             Text(label,
-                style: const TextStyle(fontSize: 11, color: Colors.black45)),
+                style: TextStyle(
+                    fontSize: AppFontSize.meta,
+                    color: AppUiPalette.of(context).secondaryText)),
             const SizedBox(height: 4),
-            Text(fmtDateTime(time),
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+            Text(
+                context.usesKoreanFeatures
+                    ? fmtDateTime(time, localizations: context.l10n)
+                    : '${fmtDateTime(time, localizations: context.l10n)}\n${sleepUtcOffset(time)}',
+                style: const TextStyle(
+                    fontSize: AppFontSize.control,
+                    fontWeight: FontWeight.w700)),
           ],
         ),
       ),
@@ -288,7 +346,8 @@ Future<void> handleSleepSlotTap(
   required SleepRecord? record,
 }) async {
   final notifier = ref.read(sleepRecordProvider.notifier);
-  final defaults = record == null ? defaultSleepSlotTimes(date, category) : null;
+  final defaults =
+      record == null ? defaultSleepSlotTimes(date, category) : null;
   var start = record?.start ?? defaults!.start;
   var end = record != null ? (record.end ?? DateTime.now()) : defaults!.end;
 
@@ -300,7 +359,15 @@ Future<void> handleSleepSlotTap(
       initialStart: start,
       initialEnd: end,
       showDeleteButton: record != null,
-      title: record != null ? '${category.label} 수정' : '${category.label} 기록',
+      title: record != null
+          ? context.l10n.sleepText064(((category == SleepSlotCategory.main
+                  ? context.l10n.sleepText042
+                  : context.l10n.sleepText043))
+              .toString())
+          : context.l10n.sleepText065(((category == SleepSlotCategory.main
+                  ? context.l10n.sleepText042
+                  : context.l10n.sleepText043))
+              .toString()),
     );
     if (result is SleepSlotDeleted) {
       if (record?.id != null) await notifier.deleteRecord(record!.id!);
@@ -308,28 +375,45 @@ Future<void> handleSleepSlotTap(
     }
     if (result is! SleepSlotSaved) return;
 
-    final conflict = await notifier.findOverlap(result.start, result.end, excludeId: record?.id);
+    final conflict = await notifier.findOverlap(result.start, result.end,
+        excludeId: record?.id);
     if (conflict == null) {
       if (record != null) {
-        await notifier.updateTimes(record, start: result.start, end: result.end);
+        await notifier.updateTimes(record,
+            start: result.start, end: result.end);
       } else {
         await notifier.addManual(start: result.start, end: result.end);
       }
       return;
     }
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(sleepOverlapMessage(conflict))),
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        content: Text(sleepOverlapMessage(ctx, conflict)),
+        actions: [
+          AppSecondButton(
+            variant: AppSecondButtonVariant.neutral,
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
+          ),
+        ],
+      ),
     );
+    if (!context.mounted) return;
     start = result.start;
     end = result.end;
   }
 }
 
-/// 겹침 안내 문구(수면·회복 탭은 한국어 하드코딩 정책 - CLAUDE.md "출퇴근 시각 입력" 절).
-String sleepOverlapMessage(SleepRecord conflict) {
+/// 모든 출시 언어에 제공하는 수면 기록 겹침 안내.
+String sleepOverlapMessage(BuildContext context, SleepRecord conflict) {
   final what = conflict.end != null
-      ? '이미 기록된 수면(${fmtDateTime(conflict.start)}~${fmtTimeOnly(conflict.end!)})'
-      : '진행 중인 수면(${fmtDateTime(conflict.start)}부터)';
-  return '$what과 시간이 겹쳐요. 시각을 고치거나 그 기록을 먼저 수정해 주세요.';
+      ? context.l10n.sleepText066(
+          (fmtDateTime(conflict.start, localizations: context.l10n)).toString(),
+          (fmtTimeOnly(conflict.end!, localizations: context.l10n)).toString())
+      : context.l10n.sleepText067(
+          (fmtDateTime(conflict.start, localizations: context.l10n))
+              .toString());
+  return context.l10n.sleepText068((what).toString());
 }

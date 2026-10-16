@@ -1,3 +1,6 @@
+import 'app_ui_theme_scope.dart';
+import '../widgets/app_ui_feedback.dart';
+import '../theme/app_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -12,12 +15,13 @@ Future<void> showMemoDetailSheet({
   required Future<void> Function(String) onSave,
   required Future<void> Function() onDelete,
 }) =>
-    showModalBottomSheet<void>(
+    showAppUiBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppUiMetrics.cardRadius)),
       ),
       builder: (_) => _MemoDetailSheet(
           dateLabel: dateLabel, text: text, onSave: onSave, onDelete: onDelete),
@@ -68,7 +72,7 @@ class _MemoDetailSheetState extends State<_MemoDetailSheet> {
     final text = _controller.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.statusEnterMemoContent)));
+          AppUiSnackBar(content: Text(context.l10n.statusEnterMemoContent)));
       return;
     }
     _perform(() => widget.onSave(text));
@@ -77,11 +81,10 @@ class _MemoDetailSheetState extends State<_MemoDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final fieldBackground =
-        Color.alphaBlend(colors.onSurface.withOpacity(0.07), colors.surface);
+    final fieldBackground = AppUiPalette.of(context).soft;
     final fieldBorder = OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10.r),
-        borderSide: BorderSide(color: colors.onSurface.withOpacity(0.3)));
+        borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
+        borderSide: BorderSide(color: colors.outline));
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: SafeArea(
@@ -107,7 +110,7 @@ class _MemoDetailSheetState extends State<_MemoDetailSheet> {
                 Expanded(
                     child: Text(widget.dateLabel,
                         style: TextStyle(
-                            fontSize: 13.sp,
+                            fontSize: AppFontSize.body,
                             fontWeight: FontWeight.w700,
                             color: colors.primary))),
               ]),
@@ -128,34 +131,39 @@ class _MemoDetailSheetState extends State<_MemoDetailSheet> {
                     filled: true,
                     fillColor: fieldBackground,
                     hintText: context.l10n.calendarMemoContent,
-                    contentPadding: EdgeInsets.all(12.w),
+                    contentPadding:
+                        EdgeInsets.all(AppUiMetrics.compactCardPadding),
                     border: fieldBorder,
                     enabledBorder: fieldBorder,
                     focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.r),
+                        borderRadius:
+                            BorderRadius.circular(AppUiMetrics.controlRadius),
                         borderSide:
                             BorderSide(color: colors.primary, width: 2)),
                   ),
-                  style: TextStyle(fontSize: 14.sp, color: colors.onSurface),
+                  style: TextStyle(
+                      fontSize: AppFontSize.body, color: colors.onSurface),
                 )
               else
                 InkWell(
                   key: const ValueKey('memo-detail-content'),
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius:
+                      BorderRadius.circular(AppUiMetrics.controlRadius),
                   onTap: () => setState(() => _editing = true),
                   child: Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(14.w),
                     foregroundDecoration: BoxDecoration(
-                        border: Border.all(
-                            color: colors.onSurface.withOpacity(0.3)),
-                        borderRadius: BorderRadius.circular(10.r)),
+                        border: Border.all(color: colors.outline),
+                        borderRadius:
+                            BorderRadius.circular(AppUiMetrics.controlRadius)),
                     decoration: BoxDecoration(
                         color: fieldBackground,
-                        borderRadius: BorderRadius.circular(10.r)),
+                        borderRadius:
+                            BorderRadius.circular(AppUiMetrics.controlRadius)),
                     child: Text(widget.text,
                         style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: AppFontSize.body,
                             color: colors.onSurface,
                             height: 1.5)),
                   ),

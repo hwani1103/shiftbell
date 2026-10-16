@@ -1,3 +1,5 @@
+import '../widgets/app_ui_feedback.dart';
+import '../theme/app_ui_theme.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -141,7 +143,7 @@ class _PermissionPanelState extends State<PermissionPanel>
     if (!opened) {
       _pendingPermission = null;
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.permissionOpenFailed)));
+          AppUiSnackBar(content: Text(context.l10n.permissionOpenFailed)));
     } else {
       // Runtime dialogs finish on their callback; settings activities finish on
       // resume. A successful launch is never evidence that permission was given.
@@ -286,8 +288,12 @@ class _PermissionPanelState extends State<PermissionPanel>
 
   @override
   Widget build(BuildContext context) {
+    // Do not draw temporary unknown cards before the first native read finishes.
+    // Later refreshes keep the last verified UI visible until the next read.
+    if (!controller.hasLoaded) return const SizedBox.shrink();
     final l = context.l10n;
     final colors = Theme.of(context).colorScheme;
+    final ui = Theme.of(context).extension<AppUiPalette>();
     final descriptions = [
       l.permissionNotificationDesc,
       l.permissionOverlayDesc,
@@ -310,8 +316,10 @@ class _PermissionPanelState extends State<PermissionPanel>
             decoration: BoxDecoration(
                 color: Color.alphaBlend(
                     colors.onSurface.withOpacity(0.025), colors.surface),
-                border: Border.all(color: colors.onSurface.withOpacity(0.15)),
-                borderRadius: BorderRadius.circular(12)),
+                border: Border.all(
+                    color: ui?.border ?? colors.onSurface.withOpacity(0.15)),
+                borderRadius: BorderRadius.circular(
+                    ui != null ? AppUiMetrics.cardRadius : 12)),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Padding(
                   padding: EdgeInsets.only(
@@ -392,24 +400,38 @@ class _PermissionPanelState extends State<PermissionPanel>
 
   Widget _settingsButton(AppPermission p) => OutlinedButton(
       key: ValueKey('permission-${p.name}'),
-      style: OutlinedButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-          disabledBackgroundColor:
-              Theme.of(context).colorScheme.primaryContainer,
-          disabledForegroundColor:
-              Theme.of(context).colorScheme.onPrimaryContainer,
-          overlayColor: Colors.transparent,
-          splashFactory: NoSplash.splashFactory,
-          animationDuration: Duration.zero,
-          side: BorderSide(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-              width: 1.25),
-          textStyle: Theme.of(context)
-              .textTheme
-              .labelLarge
-              ?.copyWith(fontWeight: FontWeight.w700),
-          padding: const EdgeInsets.symmetric(horizontal: 12)),
+      style: Theme.of(context).extension<AppUiPalette>() != null
+          ? OutlinedButton.styleFrom(
+              backgroundColor: AppUiPalette.of(context).primary,
+              foregroundColor: AppUiPalette.of(context).onPrimary,
+              disabledBackgroundColor: AppUiPalette.of(context).disabledSurface,
+              disabledForegroundColor: AppUiPalette.of(context).disabledText,
+              minimumSize: const Size(0, 32),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              textStyle: AppTypography.style(context, AppTextRole.button),
+              side: BorderSide.none,
+              shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(AppUiMetrics.controlRadius)),
+            )
+          : OutlinedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+              disabledBackgroundColor:
+                  Theme.of(context).colorScheme.primaryContainer,
+              disabledForegroundColor:
+                  Theme.of(context).colorScheme.onPrimaryContainer,
+              overlayColor: Colors.transparent,
+              splashFactory: NoSplash.splashFactory,
+              animationDuration: Duration.zero,
+              side: BorderSide(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                  width: 1.25),
+              textStyle: Theme.of(context)
+                  .textTheme
+                  .labelLarge
+                  ?.copyWith(fontWeight: FontWeight.w700),
+              padding: const EdgeInsets.symmetric(horizontal: 12)),
       onPressed: busy
           ? null
           : () async {

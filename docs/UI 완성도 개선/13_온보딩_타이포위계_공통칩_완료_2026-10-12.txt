@@ -1,0 +1,19 @@
+온보딩 6차 완료 — 2026-10-12
+
+사용자 즉시 구현 지시에 따라 12번 원장의 항목을 반영했다.
+- 단계 표시: 공통 progress 텍스트 역할(14, semibold) 적용.
+- 텍스트 크기: AppFontSize의 재사용 계층에 연결. 크기/굵기/색상은 공통 템플릿 관리.
+- 칩 인덱스: 공통 ShiftChipIndex에서 실제 글자 영역을 측정하고 근무명/팀명/삭제 영역을 침범하지 않는 최대 크기를 사용. 최대값은 공통 meta 계층(12). 시스템 글자 배율과 무관한 고정 규칙 유지.
+- 날짜별로 직접 지정: 공통 활성 secondary 버튼 적용.
+- 앱 전체의 짧은 애니메이션 확대는 후속 원칙으로 기록했으며 이번에 전역 적용하지 않았다.
+- 기존 앱 전체를 공통 테마로 이관한 것은 아니다. 이번 온보딩과 공통 구성요소의 범위를 구분한다.
+
+검증
+- artifacts/onboarding_round6_verified.log: 123개 테스트 PASS. 다국어/크기/알람 밀도/공통 칩 실제 글자 충돌/패턴 흐름 포함.
+- artifacts/onboarding_round6_analyze.log: analyzer exit 0, info 18개, error/warning 없음.
+- artifacts/onboarding_round6_dev_debug_build.log: dev debug APK 빌드 성공.
+- APK: artifacts/onboarding_round6/ShiftBell_Onboarding_typography_dev_debug.apk
+- SHA256: 733D420E7F0AC6D33FE7DD411FAEF7B190A732DFAF70F9B57F490480EDDADD35
+- DB 버전/권한 기능/출시 언어 기능 범위 및 리소스 구조는 이번 변경에서 수정하지 않았다.
+- 직전 5차의 check_critical_release.ps1 -Build PASS 증거를 보존. 이번 시각적 변경은 dev debug 직접 빌드.
+- 실기기 PASS 또는 release 검증으로 기록하지 않는다.

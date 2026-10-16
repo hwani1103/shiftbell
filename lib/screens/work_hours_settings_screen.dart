@@ -1,3 +1,5 @@
+import '../widgets/app_ui_components.dart';
+import '../theme/app_ui_theme.dart';
 import '../widgets/settings_appearance.dart';
 import '../widgets/adaptive_layout.dart';
 // lib/screens/work_hours_settings_screen.dart
@@ -8,6 +10,7 @@ import '../widgets/adaptive_layout.dart';
 
 import '../providers/data_revision_provider.dart';
 import '../services/database_service.dart';
+import '../services/app_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -110,7 +113,8 @@ class _WorkHoursSettingsScreenState
                         child: Text(
                           context.l10n.workHoursShiftChangeOtTitle,
                           style: TextStyle(
-                              fontSize: 17.sp, fontWeight: FontWeight.w600),
+                              fontSize: AppFontSize.section,
+                              fontWeight: FontWeight.w600),
                         ),
                       ),
                       Switch(
@@ -126,7 +130,7 @@ class _WorkHoursSettingsScreenState
                   Text(
                     context.l10n.workHoursShiftChangeOtDesc,
                     style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: AppFontSize.meta,
                         color: colorScheme.onSurfaceVariant,
                         height: 1.4),
                   ),
@@ -137,14 +141,15 @@ class _WorkHoursSettingsScreenState
 
                   Text(
                     context.l10n.settingsDefaultWorkHoursPerShift,
-                    style:
-                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        fontSize: AppFontSize.section,
+                        fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 4.h),
                   Text(
                     context.l10n.workHoursDefaultDurationDesc,
                     style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: AppFontSize.meta,
                         color: colorScheme.onSurfaceVariant,
                         height: 1.4),
                   ),
@@ -158,14 +163,15 @@ class _WorkHoursSettingsScreenState
 
                   Text(
                     context.l10n.settingsMonthlyPeriodBasis,
-                    style:
-                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        fontSize: AppFontSize.section,
+                        fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 4.h),
                   Text(
                     context.l10n.workHoursPeriodBasisDesc,
                     style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: AppFontSize.meta,
                         color: colorScheme.onSurfaceVariant,
                         height: 1.4),
                   ),
@@ -222,7 +228,7 @@ class _WorkHoursSettingsScreenState
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: colorScheme.surfaceVariant.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,13 +236,10 @@ class _WorkHoursSettingsScreenState
           Row(
             children: [
               Expanded(
-                child: Text(
-                  shift,
-                  style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurface),
-                ),
+                child: Align(
+                    alignment: Alignment.centerLeft,
+                    child:
+                        AppUiShiftChip(name: shift, size: AppChipSize.compact)),
               ),
               SizedBox(width: 8.w),
               // ⭐ 2026-09-12(2차, 사용자 피드백) - 소요시간 텍스트를 그냥 맨
@@ -257,7 +260,7 @@ class _WorkHoursSettingsScreenState
                       : _formatDuration(range.durationMinutes),
                   maxLines: 1,
                   style: TextStyle(
-                      fontSize: 12.5.sp,
+                      fontSize: AppFontSize.body,
                       fontWeight: FontWeight.w600,
                       color: colorScheme.primary),
                 ),
@@ -306,7 +309,7 @@ class _WorkHoursSettingsScreenState
                   child: Text(
                     context.koOnly.workHoursLegacyClockTimeHint,
                     style: TextStyle(
-                      fontSize: 11.5.sp,
+                      fontSize: AppFontSize.meta,
                       color: colorScheme.onSurfaceVariant,
                       height: 1.35,
                     ),
@@ -325,7 +328,7 @@ class _WorkHoursSettingsScreenState
                   child: Text(
                     '${context.l10n.workHoursShiftTimeClockIn} '
                     '${_fmtRangeTime(range?.startMinutes ?? _pendingStartOnlyMinutes[shift])}',
-                    style: TextStyle(fontSize: 12.5.sp),
+                    style: TextStyle(fontSize: AppFontSize.body),
                   ),
                 ),
               ),
@@ -337,7 +340,7 @@ class _WorkHoursSettingsScreenState
                   child: Text(
                     '${context.l10n.workHoursShiftTimeClockOut} '
                     '${_fmtRangeTime(range?.endMinutes ?? _pendingEndOnlyMinutes[shift])}',
-                    style: TextStyle(fontSize: 12.5.sp),
+                    style: TextStyle(fontSize: AppFontSize.body),
                   ),
                 ),
               ),
@@ -437,6 +440,7 @@ class _WorkHoursSettingsScreenState
         .read(conditionShiftTimeProvider.notifier)
         .applyExternallyPersisted(shift, range, notify: true);
     if (saved != null) {
+      AppAnalytics.track(AnalyticsEvent.workHoursSettingsSaved);
       ref.read(scheduleProvider.notifier).applyExternallyPersisted(
         saved,
         notifyDomains: const {DataDomain.workHoursSettings},
@@ -486,9 +490,9 @@ class _WorkHoursSettingsScreenState
       color: isSelected
           ? _selectedBg(context)
           : colorScheme.surfaceVariant.withOpacity(0.3),
-      borderRadius: BorderRadius.circular(12.r),
+      borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
         onTap: () async {
           await ref
               .read(workHoursSettingsProvider.notifier)
@@ -502,7 +506,7 @@ class _WorkHoursSettingsScreenState
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.r),
+            borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
             border: Border.all(
               color: isSelected
                   ? colorScheme.primary
@@ -526,13 +530,13 @@ class _WorkHoursSettingsScreenState
                   children: [
                     Text(title,
                         style: TextStyle(
-                            fontSize: 15.sp,
+                            fontSize: AppFontSize.control,
                             fontWeight: FontWeight.w600,
                             color: colorScheme.onSurface)),
                     SizedBox(height: 2.h),
                     Text(subtitle,
                         style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: AppFontSize.meta,
                             color: colorScheme.onSurfaceVariant)),
                   ],
                 ),
@@ -551,13 +555,14 @@ class _WorkHoursSettingsScreenState
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: colorScheme.surfaceVariant.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
         border: Border.all(color: colorScheme.outline.withOpacity(0.4)),
       ),
       child: Row(
         children: [
           Text(context.l10n.workHoursCutoffDayPrefix,
-              style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface)),
+              style: TextStyle(
+                  fontSize: AppFontSize.body, color: colorScheme.onSurface)),
           // ⭐ "일"을 피커 바로 옆에 좁게 붙이지 않고, "매월"과 대칭되게 오른쪽
           // 끝에 독립적으로 배치 - 매월 [ 가운데 피커 ] 일, 형태로 균형 잡음.
           Expanded(
@@ -570,9 +575,10 @@ class _WorkHoursSettingsScreenState
                 itemHeight: 40.h,
                 itemWidth: 48.w,
                 textStyle: TextStyle(
-                    fontSize: 13.sp, color: colorScheme.onSurfaceVariant),
+                    fontSize: AppFontSize.body,
+                    color: colorScheme.onSurfaceVariant),
                 selectedTextStyle: TextStyle(
-                    fontSize: 18.sp,
+                    fontSize: AppFontSize.toolbar,
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface),
                 decoration: BoxDecoration(
@@ -588,7 +594,8 @@ class _WorkHoursSettingsScreenState
             ),
           ),
           Text(context.l10n.workHoursCutoffDaySuffix,
-              style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface)),
+              style: TextStyle(
+                  fontSize: AppFontSize.body, color: colorScheme.onSurface)),
         ],
       ),
     );
@@ -632,15 +639,15 @@ class _WorkHoursSettingsScreenState
       color: selected
           ? _selectedBg(context)
           : colorScheme.surfaceVariant.withOpacity(0.3),
-      borderRadius: BorderRadius.circular(10.r),
+      borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
       child: InkWell(
-        borderRadius: BorderRadius.circular(10.r),
+        borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
         onTap: onTap,
         child: Container(
           alignment: Alignment.center,
           padding: EdgeInsets.symmetric(vertical: 10.h),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10.r),
+            borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
             border: Border.all(
               color: selected
                   ? colorScheme.primary
@@ -651,7 +658,7 @@ class _WorkHoursSettingsScreenState
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 13.sp,
+              fontSize: AppFontSize.body,
               fontWeight: FontWeight.w600,
               color:
                   selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
@@ -679,12 +686,12 @@ class _WorkHoursSettingsScreenState
         color: isDark
             ? colorScheme.primaryContainer.withOpacity(0.25)
             : colorScheme.primary.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(10.r),
+        borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
       ),
       child: Text(
         context.l10n.settingsPreviewThisMonth(range),
         style: TextStyle(
-            fontSize: 12.sp,
+            fontSize: AppFontSize.meta,
             fontWeight: FontWeight.w600,
             color: colorScheme.primary),
       ),

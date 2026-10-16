@@ -179,13 +179,30 @@ class _AdaptiveScheduleFrameState extends State<AdaptiveScheduleFrame> {
 /// The same content has a hero column and a controls column on wide windows.
 class AdaptiveHeroLayout extends StatelessWidget {
   const AdaptiveHeroLayout(
-      {super.key, required this.children, required this.splitIndex});
+      {super.key,
+      required this.children,
+      required this.splitIndex,
+      this.distributeVerticalSpace = false,
+      this.flexibleIndex});
   final List<Widget> children;
   final int splitIndex;
+  final int? flexibleIndex;
+  final bool distributeVerticalSpace;
   @override
   Widget build(BuildContext context) {
     final layout = AppLayout.of(context);
-    if (!layout.isWide) return Column(children: children);
+    if (!layout.isWide)
+      return Column(
+          mainAxisAlignment: distributeVerticalSpace
+              ? MainAxisAlignment.spaceBetween
+              : MainAxisAlignment.start,
+          children: [
+            for (var i = 0; i < children.length; i++)
+              if (i == flexibleIndex && !layout.usesBoundedCalendar)
+                Flexible(child: children[i])
+              else
+                children[i]
+          ]);
     return Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
       Expanded(
           flex: layout.isSquare ? 5 : 4,
@@ -197,34 +214,28 @@ class AdaptiveHeroLayout extends StatelessWidget {
   }
 }
 
-/// On short covers keep the existing composition in one viewport. The ring is
-/// already smaller there; this only scales down any remaining excess height.
+/// Phone hero content receives a bounded height so its flexible ring can yield.
+/// Fold/wide layouts preserve their composition and fit any remaining overflow.
 class AdaptiveHeroViewport extends StatelessWidget {
   const AdaptiveHeroViewport(
-      {super.key, required this.child, required this.padding, this.physics});
+      {super.key, required this.child, required this.padding});
   final Widget child;
   final EdgeInsets padding;
-  final ScrollPhysics? physics;
   @override
   Widget build(BuildContext context) {
-    final layout = AppLayout.of(context);
-    if (!layout.isShortCover &&
-        !layout.isTallCover &&
-        !layout.isBalancedInner) {
-      return SingleChildScrollView(
-          padding: padding, physics: physics, child: child);
+    if (!AppLayout.of(context).usesBoundedCalendar) {
+      return Padding(padding: padding, child: child);
     }
     return LayoutBuilder(
         builder: (context, bounds) => Padding(
-              padding: padding,
-              child: SizedBox.expand(
-                  child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                    width: bounds.maxWidth - padding.horizontal, child: child),
-              )),
-            ));
+            padding: padding,
+            child: SizedBox.expand(
+                child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                        width: bounds.maxWidth - padding.horizontal,
+                        child: child)))));
   }
 }
 

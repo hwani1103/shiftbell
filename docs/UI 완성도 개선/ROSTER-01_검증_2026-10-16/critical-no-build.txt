@@ -1,0 +1,2200 @@
+Generated 5 localized manifests and browser metadata bootstrap.
+PASS: 8 web locale/fallback cases and language-change checks; no layout validation.
+National holiday source and Dart/native parity: OK
+Because l10n.yaml exists, the options defined there will be used instead.
+To use the command line arguments, delete the l10n.yaml file in the Flutter project.
+
+
+{
+  "errors": [],
+  "languages": {
+    "en": {
+      "arb_messages": 780,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": []
+    },
+    "pt": {
+      "arb_messages": 780,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "sleepText077",
+        "commonPm",
+        "commonOk",
+        "commonAm",
+        "sleepText076",
+        "commonPrevious",
+        "sleepText075",
+        "appTitle",
+        "sleepText053",
+        "uiThemeAutomatic",
+        "splashTitle",
+        "calendarOtTotal",
+        "alarmVolume",
+        "defaultSnoozeMinutes",
+        "themeLabPreviewSheetTitle",
+        "alarmDurationMinutes"
+      ]
+    },
+    "de": {
+      "arb_messages": 780,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "commonPm",
+        "commonOk",
+        "commonAm",
+        "appTitle",
+        "sleepText053",
+        "uiThemeAutomatic",
+        "splashTitle",
+        "alarmVibration",
+        "themeLabPreviewSheetTitle"
+      ]
+    },
+    "hi": {
+      "arb_messages": 780,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "commonPm",
+        "commonAm",
+        "appTitle",
+        "sleepText053",
+        "splashTitle",
+        "themeLabPreviewSheetTitle"
+      ]
+    }
+  },
+  "limits": "Structure only. ICU generation, semantic review and device layout review are separate.",
+  "korean_preserved_scoped_messages": 170,
+  "native_korean_only_messages": 1
+}
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: missing choices: existing=false
+00:00 +1: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: stored/restored choice false survives existing=false
+00:00 +2: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: stored/restored choice true survives existing=false
+00:00 +3: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: missing choices: existing=true
+00:00 +4: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: stored/restored choice false survives existing=true
+00:00 +5: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: stored/restored choice true survives existing=true
+00:00 +6: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: existing user who reset their schedule keeps the old visible default
+00:01 +7: C:/Users/Administrator/Desktop/shiftbell/test/sleep_estimate_minimum_test.dart: automatic estimates crossing midnight require five hours, both ongoing and ended
+00:01 +8: C:/Users/Administrator/Desktop/shiftbell/test/sleep_estimate_minimum_test.dart: manual naps still appear and confirmed automatic history stays outside pending cards
+00:04 +9: C:/Users/Administrator/Desktop/shiftbell/test/sleep_release_cases_test.dart: explicit sleep attribution and average policy ledger
+00:13 +10: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: (setUpAll)
+00:13 +10: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 0 / sleep 0: five-language parity
+00:15 +11: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 0 / sleep 119: five-language parity
+00:15 +12: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 0 / sleep 120: five-language parity
+00:15 +13: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 0 / sleep 480: five-language parity
+00:16 +14: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 0: five-language parity
+00:16 +15: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 119: five-language parity
+00:16 +16: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:16 +17: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 480: five-language parity
+00:16 +18: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 0: five-language parity
+00:17 +19: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 119: five-language parity
+00:17 +20: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:17 +21: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 480: five-language parity
+00:17 +22: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 16 / sleep 0: five-language parity
+00:17 +23: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 16 / sleep 119: five-language parity
+00:17 +24: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 16 / sleep 120: five-language parity
+00:17 +25: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 16 / sleep 480: five-language parity
+00:18 +26: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 0: five-language parity
+00:18 +27: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 119: five-language parity
+00:18 +28: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:18 +29: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 480: five-language parity
+00:18 +30: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 0: five-language parity
+00:18 +31: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:18 +32: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 120: five-language parity
+00:18 +33: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 480: five-language parity
+00:19 +34: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 0 / sleep 0: five-language parity
+00:19 +35: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 0 / sleep 119: five-language parity
+00:19 +36: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 0 / sleep 120: five-language parity
+00:19 +37: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 0 / sleep 480: five-language parity
+00:20 +38: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 6 / sleep 0: five-language parity
+00:20 +39: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 6 / sleep 119: five-language parity
+00:21 +40: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 6 / sleep 120: five-language parity
+00:23 +41: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 6 / sleep 480: five-language parity
+00:26 +42: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 10 / sleep 0: five-language parity
+00:26 +43: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 10 / sleep 119: five-language parity
+00:27 +44: C:/Users/Administrator/Desktop/shiftbell/test/sleep_instant_storage_test.dart: New York spring
+00:27 +45: C:/Users/Administrator/Desktop/shiftbell/test/sleep_instant_storage_test.dart: New York spring
+00:28 +46: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 10 / sleep 480: five-language parity
+00:28 +47: C:/Users/Administrator/Desktop/shiftbell/test/sleep_instant_storage_test.dart: New York autumn
+00:28 +48: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 0: five-language parity
+00:28 +49: C:/Users/Administrator/Desktop/shiftbell/test/sleep_instant_storage_test.dart: Berlin spring
+00:28 +50: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 119: five-language parity
+00:28 +51: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 119: five-language parity
+00:28 +52: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 119: five-language parity
+00:28 +53: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 119: five-language parity
+00:29 +54: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 119: five-language parity
+00:29 +55: C:/Users/Administrator/Desktop/shiftbell/test/sleep_instant_storage_test.dart: Nepal
+00:29 +56: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 120: five-language parity
+00:29 +57: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 120: five-language parity
+00:29 +58: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 120: five-language parity
+00:29 +59: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 120: five-language parity
+00:30 +60: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 480: five-language parity
+00:30 +61: C:/Users/Administrator/Desktop/shiftbell/test/sleep_wall_time_test.dart: America/New_York 2026-03-08T02:30:00
+00:30 +62: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 0: five-language parity
+00:30 +63: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 0: five-language parity
+00:30 +64: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 0: five-language parity
+00:30 +65: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 0: five-language parity
+00:30 +66: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 0: five-language parity
+00:31 +67: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 0: five-language parity
+00:31 +68: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 0: five-language parity
+00:31 +69: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 0: five-language parity
+00:31 +70: C:/Users/Administrator/Desktop/shiftbell/test/sleep_wall_time_test.dart: Asia/Seoul 2026-03-08T02:30:00
+00:31 +71: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 119: five-language parity
+00:31 +72: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 119: five-language parity
+00:31 +73: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 119: five-language parity
+00:31 +74: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 119: five-language parity
+00:31 +75: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 119: five-language parity
+00:31 +76: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 119: five-language parity
+00:31 +77: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 119: five-language parity
+00:31 +78: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 120: five-language parity
+00:32 +79: C:/Users/Administrator/Desktop/shiftbell/test/night_shift_sleep_attribution_test.dart: 9/27~29 연속 야간: 근무 중 수면의 날짜와 슬롯 9/27 22시~9/28 01시는 9/27 낮잠, 퇴근 후 수면은 9/27 주 수면
+00:32 +80: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 480: five-language parity
+00:32 +81: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 480: five-language parity
+00:32 +82: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 480: five-language parity
+00:32 +83: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 480: five-language parity
+00:32 +84: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 480: five-language parity
+00:32 +85: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 480: five-language parity
+00:32 +86: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 480: five-language parity
+00:32 +87: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 480: five-language parity
+00:32 +88: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 480: five-language parity
+00:32 +89: C:/Users/Administrator/Desktop/shiftbell/test/night_shift_sleep_attribution_test.dart: 연속 야간 - 아침 회복수면과 출근 전 수면의 분리(사용자 신고 항목 5) 오늘이 휴무면 경계는 예전처럼 21시 - 아침 회복수면은 어제, 그날 밤 취침은 오늘
+00:32 +90: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 0: five-language parity
+00:33 +91: C:/Users/Administrator/Desktop/shiftbell/test/night_shift_sleep_attribution_test.dart: 수면량 문구 - "출근 전 7시간"이 아니라 "지난 24시간"(사용자 신고 항목 2) 야간 첫날(어제 휴무) - 전날 밤잠 8시간 + 출근 전 낮잠 2시간이면 부족 경고가 없어야 한다
+00:33 +92: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 119: five-language parity
+00:33 +93: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 119: five-language parity
+00:33 +94: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 119: five-language parity
+00:33 +95: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 119: five-language parity
+00:33 +96: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 119: five-language parity
+00:34 +97: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 120: five-language parity
+00:34 +98: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 480: five-language parity
+00:35 +99: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 0: five-language parity
+00:35 +100: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:35 +101: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:35 +102: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:35 +103: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:35 +104: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:35 +105: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:35 +106: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:36 +107: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:36 +108: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:36 +109: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:36 +110: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 120: five-language parity
+00:36 +111: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 480: five-language parity
+00:37 +112: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 6 / sleep 0: five-language parity
+00:37 +113: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 6 / sleep 119: five-language parity
+00:37 +114: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 6 / sleep 120: five-language parity
+00:37 +115: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 6 / sleep 480: five-language parity
+00:38 +116: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 10 / sleep 0: five-language parity
+00:38 +117: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 10 / sleep 119: five-language parity
+00:38 +118: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 10 / sleep 120: five-language parity
+00:38 +119: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 10 / sleep 480: five-language parity
+00:39 +120: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 16 / sleep 0: five-language parity
+00:39 +121: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 16 / sleep 119: five-language parity
+00:39 +122: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 16 / sleep 120: five-language parity
+00:40 +123: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 16 / sleep 480: five-language parity
+00:40 +124: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 18 / sleep 0: five-language parity
+00:40 +125: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 18 / sleep 119: five-language parity
+00:40 +126: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 18 / sleep 120: five-language parity
+00:41 +127: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 18 / sleep 480: five-language parity
+00:42 +128: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 23 / sleep 0: five-language parity
+00:42 +129: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 23 / sleep 119: five-language parity
+00:42 +130: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 23 / sleep 120: five-language parity
+00:42 +131: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 23 / sleep 480: five-language parity
+00:43 +132: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 0: five-language parity
+00:43 +133: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 119: five-language parity
+00:43 +134: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 119: five-language parity
+00:43 +135: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 120: five-language parity
+00:43 +136: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 120: five-language parity
+00:43 +137: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 120: five-language parity
+00:43 +137: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: T11-07 Native 동기화 실패 시 일정 탭 로컬 상태와 prefs를 바꾸지 않는다
+⚠️ 일정관리 탭 설정 Native 동기화 실패: PlatformException(injected, null, null, null)
+00:43 +138: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 120: five-language parity
+00:43 +139: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:44 +140: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:44 +141: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:44 +142: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:45 +143: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:45 +144: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:45 +145: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:46 +146: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:46 +147: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:46 +148: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:47 +149: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:47 +150: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 16 / sleep 119: five-language parity
+00:47 +151: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 16 / sleep 120: five-language parity
+00:47 +152: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 16 / sleep 480: five-language parity
+00:48 +153: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 18 / sleep 0: five-language parity
+00:48 +154: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 18 / sleep 119: five-language parity
+00:48 +155: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 18 / sleep 120: five-language parity
+00:49 +156: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 18 / sleep 480: five-language parity
+00:49 +157: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 23 / sleep 0: five-language parity
+00:49 +158: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 23 / sleep 119: five-language parity
+00:49 +159: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 23 / sleep 120: five-language parity
+00:50 +160: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 23 / sleep 480: five-language parity
+00:50 +161: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 0 / sleep 0: five-language parity
+00:50 +162: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 0 / sleep 119: five-language parity
+00:51 +163: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 0 / sleep 120: five-language parity
+00:51 +164: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 0 / sleep 480: five-language parity
+00:51 +165: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 6 / sleep 0: five-language parity
+00:51 +166: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 6 / sleep 119: five-language parity
+00:51 +167: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 6 / sleep 120: five-language parity
+00:52 +168: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 6 / sleep 480: five-language parity
+00:52 +169: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 10 / sleep 0: five-language parity
+00:52 +170: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 10 / sleep 119: five-language parity
+00:52 +171: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 10 / sleep 120: five-language parity
+00:53 +172: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 10 / sleep 480: five-language parity
+00:53 +173: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 16 / sleep 0: five-language parity
+00:53 +174: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 16 / sleep 119: five-language parity
+00:53 +175: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 16 / sleep 120: five-language parity
+00:53 +176: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 16 / sleep 480: five-language parity
+00:53 +177: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 18 / sleep 0: five-language parity
+00:54 +178: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 18 / sleep 119: five-language parity
+00:54 +179: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 18 / sleep 120: five-language parity
+00:54 +180: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 18 / sleep 480: five-language parity
+00:54 +181: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 23 / sleep 0: five-language parity
+00:54 +182: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 23 / sleep 119: five-language parity
+00:55 +183: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 23 / sleep 120: five-language parity
+00:55 +184: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 23 / sleep 480: five-language parity
+00:55 +185: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 0 / sleep 0: five-language parity
+00:55 +186: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 0 / sleep 119: five-language parity
+00:55 +187: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 0 / sleep 120: five-language parity
+00:55 +188: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 0 / sleep 480: five-language parity
+00:56 +189: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 6 / sleep 0: five-language parity
+00:56 +190: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 6 / sleep 119: five-language parity
+00:56 +191: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 6 / sleep 120: five-language parity
+00:56 +192: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 6 / sleep 480: five-language parity
+00:56 +193: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 10 / sleep 0: five-language parity
+00:56 +194: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 10 / sleep 119: five-language parity
+00:56 +195: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 10 / sleep 120: five-language parity
+00:57 +196: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 10 / sleep 480: five-language parity
+00:57 +197: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 16 / sleep 0: five-language parity
+00:57 +198: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 16 / sleep 119: five-language parity
+00:57 +199: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 16 / sleep 120: five-language parity
+00:57 +200: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 16 / sleep 480: five-language parity
+00:57 +201: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 18 / sleep 0: five-language parity
+00:57 +202: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 18 / sleep 119: five-language parity
+00:57 +203: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 18 / sleep 120: five-language parity
+00:58 +204: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 18 / sleep 480: five-language parity
+00:58 +205: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 23 / sleep 0: five-language parity
+00:58 +206: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 23 / sleep 119: five-language parity
+00:58 +207: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 23 / sleep 120: five-language parity
+00:58 +208: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 23 / sleep 480: five-language parity
+00:58 +209: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 0 / sleep 0: five-language parity
+00:59 +210: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 0 / sleep 119: five-language parity
+01:00 +211: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 0 / sleep 120: five-language parity
+01:01 +212: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 0 / sleep 480: five-language parity
+01:03 +213: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 6 / sleep 0: five-language parity
+01:05 +214: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 6 / sleep 119: five-language parity
+01:07 +215: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 6 / sleep 120: five-language parity
+01:09 +216: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 6 / sleep 480: five-language parity
+01:11 +217: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 10 / sleep 0: five-language parity
+01:13 +218: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 10 / sleep 119: five-language parity
+01:15 +219: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 10 / sleep 120: five-language parity
+01:17 +220: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 10 / sleep 480: five-language parity
+01:22 +221: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 16 / sleep 0: five-language parity
+01:26 +222: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 16 / sleep 119: five-language parity
+01:31 +223: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 16 / sleep 120: five-language parity
+01:35 +224: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 16 / sleep 480: five-language parity
+01:42 +225: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 18 / sleep 0: five-language parity
+01:46 +226: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 18 / sleep 119: five-language parity
+01:49 +227: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 18 / sleep 120: five-language parity
+01:52 +228: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 18 / sleep 480: five-language parity
+01:57 +229: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 23 / sleep 0: five-language parity
+02:00 +230: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 23 / sleep 119: five-language parity
+02:05 +231: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 23 / sleep 120: five-language parity
+02:10 +232: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 23 / sleep 480: five-language parity
+02:14 +233: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 0 / sleep 0: five-language parity
+02:15 +234: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 0 / sleep 119: five-language parity
+02:16 +235: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 0 / sleep 120: five-language parity
+02:16 +236: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 0 / sleep 480: five-language parity
+02:17 +237: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 6 / sleep 0: five-language parity
+02:17 +238: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 6 / sleep 119: five-language parity
+02:17 +239: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 6 / sleep 120: five-language parity
+02:17 +240: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 6 / sleep 480: five-language parity
+02:18 +241: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 10 / sleep 0: five-language parity
+02:18 +242: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 10 / sleep 119: five-language parity
+02:18 +243: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 10 / sleep 120: five-language parity
+02:18 +244: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 10 / sleep 480: five-language parity
+02:19 +245: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 16 / sleep 0: five-language parity
+02:19 +246: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 16 / sleep 119: five-language parity
+02:19 +247: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 16 / sleep 120: five-language parity
+02:19 +248: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 16 / sleep 480: five-language parity
+02:19 +249: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 18 / sleep 0: five-language parity
+02:19 +250: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 18 / sleep 119: five-language parity
+02:19 +251: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 18 / sleep 120: five-language parity
+02:19 +252: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 18 / sleep 480: five-language parity
+02:20 +253: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 23 / sleep 0: five-language parity
+02:20 +254: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 23 / sleep 119: five-language parity
+02:20 +255: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 23 / sleep 120: five-language parity
+02:20 +256: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 7 / hour 23 / sleep 480: five-language parity
+02:20 +257: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: (tearDownAll)
+02:20 +257: All tests passed!
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: cancelled notification prompt releases both onboarding buttons
+00:02 +1: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: missing and malformed observations never satisfy permissions
+00:02 +2: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: a resume overlapping an older read commits only the trailing observation
+00:02 +3: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: opening settings and duplicate taps do not grant or chain permissions
+00:02 +4: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: native read failure is unknown and route failure remains a failure
+00:02 +5: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: ko permission row refreshes after settings without navigation
+00:02 +6: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: pt_BR permission row refreshes after settings without navigation
+00:03 +7: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: de permission row refreshes after settings without navigation
+00:03 +8: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: en permission row refreshes after settings without navigation
+00:03 +9: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: hi permission row refreshes after settings without navigation
+00:03 +10: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: onboarding shows only unresolved permissions and refreshes them
+00:03 +11: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: Xiaomi sheet refreshes but never completes by reading instructions
+00:04 +12: C:/Users/Administrator/Desktop/shiftbell/test/permission_state_test.dart: unknown banner changes language and a blocked channel stays separate
+00:05 +13: C:/Users/Administrator/Desktop/shiftbell/test/permission_initial_snapshot_test.dart: initial read failure finishes loading but never implies approval
+00:05 +14: C:/Users/Administrator/Desktop/shiftbell/test/permission_initial_snapshot_test.dart: slow first read exposes no temporary controls or skip action
+00:08 +15: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: clicked card goes first; verified grant opens the next denied card
+00:08 +16: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: clicked card goes first; verified grant opens the next denied card
+00:09 +17: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: clicked card goes first; verified grant opens the next denied card
+00:09 +18: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: clicked card goes first; verified grant opens the next denied card
+00:12 +19: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: denied return stops the sequence and preserves manual settings
+00:12 +20: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: unknown return stops the sequence and preserves manual settings
+00:12 +21: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: notApplicable return stops the sequence and preserves manual settings
+00:13 +22: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: blocked alarm channel is a distinct remaining settings route
+00:13 +23: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: unknown next permission is not automatically opened
+00:13 +24: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: granted state in the background waits for foreground return
+00:13 +25: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: failed settings launch does not resume a sequence later
+00:13 +26: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: ordinary settings panel keeps independent manual actions
+00:13 +27: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: return while launch callback is pending never overlaps requests
+00:13 +28: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: hidden or disposed onboarding cannot launch another settings page
+00:14 +29: C:/Users/Administrator/Desktop/shiftbell/test/onboarding_permission_sequence_test.dart: cancelled first notification request does not open another card
+00:15 +30: C:/Users/Administrator/Desktop/shiftbell/test/permission_intro_navigation_test.dart: resume advances only after every permission and channel is verified
+00:15 +31: C:/Users/Administrator/Desktop/shiftbell/test/permission_intro_navigation_test.dart: resume advances only after every permission and channel is verified
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\permission_intro_cc7803b8\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+00:19 +32: C:/Users/Administrator/Desktop/shiftbell/test/permission_intro_navigation_test.dart: resume advances only after every permission and channel is verified
+00:19 +33: C:/Users/Administrator/Desktop/shiftbell/test/permission_intro_navigation_test.dart: resume advances only after every permission and channel is verified
+00:19 +33: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: (setUpAll)
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\reset_failure_ui_158c24c4\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+00:20 +33: C:/Users/Administrator/Desktop/shiftbell/test/permission_intro_navigation_test.dart: resume advances only after every permission and channel is verified
+00:20 +34: C:/Users/Administrator/Desktop/shiftbell/test/followup_resource_scope_test.dart: pt_BR app routes are blocked but public web calendar is retained
+00:21 +35: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:21 +36: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:22 +37: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:22 +38: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:22 +39: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:22 +40: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:22 +41: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:22 +42: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:23 +43: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:23 +44: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:23 +45: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:23 +46: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:24 +47: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:24 +48: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:24 +49: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:25 +50: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:25 +51: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:25 +52: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:25 +53: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning ko/1.0
+00:27 +54: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR offers sleep tutorial but blocks personal-event tutorial
+00:27 +55: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR offers sleep tutorial but blocks personal-event tutorial
+00:27 +56: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR offers sleep tutorial but blocks personal-event tutorial
+00:27 +57: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR offers sleep tutorial but blocks personal-event tutorial
+00:27 +58: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR offers sleep tutorial but blocks personal-event tutorial
+00:27 +59: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR offers sleep tutorial but blocks personal-event tutorial
+00:27 +60: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR offers sleep tutorial but blocks personal-event tutorial
+00:28 +61: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR offers sleep tutorial but blocks personal-event tutorial
+00:29 +62: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning de/1.0
+00:29 +63: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning de/1.0
+00:30 +64: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning de/1.0
+00:30 +65: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning de/1.0
+00:30 +66: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning de/1.0
+00:30 +67: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR help search excludes unavailable features
+00:31 +68: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR help search excludes unavailable features
+00:32 +69: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning hi/1.0
+00:32 +70: C:/Users/Administrator/Desktop/shiftbell/test/schedule_reset_scope_test.dart: Reset proceeds to onboarding with locale-scoped sharing warning hi/1.0
+00:32 +71: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: pt_BR excludes a Korean-only detail opened through search
+00:34 +72: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:34 +73: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:34 +74: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:34 +75: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:35 +76: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:35 +77: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:36 +78: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:36 +79: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:37 +80: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:37 +81: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:37 +81: C:/Users/Administrator/Desktop/shiftbell/test/one_touch_removal_test.dart: v26 removal preserves ordinary alarms, histories, IDs and drops dev-only columns
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+00:37 +82: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:37 +82: C:/Users/Administrator/Desktop/shiftbell/test/one_touch_removal_test.dart: v26 removal preserves ordinary alarms, histories, IDs and drops dev-only columns
+🛠️ DB 스키마 복구 27건 실행
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+00:38 +83: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:38 +84: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:39 +84: C:/Users/Administrator/Desktop/shiftbell/test/one_touch_removal_test.dart: failed removal rolls back schema, removed alarms and cancellation histories
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+00:39 +85: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:39 +85: C:/Users/Administrator/Desktop/shiftbell/test/one_touch_removal_test.dart: failed removal rolls back schema, removed alarms and cancellation histories
+🛠️ DB 스키마 복구 27건 실행
+00:39 +86: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:39 +86: C:/Users/Administrator/Desktop/shiftbell/test/one_touch_removal_test.dart: failed removal rolls back schema, removed alarms and cancellation histories
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+00:39 +87: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:39 +88: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: selection waits for confirmed save and survives failure without claiming success
+00:39 +89: C:/Users/Administrator/Desktop/shiftbell/test/one_touch_removal_test.dart: failed removal rolls back schema, removed alarms and cancellation histories
+00:39 +90: C:/Users/Administrator/Desktop/shiftbell/test/one_touch_removal_test.dart: failed removal rolls back schema, removed alarms and cancellation histories
+00:39 +91: C:/Users/Administrator/Desktop/shiftbell/test/one_touch_removal_test.dart: failed removal rolls back schema, removed alarms and cancellation histories
+00:39 +92: C:/Users/Administrator/Desktop/shiftbell/test/one_touch_removal_test.dart: failed removal rolls back schema, removed alarms and cancellation histories
+00:39 +93: C:/Users/Administrator/Desktop/shiftbell/test/one_touch_removal_test.dart: failed removal rolls back schema, removed alarms and cancellation histories
+error SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, table alarms already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE alarms(x INTEGER), parameters: }) DatabaseException(SqliteException(1): while executing, table alarms already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE alarms(x INTEGER), parameters: ) sql 'CREATE TABLE alarms(x INTEGER)' {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\remove_dev_onetouch_80d47f4\aux_h2_minimal_v24.db, id: 5, readOnly: false, singleInstance: false}}} during open, closing...
+00:40 +94: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: hi_IN offers sleep tutorial but blocks personal-event tutorial
+00:40 +95: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: hi_IN offers sleep tutorial but blocks personal-event tutorial
+00:40 +96: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: ko three choices fit at width280 and textScale2
+00:40 +97: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: ko three choices fit at width280 and textScale2
+00:40 +98: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: hi_IN help search excludes unavailable features
+00:40 +99: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: hi_IN help search excludes unavailable features
+00:40 +100: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: hi_IN help search excludes unavailable features
+00:40 +101: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: pt_BR three choices fit at width280 and textScale2
+00:40 +102: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: hi_IN hides an already-open Korean-only help detail
+00:41 +103: C:/Users/Administrator/Desktop/shiftbell/test/default_snooze_setting_test.dart: hi three choices fit at width280 and textScale2
+00:41 +104: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: hi_IN excludes a Korean-only detail opened through search
+00:41 +105: C:/Users/Administrator/Desktop/shiftbell/test/third_localization_review_test.dart: hi_IN limits themes without replacing stored Korean choices
+00:44 +106: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/my_share_code_pending_banner_test.dart: (setUpAll)
+00:44 +106: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/my_share_code_pending_banner_test.dart: F-W01 off: 대기 안내 없음, 공유 시작 버튼
+00:45 +106: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/friend_provider_cache_test.dart: (setUpAll)
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\g2_friend_provider_9947b139\shiftbell.db
+✅ 데이터베이스 초기화 완료
+00:46 +107: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/friend_provider_cache_test.dart: (setUpAll)
+🛠️ DB 스키마 복구 3건 실행
+00:46 +107: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/my_share_code_pending_banner_test.dart: F-W02 stop_pending: 중지 대기 안내 표시(삭제 완료로 표시 안 함), 재시도 후에도 대기면 토스트·안내 유지
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\g2_share_screen_2eb7356b\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+00:47 +108: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/my_share_code_pending_banner_test.dart: F-W02 stop_pending: 중지 대기 안내 표시(삭제 완료로 표시 안 함), 재시도 후에도 대기면 토스트·안내 유지
+00:50 +109: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/friend_provider_cache_test.dart: F-P02 refreshAll은 친구 수와 무관하게 마지막에 load 1회 (#30)
+00:51 +110: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/friend_provider_cache_test.dart: F-P02 refreshAll은 친구 수와 무관하게 마지막에 load 1회 (#30)
+00:51 +111: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/friend_provider_cache_test.dart: F-P02 refreshAll은 친구 수와 무관하게 마지막에 load 1회 (#30)
+00:51 +112: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/my_share_code_pending_banner_test.dart: F-W05 legacy enabled만 있는 설치: active·dirty로 올라가 반영 대기 안내
+00:51 +113: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/friend_provider_cache_test.dart: F-P03 2분 스로틀: 비강제 재호출은 건너뛰고 force는 다시 실행 (#30)
+00:52 +114: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/friend_provider_cache_test.dart: F-P04 생성 직후 자동 새로고침도 초기 SQLite load를 기다린 뒤 전체 친구를 처리
+00:55 +115: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: foreign error details never expose internal Korean or another language
+00:55 +116: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: foreign error details never expose internal Korean or another language
+00:55 +117: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: foreign error details never expose internal Korean or another language
+00:55 +118: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: foreign error details never expose internal Korean or another language
+00:56 +118: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g2/friend_provider_cache_test.dart: F-P05 깨졌거나 경계 밖 캐시는 data null로 표시하고 목록은 유지
+⚠️ 친구 스케줄 캐시 형식 오류: FormatException: Invalid friend schedule payload
+⚠️ 친구 스케줄 캐시 형식 오류: FormatException: Unexpected character (at character 2)
+{not json
+ ^
+
+⚠️ 친구 스케줄 캐시 형식 오류: FormatException: Invalid friend schedule payload
+⚠️ 친구 스케줄 캐시 형식 오류: FormatException: Unexpected character (at character 2)
+{not json
+ ^
+
+00:56 +119: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: foreign error details never expose internal Korean or another language
+00:56 +120: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: foreign error details never expose internal Korean or another language
+00:58 +121: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: public web PublicWebLoadFailure.missingCode uses current language before and after async completion
+00:58 +122: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: public web PublicWebLoadFailure.unavailable uses current language before and after async completion
+00:58 +123: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: public web PublicWebLoadFailure.unknown uses current language before and after async completion
+00:58 +124: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: a delayed Korean tutorial is not consumed after switching language
+00:59 +125: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: an open common shift-assignment popup changes to each current language
+01:01 +126: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: legacy work-hour copy is Korean-only and changing language preserves stored hours
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\locale_work_hours_1388b85b\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+01:04 +127: C:/Users/Administrator/Desktop/shiftbell/test/final_locale_tuning_test.dart: old-version backup help remains Korean-only across search and an open detail
+01:05 +128: All tests passed!
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/alarm_history_snooze_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/alarm_history_snooze_test.dart: ko history keeps the executed duration; unknown legacy duration is not invented
+00:01 +1: C:/Users/Administrator/Desktop/shiftbell/test/alarm_history_snooze_test.dart: en history keeps the executed duration; unknown legacy duration is not invented
+00:01 +2: C:/Users/Administrator/Desktop/shiftbell/test/alarm_history_snooze_test.dart: de history keeps the executed duration; unknown legacy duration is not invented
+00:01 +3: C:/Users/Administrator/Desktop/shiftbell/test/alarm_history_snooze_test.dart: pt history keeps the executed duration; unknown legacy duration is not invented
+00:01 +4: C:/Users/Administrator/Desktop/shiftbell/test/alarm_history_snooze_test.dart: hi history keeps the executed duration; unknown legacy duration is not invented
+00:01 +5: loading C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart
+00:05 +5: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: work hours loading is silent and saved settings send no private values
+00:05 +6: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: 이벤트 이름 GA4 규칙(소문자 시작·영문 소문자/숫자/밑줄·40자 이하, 예약 접두어 금지)
+00:05 +7: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: 이벤트 이름 앱 이벤트 목록 == 대시보드 labels.js의 사용자 이벤트 목록
+00:06 +8: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: AppAnalytics.track 이름과 분류 파라미터를 그대로 전달하고 예외를 던지지 않는다
+00:06 +9: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: AppAnalytics.track 싱크가 예외를 던져도 호출부로 새지 않는다
+⚠️ Analytics 이벤트 기록 실패(help_opened): Bad state: boom
+00:06 +10: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: AlarmUsageAnalytics.reportNew 계측 첫 실행: 옛 이력은 보내지 않고 기준선(최대 id)만 저장
+00:06 +11: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: AlarmUsageAnalytics.reportNew 새 이력만 종류별로 매핑, ringing/removed·72시간보다 오래된 이력은 제외, 커서는 끝까지 전진
+00:06 +12: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: AlarmUsageAnalytics.reportNew 한꺼번에 몰려도 종류별 상한만 보내고, 나머지도 다시 보내지 않도록 커서는 전진
+00:06 +13: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: AlarmUsageAnalytics.reportNew 연속 호출 시 같은 이력을 두 번 보내지 않는다
+00:06 +14: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: AlarmUsageAnalytics.reportNew 조회가 실패해도 예외를 던지지 않고 커서를 건드리지 않는다
+⚠️ 알람 사용량 집계 실패: Bad state: db closed
+00:06 +15: C:/Users/Administrator/Desktop/shiftbell/test/app_analytics_test.dart: 통계 커서는 기기별 설정이라 백업·복원 대상이 아니다
+00:06 +16: loading C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart
+00:11 +16: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: (setUpAll)
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\full_audit_critical_c8ae1186\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+00:11 +16: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: HIST-01 selected duration survives export, old/new merge and repeated restore
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+00:12 +17: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: HIST-02 invalid duration is rejected before restore and by SQLite
+00:13 +18: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-A01 all-alarm deletion cancels fixed custom snoozed and keeps history
+🗑️ 모든 알람 삭제 완료 (이력 기록 후 삭제)
+✅ 알람 취소: ID 1
+✅ Native 알람 취소: DB ID 1
+✅ 알람 취소: ID 2
+✅ Native 알람 취소: DB ID 2
+✅ 알람 취소: ID 3
+✅ Native 알람 취소: DB ID 3
+✅ 모든 Notification 삭제 완료
+✅ shownNotifications 정리 완료
+✅ AlarmGuardReceiver 취소 완료
+🗑️🔥 모든 알람 완전 삭제 완료 (템플릿 포함)
+00:13 +19: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-A01b schedule reset commits deletion before Native cancellation
+🗑️ 모든 알람 삭제 완료 (이력 기록 후 삭제)
+✅ 알람 취소: ID 42
+✅ Native 알람 취소: DB ID 42
+✅ 모든 Notification 삭제 완료
+✅ shownNotifications 정리 완료
+✅ AlarmGuardReceiver 취소 완료
+🗑️ 교대근무 초기화 완료
+00:13 +20: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-A01c failed all-delete transaction preserves rows templates and history
+00:13 +21: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-A03 custom type change then delete preserves source log without fixed override
+✅ 알람 타입 변경 완료 (ID: 42 → 타입: 2)
+📊 알람 상태: 울리기 전
+✅ alarm_history에 "알람 제거" 기록 추가: ID=42
+✅ 알람 취소: ID 42
+✅ Notification 삭제 완료 (8888, 8889)
+✅ shownNotifications 정리 완료
+✅ 알람 삭제 완료 (ID: 42, 울림 중: false)
+00:13 +22: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B01 export includes only future custom plus permanent history
+00:14 +23: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B02 rejects normalized invalid backup date 2030-02-30T07:00:00 before any mutation
+🧯 [restore] 검증 실패: [alarms date invalid]
+00:14 +24: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B02 rejects normalized invalid backup date 2030-13-01T07:00:00 before any mutation
+🧯 [restore] 검증 실패: [alarms date invalid]
+00:14 +25: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B02 rejects normalized invalid backup date 2030-01-01T24:00:00 before any mutation
+🧯 [restore] 검증 실패: [alarms date invalid]
+00:14 +26: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B02 rejects normalized invalid backup date 2030-01-01T07:60:00 before any mutation
+🧯 [restore] 검증 실패: [alarms date invalid]
+00:14 +27: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B02 rejects normalized invalid backup date 2030-01-01T07:00:60 before any mutation
+🧯 [restore] 검증 실패: [alarms date invalid]
+00:14 +28: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B03 invalid assigned day is rejected instead of normalized
+00:14 +29: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B16 valid calendar and DST wall time stays restorable 2032-02-29T07:00:00
+00:14 +30: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B16 valid calendar and DST wall time stays restorable 2030-02-28T23:59:59.123456
+00:14 +31: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B16 valid calendar and DST wall time stays restorable 2026-03-08T02:30:00
+00:15 +32: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B16 valid calendar and DST wall time stays restorable 2026-11-01T01:30:00
+00:15 +33: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B14 backup rejects non-custom fixed before OS changes
+🧯 [restore] 검증 실패: [alarms row not custom (fixed)]
+00:15 +34: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B14 backup rejects non-custom snoozed before OS changes
+🧯 [restore] 검증 실패: [alarms row not custom (snoozed)]
+00:15 +35: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B14 backup rejects unknown alarm type before OS changes
+🧯 [restore] 검증 실패: [alarms alarm_type_id unknown]
+00:15 +36: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B14 backup rejects invalid clock before OS changes
+🧯 [restore] 검증 실패: [alarms time invalid]
+00:15 +37: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B14 backup rejects invalid column before OS changes
+🧯 [restore] 검증 실패: [alarms[0] unknown column unexpected]
+00:15 +38: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B14 backup rejects invalid column type before OS changes
+🧯 [restore] 검증 실패: [alarms[0].alarm_type_id type mismatch]
+00:16 +39: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B14 backup rejects incomplete preset link before OS changes
+🧯 [restore] 검증 실패: [alarms[0] unknown column preset_slot]
+00:16 +40: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B14 backup rejects preset outside five slots before OS changes
+🧯 [restore] 검증 실패: [alarms[0] unknown column preset_slot, alarms[0] unknown column assigned_day]
+00:16 +41: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B04 restore preserves local snooze on colliding backup ID and keeps local share intent
+00:16 +42: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B05 restoreClearOs failure retains resumable job and retry converges
+🧯 [restore] 단계 실패(locked 이후): PlatformException(audit_injected_failure, null, null, null)
+#0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:653:7)
+#1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366:18)
+<asynchronous suspension>
+#2      RestoreCoordinator._run.<anonymous closure> (package:shiftbell/services/restore_coordinator.dart:264:11)
+<asynchronous suspension>
+#3      RestoreCoordinator._advance (package:shiftbell/services/restore_coordinator.dart:298:7)
+<asynchronous suspension>
+#4      RestoreCoordinator._run (package:shiftbell/services/restore_coordinator.dart:262:9)
+<asynchronous suspension>
+#5      RestoreCoordinator.start (package:shiftbell/services/restore_coordinator.dart:171:5)
+<asynchronous suspension>
+#6      Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#7      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#8      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+#9      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#10     main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart:314:7)
+<asynchronous suspension>
+#11     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#12     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#13     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+00:17 +43: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B05 restoreReconcileOs failure retains resumable job and retry converges
+🧯 [restore] 단계 실패(prefsApplied 이후): PlatformException(audit_injected_failure, null, null, null)
+#0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:653:7)
+#1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366:18)
+<asynchronous suspension>
+#2      RestoreCoordinator._reconcile (package:shiftbell/services/restore_coordinator.dart:490:17)
+<asynchronous suspension>
+#3      RestoreCoordinator._advance (package:shiftbell/services/restore_coordinator.dart:298:7)
+<asynchronous suspension>
+#4      RestoreCoordinator._run (package:shiftbell/services/restore_coordinator.dart:275:9)
+<asynchronous suspension>
+#5      RestoreCoordinator.start (package:shiftbell/services/restore_coordinator.dart:171:5)
+<asynchronous suspension>
+#6      Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#7      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#8      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+#9      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#10     main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart:314:7)
+<asynchronous suspension>
+#11     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#12     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#13     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+🧯 [restore] 실패 후 재조정도 실패: PlatformException(audit_injected_failure, null, null, null)
+00:17 +44: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B06 ring epoch changes during restore rollback then retry without duplicate alarms
+🧯 [restore] DB 교체 준비 중 진행 중 알람이 바뀜 - 롤백 후 다시 준비(1/5)
+00:18 +45: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B07 repeated ring epoch changes stop after bounded attempts and remain resumable
+🧯 [restore] DB 교체 준비 중 진행 중 알람이 바뀜 - 롤백 후 다시 준비(1/5)
+🧯 [restore] DB 교체 준비 중 진행 중 알람이 바뀜 - 롤백 후 다시 준비(2/5)
+🧯 [restore] DB 교체 준비 중 진행 중 알람이 바뀜 - 롤백 후 다시 준비(3/5)
+🧯 [restore] DB 교체 준비 중 진행 중 알람이 바뀜 - 롤백 후 다시 준비(4/5)
+🧯 [restore] 단계 실패(osCleared 이후): Instance of '_CarryChanged'
+#0      RestoreCoordinator._replaceInTxn (package:shiftbell/services/restore_coordinator.dart:448:47)
+<asynchronous suspension>
+#1      SqfliteDatabaseMixinExt._txnTransaction (package:sqflite_common/src/database_mixin.dart:388:16)
+<asynchronous suspension>
+#2      BasicLock.synchronized (package:synchronized/src/basic_lock.dart:38:16)
+<asynchronous suspension>
+#3      SqfliteDatabaseMixin.txnSynchronized (package:sqflite_common/src/database_mixin.dart:589:14)
+<asynchronous suspension>
+#4      RestoreCoordinator._applyDb (package:shiftbell/services/restore_coordinator.dart:329:9)
+<asynchronous suspension>
+#5      RestoreCoordinator._run.<anonymous closure> (package:shiftbell/services/restore_coordinator.dart:272:11)
+<asynchronous suspension>
+#6      RestoreCoordinator._advance (package:shiftbell/services/restore_coordinator.dart:298:7)
+<asynchronous suspension>
+#7      RestoreCoordinator._run (package:shiftbell/services/restore_coordinator.dart:266:9)
+<asynchronous suspension>
+#8      RestoreCoordinator.start (package:shiftbell/services/restore_coordinator.dart:171:5)
+<asynchronous suspension>
+#9      Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#10     _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#11     StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+#12     expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#13     main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart:334:5)
+<asynchronous suspension>
+#14     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#15     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#16     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+00:18 +46: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B07b repeated epochs with snooze collision and stop_pending converge on resume
+🧯 [restore] DB 교체 준비 중 진행 중 알람이 바뀜 - 롤백 후 다시 준비(1/5)
+🧯 [restore] DB 교체 준비 중 진행 중 알람이 바뀜 - 롤백 후 다시 준비(2/5)
+🧯 [restore] DB 교체 준비 중 진행 중 알람이 바뀜 - 롤백 후 다시 준비(3/5)
+🧯 [restore] DB 교체 준비 중 진행 중 알람이 바뀜 - 롤백 후 다시 준비(4/5)
+🧯 [restore] 단계 실패(osCleared 이후): Instance of '_CarryChanged'
+#0      RestoreCoordinator._replaceInTxn (package:shiftbell/services/restore_coordinator.dart:448:47)
+<asynchronous suspension>
+#1      SqfliteDatabaseMixinExt._txnTransaction (package:sqflite_common/src/database_mixin.dart:388:16)
+<asynchronous suspension>
+#2      BasicLock.synchronized (package:synchronized/src/basic_lock.dart:38:16)
+<asynchronous suspension>
+#3      SqfliteDatabaseMixin.txnSynchronized (package:sqflite_common/src/database_mixin.dart:589:14)
+<asynchronous suspension>
+#4      RestoreCoordinator._applyDb (package:shiftbell/services/restore_coordinator.dart:329:9)
+<asynchronous suspension>
+#5      RestoreCoordinator._run.<anonymous closure> (package:shiftbell/services/restore_coordinator.dart:272:11)
+<asynchronous suspension>
+#6      RestoreCoordinator._advance (package:shiftbell/services/restore_coordinator.dart:298:7)
+<asynchronous suspension>
+#7      RestoreCoordinator._run (package:shiftbell/services/restore_coordinator.dart:266:9)
+<asynchronous suspension>
+#8      RestoreCoordinator.start (package:shiftbell/services/restore_coordinator.dart:171:5)
+<asynchronous suspension>
+#9      Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#10     _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#11     StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+#12     expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#13     main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart:355:5)
+<asynchronous suspension>
+#14     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#15     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#16     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+00:19 +47: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B08 lost restore copy reconciles existing data and clears pending job
+🧯 [restore] 단계 실패(locked 이후): PlatformException(audit_injected_failure, null, null, null)
+#0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:653:7)
+#1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366:18)
+<asynchronous suspension>
+#2      RestoreCoordinator._run.<anonymous closure> (package:shiftbell/services/restore_coordinator.dart:264:11)
+<asynchronous suspension>
+#3      RestoreCoordinator._advance (package:shiftbell/services/restore_coordinator.dart:298:7)
+<asynchronous suspension>
+#4      RestoreCoordinator._run (package:shiftbell/services/restore_coordinator.dart:262:9)
+<asynchronous suspension>
+#5      RestoreCoordinator.start (package:shiftbell/services/restore_coordinator.dart:171:5)
+<asynchronous suspension>
+#6      Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#7      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#8      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+#9      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#10     main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart:378:5)
+<asynchronous suspension>
+#11     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#12     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#13     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+00:19 +48: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B09 DB insertion failure rolls back all source tables and resumes
+🧯 [restore] 단계 실패(osCleared 이후): SqfliteFfiException(sqlite_error: 1811, , SqliteException(1811): while executing statement, injected, constraint failed (code 1811)
+  Causing statement: INSERT INTO alarms (id, time, date, type, alarm_type_id, shift_type, day_offset) VALUES (?, ?, ?, ?, ?, NULL, ?), parameters: 9, 07:00, 2026-10-18T07:13:25.788354, custom, 1, 0}) DatabaseException(SqliteException(1811): while executing statement, injected, constraint failed (code 1811)
+  Causing statement: INSERT INTO alarms (id, time, date, type, alarm_type_id, shift_type, day_offset) VALUES (?, ?, ?, ?, ?, NULL, ?), parameters: 9, 07:00, 2026-10-18T07:13:25.788354, custom, 1, 0) sql 'INSERT INTO alarms (id, time, date, type, alarm_type_id, shift_type, day_offset) VALUES (?, ?, ?, ?, ?, NULL, ?)' args [9, 07:00, 2026-10-18T07:13:25.788354, custom, 1, 0] {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\full_audit_critical_c8ae1186\shiftbell.db, id: 1, readOnly: false, singleInstance: true}}}
+#0      responseToResultOrThrow (package:sqflite_common_ffi/src/method_call.dart:125:9)
+#1      SqfliteIsolate.handle (package:sqflite_common_ffi/src/isolate.dart:35:12)
+<asynchronous suspension>
+#2      _isolateHandle (package:sqflite_common_ffi/src/database_factory_ffi_io.dart:106:10)
+<asynchronous suspension>
+#3      ffiMethodCallhandleInIsolate (package:sqflite_common_ffi/src/database_factory_ffi_io.dart:59:18)
+<asynchronous suspension>
+#4      _SqfliteDatabaseFactoryImpl.invokeMethod (package:sqflite_common/src/mixin/factory.dart:22:8)
+<asynchronous suspension>
+#5      SqfliteDatabaseMixin.txnRawInsert.<anonymous closure> (package:sqflite_common/src/database_mixin.dart:663:14)
+<asynchronous suspension>
+#6      SqfliteDatabaseMixin.txnSynchronized (package:sqflite_common/src/database_mixin.dart:554:16)
+<asynchronous suspension>
+#7      RestoreCoordinator._replaceInTxn (package:shiftbell/services/restore_coordinator.dart:443:7)
+<asynchronous suspension>
+#8      SqfliteDatabaseMixinExt._txnTransaction (package:sqflite_common/src/database_mixin.dart:388:16)
+<asynchronous suspension>
+#9      BasicLock.synchronized (package:synchronized/src/basic_lock.dart:38:16)
+<asynchronous suspension>
+#10     SqfliteDatabaseMixin.txnSynchronized (package:sqflite_common/src/database_mixin.dart:589:14)
+<asynchronous suspension>
+#11     RestoreCoordinator._applyDb (package:shiftbell/services/restore_coordinator.dart:329:9)
+<asynchronous suspension>
+#12     RestoreCoordinator._run.<anonymous closure> (package:shiftbell/services/restore_coordinator.dart:272:11)
+<asynchronous suspension>
+#13     RestoreCoordinator._advance (package:shiftbell/services/restore_coordinator.dart:298:7)
+<asynchronous suspension>
+#14     RestoreCoordinator._run (package:shiftbell/services/restore_coordinator.dart:266:9)
+<asynchronous suspension>
+#15     RestoreCoordinator.start (package:shiftbell/services/restore_coordinator.dart:171:5)
+<asynchronous suspension>
+#16     Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#17     _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#18     StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+#19     expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#20     main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart:389:5)
+<asynchronous suspension>
+#21     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#22     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#23     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+00:20 +49: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B09b resume clears reservations recreated by failure recovery before replacing DB
+🧯 [restore] 단계 실패(osCleared 이후): SqfliteFfiException(sqlite_error: 1811, , SqliteException(1811): while executing statement, injected, constraint failed (code 1811)
+  Causing statement: INSERT INTO alarms (id, time, date, type, alarm_type_id, shift_type, day_offset) VALUES (?, ?, ?, ?, ?, NULL, ?), parameters: 9, 07:00, 2026-10-18T07:13:26.361354, custom, 1, 0}) DatabaseException(SqliteException(1811): while executing statement, injected, constraint failed (code 1811)
+  Causing statement: INSERT INTO alarms (id, time, date, type, alarm_type_id, shift_type, day_offset) VALUES (?, ?, ?, ?, ?, NULL, ?), parameters: 9, 07:00, 2026-10-18T07:13:26.361354, custom, 1, 0) sql 'INSERT INTO alarms (id, time, date, type, alarm_type_id, shift_type, day_offset) VALUES (?, ?, ?, ?, ?, NULL, ?)' args [9, 07:00, 2026-10-18T07:13:26.361354, custom, 1, 0] {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\full_audit_critical_c8ae1186\shiftbell.db, id: 1, readOnly: false, singleInstance: true}}}
+#0      responseToResultOrThrow (package:sqflite_common_ffi/src/method_call.dart:125:9)
+#1      SqfliteIsolate.handle (package:sqflite_common_ffi/src/isolate.dart:35:12)
+<asynchronous suspension>
+#2      _isolateHandle (package:sqflite_common_ffi/src/database_factory_ffi_io.dart:106:10)
+<asynchronous suspension>
+#3      ffiMethodCallhandleInIsolate (package:sqflite_common_ffi/src/database_factory_ffi_io.dart:59:18)
+<asynchronous suspension>
+#4      _SqfliteDatabaseFactoryImpl.invokeMethod (package:sqflite_common/src/mixin/factory.dart:22:8)
+<asynchronous suspension>
+#5      SqfliteDatabaseMixin.txnRawInsert.<anonymous closure> (package:sqflite_common/src/database_mixin.dart:663:14)
+<asynchronous suspension>
+#6      SqfliteDatabaseMixin.txnSynchronized (package:sqflite_common/src/database_mixin.dart:554:16)
+<asynchronous suspension>
+#7      RestoreCoordinator._replaceInTxn (package:shiftbell/services/restore_coordinator.dart:443:7)
+<asynchronous suspension>
+#8      SqfliteDatabaseMixinExt._txnTransaction (package:sqflite_common/src/database_mixin.dart:388:16)
+<asynchronous suspension>
+#9      BasicLock.synchronized (package:synchronized/src/basic_lock.dart:38:16)
+<asynchronous suspension>
+#10     SqfliteDatabaseMixin.txnSynchronized (package:sqflite_common/src/database_mixin.dart:589:14)
+<asynchronous suspension>
+#11     RestoreCoordinator._applyDb (package:shiftbell/services/restore_coordinator.dart:329:9)
+<asynchronous suspension>
+#12     RestoreCoordinator._run.<anonymous closure> (package:shiftbell/services/restore_coordinator.dart:272:11)
+<asynchronous suspension>
+#13     RestoreCoordinator._advance (package:shiftbell/services/restore_coordinator.dart:298:7)
+<asynchronous suspension>
+#14     RestoreCoordinator._run (package:shiftbell/services/restore_coordinator.dart:266:9)
+<asynchronous suspension>
+#15     RestoreCoordinator.start (package:shiftbell/services/restore_coordinator.dart:171:5)
+<asynchronous suspension>
+#16     Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#17     _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#18     StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+#19     expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#20     main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart:415:5)
+<asynchronous suspension>
+#21     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#22     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#23     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+00:20 +50: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B10 automatic backup skips identical content but captures preference changes
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+🗄️ [backup] 쓰기 시작(auto, 테이블 16개, 행 4개)
+🗄️ [backup] 쓰기 결과: true
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+🗄️ [backup] 스킵 - 내용 변경 없음
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+🗄️ [backup] 쓰기 시작(auto, 테이블 16개, 행 4개)
+🗄️ [backup] 쓰기 결과: true
+00:20 +51: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B11 failed manual write preserves last-success metadata and auto slot
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+🗄️ [backup] 쓰기 시작(auto, 테이블 16개, 행 4개)
+🗄️ [backup] 쓰기 결과: true
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+🗄️ [backup] 쓰기 시작(manual, 테이블 16개, 행 4개)
+🗄️ [backup] 쓰기 결과: false
+00:21 +52: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B12 simultaneous manual and auto requests drain both slots after changed data
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+🗄️ [backup] 쓰기 시작(auto, 테이블 16개, 행 4개)
+🗄️ [backup] 쓰기 결과: true
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+🗄️ [backup] 쓰기 시작(manual, 테이블 16개, 행 5개)
+🗄️ [backup] 쓰기 결과: true
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+🗄️ [backup] 쓰기 시작(auto, 테이블 16개, 행 5개)
+🗄️ [backup] 쓰기 결과: true
+00:21 +53: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B13 same backup restored twice merges permanent history once
+✅ alarm_history에 "알람 제거" 기록 추가: ID=802
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+00:21 +54: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-B15 empty schedule and pending restore never overwrite automatic backup
+🗄️ [backup] 스킵 - shift_schedule 비어있음
+🧯 [restore] 단계 실패(locked 이후): PlatformException(audit_injected_failure, null, null, null)
+#0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:653:7)
+#1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366:18)
+<asynchronous suspension>
+#2      RestoreCoordinator._run.<anonymous closure> (package:shiftbell/services/restore_coordinator.dart:264:11)
+<asynchronous suspension>
+#3      RestoreCoordinator._advance (package:shiftbell/services/restore_coordinator.dart:298:7)
+<asynchronous suspension>
+#4      RestoreCoordinator._run (package:shiftbell/services/restore_coordinator.dart:262:9)
+<asynchronous suspension>
+#5      RestoreCoordinator.start (package:shiftbell/services/restore_coordinator.dart:171:5)
+<asynchronous suspension>
+#6      Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#7      _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#8      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+#9      expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#10     main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart:490:5)
+<asynchronous suspension>
+#11     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#12     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#13     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+🗄️ [backup] 스킵 - 백업 복원 진행 중/중단된 복원 작업 있음
+🗄️ [backup] 스킵 - 백업 복원 진행 중/중단된 복원 작업 있음
+00:22 +55: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: AUD-F01 100 offline friends retain cache and database counts after refresh rename delete
+00:23 +56: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: TZ-B01 consumed state round-trips after visible history was cleared
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+00:24 +57: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: TZ-B02 old backup history supplies consumed state without suppressing custom history
+00:25 +58: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: TZ-B03 newer backup enriches an identical legacy history with its nominal DST slot
+00:25 +59: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: TZ-B04 restore carries snooze origin and target without replacing the consumed ledger
+00:25 +60: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: TZ-B05 consumed backup keys distinguish shift suffix from signed day offset
+⚠️ 백업용 앱 버전 조회 실패(백업은 계속 진행): MissingPluginException(No implementation found for method getAll on channel dev.fluttercommunity.plus/package_info)
+00:26 +61: C:/Users/Administrator/Desktop/shiftbell/test/full_audit_critical_test.dart: (tearDownAll)
+00:26 +61: loading C:/Users/Administrator/Desktop/shiftbell/test/alarm_snooze_backup_test.dart
+00:30 +61: C:/Users/Administrator/Desktop/shiftbell/test/alarm_snooze_backup_test.dart: both repeated-hour history instants survive existing backup format
+00:30 +62: loading C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart
+00:32 +62: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: (setUpAll)
+00:32 +62: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: MIG-ALL + REOPEN: v1~v23 fixture를 v25로 올리면 기대 데이터·기준 구조와 같고, 다시 열어도 변화 0
+✅ DB 업그레이드 v1 → v2
+✅ DB 업그레이드 v2 → v3
+✅ DB 업그레이드 v3 → v4
+✅ DB 업그레이드 v4 → v5
+✅ DB 업그레이드 v5 → v6
+✅ DB 업그레이드 v6 → v7
+✅ DB 업그레이드 v7 → v8
+✅ DB 업그레이드 v8 → v9
+✅ DB 업그레이드 v9 → v10
+✅ DB 업그레이드 v10 → v11
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v2 → v3
+✅ DB 업그레이드 v3 → v4
+✅ DB 업그레이드 v4 → v5
+✅ DB 업그레이드 v5 → v6
+✅ DB 업그레이드 v6 → v7
+✅ DB 업그레이드 v7 → v8
+✅ DB 업그레이드 v8 → v9
+✅ DB 업그레이드 v9 → v10
+✅ DB 업그레이드 v10 → v11
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v3 → v4
+✅ DB 업그레이드 v4 → v5
+✅ DB 업그레이드 v5 → v6
+✅ DB 업그레이드 v6 → v7
+✅ DB 업그레이드 v7 → v8
+✅ DB 업그레이드 v8 → v9
+✅ DB 업그레이드 v9 → v10
+✅ DB 업그레이드 v10 → v11
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v4 → v5
+✅ DB 업그레이드 v5 → v6
+✅ DB 업그레이드 v6 → v7
+✅ DB 업그레이드 v7 → v8
+✅ DB 업그레이드 v8 → v9
+✅ DB 업그레이드 v9 → v10
+✅ DB 업그레이드 v10 → v11
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v5 → v6
+✅ DB 업그레이드 v6 → v7
+✅ DB 업그레이드 v7 → v8
+✅ DB 업그레이드 v8 → v9
+✅ DB 업그레이드 v9 → v10
+✅ DB 업그레이드 v10 → v11
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v6 → v7
+✅ DB 업그레이드 v7 → v8
+✅ DB 업그레이드 v8 → v9
+✅ DB 업그레이드 v9 → v10
+✅ DB 업그레이드 v10 → v11
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v7 → v8
+✅ DB 업그레이드 v8 → v9
+✅ DB 업그레이드 v9 → v10
+✅ DB 업그레이드 v10 → v11
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v8 → v9
+✅ DB 업그레이드 v9 → v10
+✅ DB 업그레이드 v10 → v11
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v9 → v10
+✅ DB 업그레이드 v10 → v11
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v10 → v11
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v11 → v12
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+00:39 +63: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 실제 v24 구조에서 v25 업그레이드: 기존 알람·영구 이력 보존, 실패 시 전체 롤백
+error SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, table alarms already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE alarms(x INTEGER), parameters: }) DatabaseException(SqliteException(1): while executing, table alarms already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE alarms(x INTEGER), parameters: ) sql 'CREATE TABLE alarms(x INTEGER)' {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\g0_dart_mig_ed8949b2\v23.db, id: 48, readOnly: false, singleInstance: false}}} during open, closing...
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+00:40 +64: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: HIST-M01 v28 to v29 preserves data, rolls back failure and rejects invalid minutes
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+error SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, table alarms already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE alarms(x INTEGER), parameters: }) DatabaseException(SqliteException(1): while executing, table alarms already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE alarms(x INTEGER), parameters: ) sql 'CREATE TABLE alarms(x INTEGER)' {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\g0_dart_mig_140527ab\v23.db, id: 52, readOnly: false, singleInstance: false}}} during open, closing...
+✅ DB 업그레이드 v28 → v29
+00:40 +65: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 음성 대조: fixture가 23개이고, 비교기가 틀린 기대값·다른 구조를 실제로 잡아냄
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+00:40 +66: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: TZ-M01 v27 history becomes consumed state; failed v28 migration rolls back all schema and data
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+error SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, table alarms already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE alarms(x INTEGER), parameters: }) DatabaseException(SqliteException(1): while executing, table alarms already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE alarms(x INTEGER), parameters: ) sql 'CREATE TABLE alarms(x INTEGER)' {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\g0_dart_mig_14530536\v23.db, id: 58, readOnly: false, singleInstance: false}}} during open, closing...
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+00:41 +67: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: ROLLBACK: v12→v25 중 v20에서 SQL 실패 → 스키마·데이터·user_version 전부 시작 상태, 원인 제거 후 성공
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+error SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, table alarm_types already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE alarm_types(x INTEGER), parameters: }) DatabaseException(SqliteException(1): while executing, table alarm_types already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE alarm_types(x INTEGER), parameters: ) sql 'CREATE TABLE alarm_types(x INTEGER)' {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\g0_dart_mig_c1d52433\v12.db, id: 63, readOnly: false, singleInstance: false}}} during open, closing...
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+00:41 +68: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: FRIEND-ROLLBACK: v16에서 v17 DROP·CREATE 직후 실패 → 옛 friends 스키마와 701 행 복원
+error SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, table friends already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE friends(x INTEGER), parameters: }) DatabaseException(SqliteException(1): while executing, table friends already exists, SQL logic error (code 1)
+  Causing statement (at position 13): CREATE TABLE friends(x INTEGER), parameters: ) sql 'CREATE TABLE friends(x INTEGER)' {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\g0_dart_mig_79adaed1\v16.db, id: 66, readOnly: false, singleInstance: false}}} during open, closing...
+00:41 +69: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: MISSING-COLUMN: 버전만 24로 선행하고 컬럼·인덱스·테이블이 빠진 DB를 repair가 채우고 데이터 보존
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+🛠️ DB 스키마 복구 5건 실행
+00:41 +70: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: ALTER-FAIL(repair): 누락 컬럼 ALTER가 실패하면 예외 전파, 같은 트랜잭션의 다른 복구도 롤백
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+error SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, Cannot add a NOT NULL column with default value NULL, SQL logic error (code 1)
+  Causing statement: ALTER TABLE date_schedules ADD COLUMN notify_offset_minutes INTEGER NOT NULL, parameters: }) DatabaseException(SqliteException(1): while executing, Cannot add a NOT NULL column with default value NULL, SQL logic error (code 1)
+  Causing statement: ALTER TABLE date_schedules ADD COLUMN notify_offset_minutes INTEGER NOT NULL, parameters: ) sql 'ALTER TABLE date_schedules ADD COLUMN notify_offset_minutes INTEGER NOT NULL' {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\g0_dart_mig_f79ad725\variant_v23_stamped24_missing.db, id: 69, readOnly: false, singleInstance: false}}} during open, closing...
+00:41 +71: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: ALTER-FAIL(migration): 없는 테이블에 대한 ALTER는 건너뛰지 않고 실패
+error SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, no such table: no_such_table, SQL logic error (code 1)
+  Causing statement: ALTER TABLE no_such_table ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0, parameters: }) DatabaseException(SqliteException(1): while executing, no such table: no_such_table, SQL logic error (code 1)
+  Causing statement: ALTER TABLE no_such_table ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0, parameters: ) sql 'ALTER TABLE no_such_table ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0' {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\g0_dart_mig_7b0ab6cf\v18.db, id: 71, readOnly: false, singleInstance: false}}} during open, closing...
+00:41 +72: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: FUTURE-VERSION: user_version 30 DB는 다운그레이드 거부, 버전·데이터 무변경
+error DbMigrationException: DB 다운그레이드 금지: disk v30 > app v29 during open, closing...
+00:41 +73: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: REPAIR-REJECT (현재 동작 기록): v17 전환 없이 24로 찍힌 옛 friends DB
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+error SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, table alarm_history has no column named day_offset, SQL logic error (code 1)
+  Causing statement: INSERT INTO alarm_history(alarm_id,scheduled_time,scheduled_date,actual_ring_time,dismiss_type,snooze_count,shift_type,created_at,day_offset) SELECT id,time,COALESCE(date,''),strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),'cancelled_before_ring',0,shift_type,strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),day_offset FROM alarms WHERE preset_slot IS NOT NULL AND type IN ('custom','snoozed'), parameters: }) DatabaseException(SqliteException(1): while executing, table alarm_history has no column named day_offset, SQL logic error (code 1)
+  Causing statement: INSERT INTO alarm_history(alarm_id,scheduled_time,scheduled_date,actual_ring_time,dismiss_type,snooze_count,shift_type,created_at,day_offset) SELECT id,time,COALESCE(date,''),strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),'cancelled_before_ring',0,shift_type,strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),day_offset FROM alarms WHERE preset_slot IS NOT NULL AND type IN ('custom','snoozed'), parameters: ) sql 'INSERT INTO alarm_history(alarm_id,scheduled_time,scheduled_date,actual_ring_time,dismiss_type,snooze_count,shift_type,created_at,day_offset) SELECT id,time,COALESCE(date,''),strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),'cancelled_before_ring',0,shift_type,strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),day_offset FROM alarms WHERE preset_slot IS NOT NULL AND type IN ('custom','snoozed')' {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\g0_dart_mig_9be9146d\variant_v16_stamped24_oldfriends.db, id: 76, readOnly: false, singleInstance: false}}} during open, closing...
+REPAIR-REJECT 관찰: open 실패 SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while executing, table alarm_history has no column named day_offset, SQL logic error (code 1)
+  Causing statement: INSERT INTO alarm_history(alarm_id,scheduled_time,scheduled_date,actual_ring_time,dismiss_type,snooze_count,shift_type,created_at,day_offset) SELECT id,time,COALESCE(date,''),strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),'cancelled_before_ring',0,shift_type,strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),day_offset FROM alarms WHERE preset_slot IS NOT NULL AND type IN ('custom','snoozed'), parameters: }) DatabaseException(SqliteException(1): while executing, table alarm_history has no column named day_offset, SQL logic error (code 1)
+  Causing statement: INSERT INTO alarm_history(alarm_id,scheduled_time,scheduled_date,actual_ring_time,dismiss_type,snooze_count,shift_type,created_at,day_offset) SELECT id,time,COALESCE(date,''),strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),'cancelled_before_ring',0,shift_type,strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),day_offset FROM alarms WHERE preset_slot IS NOT NULL AND type IN ('custom','snoozed'), parameters: ) sql 'INSERT INTO alarm_history(alarm_id,scheduled_time,scheduled_date,actual_ring_time,dismiss_type,snooze_count,shift_type,created_at,day_offset) SELECT id,time,COALESCE(date,''),strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),'cancelled_before_ring',0,shift_type,strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),day_offset FROM alarms WHERE preset_slot IS NOT NULL AND type IN ('custom','snoozed')' {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\g0_dart_mig_9be9146d\variant_v16_stamped24_oldfriends.db, id: 76, readOnly: false, singleInstance: false}}}
+00:41 +74: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) 원본 그대로 → accept
+00:41 +75: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair DROP 거부 → reject
+00:41 +76: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair UPDATE 거부 → reject
+00:41 +77: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair DELETE 거부 → reject
+00:41 +78: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair RENAME 거부 → reject
+00:41 +79: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair INSERT 거부 → reject
+00:41 +80: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair DROP COLUMN 거부 → reject
+00:41 +81: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair 세미콜론으로 두 문장 거부 → reject
+00:41 +82: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair IF NOT EXISTS 없는 CREATE TABLE 거부 → reject
+00:41 +83: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair CREATE TABLE이 ALTER/INDEX 뒤에 오면 거부 → reject
+00:41 +84: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair ALTER 대상 테이블의 CREATE가 없으면 거부 → reject
+00:41 +85: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair INDEX 대상 테이블의 CREATE가 없으면 거부 → reject
+00:41 +86: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair 인덱스 추가 허용 → accept
+00:41 +87: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair UNIQUE 인덱스 추가 허용 → accept
+00:41 +88: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) repair 소문자 허용 형태 허용 → accept
+00:42 +89: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) migrations 중간 버전 누락 거부 → reject
+00:42 +90: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) migrations 버전 중복 거부 → reject
+00:42 +91: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) migrations 한 항목 두 문장 거부 → reject
+00:42 +92: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) targetVersion보다 migrations가 모자라면 거부 → reject
+00:42 +93: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: 파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유) format 2 거부 → reject
+00:42 +94: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_migration_dart_test.dart: (tearDownAll)
+00:42 +94: loading C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_reference_schema_test.dart
+00:43 +94: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_reference_schema_test.dart: (setUpAll)
+00:43 +94: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_reference_schema_test.dart: 신규 설치 v25 구조 = 기준 스냅샷, 프리셋 3종, alarm_overrides 제약
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\g0_reference_a1139b76\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+00:44 +95: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_reference_schema_test.dart: (tearDownAll)
+00:44 +95: loading C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_service_upgrade_v12_test.dart
+00:46 +95: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_service_upgrade_v12_test.dart: (setUpAll)
+00:46 +95: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_service_upgrade_v12_test.dart: DatabaseService가 v12 fixture를 v24로 올림 - 기대 데이터·기준 구조 일치
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\g0_service_v12_cc1cb35d\shiftbell.db
+✅ DB 업그레이드 v12 → v13
+✅ DB 업그레이드 v13 → v14
+✅ DB 업그레이드 v14 → v15
+✅ DB 업그레이드 v15 → v16
+✅ DB 업그레이드 v16 → v17
+✅ DB 업그레이드 v17 → v18
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+00:47 +96: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_service_upgrade_v12_test.dart: (tearDownAll)
+00:47 +96: loading C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_service_upgrade_v18_test.dart
+00:49 +96: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_service_upgrade_v18_test.dart: (setUpAll)
+00:49 +96: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_service_upgrade_v18_test.dart: DatabaseService가 v18 fixture를 v24로 올림 - 기대 데이터·기준 구조 일치
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\g0_service_v18_b99237a7\shiftbell.db
+✅ DB 업그레이드 v18 → v19
+✅ DB 업그레이드 v19 → v20
+✅ DB 업그레이드 v20 → v21
+✅ DB 업그레이드 v21 → v22
+✅ DB 업그레이드 v22 → v23
+✅ DB 업그레이드 v23 → v24
+✅ DB 업그레이드 v24 → v25
+✅ DB 업그레이드 v25 → v26
+✅ DB 업그레이드 v26 → v27
+✅ DB 업그레이드 v27 → v28
+✅ DB 업그레이드 v28 → v29
+00:49 +97: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/db_service_upgrade_v18_test.dart: (tearDownAll)
+00:49 +97: loading C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_db_init_test.dart
+00:52 +97: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_db_init_test.dart: (setUpAll)
+00:52 +97: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_db_init_test.dart: Android에서 DB 경로 조회 실패 → 예외 전파, 일반 경로 DB 미생성, 새는 오류 없음, 다음 호출은 새로 시도
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\g0_r0_path_67a29ec\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+00:54 +98: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_db_init_test.dart: (tearDownAll)
+00:54 +98: loading C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_repro/r0_03_preset_repair_test.dart
+00:56 +98: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_repro/r0_03_preset_repair_test.dart: (setUpAll)
+00:56 +98: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_repro/r0_03_preset_repair_test.dart: R0-03: 두 번째 프리셋 insert 실패 뒤 재시도가 전체 프리셋을 완성한다
+✅ Device Protected DB 경로: C:\Users\ADMINI~1\AppData\Local\Temp\r0_03_ff0a91e7\shiftbell.db
+🛠️ DB 스키마 복구 25건 실행
+error SqfliteFfiException(sqlite_error: 1811, , SqliteException(1811): while executing statement, injected preset insert failure, constraint failed (code 1811)
+  Causing statement: INSERT OR IGNORE INTO alarm_types (id, name, emoji, sound_file, volume, vibration_strength, is_preset, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?), parameters: 2, vibrate, 📳, vibrate, 0.0, 3, 1, 3}) DatabaseException(SqliteException(1811): while executing statement, injected preset insert failure, constraint failed (code 1811)
+  Causing statement: INSERT OR IGNORE INTO alarm_types (id, name, emoji, sound_file, volume, vibration_strength, is_preset, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?), parameters: 2, vibrate, 📳, vibrate, 0.0, 3, 1, 3) sql 'INSERT OR IGNORE INTO alarm_types (id, name, emoji, sound_file, volume, vibration_strength, is_preset, duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?)' args [2, vibrate, 📳, vibrate, 0.0, 3, 1, 3] {details: {database: {path: C:\Users\ADMINI~1\AppData\Local\Temp\r0_03_ff0a91e7\shiftbell.db, id: 2, readOnly: false, singleInstance: true}}} during open, closing...
+✅ Device Protected DB 경로: C:\Users\ADMINI~1\AppData\Local\Temp\r0_03_ff0a91e7\shiftbell.db
+🛠️ 빠진 프리셋 알람 타입 다시 넣음: [1, 2, 3]
+00:59 +99: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_repro/r0_03_preset_repair_test.dart: (tearDownAll)
+00:59 +99: loading C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_repro/r0_04_database_init_error_test.dart
+01:01 +99: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_repro/r0_04_database_init_error_test.dart: (setUpAll)
+01:01 +99: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_repro/r0_04_database_init_error_test.dart: R0-04: 단독 첫 초기화 실패가 미처리 Completer 오류를 추가로 만들지 않는다
+✅ Device Protected DB 경로: C:\Users\ADMINI~1\AppData\Local\Temp\r0_04_37f6af3d\shiftbell.db
+error DbMigrationException: DB 다운그레이드 금지: disk v30 > app v29 during open, closing...
+01:02 +100: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g0/r0_repro/r0_04_database_init_error_test.dart: (tearDownAll)
+01:02 +100: All tests passed!
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: DST Europe/Berlin 3: every date exactly once, including last day
+00:00 +1: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: DST Europe/Berlin 10: every date exactly once, including last day
+00:00 +2: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: DST Europe/London 3: every date exactly once, including last day
+00:00 +3: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: DST Europe/London 10: every date exactly once, including last day
+00:00 +4: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: DST America/New_York 3: every date exactly once, including last day
+00:00 +5: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: DST America/New_York 10: every date exactly once, including last day
+00:00 +6: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: DST Australia/Lord_Howe 4: every date exactly once, including last day
+00:00 +7: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: DST Australia/Lord_Howe 10: every date exactly once, including last day
+00:00 +8: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: America/New_York all months 2024/2026/2027/2028 agree with independent date ledger
+00:00 +9: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: America/Los_Angeles all months 2024/2026/2027/2028 agree with independent date ledger
+00:00 +10: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: America/Phoenix all months 2024/2026/2027/2028 agree with independent date ledger
+00:00 +11: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: Pacific/Honolulu all months 2024/2026/2027/2028 agree with independent date ledger
+00:00 +12: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: Europe/London all months 2024/2026/2027/2028 agree with independent date ledger
+00:00 +13: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: Europe/Berlin all months 2024/2026/2027/2028 agree with independent date ledger
+00:01 +14: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: Africa/Johannesburg all months 2024/2026/2027/2028 agree with independent date ledger
+00:01 +15: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: Asia/Manila all months 2024/2026/2027/2028 agree with independent date ledger
+00:01 +16: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: Asia/Dubai all months 2024/2026/2027/2028 agree with independent date ledger
+00:01 +17: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: America/Sao_Paulo all months 2024/2026/2027/2028 agree with independent date ledger
+00:01 +18: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: America/Rio_Branco all months 2024/2026/2027/2028 agree with independent date ledger
+00:01 +19: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: Asia/Kolkata all months 2024/2026/2027/2028 agree with independent date ledger
+00:01 +20: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: Asia/Seoul all months 2024/2026/2027/2028 agree with independent date ledger
+00:01 +21: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: Australia/Lord_Howe all months 2024/2026/2027/2028 agree with independent date ledger
+00:01 +22: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: shift-change OT is optional display detail, never double-counted in work total
+00:02 +23: C:/Users/Administrator/Desktop/shiftbell/test/work_hours_calendar_days_test.dart: same date, reversed dates, unset shift, leap day, year and payday boundaries
+00:02 +24: C:/Users/Administrator/Desktop/shiftbell/test/overtime_calendar_range_test.dart: (setUpAll)
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\ot_calendar_dates_9b341d7a\shiftbell.db
+✅ 데이터베이스 초기화 완료
+00:03 +25: C:/Users/Administrator/Desktop/shiftbell/test/overtime_calendar_range_test.dart: (setUpAll)
+00:03 +26: C:/Users/Administrator/Desktop/shiftbell/test/overtime_calendar_range_test.dart: (setUpAll)
+🛠️ DB 스키마 복구 3건 실행
+00:03 +26: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:04 +27: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:05 +28: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:05 +29: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:05 +30: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:05 +31: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:05 +32: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:05 +33: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:05 +34: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:05 +35: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:05 +36: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:06 +37: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:06 +38: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:06 +39: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:06 +40: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:06 +41: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:07 +41: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: (setUpAll)
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\timezone_consumed_ddf2815d\shiftbell.db
+✅ 데이터베이스 초기화 완료
+00:08 +42: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:08 +42: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: (setUpAll)
+🛠️ DB 스키마 복구 3건 실행
+00:09 +42: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:09 +43: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:10 +44: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:10 +45: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:10 +46: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:10 +47: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:10 +48: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:10 +49: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:10 +50: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:10 +51: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:11 +52: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:11 +53: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:11 +54: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:11 +55: C:/Users/Administrator/Desktop/shiftbell/test/regional_release_test.dart: public web header follows current language and regional weekday order
+00:11 +56: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ04 superseded is not a completed ring
+00:11 +57: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ04 cancelled_before_ring is not a completed ring
+00:11 +58: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ05 custom history and ID-only matches cannot suppress fixed alarms
+00:11 +59: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ06 explicit slot survives missing creation logs and history clearing
+🗑️ 알람 이력 + 생성 로그 전체 삭제 완료 (설정 초기화)
+00:12 +60: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ07 full schedule reset explicitly starts a new consumption lifetime
+🗑️ 모든 알람 삭제 완료 (이력 기록 후 삭제)
+00:12 +61: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ08 snoozed row retains its absolute target while original stays consumed
+00:12 +62: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ09 end record failure rolls back deletion and successful retry records origin
+✅ alarm_history에 "알람 확인" 기록 추가: ID=47
+00:12 +63: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ10 a failed consumed-slot read/import cannot be treated as empty history
+00:13 +64: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ11 slot identity includes shift and day offset
+00:13 +65: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ12 metadata backfill keeps existing ID and has no OS diff
+00:13 +66: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: TZ13 legacy ID reused by a custom backup is ambiguous even at the same slot
+00:13 +67: C:/Users/Administrator/Desktop/shiftbell/test/timezone_consumed_alarm_test.dart: (tearDownAll)
+00:13 +67: All tests passed!
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/national_holidays_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/national_holidays_test.dart: country uses actual device region without borrowing an English fallback
+00:00 +1: C:/Users/Administrator/Desktop/shiftbell/test/national_holidays_test.dart: national scope excludes state, regional and working observances
+00:00 +2: C:/Users/Administrator/Desktop/shiftbell/test/national_holidays_test.dart: observed days cross years without spreading substitutes to other countries
+00:00 +3: C:/Users/Administrator/Desktop/shiftbell/test/national_holidays_test.dart: only reviewed years/dates and no guessed future lunar announcements
+00:00 +4: C:/Users/Administrator/Desktop/shiftbell/test/national_holidays_test.dart: Korean overrides cannot leak into foreign calendars and local day is retained
+00:03 +5: C:/Users/Administrator/Desktop/shiftbell/test/national_holiday_view_test.dart: foreign holiday is a red date with a tappable name, without a cell label
+00:07 +6: C:/Users/Administrator/Desktop/shiftbell/test/national_holiday_view_test.dart: foreign holiday is a red date with a tappable name, without a cell label
+00:07 +7: C:/Users/Administrator/Desktop/shiftbell/test/national_holiday_view_test.dart: foreign holiday is a red date with a tappable name, without a cell label
+00:10 +8: C:/Users/Administrator/Desktop/shiftbell/test/ad_consent_refresh_test.dart: privacy choices dispose the old banner and recheck a fixed-size slot
+배너 슬롯 측정: 800 dp / Orientation.landscape -> 800×56 dp
+배너 슬롯 측정: 800 dp / Orientation.landscape -> 800×56 dp
+배너 슬롯 측정: 800 dp / Orientation.landscape -> 800×56 dp
+⏭️ 배너 광고 생략(광고 동의 미확보) - 자리만 확보함
+배너 슬롯 측정: 800 dp / Orientation.landscape -> 800×56 dp
+배너 슬롯 측정: 800 dp / Orientation.landscape -> 800×56 dp
+00:12 +9: C:/Users/Administrator/Desktop/shiftbell/test/ad_startup_layout_test.dart: delayed consent never blocks geometry; late initialization loads current slot
+배너 슬롯 측정: 800 dp / Orientation.landscape -> 800×90 dp
+✅ 배너 높이 확정: 800×90 (화면 폭 800dp 기준)
+배너 슬롯 측정: 752 dp / Orientation.portrait -> 752×90 dp
+배너 슬롯 측정: 360 dp / Orientation.portrait -> 360×56 dp
+Consent information update failed: simulated network failure
+배너 슬롯 측정: 360 dp / Orientation.portrait -> 360×56 dp
+00:13 +10: C:/Users/Administrator/Desktop/shiftbell/test/ad_sdk_delay_test.dart: SDK pending for a minute leaves app usable and disposed slot never loads late
+Consent information update failed: offline
+배너 슬롯 측정: 800 dp / Orientation.landscape -> 800×56 dp
+✅ 배너 높이 확정: 800×56 (화면 폭 800dp 기준)
+배너 슬롯 측정: 800 dp / Orientation.landscape -> 800×56 dp
+00:14 +11: All tests passed!
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:compileFlutterBuildDevDebug
+> Task :app:packJniLibsflutterBuildDevDebug UP-TO-DATE
+
+> Task :app:checkDartKotlinSync
+? [Dart��Kotlin ����ȭ] DB ��Ű�� ���� ��ġ Ȯ�� (��=29)
+? [Dart��Kotlin ����ȭ] DB ��Ű�� SQL ���� ��ǥ ���� ��ġ Ȯ�� (��=29)
+? [Dart��Kotlin ����ȭ] �˶� �ڵ� ���� ������(�ϼ�) ��ġ Ȯ�� (��=10)
+? [Dart��Kotlin ����ȭ] �˶� ���� offset ��ġ Ȯ�� (��=-1)
+? [Dart��Kotlin ����ȭ] �˶� ���� offset ��ġ Ȯ�� (��=0)
+? [Dart��Kotlin ����ȭ] �˶� ������ offset ��ġ Ȯ�� (��=1)
+? [Dart��Kotlin ����ȭ] ����â �߰� ��� �� ����(��) ��ġ Ȯ�� (��=60)
+? [Dart��Kotlin ����ȭ] ����â �Ϲ� ���� �ð�(��) ��ġ Ȯ�� (��=21)
+? [Dart��Kotlin ����ȭ] ����â �ִ� ����(��) ��ġ Ȯ�� (��=9)
+? [Dart��Kotlin ����ȭ] �߰� ��� �� ���� ����(��) ��ġ Ȯ�� (��=6)
+
+> Task :app:preBuild
+> Task :app:preDevDebugBuild
+> Task :audioplayers_android:preBuild UP-TO-DATE
+> Task :audioplayers_android:preDebugBuild UP-TO-DATE
+> Task :audioplayers_android:writeDebugAarMetadata UP-TO-DATE
+> Task :cloud_firestore:preBuild UP-TO-DATE
+> Task :cloud_firestore:preDebugBuild UP-TO-DATE
+> Task :cloud_firestore:writeDebugAarMetadata UP-TO-DATE
+> Task :firebase_analytics:preBuild UP-TO-DATE
+> Task :firebase_analytics:preDebugBuild UP-TO-DATE
+> Task :firebase_analytics:writeDebugAarMetadata UP-TO-DATE
+> Task :firebase_auth:preBuild UP-TO-DATE
+> Task :firebase_auth:preDebugBuild UP-TO-DATE
+> Task :firebase_auth:writeDebugAarMetadata UP-TO-DATE
+> Task :firebase_core:preBuild UP-TO-DATE
+> Task :firebase_core:preDebugBuild UP-TO-DATE
+> Task :firebase_core:writeDebugAarMetadata UP-TO-DATE
+> Task :flutter_local_notifications:preBuild UP-TO-DATE
+> Task :flutter_local_notifications:preDebugBuild UP-TO-DATE
+> Task :flutter_local_notifications:writeDebugAarMetadata UP-TO-DATE
+> Task :google_mobile_ads:preBuild UP-TO-DATE
+> Task :google_mobile_ads:preDebugBuild UP-TO-DATE
+> Task :google_mobile_ads:writeDebugAarMetadata UP-TO-DATE
+> Task :in_app_update:preBuild UP-TO-DATE
+> Task :in_app_update:preDebugBuild UP-TO-DATE
+> Task :in_app_update:writeDebugAarMetadata UP-TO-DATE
+> Task :package_info_plus:preBuild UP-TO-DATE
+> Task :package_info_plus:preDebugBuild UP-TO-DATE
+> Task :package_info_plus:writeDebugAarMetadata UP-TO-DATE
+> Task :path_provider_android:preBuild UP-TO-DATE
+> Task :path_provider_android:preDebugBuild UP-TO-DATE
+> Task :path_provider_android:writeDebugAarMetadata UP-TO-DATE
+> Task :permission_handler_android:preBuild UP-TO-DATE
+> Task :permission_handler_android:preDebugBuild UP-TO-DATE
+> Task :permission_handler_android:writeDebugAarMetadata UP-TO-DATE
+> Task :share_plus:preBuild UP-TO-DATE
+> Task :share_plus:preDebugBuild UP-TO-DATE
+> Task :share_plus:writeDebugAarMetadata UP-TO-DATE
+> Task :shared_preferences_android:preBuild UP-TO-DATE
+> Task :shared_preferences_android:preDebugBuild UP-TO-DATE
+> Task :shared_preferences_android:writeDebugAarMetadata UP-TO-DATE
+> Task :sqflite_android:preBuild UP-TO-DATE
+> Task :sqflite_android:preDebugBuild UP-TO-DATE
+> Task :sqflite_android:writeDebugAarMetadata UP-TO-DATE
+> Task :url_launcher_android:preBuild UP-TO-DATE
+> Task :url_launcher_android:preDebugBuild UP-TO-DATE
+> Task :url_launcher_android:writeDebugAarMetadata UP-TO-DATE
+> Task :webview_flutter_android:preBuild UP-TO-DATE
+> Task :webview_flutter_android:preDebugBuild UP-TO-DATE
+> Task :webview_flutter_android:writeDebugAarMetadata UP-TO-DATE
+> Task :app:checkDevDebugAarMetadata UP-TO-DATE
+> Task :app:cleanMergeDevDebugAssets
+> Task :app:mergeDevDebugShaders UP-TO-DATE
+> Task :app:compileDevDebugShaders NO-SOURCE
+> Task :app:generateDevDebugAssets UP-TO-DATE
+> Task :audioplayers_android:mergeDebugShaders UP-TO-DATE
+> Task :audioplayers_android:compileDebugShaders NO-SOURCE
+> Task :audioplayers_android:generateDebugAssets UP-TO-DATE
+> Task :audioplayers_android:mergeDebugAssets UP-TO-DATE
+> Task :cloud_firestore:mergeDebugShaders UP-TO-DATE
+> Task :cloud_firestore:compileDebugShaders NO-SOURCE
+> Task :cloud_firestore:generateDebugAssets UP-TO-DATE
+> Task :cloud_firestore:mergeDebugAssets UP-TO-DATE
+> Task :firebase_analytics:mergeDebugShaders UP-TO-DATE
+> Task :firebase_analytics:compileDebugShaders NO-SOURCE
+> Task :firebase_analytics:generateDebugAssets UP-TO-DATE
+> Task :firebase_analytics:mergeDebugAssets UP-TO-DATE
+> Task :firebase_auth:mergeDebugShaders UP-TO-DATE
+> Task :firebase_auth:compileDebugShaders NO-SOURCE
+> Task :firebase_auth:generateDebugAssets UP-TO-DATE
+> Task :firebase_auth:mergeDebugAssets UP-TO-DATE
+> Task :firebase_core:mergeDebugShaders UP-TO-DATE
+> Task :firebase_core:compileDebugShaders NO-SOURCE
+> Task :firebase_core:generateDebugAssets UP-TO-DATE
+> Task :firebase_core:mergeDebugAssets UP-TO-DATE
+> Task :flutter_local_notifications:mergeDebugShaders UP-TO-DATE
+> Task :flutter_local_notifications:compileDebugShaders NO-SOURCE
+> Task :flutter_local_notifications:generateDebugAssets UP-TO-DATE
+> Task :flutter_local_notifications:mergeDebugAssets UP-TO-DATE
+> Task :google_mobile_ads:mergeDebugShaders UP-TO-DATE
+> Task :google_mobile_ads:compileDebugShaders NO-SOURCE
+> Task :google_mobile_ads:generateDebugAssets UP-TO-DATE
+> Task :google_mobile_ads:mergeDebugAssets UP-TO-DATE
+> Task :in_app_update:mergeDebugShaders UP-TO-DATE
+> Task :in_app_update:compileDebugShaders NO-SOURCE
+> Task :in_app_update:generateDebugAssets UP-TO-DATE
+> Task :in_app_update:mergeDebugAssets UP-TO-DATE
+> Task :package_info_plus:mergeDebugShaders UP-TO-DATE
+> Task :package_info_plus:compileDebugShaders NO-SOURCE
+> Task :package_info_plus:generateDebugAssets UP-TO-DATE
+> Task :package_info_plus:mergeDebugAssets UP-TO-DATE
+> Task :path_provider_android:mergeDebugShaders UP-TO-DATE
+> Task :path_provider_android:compileDebugShaders NO-SOURCE
+> Task :path_provider_android:generateDebugAssets UP-TO-DATE
+> Task :path_provider_android:mergeDebugAssets UP-TO-DATE
+> Task :permission_handler_android:mergeDebugShaders UP-TO-DATE
+> Task :permission_handler_android:compileDebugShaders NO-SOURCE
+> Task :permission_handler_android:generateDebugAssets UP-TO-DATE
+> Task :permission_handler_android:mergeDebugAssets UP-TO-DATE
+> Task :share_plus:mergeDebugShaders UP-TO-DATE
+> Task :share_plus:compileDebugShaders NO-SOURCE
+> Task :share_plus:generateDebugAssets UP-TO-DATE
+> Task :share_plus:mergeDebugAssets UP-TO-DATE
+> Task :shared_preferences_android:mergeDebugShaders UP-TO-DATE
+> Task :shared_preferences_android:compileDebugShaders NO-SOURCE
+> Task :shared_preferences_android:generateDebugAssets UP-TO-DATE
+> Task :shared_preferences_android:mergeDebugAssets UP-TO-DATE
+> Task :sqflite_android:mergeDebugShaders UP-TO-DATE
+> Task :sqflite_android:compileDebugShaders NO-SOURCE
+> Task :sqflite_android:generateDebugAssets UP-TO-DATE
+> Task :sqflite_android:mergeDebugAssets UP-TO-DATE
+> Task :url_launcher_android:mergeDebugShaders UP-TO-DATE
+> Task :url_launcher_android:compileDebugShaders NO-SOURCE
+> Task :url_launcher_android:generateDebugAssets UP-TO-DATE
+> Task :url_launcher_android:mergeDebugAssets UP-TO-DATE
+> Task :webview_flutter_android:mergeDebugShaders UP-TO-DATE
+> Task :webview_flutter_android:compileDebugShaders NO-SOURCE
+> Task :webview_flutter_android:generateDebugAssets UP-TO-DATE
+> Task :webview_flutter_android:mergeDebugAssets UP-TO-DATE
+> Task :app:mergeDevDebugAssets
+> Task :app:copyFlutterAssetsDevDebug
+> Task :app:generateDevDebugResValues UP-TO-DATE
+> Task :app:processDevDebugGoogleServices UP-TO-DATE
+> Task :audioplayers_android:generateDebugResValues UP-TO-DATE
+> Task :audioplayers_android:generateDebugResources UP-TO-DATE
+> Task :audioplayers_android:packageDebugResources UP-TO-DATE
+> Task :cloud_firestore:generateDebugResValues UP-TO-DATE
+> Task :cloud_firestore:generateDebugResources UP-TO-DATE
+> Task :cloud_firestore:packageDebugResources UP-TO-DATE
+> Task :firebase_analytics:generateDebugResValues UP-TO-DATE
+> Task :firebase_analytics:generateDebugResources UP-TO-DATE
+> Task :firebase_analytics:packageDebugResources UP-TO-DATE
+> Task :firebase_auth:generateDebugResValues UP-TO-DATE
+> Task :firebase_auth:generateDebugResources UP-TO-DATE
+> Task :firebase_auth:packageDebugResources UP-TO-DATE
+> Task :firebase_core:generateDebugResValues UP-TO-DATE
+> Task :firebase_core:generateDebugResources UP-TO-DATE
+> Task :firebase_core:packageDebugResources UP-TO-DATE
+> Task :flutter_local_notifications:generateDebugResValues UP-TO-DATE
+> Task :flutter_local_notifications:generateDebugResources UP-TO-DATE
+> Task :flutter_local_notifications:packageDebugResources UP-TO-DATE
+> Task :google_mobile_ads:generateDebugResValues UP-TO-DATE
+> Task :google_mobile_ads:generateDebugResources UP-TO-DATE
+> Task :google_mobile_ads:packageDebugResources UP-TO-DATE
+> Task :in_app_update:generateDebugResValues UP-TO-DATE
+> Task :in_app_update:generateDebugResources UP-TO-DATE
+> Task :in_app_update:packageDebugResources UP-TO-DATE
+> Task :package_info_plus:generateDebugResValues UP-TO-DATE
+> Task :package_info_plus:generateDebugResources UP-TO-DATE
+> Task :package_info_plus:packageDebugResources UP-TO-DATE
+> Task :path_provider_android:generateDebugResValues UP-TO-DATE
+> Task :path_provider_android:generateDebugResources UP-TO-DATE
+> Task :path_provider_android:packageDebugResources UP-TO-DATE
+> Task :permission_handler_android:generateDebugResValues UP-TO-DATE
+> Task :permission_handler_android:generateDebugResources UP-TO-DATE
+> Task :permission_handler_android:packageDebugResources UP-TO-DATE
+> Task :share_plus:generateDebugResValues UP-TO-DATE
+> Task :share_plus:generateDebugResources UP-TO-DATE
+> Task :share_plus:packageDebugResources UP-TO-DATE
+> Task :shared_preferences_android:generateDebugResValues UP-TO-DATE
+> Task :shared_preferences_android:generateDebugResources UP-TO-DATE
+> Task :shared_preferences_android:packageDebugResources UP-TO-DATE
+> Task :sqflite_android:generateDebugResValues UP-TO-DATE
+> Task :sqflite_android:generateDebugResources UP-TO-DATE
+> Task :sqflite_android:packageDebugResources UP-TO-DATE
+> Task :url_launcher_android:generateDebugResValues UP-TO-DATE
+> Task :url_launcher_android:generateDebugResources UP-TO-DATE
+> Task :url_launcher_android:packageDebugResources UP-TO-DATE
+> Task :webview_flutter_android:generateDebugResValues UP-TO-DATE
+> Task :webview_flutter_android:generateDebugResources UP-TO-DATE
+> Task :webview_flutter_android:packageDebugResources UP-TO-DATE
+> Task :app:mapDevDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDevDebugResources UP-TO-DATE
+> Task :app:mergeDevDebugResources UP-TO-DATE
+> Task :app:packageDevDebugResources UP-TO-DATE
+> Task :app:parseDevDebugLocalResources UP-TO-DATE
+> Task :app:createDevDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDevDebug UP-TO-DATE
+> Task :audioplayers_android:extractDeepLinksDebug UP-TO-DATE
+> Task :audioplayers_android:processDebugManifest UP-TO-DATE
+> Task :cloud_firestore:extractDeepLinksDebug UP-TO-DATE
+> Task :cloud_firestore:processDebugManifest UP-TO-DATE
+> Task :firebase_analytics:extractDeepLinksDebug UP-TO-DATE
+> Task :firebase_analytics:processDebugManifest UP-TO-DATE
+> Task :firebase_auth:extractDeepLinksDebug UP-TO-DATE
+> Task :firebase_auth:processDebugManifest UP-TO-DATE
+> Task :firebase_core:extractDeepLinksDebug UP-TO-DATE
+> Task :firebase_core:processDebugManifest UP-TO-DATE
+> Task :flutter_local_notifications:extractDeepLinksDebug UP-TO-DATE
+> Task :flutter_local_notifications:processDebugManifest UP-TO-DATE
+> Task :google_mobile_ads:extractDeepLinksDebug UP-TO-DATE
+> Task :google_mobile_ads:processDebugManifest UP-TO-DATE
+> Task :in_app_update:extractDeepLinksDebug UP-TO-DATE
+> Task :in_app_update:processDebugManifest UP-TO-DATE
+> Task :package_info_plus:extractDeepLinksDebug UP-TO-DATE
+> Task :package_info_plus:processDebugManifest UP-TO-DATE
+> Task :path_provider_android:extractDeepLinksDebug UP-TO-DATE
+> Task :path_provider_android:processDebugManifest UP-TO-DATE
+> Task :permission_handler_android:extractDeepLinksDebug UP-TO-DATE
+> Task :permission_handler_android:processDebugManifest UP-TO-DATE
+> Task :share_plus:extractDeepLinksDebug UP-TO-DATE
+> Task :share_plus:processDebugManifest UP-TO-DATE
+> Task :shared_preferences_android:extractDeepLinksDebug UP-TO-DATE
+> Task :shared_preferences_android:processDebugManifest UP-TO-DATE
+> Task :sqflite_android:extractDeepLinksDebug UP-TO-DATE
+> Task :sqflite_android:processDebugManifest UP-TO-DATE
+> Task :url_launcher_android:extractDeepLinksDebug UP-TO-DATE
+> Task :url_launcher_android:processDebugManifest UP-TO-DATE
+> Task :webview_flutter_android:extractDeepLinksDebug UP-TO-DATE
+> Task :webview_flutter_android:processDebugManifest UP-TO-DATE
+> Task :app:processDevDebugMainManifest UP-TO-DATE
+> Task :app:outputDevDebugAppLinkSettings UP-TO-DATE
+> Task :app:processDevDebugManifest UP-TO-DATE
+> Task :app:processDevDebugManifestForPackage UP-TO-DATE
+> Task :audioplayers_android:compileDebugLibraryResources UP-TO-DATE
+> Task :audioplayers_android:parseDebugLocalResources UP-TO-DATE
+> Task :audioplayers_android:generateDebugRFile UP-TO-DATE
+> Task :cloud_firestore:compileDebugLibraryResources UP-TO-DATE
+> Task :cloud_firestore:parseDebugLocalResources UP-TO-DATE
+> Task :cloud_firestore:generateDebugRFile UP-TO-DATE
+> Task :firebase_analytics:compileDebugLibraryResources UP-TO-DATE
+> Task :firebase_analytics:parseDebugLocalResources UP-TO-DATE
+> Task :firebase_analytics:generateDebugRFile UP-TO-DATE
+> Task :firebase_auth:compileDebugLibraryResources UP-TO-DATE
+> Task :firebase_auth:parseDebugLocalResources UP-TO-DATE
+> Task :firebase_auth:generateDebugRFile UP-TO-DATE
+> Task :firebase_core:compileDebugLibraryResources UP-TO-DATE
+> Task :firebase_core:parseDebugLocalResources UP-TO-DATE
+> Task :firebase_core:generateDebugRFile UP-TO-DATE
+> Task :flutter_local_notifications:compileDebugLibraryResources UP-TO-DATE
+> Task :flutter_local_notifications:parseDebugLocalResources UP-TO-DATE
+> Task :flutter_local_notifications:generateDebugRFile UP-TO-DATE
+> Task :google_mobile_ads:compileDebugLibraryResources UP-TO-DATE
+> Task :google_mobile_ads:parseDebugLocalResources UP-TO-DATE
+> Task :google_mobile_ads:generateDebugRFile UP-TO-DATE
+> Task :in_app_update:compileDebugLibraryResources UP-TO-DATE
+> Task :in_app_update:parseDebugLocalResources UP-TO-DATE
+> Task :in_app_update:generateDebugRFile UP-TO-DATE
+> Task :package_info_plus:compileDebugLibraryResources UP-TO-DATE
+> Task :package_info_plus:parseDebugLocalResources UP-TO-DATE
+> Task :package_info_plus:generateDebugRFile UP-TO-DATE
+> Task :path_provider_android:compileDebugLibraryResources UP-TO-DATE
+> Task :path_provider_android:parseDebugLocalResources UP-TO-DATE
+> Task :path_provider_android:generateDebugRFile UP-TO-DATE
+> Task :permission_handler_android:compileDebugLibraryResources UP-TO-DATE
+> Task :permission_handler_android:parseDebugLocalResources UP-TO-DATE
+> Task :permission_handler_android:generateDebugRFile UP-TO-DATE
+> Task :share_plus:compileDebugLibraryResources UP-TO-DATE
+> Task :share_plus:parseDebugLocalResources UP-TO-DATE
+> Task :share_plus:generateDebugRFile UP-TO-DATE
+> Task :shared_preferences_android:compileDebugLibraryResources UP-TO-DATE
+> Task :shared_preferences_android:parseDebugLocalResources UP-TO-DATE
+> Task :shared_preferences_android:generateDebugRFile UP-TO-DATE
+> Task :sqflite_android:compileDebugLibraryResources UP-TO-DATE
+> Task :sqflite_android:parseDebugLocalResources UP-TO-DATE
+> Task :sqflite_android:generateDebugRFile UP-TO-DATE
+> Task :url_launcher_android:compileDebugLibraryResources UP-TO-DATE
+> Task :url_launcher_android:parseDebugLocalResources UP-TO-DATE
+> Task :url_launcher_android:generateDebugRFile UP-TO-DATE
+> Task :webview_flutter_android:compileDebugLibraryResources UP-TO-DATE
+> Task :webview_flutter_android:parseDebugLocalResources UP-TO-DATE
+> Task :webview_flutter_android:generateDebugRFile UP-TO-DATE
+> Task :app:processDevDebugResources UP-TO-DATE
+> Task :audioplayers_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :audioplayers_android:compileDebugKotlin UP-TO-DATE
+> Task :audioplayers_android:javaPreCompileDebug UP-TO-DATE
+> Task :audioplayers_android:compileDebugJavaWithJavac NO-SOURCE
+> Task :audioplayers_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :cloud_firestore:generateDebugBuildConfig UP-TO-DATE
+> Task :cloud_firestore:javaPreCompileDebug UP-TO-DATE
+> Task :firebase_core:generateDebugBuildConfig UP-TO-DATE
+> Task :firebase_core:javaPreCompileDebug UP-TO-DATE
+> Task :firebase_core:compileDebugJavaWithJavac UP-TO-DATE
+> Task :firebase_core:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :cloud_firestore:compileDebugJavaWithJavac UP-TO-DATE
+> Task :cloud_firestore:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :firebase_analytics:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :firebase_analytics:generateDebugBuildConfig UP-TO-DATE
+> Task :firebase_analytics:compileDebugKotlin UP-TO-DATE
+> Task :firebase_analytics:javaPreCompileDebug UP-TO-DATE
+> Task :firebase_analytics:compileDebugJavaWithJavac UP-TO-DATE
+> Task :firebase_analytics:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :firebase_auth:generateDebugBuildConfig UP-TO-DATE
+> Task :firebase_auth:javaPreCompileDebug UP-TO-DATE
+> Task :firebase_auth:compileDebugJavaWithJavac UP-TO-DATE
+> Task :firebase_auth:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :flutter_local_notifications:javaPreCompileDebug UP-TO-DATE
+> Task :flutter_local_notifications:compileDebugJavaWithJavac UP-TO-DATE
+> Task :flutter_local_notifications:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :google_mobile_ads:javaPreCompileDebug UP-TO-DATE
+> Task :webview_flutter_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :webview_flutter_android:compileDebugKotlin UP-TO-DATE
+> Task :webview_flutter_android:javaPreCompileDebug UP-TO-DATE
+> Task :webview_flutter_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :webview_flutter_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :google_mobile_ads:compileDebugJavaWithJavac UP-TO-DATE
+> Task :google_mobile_ads:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :in_app_update:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :in_app_update:compileDebugKotlin UP-TO-DATE
+> Task :in_app_update:javaPreCompileDebug UP-TO-DATE
+> Task :in_app_update:compileDebugJavaWithJavac NO-SOURCE
+> Task :in_app_update:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :package_info_plus:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :package_info_plus:compileDebugKotlin UP-TO-DATE
+> Task :package_info_plus:javaPreCompileDebug UP-TO-DATE
+> Task :package_info_plus:compileDebugJavaWithJavac NO-SOURCE
+> Task :package_info_plus:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :path_provider_android:javaPreCompileDebug UP-TO-DATE
+> Task :path_provider_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :path_provider_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :permission_handler_android:javaPreCompileDebug UP-TO-DATE
+> Task :permission_handler_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :permission_handler_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :share_plus:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :share_plus:compileDebugKotlin UP-TO-DATE
+> Task :share_plus:javaPreCompileDebug UP-TO-DATE
+> Task :share_plus:compileDebugJavaWithJavac NO-SOURCE
+> Task :share_plus:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :shared_preferences_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :shared_preferences_android:compileDebugKotlin UP-TO-DATE
+> Task :shared_preferences_android:javaPreCompileDebug UP-TO-DATE
+> Task :shared_preferences_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :shared_preferences_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :sqflite_android:javaPreCompileDebug UP-TO-DATE
+> Task :sqflite_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :sqflite_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :url_launcher_android:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :url_launcher_android:generateDebugBuildConfig UP-TO-DATE
+> Task :url_launcher_android:compileDebugKotlin UP-TO-DATE
+> Task :url_launcher_android:javaPreCompileDebug UP-TO-DATE
+> Task :url_launcher_android:compileDebugJavaWithJavac UP-TO-DATE
+> Task :url_launcher_android:bundleLibCompileToJarDebug UP-TO-DATE
+> Task :app:javaPreCompileDevDebug UP-TO-DATE
+> Task :app:preDevDebugUnitTestBuild
+> Task :app:javaPreCompileDevDebugUnitTest UP-TO-DATE
+> Task :app:packageDevDebugUnitTestForUnitTest
+> Task :app:generateDevDebugUnitTestConfig
+> Task :audioplayers_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :audioplayers_android:processDebugJavaRes UP-TO-DATE
+> Task :cloud_firestore:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :cloud_firestore:processDebugJavaRes NO-SOURCE
+> Task :firebase_analytics:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :firebase_analytics:processDebugJavaRes UP-TO-DATE
+> Task :firebase_auth:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :firebase_auth:processDebugJavaRes NO-SOURCE
+> Task :firebase_core:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :firebase_core:processDebugJavaRes NO-SOURCE
+> Task :flutter_local_notifications:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :flutter_local_notifications:processDebugJavaRes NO-SOURCE
+> Task :google_mobile_ads:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :google_mobile_ads:processDebugJavaRes NO-SOURCE
+> Task :in_app_update:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :in_app_update:processDebugJavaRes UP-TO-DATE
+> Task :package_info_plus:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :package_info_plus:processDebugJavaRes UP-TO-DATE
+> Task :path_provider_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :path_provider_android:processDebugJavaRes NO-SOURCE
+> Task :permission_handler_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :permission_handler_android:processDebugJavaRes NO-SOURCE
+> Task :share_plus:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :share_plus:processDebugJavaRes UP-TO-DATE
+> Task :shared_preferences_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :shared_preferences_android:processDebugJavaRes UP-TO-DATE
+> Task :sqflite_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :sqflite_android:processDebugJavaRes NO-SOURCE
+> Task :url_launcher_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :url_launcher_android:processDebugJavaRes UP-TO-DATE
+> Task :webview_flutter_android:bundleLibRuntimeToJarDebug UP-TO-DATE
+> Task :webview_flutter_android:processDebugJavaRes UP-TO-DATE
+> Task :app:compileDevDebugKotlin
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActionHelper.kt:198:83 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:24:8 'class GestureDetectorCompat : Any' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:46:43 'class GestureDetectorCompat : Any' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:101:49 'var isStatusBarContrastEnforced: Boolean' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:104:27 'val defaultDisplay: Display!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:112:81 'val defaultDisplay: Display!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:118:31 'constructor(p0: Context, p1: GestureDetector.OnGestureListener): GestureDetectorCompat' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:249:30 'var systemUiVisibility: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:250:35 'static field SYSTEM_UI_FLAG_LIGHT_STATUS_BAR: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:409:18 This declaration overrides a deprecated member but is not marked as deprecated itself. Add the '@Deprecated' annotation or suppress the diagnostic.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:420:105 'val defaultDisplay: Display!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt:468:30 The corresponding parameter in the supertype 'ComponentActivity' is named 'intent'. This may cause problems when calling this function with named arguments.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmOverlayService.kt:397:44 'static field FLAG_SHOW_WHEN_LOCKED: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmPlayer.kt:306:53 'static field VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmPlayer.kt:363:27 'fun vibrate(p0: VibrationEffect!, p1: AudioAttributes!): Unit' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CalendarWidgetProvider.kt:85:29 'fun <T : Parcelable!> getParcelableArrayList(p0: String?): ArrayList<T!>?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmDisplay.kt:47:52 'fun getRealMetrics(p0: DisplayMetrics!): Unit' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmDisplay.kt:73:79 Unnecessary non-null assertion (!!) on a non-null receiver of type 'Display'.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt:157:52 'val stableInsetLeft: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt:157:76 'val systemWindowInsetLeft: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt:158:50 'val stableInsetTop: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt:158:73 'val systemWindowInsetTop: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt:159:54 'val stableInsetRight: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt:159:79 'val systemWindowInsetRight: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt:160:56 'val stableInsetBottom: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt:160:82 'val systemWindowInsetBottom: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt:161:57 'val mandatorySystemGestureInsets: Insets' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CustomAlarmReceiver.kt:281:30 'static field SCREEN_BRIGHT_WAKE_LOCK: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/CustomAlarmReceiver.kt:282:30 'static field ACQUIRE_CAUSES_WAKEUP: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/MainActivity.kt:1297:49 'static field VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/RingSnoozeController.kt:92:95 Unnecessary non-null assertion (!!) on a non-null receiver of type 'String'.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepScheduleResolver.kt:141:73 Unnecessary non-null assertion (!!) on a non-null receiver of type 'SleepScheduleResolver.OpportunityWindow'.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepScheduleResolver.kt:144:81 Unnecessary non-null assertion (!!) on a non-null receiver of type 'SleepScheduleResolver.OpportunityWindow'.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt:278:66 'field scaledDensity: Float' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt:341:66 'field scaledDensity: Float' is deprecated. Deprecated in Java.
+
+> Task :app:compileDevDebugJavaWithJavac UP-TO-DATE
+> Task :app:bundleDevDebugClassesToRuntimeJar
+> Task :app:bundleDevDebugClassesToCompileJar
+> Task :app:processDevDebugJavaRes UP-TO-DATE
+> Task :app:compileDevDebugUnitTestKotlin
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/AlarmRefreshEngineH2Test.kt:159:19 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/AlarmRefreshEngineH2Test.kt:213:16 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/AlarmSnoozeDstTest.kt:66:40 'fun snooze(context: Context, alarmId: Int, minutes: Int = ...): AlarmActionHelper.SnoozeResult?' is deprecated. Use RingSnoozeController for UI, snoozeAt for DB/OS tests.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/AlarmSnoozeDstTest.kt:78:16 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/AlarmSnoozeDstTest.kt:160:38 'fun snooze(context: Context, alarmId: Int, minutes: Int = ...): AlarmActionHelper.SnoozeResult?' is deprecated. Use RingSnoozeController for UI, snoozeAt for DB/OS tests.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/AlarmSnoozeDstTest.kt:166:41 'fun snooze(context: Context, alarmId: Int, minutes: Int = ...): AlarmActionHelper.SnoozeResult?' is deprecated. Use RingSnoozeController for UI, snoozeAt for DB/OS tests.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/CoverAlarmFlexWindowTest.kt:58:68 'constructor(p0: Rect?, p1: (Mutable)List<Rect!>?): DisplayCutout' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/CoverAlarmNotificationTest.kt:59:37 'field bigContentView: RemoteViews!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/DiagnosticShareTest.kt:36:28 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/DiagnosticShareTest.kt:42:24 'fun <T : Parcelable!> getParcelableExtra(p0: String!): T?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G0NativeMigrationTest.kt:157:46 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G1LocaleTest.kt:103:42 'fun snooze(context: Context, alarmId: Int, minutes: Int = ...): AlarmActionHelper.SnoozeResult?' is deprecated. Use RingSnoozeController for UI, snoozeAt for DB/OS tests.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G1RingRoundTest.kt:108:40 'fun snooze(context: Context, alarmId: Int, minutes: Int = ...): AlarmActionHelper.SnoozeResult?' is deprecated. Use RingSnoozeController for UI, snoozeAt for DB/OS tests.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G1RingRoundTest.kt:119:30 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G1RingRoundTest.kt:193:16 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G1RingRoundTest.kt:195:66 'field type: Int' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G1RingRoundTest.kt:935:57 'static field VIBRATOR_SERVICE: String' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G1ScheduleNotifyTest.kt:102:26 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G1ScheduleNotifyTest.kt:109:26 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G1WakeSyncTest.kt:83:36 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/G1WakeSyncTest.kt:107:16 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/ReleaseLanguagesTest.kt:82:23 'constructor(p0: String!, p1: String!): Locale' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/RingSnoozeTest.kt:129:16 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/RingSnoozeTest.kt:140:31 'field bigContentView: RemoteViews!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/RingSnoozeTest.kt:147:223 'field sound: Uri!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/RingSnoozeTest.kt:147:250 'field vibrate: LongArray!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/RingSnoozeTest.kt:193:33 'field bigContentView: RemoteViews!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/RingSnoozeTest.kt:198:34 'field bigContentView: RemoteViews!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/RingSnoozeTest.kt:230:35 'field sound: Uri!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/RingSnoozeTest.kt:230:69 'field vibrate: LongArray!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/SleepWidgetReapplyTest.kt:26:52 The resulting type of this 'javaClass' call is 'Class<SleepWidgetProvider.Companion>' and not 'Class<SleepWidgetProvider>'. Use '::class.java' to access type 'Class<SleepWidgetProvider>'.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/test/kotlin/com/hwani1103/shiftbell/SnoozeControlsLayoutTest.kt:103:39 'field bigContentView: RemoteViews!' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/testDevDebug/kotlin/com/hwani1103/shiftbell/DebugAlarmDeliveryProbeTest.kt:29:68 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/testDevDebug/kotlin/com/hwani1103/shiftbell/DebugAlarmDeliveryProbeTest.kt:30:50 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+w: file:///C:/Users/Administrator/Desktop/shiftbell/android/app/src/testDevDebug/kotlin/com/hwani1103/shiftbell/DebugAlarmDeliveryProbeTest.kt:32:83 'field operation: PendingIntent?' is deprecated. Deprecated in Java.
+
+> Task :app:compileDevDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:processDevDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:testDevDebugUnitTest
+
+[Incubating] Problems report is available at: file:///C:/Users/Administrator/Desktop/shiftbell/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.12/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 10m 11s
+295 actionable tasks: 12 executed, 283 up-to-date
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle:compileKotlin UP-TO-DATE
+> Task :gradle:compileJava NO-SOURCE
+> Task :gradle:compileGroovy NO-SOURCE
+> Task :gradle:pluginDescriptors UP-TO-DATE
+> Task :gradle:processResources UP-TO-DATE
+> Task :gradle:classes UP-TO-DATE
+> Task :gradle:jar UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+
+> Task :app:compileFlutterBuildDevDebug
+lib/screens/calendar_tab.dart:2:8: Error: Error when reading 'lib/widgets/detail_calendar_cell.dart': �??��?�� ?��?��?�� 찾을 ?�� ?��?��?��?��
+import '../widgets/detail_calendar_cell.dart';
+       ^
+lib/screens/calendar_tab.dart:3838:35: Error: The getter 'CalendarDetailProfile' isn't defined for the type '_CalendarTabState'.
+ - '_CalendarTabState' is from 'package:shiftbell/screens/calendar_tab.dart' ('lib/screens/calendar_tab.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'CalendarDetailProfile'.
+    if (_readingColors != null && CalendarDetailProfile.forTheme(theme) != null &&
+                                  ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/calendar_tab.dart:3842:20: Error: The getter 'CalendarDetailProfile' isn't defined for the type '_CalendarTabState'.
+ - '_CalendarTabState' is from 'package:shiftbell/screens/calendar_tab.dart' ('lib/screens/calendar_tab.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'CalendarDetailProfile'.
+          profile: CalendarDetailProfile.forTheme(theme)!, palette: _readingColors!,
+                   ^^^^^^^^^^^^^^^^^^^^^
+lib/screens/calendar_tab.dart:3841:14: Error: The method 'DetailCalendarCell' isn't defined for the type '_CalendarTabState'.
+ - '_CalendarTabState' is from 'package:shiftbell/screens/calendar_tab.dart' ('lib/screens/calendar_tab.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'DetailCalendarCell'.
+      return DetailCalendarCell(
+             ^^^^^^^^^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+> Task :app:compileFlutterBuildDevDebug FAILED
+
+[Incubating] Problems report is available at: file:///C:/Users/Administrator/Desktop/shiftbell/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDevDebug'.
+> Process 'command 'C:\tools\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.12/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 31s
+5 actionable tasks: 1 executed, 4 up-to-date

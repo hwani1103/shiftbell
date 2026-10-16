@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-14",
+  "reason": "User requested an original white choice in the Korean calendar theme selector. New Korean-only copy; existing reviewed copy is unchanged.",
+  "changes": {
+    "uiThemeOriginalWhite": {
+      "before": null,
+      "after": "기본 흰색"
+    }
+  }
+}

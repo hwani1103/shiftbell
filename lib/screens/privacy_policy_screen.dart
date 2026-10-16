@@ -1,3 +1,5 @@
+import '../widgets/app_ui_feedback.dart';
+import '../theme/app_ui_theme.dart';
 import '../widgets/adaptive_layout.dart';
 // lib/screens/privacy_policy_screen.dart
 //
@@ -26,13 +28,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
-import '../theme/app_colors.dart';
 
 class _PrivacySection {
   final IconData icon;
   final String Function(AppLocalizations l10n) title;
   final String Function(AppLocalizations l10n) body;
-  const _PrivacySection({required this.icon, required this.title, required this.body});
+  const _PrivacySection(
+      {required this.icon, required this.title, required this.body});
 }
 
 final List<_PrivacySection> _privacySections = [
@@ -63,7 +65,7 @@ final List<_PrivacySection> _privacySections = [
     body: (l10n) => l10n.privacyPermissionsBody,
   ),
   _PrivacySection(
-    icon: Icons.delete_outline,
+    icon: AppUiIcons.delete,
     title: (l10n) => l10n.privacyDataRetentionTitle,
     body: (l10n) => l10n.privacyDataRetentionBody,
   ),
@@ -86,14 +88,15 @@ class PrivacyPolicyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: kAppBackgroundPastel,
+      backgroundColor: AppUiPalette.of(context).background,
       appBar: AppBar(
         title: Text(l10n.settingsPrivacyPolicy),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0.5,
+        backgroundColor: AppUiPalette.of(context).surface,
+        foregroundColor: AppUiPalette.of(context).text,
+        elevation: 0,
       ),
-      body: AdaptiveFormBody(child: SafeArea(
+      body: AdaptiveFormBody(
+          child: SafeArea(
         top: false,
         child: ListView(
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 28.h),
@@ -102,18 +105,22 @@ class PrivacyPolicyScreen extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(18.w),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppUiPalette.of(context).surface,
                 borderRadius: BorderRadius.circular(14.r),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.privacy_tip_outlined, size: 22.sp, color: kAppMainAccent),
+                  Icon(Icons.privacy_tip_outlined,
+                      size: 22.sp, color: AppUiPalette.of(context).primary),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
                       l10n.privacyIntro,
-                      style: TextStyle(fontSize: 13.5.sp, color: Colors.black87, height: 1.55),
+                      style: TextStyle(
+                          fontSize: AppFontSize.body,
+                          color: AppUiPalette.of(context).text,
+                          height: 1.55),
                     ),
                   ),
                 ],
@@ -123,15 +130,16 @@ class PrivacyPolicyScreen extends StatelessWidget {
               SizedBox(height: 18.h),
               Row(
                 children: [
-                  Icon(section.icon, size: 18.sp, color: kAppMainAccent),
+                  Icon(section.icon,
+                      size: 18.sp, color: AppUiPalette.of(context).primary),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       section.title(l10n),
                       style: TextStyle(
-                        fontSize: 13.sp,
+                        fontSize: AppFontSize.body,
                         fontWeight: FontWeight.w700,
-                        color: kAppMainAccent,
+                        color: AppUiPalette.of(context).primary,
                         letterSpacing: 0.2,
                       ),
                     ),
@@ -141,14 +149,17 @@ class PrivacyPolicyScreen extends StatelessWidget {
               SizedBox(height: 8.h),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(16.w),
+                padding: EdgeInsets.all(AppUiMetrics.gap),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppUiPalette.of(context).surface,
                   borderRadius: BorderRadius.circular(14.r),
                 ),
                 child: Text(
                   section.body(l10n),
-                  style: TextStyle(fontSize: 13.5.sp, color: Colors.black87, height: 1.6),
+                  style: TextStyle(
+                      fontSize: AppFontSize.body,
+                      color: AppUiPalette.of(context).text,
+                      height: 1.6),
                 ),
               ),
             ],
@@ -157,7 +168,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
               child: Text(
                 l10n.privacyEffectiveDate,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11.5.sp, color: Colors.grey.shade600, height: 1.5),
+                style: TextStyle(
+                    fontSize: AppFontSize.meta,
+                    color: AppUiPalette.of(context).secondaryText,
+                    height: 1.5),
               ),
             ),
           ],

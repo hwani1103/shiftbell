@@ -1,0 +1,15 @@
+{
+  "added": "오후",
+  "errors": [],
+  "widths": [
+    {
+      "width": 736,
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "overflow": false
+    }
+  ],
+  "note": "HTML preview only; not Flutter/device verification"
+}

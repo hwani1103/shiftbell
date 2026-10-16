@@ -1,0 +1,76 @@
+GAME-01 현행 구현 인계 — 칸당 동일 속도 / 에셋 프로토타입
+사용자 재확정: 이동 횟수 N과 이동 시간은 별개. 긴 이동은 더 오래 걸리며 모든 Unit의 칸당 속도는 같아야 한다.
+이 문서가 현행 lab 규칙을 설명한다. game_design_v1과 game_implementation_v1의 동일 Step 시간 계약/47개 해답은 당시 증거로 보존한다.
+우선순위: 이후 사용자 지시 > AGENTS.md > 이 현행 원장 > 옛 GAME-01 문서.
+
+1. 변경 범위와 격리
+허용 경로: packages/sync_path_core, sync_path_tools, sync_path_ui, examples/sync_path_lab 및 새 게임/UI 기록.
+기존 dev/prod app entry, root pubspec/Android/web/앱 asset/알람/광고/공통 UI는 이 작업에서 수정하지 않았다.
+Git의 기존 dirty 변경과 다른 세션 작업을 보존했다. tracked_audit.json의 기존 파일 차이는 동시 세션 변경이다.
+설치/기기 앱 중지/production/release/배포 작업 없음. root P0 출시 검사는 대상 앱 변경이 없어 실행하지 않았다.
+
+2. 현행 규칙
+ruleSetId=constant-cell-speed-v2, packId=dev-pilot-12-cell-speed, packRevision=2, 모든 levelRevision=2.
+최대 N은 직선 명령의 선택 횟수다. 첫 출발 t=0; d칸 이동의 논리 시간은 d; 각 Unit은 직전 이동 직후 다음 이동을 시작한다.
+모든 Unit의 논리 속도는 한 시간 단위에 한 칸, 기본 화면 재생은 칸당650ms.
+대기 금지, 분할/왕복/재방문 허용. 직선 분할은 시간 조절 방법이 아니다. 우회/왕복은 실제 이동 거리를 늘린다.
+같은 절대 시간의 중심 일치만 충돌. 교차하는 길이더라도 지나간 시점이 다르면 안전하다. 칸 사이의 마주침도 충돌한다.
+Goal 진입 즉시 흡수/제거하며 동시 도착 허용. Goal에서 대기하는 collider는 만들지 않는다.
+
+실기기 피드백 회귀:
+L07 A(3,0)→(2,0)→(2,4):5칸, B(1,0)→(0,0)→(2,0)→(2,4):7칸. 새 엔진 결과 SUCCESS, 도착5/7.
+L08 A(0,4)→(3,4)→(3,2)→(2,2):6칸.
+    B(0,0)→(4,0)→(4,2)→(2,2):8칸.
+    C(0,3)→(1,3)→(1,2)→(2,2):3칸. 새 엔진 결과 SUCCESS, 도착6/8/3.
+새 APK의 실기기 재실행 자체는 사용자가 설치한 뒤 후속 확인한다. 위 결과는 호스트 엔진/화면 검사이며 실기기 PASS로 기록하지 않는다.
+
+3. 엔진/표현 경계
+core는 pure Dart. LinearPiece는 명령 ordinal과 절대 start/end time을 별도로 제공한다.
+TemporalCollisionResolver는 겹치는 절대 구간에 대해 유리수 상대 속도를 계산한다. 엔진은 최초 시점 모든 쌍/도착을 기록한다.
+Solver도 명령 ordinal끼리만 비교하지 않고 실제 겹친 시간 구간을 비교한다.
+ReplayCursor는 trace 종료 시각에서 clamp하며 completed Unit을 제외한다. 스프라이트/점프/보폭/FPS가 판정에 들어가지 않는다.
+호환 필드 durationInSteps는 현재 시간 단위의 별칭이다. 새 코드에서는 durationInTimeUnits 의미로 읽는다.
+계획 중 Unit은 start에 머물고 draft endpoint는 작은 표식이다. Execute 때 Goal에서 start로 되돌아오는 시각적 점프를 없앴다.
+
+4. 12레벨 재검증/수정
+동일 속도로 바꾸면 L04/L06/L09/L12의 기존 레벨은 UNSAT이었다.
+L04: 지도 유지, N3→4, 중간 통로로 위아래 우회 가능. 정확 해답4.
+L06: 지도 유지, N3→4, 왕복으로 교차점 통과 시점 변경. 정확 해답44.
+L09: 지도 유지, N3→4, 바깥 Unit 왕복으로 좁은 입구 진입 시점 변경. 정확 해답9.
+L12: N3 유지, row1을 ###.##→#....#로 변경해 위 우회 통로 추가. 정확 해답94.
+나머지 지도/명령 상한 유지. L03/L10의 옛 거리 무관 이동/뒤 Unit 따라잡기 힌트는 새 규칙에 맞게 수정.
+정확 해답 수 L01..12: 1,3,1,4,3,44,8,4,9,6,7,94 (합계184).
+전체 경로 조합14700개를 전수 확인했고, 개별 도메인/성공 개수/최초 충돌 시각·위치·모든 쌍이 독립 oracle와 일치했다.
+oracle는 명령을 한 칸 edge로 확장해 정수 구간 내0, 1/2, 1을 검사한다.
+상대 속도 성분은 -2..2이며 정수 시작 좌표이므로 모든 첫 충돌 후보를 포함한다. 프레임 샘플링이 아니다.
+임의 3-Unit 경로4000건에서도 전체구간 resolver와 독립 cell-edge oracle가 일치했다.
+수학적으로 해결 가능한 프로토타입이며 난이도 순서/재미는 사람 플레이 평가가 남아 있다.
+
+5. 그래픽 프로토타입
+imagegen 기본 내장 도구로 투명 atlas 두 장 생성. 3색 로봇 몸체×4방향, floor/wall/Goal.
+프로젝트 assets/art에 보존, source rectangle metadata를 렌더러에 명시. 외부 런타임 다운로드 없음.
+선택:1.13배, 외곽 링, 위 화살표. 라벨 A/B/C와 카드로 색 외 구분도 유지한다.
+Idle 호흡, 실제 이동거리 기반 보폭/다리/팔, Start/Stop 기울기, Walk/Run 상태 연결, 방향별 앞/뒤/좌/우 표현.
+기본 규칙의 속도1은 Walk다. Run은 향후 표현 정책에서 사용할 수 있는 연결 경계이며 Unit별 논리 속도를 다르게 하지 않는다.
+Goal 점프/환호 포즈/성공 입자, 충돌 기울기/페이드/입자. 사운드는 사용자 허용대로 제외.
+경로는 선택 선3.2px/나머지1.6px 및 낮은 opacity, 선택한 꺾임만 작은 점. 중복 start 링/텍스트 제거.
+단일 ticker가 별도 visualTime/논리 cursor를 관리한다. 계획 중 idle, 실행 중 재생, 리뷰 반응1.2초 후 정지.
+동작 줄이기에서는 정적 선택과 수동 한 칸 시간 재생만 사용. background/pause/hub/종료에 자동 재생 없음.
+atlas1회decode/라벨과 draft·도달 종점·유효성 snapshot 재사용, 종료/교체에 image/codec/ticker 정리.
+Flame/audio/resource manager dependency 추가 없음. 에셋 교체가 레벨/Solver에 영향을 주지 않는다.
+
+6. 산출물/검증
+독립 DEV debug APK: examples/sync_path_lab/build/app/outputs/flutter-apk/app-dev-debug.apk
+applicationId=dev.shiftbell.experiments.sync_path_lab.dev, label=Sync Path Lab DEV, versionName=0.2.0, versionCode=3.
+Android Gradle variant는 devDebug만 허용. dev/prod 교대시계와 ID/저장 공간이 다르다.
+새 저장키 syncPathLab.dev.v2.progress; 이전 v1기록 보존. 실험상 12레벨 전부 선택 가능, 패키지 기본 잠금 정책은 유지.
+APK155047390 bytes, SHA256=E1D73C8E4E44B2B109E49C846B3BC06C1552A19D4EF61603DEE615D497C5D058.
+merged manifest의 INTERNET은 Flutter debug 도구용, 자체 DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION은 AndroidX signature permission.
+게임용 알람/오버레이/광고/네트워크/권한 기능 없음. debug APK 크기는 출시 용량을 뜻하지 않는다.
+분석/회귀 검사: tools/check_game_lab.ps1. optional -Build도 devDebug+DEV debug web만 실행한다.
+검사 로그/level_verification.json/ui_previews/asset_hashes.json/apk_hash.json이 이 폴더에 있다.
+실기기 설치/사용성/FPS/제조사별 동작/출시 검증은 후속이다. root 출시/P0실기기 PASS로 확대하지 않는다.
+
+설치 명령 (반드시 독립 lab 디렉터리):
+cd C:\Users\Administrator\Desktop\shiftbell\examples\sync_path_lab
+flutter install --debug --flavor dev

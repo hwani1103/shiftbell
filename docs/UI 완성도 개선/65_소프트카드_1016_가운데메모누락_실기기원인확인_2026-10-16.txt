@@ -1,0 +1,31 @@
+2026-10-16 소프트카드 10/16 가운데 메모 누락 — 조사만 완료
+
+사용자 요청: dev 소프트카드 10/16 메모 3개 중 가운데만 보이지 않음. 먼저 확인.
+설치본: UI64 통합 dev debug. 이번 조사에서는 생산 코드 수정/재빌드/재설치/hot reload 없음.
+기기: SM-S948N R5KL20DHWAE. 실제 2026-10월 소프트카드 화면 및 VM 위젯 계측.
+
+확인 결과
+- 1행 입력/표시 ㄱㄴ, 배정 높이 9.0, 글자 높이 9.0.
+- 2행 입력 ㅇㄷㅇㄷ, 표시 빈 문자열, 배정 높이 8.999999999999993, 글자 높이 9.0.
+- 3행 입력/표시 ㅂㅈㅇㄷ, 배정 높이 9.0, 글자 높이 9.0.
+- 셋 모두 fontSize 9.142857142857142, 가용 너비 49.632653061224495.
+- 가운데 메모가 렌더러 입력까지 정상 전달됨. 저장 데이터 누락이 아니라 화면 표시 오류.
+
+원인
+CalendarCellGeometry의 Rect 좌표 → Positioned.fromRect 높이 산출 중 부동소수점 오차.
+CompleteCellMemoText fits()의 painter.height <= height 엄격 비교 때문에 9.0 > 8.999999999999993을 공간 부족으로 처리. 한 글자도 통과하지 못해 최종 Text가 빈 문자열.
+공통 렌더러이므로 소프트카드의 특정 날짜에만 한정되는 구조는 아님. 타 테마/기기 전수 재현은 미실시.
+기존 complete_cell_memo_text_test는 너비 기반 접두 문자열을 검증하며 미세하게 작은 유한 높이 조건이 빠져 있음.
+UI64에 남긴 호스트 이미지 빈 메모 관찰과 동일 계열 가능성이 있으나 해당 호스트 경로 계측은 이번에 재실행하지 않음.
+
+후속 수정 방향(미적용)
+실제 잘림 방지는 유지하면서 높이 비교에 계산 오차 수준의 허용치를 적용하고, 유한 높이/세 줄 실제 geometry를 회귀 검사에 포함. 폰트 축소나 메모 줄 삭제로 해결하지 않음.
+
+증거
+artifacts/memo_middle_missing_2026_10_16/current.png
+artifacts/memo_middle_missing_2026_10_16/soft_card_probe.png
+artifacts/memo_middle_missing_2026_10_16/measurement.json
+artifacts/memo_middle_missing_2026_10_16/inspect_expression.txt
+
+조사 중 메모/DB/저장 테마 설정 변경 없음. 현재 materialCard 값을 임시 provider에 동일값으로 지정 후 동일값 복귀.
+사용자가 게임 종료 후 달력 화면에서 계측 완료. OT 배치 구현은 계속 보류.

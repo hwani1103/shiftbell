@@ -1,0 +1,214 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: (setUpAll)
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Layout choice survives a new provider container and latest rapid tap wins
+00:00 +1: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for dawn
+00:00 +2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn overview preserves names/colors and fits 360px
+00:02 +3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn overview preserves names/colors and fits 360px
+00:02 +4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn overview preserves names/colors and fits 360px
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <30.181818181818183>
+  Actual: <30.181818181818187>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart:132:11)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart line 132
+The test description was:
+  dawn overview preserves names/colors and fits 360px
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:04 +4 -1: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간, 야간] Size(320.0, 568.0)
+00:04 +4 -1: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn overview preserves names/colors and fits 360px [E]
+  Test failed. See exception logs above.
+  The test description was: dawn overview preserves names/colors and fits 360px
+  
+00:04 +5 -1: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games
+00:05 +6 -1: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "SyncPathGameApp": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart:69:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart line 69
+The test description was:
+  Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:06 +6 -2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn timeline preserves names/colors and fits 360px
+00:06 +6 -2: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games [E]
+  Test failed. See exception logs above.
+  The test description was: Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games
+  
+00:06 +7 -2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn timeline preserves names/colors and fits 360px
+00:06 +8 -2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn timeline preserves names/colors and fits 360px
+00:06 +9 -2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간근무, 야간, 특별연장근무] Size(320.0, 568.0)
+00:06 +10 -2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간근무, 야간, 특별연장근무] Size(320.0, 568.0)
+00:07 +11 -2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: morning overview preserves names/colors and fits 360px
+00:08 +12 -2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: morning overview preserves names/colors and fits 360px
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <30.181818181818183>
+  Actual: <30.181818181818187>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart:132:11)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart line 132
+The test description was:
+  morning overview preserves names/colors and fits 360px
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:08 +12 -3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간근무, 야간, 특별연장근무] Size(1280.0, 800.0)
+00:08 +12 -3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: morning overview preserves names/colors and fits 360px [E]
+  Test failed. See exception logs above.
+  The test description was: morning overview preserves names/colors and fits 360px
+  
+00:08 +13 -3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: morning timeline preserves names/colors and fits 360px
+00:09 +14 -3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: morning timeline preserves names/colors and fits 360px
+00:09 +15 -3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Day, Night Duty, WWWWWWWWWW] Size(806.0, 895.0)
+00:09 +16 -3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Day, Night Duty, WWWWWWWWWW] Size(806.0, 895.0)
+00:09 +17 -3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: daytime overview preserves names/colors and fits 360px
+00:10 +18 -3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: daytime overview preserves names/colors and fits 360px
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <30.181818181818183>
+  Actual: <30.181818181818187>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart:132:11)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart line 132
+The test description was:
+  daytime overview preserves names/colors and fits 360px
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:10 +18 -4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Afternoon Shift, Sleepover Shift, WWWWWWWWWWWWWWWW] Size(320.0, 568.0)
+00:10 +18 -4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: daytime overview preserves names/colors and fits 360px [E]
+  Test failed. See exception logs above.
+  The test description was: daytime overview preserves names/colors and fits 360px
+  
+00:10 +19 -4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: daytime timeline preserves names/colors and fits 360px
+00:11 +20 -4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: daytime timeline preserves names/colors and fits 360px
+00:11 +21 -4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: daytime timeline preserves names/colors and fits 360px
+00:12 +22 -4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for evening
+00:12 +23 -4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: evening overview preserves names/colors and fits 360px
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <30.181818181818183>
+  Actual: <30.181818181818187>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart:132:11)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart line 132
+The test description was:
+  evening overview preserves names/colors and fits 360px
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:12 +23 -5: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: evening overview preserves names/colors and fits 360px [E]
+  Test failed. See exception logs above.
+  The test description was: evening overview preserves names/colors and fits 360px
+  
+00:12 +23 -5: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: evening timeline preserves names/colors and fits 360px
+00:13 +24 -5: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for night
+00:13 +25 -5: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: night overview preserves names/colors and fits 360px
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <30.181818181818183>
+  Actual: <30.181818181818187>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart:132:11)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart line 132
+The test description was:
+  night overview preserves names/colors and fits 360px
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:14 +25 -6: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: night overview preserves names/colors and fits 360px [E]
+  Test failed. See exception logs above.
+  The test description was: night overview preserves names/colors and fits 360px
+  
+00:14 +25 -6: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: night timeline preserves names/colors and fits 360px
+00:15 +26 -6: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for originalWhite
+00:15 +27 -6: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: originalWhite overview preserves names/colors and fits 360px
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <30.181818181818183>
+  Actual: <30.181818181818187>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart:132:11)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart line 132
+The test description was:
+  originalWhite overview preserves names/colors and fits 360px
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:16 +27 -7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: originalWhite overview preserves names/colors and fits 360px [E]
+  Test failed. See exception logs above.
+  The test description was: originalWhite overview preserves names/colors and fits 360px
+  
+00:16 +27 -7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: originalWhite timeline preserves names/colors and fits 360px
+00:17 +28 -7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-02-01 00:00:00.000 at 320.0 has exactly real days and no overflow
+00:18 +29 -7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-02-01 00:00:00.000 at 800.0 has exactly real days and no overflow
+00:18 +30 -7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2028-02-01 00:00:00.000 at 320.0 has exactly real days and no overflow
+00:18 +31 -7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2028-02-01 00:00:00.000 at 800.0 has exactly real days and no overflow
+00:19 +32 -7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-04-01 00:00:00.000 at 320.0 has exactly real days and no overflow
+00:20 +33 -7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-04-01 00:00:00.000 at 800.0 has exactly real days and no overflow
+00:20 +34 -7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: (tearDownAll)
+00:20 +34 -7: Some tests failed.

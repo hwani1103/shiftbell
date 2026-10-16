@@ -1,0 +1,24 @@
+오늘 근무 선택 단계 강조 개선 — 2026-10-13
+상태: 구현 및 대상9검사 완료 / dev 연결 hot reload 확인 중
+
+사용자 요청
+- 블루 기본 테마에서 선택 가능한 칩 테두리와 오늘 근무 선택 안내도 블루라 강조가 약함. 별도 색상 역할로 지정.
+- 안내의 반복이 충분히 눈에 띄지 않아 시선 유도 개선.
+
+공통 규칙 변경
+- AppUiPalette.blue.selectionOutline: 짙은 앰버#9B5809. 앱 primary#3D63B8/배경#EEF6FD는 유지. 화면 로컬 색상 하드코딩 없음.
+- 기존 선택 단계 칩 테두리와 AppTextTone.selection 안내가 같은 token을 참조.
+- AppUiMotion attentionCycle2.4초 유지. opacity1→0.42→1 및 paint scale1→0.97→1을 부드럽게 반복.
+- 렌더링 크기만 작게 변화하고 레이아웃 크기는 그대로. 기준 크기보다 확대하지 않아 기존 영역을 넘지 않음.
+- 오늘 선택 시 enabled false로 효과 정지/opacity1/scale1. 패턴 수정 시 widget dispose. 동작 줄이기 시 정적 표시.
+- hot reload의 initState 재실행 부재로 오래된 tween이 남지 않도록 갱신 시 pulse와 공통 duration 재연결. 사용자 패턴을 초기화하는 hot restart는 하지 않음.
+
+진단/검증
+- 기존 코드도 repeat였으나 opacity 최소0.65로 차이가 작았음. 반복 중단으로 단정하지 않음.
+- 연결 기기 animator_duration_scale1/accessibility_enabled0 확인. OS 설정 변경 없음.
+- 대상9검사 PASS: 반복6주기 이상 지속, 실제 오늘 선택 후 정지, 줄인 동작 정지, opacity/scale 최저점, 레이아웃 크기 보존, 선택/수정 흐름과 칩 강조색 포함.
+- 기존 테스트의 paint rect 고정 기대는 새로운 scale 효과에 맞춰 layout size 고정 기대로 변경. 실제 표현되는 효과를 숨기거나 생산 애니메이션을 끄지 않음.
+- 증거 artifacts/onboarding_attention_tests.log / onboarding_attention_tests_exit.txt.
+- 이전 debug session은 앱 재실행으로 연결 종료. 다시 실행 중인 dev 프로세스에 attach하여 hot reload 요청. prod/웹/새 APK 배포 없음.
+
+후속: 런타임 팔레트 다크 확장 계약/추가8검사는 UI23번. attach hot reload 요청은 완료 응답을 아직 받지 못했으므로 기기의 새 강조 효과 표시 완료는 미확인.

@@ -114,6 +114,7 @@ class HolidaySyncService {
     try {
       await kAlarmChannel.invokeMethod('setHolidayOverrides', {
         'add': overrides.add.keys.toList(),
+        'names': overrides.add,
         'remove': overrides.remove.toList(),
       });
       await WidgetRefreshService.refresh();

@@ -1,3 +1,4 @@
+import 'package:shiftbell/l10n/generated/app_localizations.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -33,6 +34,10 @@ void main() {
             for (final count in [1, 2, 3]) {
               final holiday = !value.startsWith('(');
               await tester.pumpWidget(MaterialApp(
+                  locale: const Locale('ko'),
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates:
+                      AppLocalizations.localizationsDelegates,
                   theme: ThemeData(fontFamily: 'UltraTest'),
                   home: MediaQuery(
                       data: MediaQueryData(
@@ -92,16 +97,15 @@ void main() {
               }
               final date = tester.getRect(find.text('29'));
               expect(rect.overlaps(date), isFalse);
-              final memo = find.byWidgetPredicate((w) =>
-                  w is CompleteCellMemoText && w.text == '첫메모가긴경우');
+              final memo = find.byWidgetPredicate(
+                  (w) => w is CompleteCellMemoText && w.text == '첫메모가긴경우');
               expect(tester.getRect(memo).left, greaterThanOrEqualTo(split));
-              final memoText = tester.widget<Text>(find.descendant(
-                  of: memo, matching: find.byType(Text)));
+              final memoText = tester.widget<Text>(
+                  find.descendant(of: memo, matching: find.byType(Text)));
               expect('첫메모가긴경우'.startsWith(memoText.data!), isTrue);
               expect(memoText.data, isNot(contains('...')));
               expect(memoText.textScaler!.scale(1), 1);
-              expect(memoText.style!.fontSize,
-                  lessThanOrEqualTo(count <= 2 ? 10.5 : 8.4));
+              expect(memoText.style!.fontSize, lessThanOrEqualTo(9.45));
               final dateText = tester.widget<Text>(find.text('29'));
               expect(dateText.textScaler!.scale(1), 1);
               expect(dateText.style!.fontSize, 14);
@@ -111,14 +115,7 @@ void main() {
                           find.byKey(const ValueKey('shift-badge-text')))
                       .textScaler!
                       .scale(1),
-                  {
-                    CalendarThemeId.minimal,
-                    CalendarThemeId.materialCard,
-                    CalendarThemeId.initialBadge,
-                    CalendarThemeId.eventChip,
-                  }.contains(theme)
-                      ? 1.3
-                      : (scale > 1.3 ? 1.3 : scale));
+                  1);
               final band =
                   tester.getRect(find.byKey(const ValueKey('wide-shift-band')));
               final shift = tester

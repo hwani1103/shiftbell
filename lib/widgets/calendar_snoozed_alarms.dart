@@ -1,3 +1,4 @@
+import '../theme/app_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -45,7 +46,7 @@ class CalendarSnoozedAlarms extends StatelessWidget {
         children: [
           Text(label,
               style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: AppFontSize.body,
                   color: colors.onSurface,
                   fontWeight: FontWeight.w600)),
           SizedBox(height: 8.h),

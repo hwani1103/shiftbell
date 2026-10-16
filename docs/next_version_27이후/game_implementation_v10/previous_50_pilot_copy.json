@@ -1,0 +1,722 @@
+{
+  "L01": {
+    "titleKo": "첫 출발",
+    "titleEn": "First departure",
+    "hintsKo": [
+      "공마다 따로 이어진 길을 따라 도착점까지 보내 보세요.",
+      "밝게 표시된 칸을 탭하고, 경로가 완성되면 다음 공을 골라 주세요.",
+      "한 가지 안전한 경로예요.\nA: 아래 2칸 → 오른쪽 2칸\nB: 아래 2칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Follow the separate corridors.",
+      "Adjust A first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 2 down → 2 right\nB: 2 down → 2 left"
+    ],
+    "chapterKo": "1–5",
+    "chapterEn": "1–5"
+  },
+  "L02": {
+    "titleKo": "같은 자리, 같은 순간",
+    "titleEn": "Same place, same time",
+    "hintsKo": [
+      "윗길에서 동시에 만나지 않도록 서로 다른 통로를 골라 보세요.",
+      "A의 길부터 조정해 보세요. 다른 공과 만나는 통로를 바꿀 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 2칸 → 아래 2칸\nB: 아래 2칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust A first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 2 right → 2 down\nB: 2 down → 2 left"
+    ]
+  },
+  "L03": {
+    "titleKo": "한 번의 우회",
+    "titleEn": "One useful detour",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "B의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 오른쪽 3칸\nB: 왼쪽 1칸 → 아래 2칸 → 오른쪽 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust B first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 down → 3 right\nB: 1 left → 2 down → 3 right"
+    ]
+  },
+  "L04": {
+    "titleKo": "첫 교차로",
+    "titleEn": "First crossing",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "A의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 위 1칸 → 왼쪽 1칸 → 오른쪽 4칸\nB: 아래 2칸 → 오른쪽 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust A first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 up → 1 left → 4 right\nB: 2 down → 2 right"
+    ]
+  },
+  "L05": {
+    "titleKo": "길이 만드는 시간",
+    "titleEn": "Time made by paths",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "B의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 왼쪽 1칸 → 아래 3칸\nB: 오른쪽 1칸 → 왼쪽 3칸 → 아래 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust B first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 down → 1 left → 3 down\nB: 1 right → 3 left → 3 down"
+    ]
+  },
+  "L06": {
+    "titleKo": "두 길의 시험",
+    "titleEn": "Two-path test",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "B의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 3칸 → 아래 1칸\nB: 위 1칸 → 아래 2칸 → 오른쪽 2칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust B first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 3 right → 1 down\nB: 1 up → 2 down → 2 right → 1 down"
+    ],
+    "chapterKo": "6–10",
+    "chapterEn": "6–10"
+  },
+  "L07": {
+    "titleKo": "세 갈래 순서",
+    "titleEn": "Three-path order",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "B의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸 → 위 3칸\nB: 아래 1칸 → 위 2칸 → 오른쪽 4칸 → 위 1칸\nC: 오른쪽 4칸 → 위 1칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust B first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 right → 1 up → 1 right → 3 up\nB: 1 down → 2 up → 4 right → 1 up\nC: 4 right → 1 up → 1 right"
+    ]
+  },
+  "L08": {
+    "titleKo": "작은 방의 세 길",
+    "titleEn": "Three paths in a small room",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "A의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 위 1칸 → 왼쪽 1칸 → 위 3칸\nB: 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸\nC: 오른쪽 1칸 → 위 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust A first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 down → 1 up → 1 left → 3 up\nB: 1 left → 1 up → 2 left\nC: 1 right → 3 up"
+    ]
+  },
+  "L09": {
+    "titleKo": "다른 길, 같은 순간",
+    "titleEn": "Different paths, same moment",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "C의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 위 2칸 → 오른쪽 2칸 → 아래 1칸\nB: 위 2칸 → 왼쪽 2칸 → 위 1칸\nC: 오른쪽 1칸 → 왼쪽 1칸 → 오른쪽 4칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust C first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 2 up → 2 right → 1 down\nB: 2 up → 2 left → 1 up\nC: 1 right → 1 left → 4 right → 1 down"
+    ]
+  },
+  "L10": {
+    "titleKo": "꺾어서 합류",
+    "titleEn": "Turn to join",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "B의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 위 1칸 → 오른쪽 3칸 → 아래 3칸\nB: 오른쪽 1칸 → 위 3칸 → 오른쪽 2칸 → 아래 3칸\nC: 오른쪽 2칸 → 아래 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust B first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 up → 3 right → 3 down\nB: 1 right → 3 up → 2 right → 3 down\nC: 2 right → 3 down"
+    ]
+  },
+  "L11": {
+    "titleKo": "되돌아오는 시간",
+    "titleEn": "Time to return",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "A의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 위 3칸 → 오른쪽 4칸 → 아래 6칸 → 왼쪽 2칸\nB: 오른쪽 3칸 → 아래 6칸 → 왼쪽 2칸\nC: 위 1칸 → 오른쪽 4칸 → 아래 6칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust A first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 3 up → 4 right → 6 down → 2 left\nB: 3 right → 6 down → 2 left\nC: 1 up → 4 right → 6 down → 2 left"
+    ],
+    "chapterKo": "11–15",
+    "chapterEn": "11–15"
+  },
+  "L12": {
+    "titleKo": "돌아가는 역할",
+    "titleEn": "A role for detours",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "C의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 4칸 → 오른쪽 1칸 → 아래 1칸\nB: 위 1칸 → 왼쪽 1칸 → 아래 4칸 → 오른쪽 1칸 → 아래 1칸\nC: 위 2칸 → 왼쪽 2칸 → 아래 4칸 → 오른쪽 1칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust C first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 4 down → 1 right → 1 down\nB: 1 up → 1 left → 4 down → 1 right → 1 down\nC: 2 up → 2 left → 4 down → 1 right → 1 down"
+    ]
+  },
+  "L13": {
+    "titleKo": "두 공의 우회",
+    "titleEn": "Two balls detour",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "A의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 왼쪽 1칸 → 위 3칸 → 왼쪽 2칸 → 아래 3칸\nB: 오른쪽 1칸 → 아래 1칸 → 왼쪽 2칸 → 아래 3칸\nC: 왼쪽 2칸 → 아래 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust A first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 left → 3 up → 2 left → 3 down\nB: 1 right → 1 down → 2 left → 3 down\nC: 2 left → 3 down"
+    ]
+  },
+  "L14": {
+    "titleKo": "엇갈린 순환로",
+    "titleEn": "A winding circuit",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "A의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 위 1칸 → 아래 2칸 → 위 4칸 → 왼쪽 1칸\nB: 위 1칸 → 오른쪽 1칸 → 위 1칸 → 왼쪽 3칸\nC: 위 1칸 → 왼쪽 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust A first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 up → 2 down → 4 up → 1 left\nB: 1 up → 1 right → 1 up → 3 left\nC: 1 up → 3 left"
+    ]
+  },
+  "L15": {
+    "titleKo": "세 공의 관문",
+    "titleEn": "Three-ball checkpoint",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "A의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 왼쪽 3칸 → 오른쪽 2칸 → 위 3칸 → 오른쪽 1칸\nB: 오른쪽 1칸 → 왼쪽 1칸 → 위 4칸 → 오른쪽 1칸\nC: 위 1칸 → 오른쪽 1칸 → 위 2칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust A first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 3 left → 2 right → 3 up → 1 right\nB: 1 right → 1 left → 4 up → 1 right\nC: 1 up → 1 right → 2 up → 1 right"
+    ]
+  },
+  "L16": {
+    "titleKo": "네 번째 공",
+    "titleEn": "The fourth ball",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "B의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 3칸 → 아래 1칸 → 오른쪽 1칸\nB: 아래 1칸 → 위 2칸 → 오른쪽 3칸 → 위 1칸\nC: 아래 1칸 → 오른쪽 3칸 → 위 1칸\nD: 위 2칸 → 오른쪽 3칸 → 아래 1칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust B first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 3 right → 1 down → 1 right\nB: 1 down → 2 up → 3 right → 1 up\nC: 1 down → 3 right → 1 up\nD: 2 up → 3 right → 1 down → 1 right"
+    ],
+    "chapterKo": "16–20",
+    "chapterEn": "16–20"
+  },
+  "L17": {
+    "titleKo": "한꺼번에 모이지 않게",
+    "titleEn": "Avoid a crowd",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "A의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 왼쪽 1칸 → 오른쪽 1칸 → 아래 3칸 → 왼쪽 1칸\nB: 왼쪽 1칸 → 아래 2칸 → 왼쪽 1칸\nC: 오른쪽 1칸 → 왼쪽 4칸 → 위 1칸\nD: 위 1칸 → 왼쪽 2칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust A first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 left → 1 right → 3 down → 1 left\nB: 1 left → 2 down → 1 left\nC: 1 right → 4 left → 1 up\nD: 1 up → 2 left → 1 up"
+    ]
+  },
+  "L18": {
+    "titleKo": "모퉁이 네 개",
+    "titleEn": "Four corners",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "D의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 오른쪽 6칸 → 위 2칸\nB: 왼쪽 3칸 → 위 4칸 → 오른쪽 4칸 → 위 2칸\nC: 아래 1칸 → 위 2칸 → 오른쪽 6칸 → 위 2칸\nD: 왼쪽 3칸 → 위 4칸 → 오른쪽 6칸 → 위 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust D first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 down → 6 right → 2 up\nB: 3 left → 4 up → 4 right → 2 up\nC: 1 down → 2 up → 6 right → 2 up\nD: 3 left → 4 up → 6 right → 2 up"
+    ]
+  },
+  "L19": {
+    "titleKo": "합류의 조건",
+    "titleEn": "Conditions for joining",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "D의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 왼쪽 5칸 → 위 2칸 → 오른쪽 1칸\nB: 위 3칸 → 왼쪽 3칸 → 아래 3칸\nC: 아래 1칸 → 오른쪽 1칸 → 위 3칸 → 왼쪽 3칸 → 아래 3칸\nD: 위 2칸 → 아래 2칸 → 위 2칸 → 왼쪽 4칸 → 아래 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust D first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 down → 5 left → 2 up → 1 right\nB: 3 up → 3 left → 3 down\nC: 1 down → 1 right → 3 up → 3 left → 3 down\nD: 2 up → 2 down → 2 up → 4 left → 3 down"
+    ]
+  },
+  "L20": {
+    "titleKo": "네 공의 약속",
+    "titleEn": "Four-ball promise",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "D의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 오른쪽 2칸 → 위 5칸\nB: 오른쪽 1칸 → 아래 2칸 → 오른쪽 2칸 → 위 5칸\nC: 왼쪽 2칸 → 오른쪽 5칸 → 위 5칸\nD: 왼쪽 1칸 → 아래 2칸 → 오른쪽 6칸 → 위 5칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust D first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 down → 2 right → 5 up\nB: 1 right → 2 down → 2 right → 5 up\nC: 2 left → 5 right → 5 up\nD: 1 left → 2 down → 6 right → 5 up"
+    ]
+  },
+  "L21": {
+    "titleKo": "한 길이 바뀌면",
+    "titleEn": "Change one path",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "B의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 왼쪽 1칸 → 오른쪽 3칸 → 위 4칸\nB: 오른쪽 1칸 → 아래 4칸 → 오른쪽 2칸 → 위 4칸\nC: 오른쪽 2칸 → 왼쪽 1칸 → 위 4칸\nD: 아래 1칸 → 왼쪽 2칸 → 위 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust B first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 down → 1 left → 3 right → 4 up\nB: 1 right → 4 down → 2 right → 4 up\nC: 2 right → 1 left → 4 up\nD: 1 down → 2 left → 2 up"
+    ],
+    "chapterKo": "21–25",
+    "chapterEn": "21–25"
+  },
+  "L22": {
+    "titleKo": "얽힌 입구",
+    "titleEn": "Tangled entrances",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "D의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 위 2칸 → 오른쪽 4칸 → 아래 2칸 → 왼쪽 1칸\nB: 아래 2칸 → 위 3칸 → 왼쪽 2칸 → 아래 4칸 → 왼쪽 1칸\nC: 아래 1칸 → 왼쪽 2칸 → 아래 4칸 → 왼쪽 1칸\nD: 위 3칸 → 아래 4칸 → 오른쪽 4칸 → 아래 2칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust D first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 down → 2 up → 4 right → 2 down → 1 left\nB: 2 down → 3 up → 2 left → 4 down → 1 left\nC: 1 down → 2 left → 4 down → 1 left\nD: 3 up → 4 down → 4 right → 2 down → 1 left"
+    ]
+  },
+  "L23": {
+    "titleKo": "통로의 약속",
+    "titleEn": "Corridor promise",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "C의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 3칸 → 아래 4칸\nB: 오른쪽 1칸 → 위 4칸 → 오른쪽 2칸 → 아래 4칸\nC: 아래 1칸 → 위 6칸 → 오른쪽 2칸 → 아래 4칸\nD: 위 1칸 → 오른쪽 4칸 → 아래 4칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust C first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 3 right → 4 down\nB: 1 right → 4 up → 2 right → 4 down\nC: 1 down → 6 up → 2 right → 4 down\nD: 1 up → 4 right → 4 down"
+    ]
+  },
+  "L24": {
+    "titleKo": "지나간 자리",
+    "titleEn": "A cleared cell",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "D의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 위 4칸 → 왼쪽 2칸 → 위 2칸\nB: 오른쪽 1칸 → 아래 4칸 → 위 2칸 → 오른쪽 2칸 → 위 4칸\nC: 오른쪽 3칸 → 위 4칸 → 왼쪽 2칸 → 위 2칸\nD: 오른쪽 4칸 → 왼쪽 3칸 → 위 2칸 → 오른쪽 2칸 → 위 4칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust D first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 right → 4 up → 2 left → 2 up\nB: 1 right → 4 down → 2 up → 2 right → 4 up\nC: 3 right → 4 up → 2 left → 2 up\nD: 4 right → 3 left → 2 up → 2 right → 4 up"
+    ]
+  },
+  "L25": {
+    "titleKo": "좁은 문 앞에서",
+    "titleEn": "Before the narrow gate",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "D의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 위 3칸\nB: 오른쪽 1칸 → 왼쪽 3칸 → 오른쪽 1칸 → 위 3칸\nC: 오른쪽 1칸 → 왼쪽 4칸 → 위 1칸\nD: 위 4칸 → 아래 3칸 → 왼쪽 2칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust D first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 right → 3 up\nB: 1 right → 3 left → 1 right → 3 up\nC: 1 right → 4 left → 1 up\nD: 4 up → 3 down → 2 left → 1 up"
+    ]
+  },
+  "L26": {
+    "titleKo": "멀리 돌아가는 이유",
+    "titleEn": "A longer way for a reason",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "A의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 위 2칸 → 왼쪽 6칸 → 오른쪽 2칸 → 위 3칸\nB: 오른쪽 1칸 → 왼쪽 2칸 → 위 4칸 → 오른쪽 2칸 → 위 1칸\nC: 왼쪽 1칸 → 오른쪽 2칸 → 위 2칸 → 왼쪽 4칸 → 위 3칸\nD: 아래 1칸 → 왼쪽 4칸 → 위 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust A first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 down → 2 up → 6 left → 2 right → 3 up\nB: 1 right → 2 left → 4 up → 2 right → 1 up\nC: 1 left → 2 right → 2 up → 4 left → 3 up\nD: 1 down → 4 left → 3 up"
+    ],
+    "chapterKo": "26–30",
+    "chapterEn": "26–30"
+  },
+  "L27": {
+    "titleKo": "마지막 교차로",
+    "titleEn": "Final crossing",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "C의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 위 2칸 → 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸\nB: 위 1칸 → 왼쪽 1칸 → 위 1칸 → 왼쪽 2칸\nC: 위 1칸 → 오른쪽 3칸 → 왼쪽 3칸 → 위 3칸 → 왼쪽 1칸\nD: 오른쪽 2칸 → 아래 2칸 → 위 4칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust C first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 right → 2 up → 1 left → 1 up → 2 left\nB: 1 up → 1 left → 1 up → 2 left\nC: 1 up → 3 right → 3 left → 3 up → 1 left\nD: 2 right → 2 down → 4 up → 1 left"
+    ]
+  },
+  "L28": {
+    "titleKo": "서로 비우는 시간",
+    "titleEn": "Time to make room",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "C의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 왼쪽 2칸 → 오른쪽 4칸 → 위 1칸 → 오른쪽 1칸\nB: 오른쪽 1칸 → 위 1칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 1칸\nC: 왼쪽 4칸 → 오른쪽 3칸 → 왼쪽 1칸 → 위 2칸 → 오른쪽 1칸\nD: 위 2칸 → 오른쪽 1칸 → 위 1칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust C first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 right → 2 left → 4 right → 1 up → 1 right\nB: 1 right → 1 up → 2 left → 2 up → 1 right\nC: 4 left → 3 right → 1 left → 2 up → 1 right\nD: 2 up → 1 right → 1 up → 1 right"
+    ]
+  },
+  "L29": {
+    "titleKo": "딱 맞는 순서",
+    "titleEn": "The right order",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "C의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 위 1칸 → 오른쪽 2칸 → 아래 1칸 → 오른쪽 3칸\nB: 위 3칸 → 오른쪽 3칸 → 왼쪽 1칸 → 아래 1칸 → 오른쪽 3칸\nC: 위 2칸 → 아래 5칸 → 오른쪽 2칸 → 위 1칸 → 오른쪽 3칸\nD: 위 1칸 → 아래 1칸 → 오른쪽 3칸 → 위 1칸 → 오른쪽 3칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust C first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 1 up → 2 right → 1 down → 3 right\nB: 3 up → 3 right → 1 left → 1 down → 3 right\nC: 2 up → 5 down → 2 right → 1 up → 3 right\nD: 1 up → 1 down → 3 right → 1 up → 3 right"
+    ]
+  },
+  "L30": {
+    "titleKo": "함께, 마지막 도착",
+    "titleEn": "Arrive together",
+    "hintsKo": [
+      "가까운 길만 고르면 충돌해요. 이동한 칸 수로 합류 시간을 비교해 보세요.",
+      "D의 길부터 조정해 보세요. 한 번 돌아가면 다른 공이 먼저 지나갈 시간을 만들 수 있어요.",
+      "한 가지 안전한 경로예요.\nA: 아래 2칸 → 오른쪽 1칸 → 아래 2칸 → 왼쪽 2칸\nB: 왼쪽 3칸 → 오른쪽 2칸 → 왼쪽 1칸 → 아래 3칸 → 왼쪽 2칸\nC: 위 1칸 → 아래 3칸 → 왼쪽 1칸 → 아래 2칸 → 왼쪽 2칸\nD: 왼쪽 2칸 → 오른쪽 3칸 → 왼쪽 4칸 → 아래 2칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Count the cells traveled before the paths join. A detour can create room.",
+      "Adjust D first, then fit the other routes around it.",
+      "One safe complete plan:\nA: 2 down → 1 right → 2 down → 2 left\nB: 3 left → 2 right → 1 left → 3 down → 2 left\nC: 1 up → 3 down → 1 left → 2 down → 2 left\nD: 2 left → 3 right → 4 left → 2 down → 2 left"
+    ]
+  },
+  "L31": {
+    "titleKo": "문을 열어 줘",
+    "titleEn": "Together through gates 1",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 왼쪽 2칸 → 오른쪽 2칸 → 위 3칸\nB: 왼쪽 1칸 → 위 1칸 → 오른쪽 6칸 → 위 3칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 right → 2 left → 2 right → 3 up\nB: 1 left → 1 up → 6 right → 3 up"
+    ],
+    "chapterKo": "31–35 · 함께 여는 문",
+    "chapterEn": "31–35 · Cooperative gates"
+  },
+  "L32": {
+    "titleKo": "열린 순간",
+    "titleEn": "Together through gates 2",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 왼쪽 1칸 → 오른쪽 2칸 → 위 2칸\nB: 아래 2칸 → 위 1칸 → 오른쪽 3칸 → 위 2칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 right → 1 left → 2 right → 2 up\nB: 2 down → 1 up → 3 right → 2 up"
+    ]
+  },
+  "L33": {
+    "titleKo": "한 박자 맞추기",
+    "titleEn": "Together through gates 3",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 2칸 → 위 2칸 → 왼쪽 3칸\nB: 위 2칸 → 왼쪽 3칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 2 right → 2 up → 3 left\nB: 2 up → 3 left"
+    ]
+  },
+  "L34": {
+    "titleKo": "함께 여는 길 1",
+    "titleEn": "Together through gates 4",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 아래 1칸 → 위 1칸 → 아래 5칸\nB: 아래 1칸 → 오른쪽 4칸 → 위 1칸\nC: 오른쪽 1칸 → 아래 2칸 → 오른쪽 2칸 → 아래 1칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 right → 1 down → 1 up → 5 down\nB: 1 down → 4 right → 1 up\nC: 1 right → 2 down → 2 right → 1 down"
+    ]
+  },
+  "L35": {
+    "titleKo": "함께 여는 길 2",
+    "titleEn": "Together through gates 5",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 오른쪽 2칸 → 아래 2칸 → 오른쪽 1칸\nB: 아래 2칸 → 위 2칸 → 아래 3칸 → 왼쪽 3칸\nC: 아래 1칸 → 오른쪽 4칸 → 위 2칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 down → 2 right → 2 down → 1 right\nB: 2 down → 2 up → 3 down → 3 left\nC: 1 down → 4 right → 2 up → 1 left"
+    ]
+  },
+  "L36": {
+    "titleKo": "함께 여는 길 3",
+    "titleEn": "Together through gates 6",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 아래 2칸 → 왼쪽 1칸 → 아래 1칸 → 왼쪽 1칸\nB: 위 2칸 → 아래 1칸 → 오른쪽 2칸 → 아래 2칸\nC: 아래 2칸 → 오른쪽 1칸 → 아래 2칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 2 down → 1 left → 1 down → 1 left\nB: 2 up → 1 down → 2 right → 2 down\nC: 2 down → 1 right → 2 down"
+    ],
+    "chapterKo": "36–40 · 함께 여는 문",
+    "chapterEn": "36–40 · Cooperative gates"
+  },
+  "L37": {
+    "titleKo": "함께 여는 길 4",
+    "titleEn": "Together through gates 7",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 6칸 → 아래 2칸\nB: 위 1칸 → 오른쪽 2칸 → 아래 2칸 → 오른쪽 2칸 → 위 4칸\nC: 왼쪽 1칸 → 오른쪽 4칸 → 아래 2칸 → 오른쪽 2칸 → 위 4칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 right → 2 left → 2 up → 6 right → 2 down\nB: 1 up → 2 right → 2 down → 2 right → 4 up\nC: 1 left → 4 right → 2 down → 2 right → 4 up"
+    ]
+  },
+  "L38": {
+    "titleKo": "함께 여는 길 5",
+    "titleEn": "Together through gates 8",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 2칸 → 위 4칸 → 왼쪽 2칸\nB: 오른쪽 2칸 → 위 4칸 → 오른쪽 2칸\nC: 위 2칸 → 오른쪽 6칸 → 아래 2칸 → 왼쪽 2칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 2 right → 4 up → 2 left\nB: 2 right → 4 up → 2 right\nC: 2 up → 6 right → 2 down → 2 left"
+    ]
+  },
+  "L39": {
+    "titleKo": "함께 여는 길 6",
+    "titleEn": "Together through gates 9",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 왼쪽 1칸 → 아래 3칸 → 오른쪽 1칸 → 아래 1칸\nB: 왼쪽 1칸 → 오른쪽 2칸 → 아래 4칸 → 오른쪽 1칸\nC: 오른쪽 2칸 → 위 2칸 → 오른쪽 2칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 left → 3 down → 1 right → 1 down\nB: 1 left → 2 right → 4 down → 1 right\nC: 2 right → 2 up → 2 right"
+    ]
+  },
+  "L40": {
+    "titleKo": "함께 여는 길 7",
+    "titleEn": "Together through gates 10",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 위 1칸 → 왼쪽 5칸 → 위 1칸\nB: 왼쪽 2칸 → 위 1칸 → 왼쪽 2칸 → 아래 1칸\nC: 왼쪽 1칸 → 위 1칸 → 왼쪽 3칸 → 위 1칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 down → 1 up → 5 left → 1 up\nB: 2 left → 1 up → 2 left → 1 down\nC: 1 left → 1 up → 3 left → 1 up"
+    ]
+  },
+  "L41": {
+    "titleKo": "함께 여는 길 8",
+    "titleEn": "Together through gates 11",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 왼쪽 2칸 → 아래 2칸 → 오른쪽 1칸\nB: 오른쪽 1칸 → 왼쪽 1칸 → 아래 2칸 → 오른쪽 3칸\nC: 오른쪽 4칸 → 왼쪽 2칸 → 위 2칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 2 left → 2 down → 1 right\nB: 1 right → 1 left → 2 down → 3 right\nC: 4 right → 2 left → 2 up → 1 right"
+    ],
+    "chapterKo": "41–45 · 함께 여는 문",
+    "chapterEn": "41–45 · Cooperative gates"
+  },
+  "L42": {
+    "titleKo": "함께 여는 길 9",
+    "titleEn": "Together through gates 12",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 아래 4칸 → 오른쪽 4칸 → 위 1칸\nB: 위 1칸 → 아래 4칸 → 오른쪽 6칸 → 위 1칸\nC: 아래 1칸 → 위 4칸 → 오른쪽 2칸 → 아래 5칸\nD: 오른쪽 1칸 → 위 2칸 → 오른쪽 2칸 → 아래 5칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 right → 4 down → 4 right → 1 up\nB: 1 up → 4 down → 6 right → 1 up\nC: 1 down → 4 up → 2 right → 5 down\nD: 1 right → 2 up → 2 right → 5 down"
+    ]
+  },
+  "L43": {
+    "titleKo": "함께 여는 길 10",
+    "titleEn": "Together through gates 13",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 오른쪽 2칸 → 위 4칸 → 왼쪽 2칸\nB: 아래 1칸 → 위 6칸 → 오른쪽 4칸\nC: 왼쪽 1칸 → 오른쪽 2칸 → 위 6칸 → 왼쪽 2칸\nD: 왼쪽 1칸 → 위 4칸 → 오른쪽 4칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 down → 2 right → 4 up → 2 left\nB: 1 down → 6 up → 4 right\nC: 1 left → 2 right → 6 up → 2 left\nD: 1 left → 4 up → 4 right"
+    ]
+  },
+  "L44": {
+    "titleKo": "함께 여는 길 11",
+    "titleEn": "Together through gates 14",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 위 6칸 → 오른쪽 1칸\nB: 아래 1칸 → 왼쪽 2칸 → 위 6칸 → 오른쪽 1칸\nC: 위 1칸 → 왼쪽 2칸 → 위 2칸 → 왼쪽 1칸\nD: 오른쪽 1칸 → 왼쪽 2칸 → 위 4칸 → 왼쪽 1칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 down → 6 up → 1 right\nB: 1 down → 2 left → 6 up → 1 right\nC: 1 up → 2 left → 2 up → 1 left\nD: 1 right → 2 left → 4 up → 1 left"
+    ]
+  },
+  "L45": {
+    "titleKo": "함께 여는 길 12",
+    "titleEn": "Together through gates 15",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 아래 2칸 → 오른쪽 2칸\nB: 오른쪽 1칸 → 아래 2칸 → 왼쪽 2칸\nC: 오른쪽 2칸 → 왼쪽 3칸 → 아래 2칸 → 오른쪽 2칸\nD: 위 1칸 → 아래 4칸 → 오른쪽 2칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 right → 2 down → 2 right\nB: 1 right → 2 down → 2 left\nC: 2 right → 3 left → 2 down → 2 right\nD: 1 up → 4 down → 2 right"
+    ]
+  },
+  "L46": {
+    "titleKo": "함께 여는 길 13",
+    "titleEn": "Together through gates 16",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 오른쪽 1칸 → 위 1칸 → 오른쪽 2칸 → 위 3칸\nB: 위 5칸 → 아래 2칸 → 왼쪽 2칸 → 위 2칸\nC: 위 1칸 → 오른쪽 3칸 → 위 2칸 → 오른쪽 1칸\nD: 아래 1칸 → 위 3칸 → 오른쪽 2칸 → 위 3칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 right → 1 up → 2 right → 3 up\nB: 5 up → 2 down → 2 left → 2 up\nC: 1 up → 3 right → 2 up → 1 right\nD: 1 down → 3 up → 2 right → 3 up"
+    ],
+    "chapterKo": "46–50 · 함께 여는 문",
+    "chapterEn": "46–50 · Cooperative gates"
+  },
+  "L47": {
+    "titleKo": "함께 여는 길 14",
+    "titleEn": "Together through gates 17",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 아래 1칸 → 왼쪽 4칸 → 위 6칸 → 오른쪽 2칸\nB: 위 1칸 → 아래 2칸 → 왼쪽 4칸 → 위 2칸\nC: 왼쪽 1칸 → 오른쪽 2칸 → 왼쪽 4칸 → 위 4칸\nD: 왼쪽 1칸 → 아래 2칸 → 왼쪽 2칸 → 위 2칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 down → 4 left → 6 up → 2 right\nB: 1 up → 2 down → 4 left → 2 up\nC: 1 left → 2 right → 4 left → 4 up\nD: 1 left → 2 down → 2 left → 2 up"
+    ]
+  },
+  "L48": {
+    "titleKo": "함께 여는 길 15",
+    "titleEn": "Together through gates 18",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 왼쪽 2칸 → 위 1칸 → 아래 4칸 → 오른쪽 1칸\nB: 왼쪽 3칸 → 오른쪽 4칸 → 아래 4칸 → 오른쪽 1칸\nC: 위 1칸 → 오른쪽 3칸 → 아래 1칸 → 오른쪽 1칸\nD: 왼쪽 3칸 → 오른쪽 2칸 → 아래 4칸 → 오른쪽 1칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 2 left → 1 up → 4 down → 1 right\nB: 3 left → 4 right → 4 down → 1 right\nC: 1 up → 3 right → 1 down → 1 right\nD: 3 left → 2 right → 4 down → 1 right"
+    ]
+  },
+  "L49": {
+    "titleKo": "함께 여는 길 16",
+    "titleEn": "Together through gates 19",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 아래 2칸 → 위 2칸 → 오른쪽 4칸 → 위 1칸\nB: 위 2칸 → 오른쪽 2칸 → 위 1칸\nC: 위 1칸 → 왼쪽 3칸 → 오른쪽 6칸 → 위 1칸\nD: 오른쪽 1칸 → 왼쪽 1칸 → 오른쪽 1칸 → 위 4칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 2 down → 2 up → 4 right → 1 up\nB: 2 up → 2 right → 1 up\nC: 1 up → 3 left → 6 right → 1 up\nD: 1 right → 1 left → 1 right → 4 up"
+    ]
+  },
+  "L50": {
+    "titleKo": "함께 여는 길 17",
+    "titleEn": "Together through gates 20",
+    "hintsKo": [
+      "번개 스위치를 지나면 같은 번호의 문이 열려요. 문에 남은 시간이 표시돼요.",
+      "다른 공이 문을 통과할 때 열려 있도록 스위치까지 가는 경로를 맞춰 보세요.",
+      "한 가지 안전한 경로예요.\nA: 위 1칸 → 아래 1칸 → 위 2칸 → 오른쪽 5칸\nB: 왼쪽 2칸 → 아래 4칸 → 오른쪽 1칸\nC: 오른쪽 3칸 → 왼쪽 3칸 → 아래 2칸 → 오른쪽 5칸\nD: 왼쪽 2칸 → 오른쪽 2칸 → 아래 4칸 → 오른쪽 3칸"
+    ],
+    "hintsEn": [
+      "Cross a lightning switch to open its matching gate. The gate shows time remaining.",
+      "Plan when one ball crosses the switch so another can pass through.",
+      "One safe complete plan:\nA: 1 up → 1 down → 2 up → 5 right\nB: 2 left → 4 down → 1 right\nC: 3 right → 3 left → 2 down → 5 right\nD: 2 left → 2 right → 4 down → 3 right"
+    ]
+  }
+}

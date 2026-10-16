@@ -1,3 +1,4 @@
+import '../widgets/app_ui_feedback.dart';
 import '../services/app_analytics.dart';
 import '../widgets/settings_appearance.dart';
 import '../widgets/app_button.dart';
@@ -116,7 +117,7 @@ class _TeamScheduleEditScreenState
       debugPrint('Team schedule reset failed: $error');
       if (!mounted) return;
       setState(() => _busy = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(AppUiSnackBar(
           content: Text(context.l10n.settingsScheduleChangeFailedWithError(
               context.localizedErrorDetail(error)))));
     }

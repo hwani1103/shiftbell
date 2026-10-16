@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/widgets.dart';
 
 /// Shows only complete grapheme clusters that fit in a single calendar cell line.
@@ -40,7 +41,10 @@ class CompleteCellMemoText extends StatelessWidget {
             )..layout();
             final result = !painter.didExceedMaxLines &&
                 (!width.isFinite || painter.width <= width - 0.5) &&
-                (!height.isFinite || painter.height <= height);
+                // Rect/Positioned subtraction may make a 9px row
+                // 8.999999999999993px high. Ignore only arithmetic noise.
+                (!height.isFinite ||
+                    painter.height <= height + precisionErrorTolerance);
             painter.dispose();
             return result;
           }

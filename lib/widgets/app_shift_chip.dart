@@ -37,8 +37,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../theme/app_colors.dart';
-import 'shift_label_layout.dart';
+import 'shift_chip_label.dart';
+import 'app_ui_components.dart';
+import '../theme/app_ui_theme.dart';
 
 class AppShiftChip extends StatelessWidget {
   const AppShiftChip({
@@ -53,6 +54,8 @@ class AppShiftChip extends StatelessWidget {
     this.cellColor,
     this.cellTextStyle,
     this.wrapLabel = false,
+    this.labelFontScale = 1,
+    this.cellPadding = 3,
   });
 
   final String label;
@@ -82,45 +85,120 @@ class AppShiftChip extends StatelessWidget {
   /// A bounded timetable cell uses the same silhouette with its shift color.
   final Color? cellColor;
   final TextStyle? cellTextStyle;
+
   /// Only the horizontally scrolling full timetable opts into two lines.
   final bool wrapLabel;
 
+  final double labelFontScale;
+  final double cellPadding;
+  static const denseBorderWidth = 1.6;
+
   @override
   Widget build(BuildContext context) {
+    if (cellTextStyle == null) {
+      final chipSize = dense ? AppChipSize.compact : AppChipSize.regular;
+      final probe = TextPainter(
+          text: TextSpan(
+              text: label, style: AppTypography.chip(context, chipSize)),
+          textDirection: Directionality.of(context),
+          textScaler: TextScaler.noScaling)
+        ..layout();
+      final width =
+          (probe.width + (dense ? 24 : 32) + (onDelete != null ? 36 : 0)).clamp(
+              40.0,
+              dense
+                  ? ShiftChipMetrics.compactMaxWidth
+                  : ShiftChipMetrics.regularMaxWidth);
+      probe.dispose();
+      return SizedBox(
+          width: width,
+          child: AppUiShiftChip(
+              name: label,
+              size: chipSize,
+              onDelete: onDelete,
+              onTap: onTap,
+              enabled: enabled,
+              selected: selected));
+    }
+
     // ⭐ 2026-09-12(사용자 피드백) - "선택된 상태가 너무 연하게 보인다"(일정
     // 알림의 N분전 칩에서 지적) - 완전히 꽉 찬 배경(버튼처럼 보임, 위 이력
     // 참고)까지는 안 가고, 선택 시에만 테두리를 살짝 더 두껍게 + 채움 색을
     // 좀 더 진하게 해서 대비만 끌어올림. day_offset_chip 등 이 칩을 쓰는
     // 다른 화면에도 공통 적용됨(전부 "선택 표시가 흐리다"는 같은 성격의
     // 개선이라 화면별로 다르게 둘 이유가 없음).
+    final p = AppUiPalette.of(context);
     final radius = dense ? 10.r : 16.r;
-    final borderWidth = selected ? (dense ? 2.2 : 3.6) : (dense ? 1.6 : 3.0);
+    final borderWidth =
+        selected ? (dense ? 2.2 : 3.6) : (dense ? denseBorderWidth : 3.0);
 
     final Color borderColor;
     final Color fillColor;
     final Color textColor;
     if (!enabled) {
-      borderColor = kAppChipBorder.withValues(alpha: 0.35);
-      fillColor = kAppChipFill.withValues(alpha: 0.6);
-      textColor = kAppChipBorder.withValues(alpha: 0.45);
+      borderColor = p.chipBorder.withValues(alpha: 0.35);
+      fillColor = p.chipSurface.withValues(alpha: 0.6);
+      textColor = p.chipText.withValues(alpha: 0.45);
     } else if (selected) {
-      borderColor = strongSelected ? const Color(0xFF263AA8) : kAppMainAccent;
-      fillColor = strongSelected
-          ? kAppMainAccent
-          : kAppMainAccent.withValues(alpha: 0.26);
-      textColor = strongSelected ? Colors.white : kAppMainAccent;
+      borderColor = p.primary;
+      fillColor =
+          strongSelected ? p.primary : p.primary.withValues(alpha: 0.26);
+      textColor = strongSelected ? p.onPrimary : p.primary;
     } else {
-      borderColor = kAppChipBorder;
-      fillColor = kAppChipFill;
-      textColor = kAppChipBorder;
+      borderColor = p.chipBorder;
+      fillColor = p.chipSurface;
+      textColor = p.chipText;
     }
 
+    var naturalWidth = 0.0;
+    var naturalHeight = 0.0;
+    // A bounded roster cell already supplies its dimensions.
+    if (cellTextStyle == null) {
+      final labelSize = dense ? AppChipSize.compact : AppChipSize.regular;
+      final labelStyle = DefaultTextStyle.of(context)
+          .style
+          .merge(AppTypography.style(context, AppTextRole.chip))
+          .copyWith(
+              fontSize:
+                  ShiftChipMetrics.maxFontSize(labelSize) * labelFontScale,
+              height: ShiftChipMetrics.lineHeight);
+      final probe = TextPainter(
+          text: TextSpan(text: label, style: labelStyle),
+          textDirection: Directionality.of(context),
+          textScaler: TextScaler.noScaling)
+        ..layout();
+      final paddingX = dense
+          ? ShiftChipMetrics.compactHorizontalPadding
+          : ShiftChipMetrics.regularHorizontalPadding;
+      naturalWidth = probe.width + paddingX * 2 + borderWidth * 2;
+      naturalHeight =
+          probe.height + ShiftChipMetrics.verticalPadding * 2 + borderWidth * 2;
+      probe.dispose();
+    }
     final chipBody = Container(
+      width: cellTextStyle == null
+          ? naturalWidth.clamp(
+              40.0,
+              dense
+                  ? ShiftChipMetrics.compactMaxWidth
+                  : ShiftChipMetrics.regularMaxWidth)
+          : null,
+      height: cellTextStyle == null ? naturalHeight : null,
+      constraints: cellTextStyle == null
+          ? BoxConstraints(
+              maxWidth: dense
+                  ? ShiftChipMetrics.compactMaxWidth
+                  : ShiftChipMetrics.regularMaxWidth)
+          : null,
       padding: cellTextStyle != null
-          ? const EdgeInsets.all(3)
+          ? EdgeInsets.all(cellPadding)
           : dense
-              ? EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h)
-              : EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
+              ? const EdgeInsets.symmetric(
+                  horizontal: ShiftChipMetrics.compactHorizontalPadding,
+                  vertical: ShiftChipMetrics.verticalPadding)
+              : const EdgeInsets.symmetric(
+                  horizontal: ShiftChipMetrics.regularHorizontalPadding,
+                  vertical: ShiftChipMetrics.verticalPadding),
       decoration: BoxDecoration(
         color: cellColor ?? fillColor,
         borderRadius: BorderRadius.circular(radius),
@@ -131,30 +209,18 @@ class AppShiftChip extends StatelessWidget {
         boxShadow: selected && strongSelected
             ? [
                 BoxShadow(
-                  color: kAppMainAccent.withValues(alpha: 0.35),
+                  color: p.primary.withValues(alpha: 0.35),
                   blurRadius: 7,
                   offset: const Offset(0, 2),
                 ),
               ]
             : null,
       ),
-      child: cellTextStyle != null
-          ? (wrapLabel
-              ? ShiftLabel(label: label, style: cellTextStyle!)
-              : Center(child: FittedBox(fit: BoxFit.scaleDown,
-                  child: Text(label, style: cellTextStyle!, maxLines: 1,
-                      softWrap: false))))
-          : Text(
-              label,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: dense ? 12.sp : 14.sp,
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                color: textColor,
-              ),
-            ),
+      child: ShiftChipLabel(
+          label: label,
+          fontScale: labelFontScale,
+          color: cellTextStyle?.color ?? textColor,
+          size: dense ? AppChipSize.compact : AppChipSize.regular),
     );
 
     // onTap이 있으면 InkWell로 감싸 눌림 효과를 줌 - 칩의 둥근 모서리와
@@ -169,8 +235,8 @@ class AppShiftChip extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(radius),
               onTap: enabled ? onTap : null,
-              splashColor: kAppMainAccent.withValues(alpha: 0.25),
-              highlightColor: kAppMainAccent.withValues(alpha: 0.15),
+              splashColor: p.primary.withValues(alpha: 0.25),
+              highlightColor: p.primary.withValues(alpha: 0.15),
               child: chipBody,
             ),
           );
@@ -199,7 +265,7 @@ class AppShiftChip extends StatelessWidget {
               child: Icon(
                 Icons.close,
                 size: 14.sp,
-                color: Colors.white,
+                color: p.onDanger,
               ),
             ),
           ),

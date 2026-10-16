@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 // lib/providers/tab_visibility_provider.dart
 //
 // ⭐ 2026-09-13 추가(사용자 요청) - "일정관리"/"컨디션" 탭을 하단 네비게이션에서
@@ -18,6 +19,10 @@ import '../services/schedule_notification_service.dart';
 
 const _kScheduleTabEnabledKey = 'schedule_tab_enabled';
 const _kConditionTabEnabledKey = 'condition_tab_enabled';
+// Foreign users never opted into sleep in versions through 27. Keep their
+// choice separate from the dormant Korean preference and preserve both.
+const globalSleepTabEnabledKey = 'sleep_global_enabled_v1';
+bool _defaultFor(String key) => key == globalSleepTabEnabledKey ? false : true;
 final _initialVisibility = <String, bool>{};
 
 /// Called after opening the DB and before building the app. Missing preferences
@@ -28,6 +33,8 @@ Future<void> initializeTabVisibilityDefaults(
   final prefs = await SharedPreferences.getInstance();
   final existingUser =
       hasExistingSchedule || prefs.get('permissions_requested') == true;
+  final globalChoice = prefs.get(globalSleepTabEnabledKey);
+  _initialVisibility[globalSleepTabEnabledKey] = globalChoice is bool ? globalChoice : false;
   for (final key in [_kScheduleTabEnabledKey, _kConditionTabEnabledKey]) {
     if (!prefs.containsKey(key)) {
       if (!await prefs.setBool(key, existingUser)) {
@@ -42,7 +49,7 @@ Future<void> initializeTabVisibilityDefaults(
 class TabEnabledNotifier extends StateNotifier<bool> {
   final String _prefsKey;
   TabEnabledNotifier(this._prefsKey)
-      : super(_initialVisibility[_prefsKey] ?? true) {
+      : super(_initialVisibility[_prefsKey] ?? _defaultFor(_prefsKey)) {
     _load();
   }
 
@@ -50,7 +57,7 @@ class TabEnabledNotifier extends StateNotifier<bool> {
     final prefs = await SharedPreferences.getInstance();
     // ⭐ 2026-09-14 (출시전 교차 검토 X-09) - 손상된 값(bool이 아닌 자료형)이 남아 있어도 탭 초기화가 깨지지 않게 기본값으로
     final raw = prefs.get(_prefsKey);
-    state = raw is bool ? raw : true;
+    state = raw is bool ? raw : _defaultFor(_prefsKey);
     // ⭐ 2026-09-14 (출시전 감사 #5) - 일정관리 탭 설정은 Native에도 맞춰 둠(재부팅·알림 수신 때 확인)
     if (_prefsKey == _kScheduleTabEnabledKey) {
       await ScheduleNotificationService.syncTabEnabledToNative(state);
@@ -86,3 +93,12 @@ final conditionTabEnabledProvider =
 
 /// One-shot UI handoff; kept pending until the destination tutorial closes.
 final optionalTabActivationProvider = StateProvider<int?>((ref) => null);
+
+final globalConditionTabEnabledProvider = StateNotifierProvider<TabEnabledNotifier, bool>(
+    (ref) => TabEnabledNotifier(globalSleepTabEnabledKey));
+
+extension SleepTabVisibilityContext on BuildContext {
+  StateNotifierProvider<TabEnabledNotifier, bool> get sleepTabEnabledProvider =>
+      Localizations.localeOf(this).languageCode == 'ko'
+          ? conditionTabEnabledProvider : globalConditionTabEnabledProvider;
+}

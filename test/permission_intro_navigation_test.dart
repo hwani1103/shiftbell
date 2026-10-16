@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -61,7 +62,7 @@ void main() {
           return const Scaffold(body: Text('next-onboarding'));
         }
       },
-      home: const PermissionIntroScreen(),
+      home: const ProviderScope(child: PermissionIntroScreen()),
     ));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('permission-overlay')));

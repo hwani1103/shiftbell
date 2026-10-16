@@ -1,0 +1,28 @@
+{
+  "trainPoolRows": 9308,
+  "trainUniqueText": 9308,
+  "holdoutRows": 116,
+  "holdoutExactOverlap": [],
+  "holdoutLabelCounts": {
+    "업무": 6,
+    "공부": 6,
+    "달리기": 7,
+    "운동": 3,
+    "등산": 7,
+    "수영": 7,
+    "병원·건강관리": 6,
+    "식사": 6,
+    "약속/사교": 6,
+    "가족": 6,
+    "쇼핑": 6,
+    "여가/휴식": 5,
+    "문화생활": 7,
+    "기타": 6,
+    "금융": 6,
+    "집안일": 6,
+    "미용": 6,
+    "자전거": 7,
+    "요가/필라테스": 7
+  },
+  "userBatchDirectlyReadByTrain": false
+}

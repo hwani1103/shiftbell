@@ -1,0 +1,12 @@
+SEARCH 95 48 seconds 1
+BEST 95 40.79 domains [6, 38, 135, 41] extra 12 seconds 18
+SEARCH 95 528 seconds 30
+BEST 95 42.78 domains [40, 7, 88, 54] extra 18 seconds 39
+SEARCH 95 1008 seconds 56
+SEARCH 95 1488 seconds 90
+BEST 95 46.3 domains [626, 107, 3, 92] extra 16 seconds 100
+SEARCH 95 1968 seconds 132
+SEARCH 95 2448 seconds 172
+SEARCH 95 2928 seconds 202
+SEARCH 95 3408 seconds 228
+SEARCH 95 3888 seconds 258

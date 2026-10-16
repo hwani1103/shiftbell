@@ -28,3 +28,9 @@ bytes72770896 / SHA2569a9191133bfe695803be640eaa976eec138bdf26ae8ff6f19b61926b52
 독일어 AdMob 동의 메시지 게시 완료. 관리자 DAU 선택7/30/100/365 반영·MAU직전28일 유지, 웹 hosting7343516a97c234e5 배포 완료.
 프로덕션 공개/메타데이터19개 게시/Firestore 공개버전 갱신은 사용자 지정 후순위 유지.
 증거: final_result.json, prod27_after25_update_comparison.json, prod27_user_final_comparison.json, prod27_final_roster_persisted.png, internal27_final_stopped.jpg, aab_verification.json, critical_gate.log.
+
+[2026-10-12 공개 게시 및 내부 베타 표시 후속]
+사용자가 직접 게시 완료. Console 프로덕션27(1.0.24) 활성/Google Play에 제공됨/게시일10월12일17:22 확인. 게시 개요의 게시 준비 변경목록은 비어 있음. 이전 공개 후순위 기록은 당시 상태로 보존.
+같은 worms 계정의 웹 Play 공개 상세에서 정상 한국어 제목(내부 베타 suffix 없음), 최신5언어 출시노트와10/12 업데이트 날짜 확인. 전화 Play 내부베타 표시는 기기 캐시/반영 지연 추정이며 전화 자체의 현재 계정·캐시는 미계측.
+내부 트랙 비활성/일시중지 유지, 참여 링크는 App not available. 앞선 검증 종료 때 실제 참여 종료는 확인했지만 Console 참여허용 본인목록 선택은 남아 있었음. 사용자 기존 내부테스트 종료 지시에 따라 본인목록 선택도 해제·저장, 두 목록 모두 unchecked/저장 disabled 확인. 목록 자체·기존23사용자 삭제 없음. 테스트 권한 해제와 회원 참여 종료를 구분.
+증거: artifacts/release_finish_2026_10_12/{internal_tester_access_removed,public27_store_normal_title}.jpg. 앱 데이터/설치/공개버전 Firestore 설정 변경 없음.

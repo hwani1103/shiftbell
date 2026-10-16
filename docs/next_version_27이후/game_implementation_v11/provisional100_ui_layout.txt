@@ -1,0 +1,5 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: Final board remains usable at 320px; campaign stops at its last level
+00:03 +1: (tearDownAll)
+00:03 +1: All tests passed!

@@ -9,6 +9,7 @@ import 'package:shiftbell/models/alarm.dart';
 import 'package:shiftbell/widgets/alarm_time_editor.dart';
 import 'package:shiftbell/widgets/tappable_number_picker.dart';
 import 'package:shiftbell/constants/platform_channel.dart';
+import 'package:shiftbell/theme/app_ui_theme.dart';
 
 void main() {
   setUpAll(() async {
@@ -23,7 +24,10 @@ void main() {
   Widget app(bool use24, Widget home, {double textScale = 1}) => ScreenUtilInit(
       designSize: const Size(360, 780),
       builder: (context, _) => MaterialApp(
-          theme: ThemeData(fontFamily: 'TimeEditorTest'),
+          theme: const bool.fromEnvironment('TEST_APP_UI_THEME')
+              ? AppUiTheme.withPalette(
+                  ThemeData(fontFamily: 'TimeEditorTest'), AppUiPalette.blue)
+              : ThemeData(fontFamily: 'TimeEditorTest'),
           locale: const Locale('en', 'US'),
           supportedLocales: const [Locale('en', 'US')],
           localizationsDelegates: const [
@@ -143,26 +147,35 @@ void main() {
   testWidgets('resume reads Android format when Flutter settings are stale',
       (tester) async {
     var nativeUse24 = false;
-    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     messenger.setMockMethodCallHandler(kAlarmChannel, (call) async {
       if (call.method == 'getUse24HourFormat') return nativeUse24;
       return null;
     });
     addTearDown(() => messenger.setMockMethodCallHandler(kAlarmChannel, null));
     TimeOfDay? saved;
-    await tester.pumpWidget(app(false, Scaffold(body: AlarmTimePicker(
-      shiftName: 'Night duty',
-      initialTime: const TimeOfDay(hour: 23, minute: 37),
-      onTimeSelected: (time, _) => saved = time,
-    ))));
+    await tester.pumpWidget(app(
+        false,
+        Scaffold(
+            body: AlarmTimePicker(
+          shiftName: 'Night duty',
+          initialTime: const TimeOfDay(hour: 23, minute: 37),
+          onTimeSelected: (time, _) => saved = time,
+        ))));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('alarm-hour-12')), findsOneWidget);
     nativeUse24 = true;
-    tester.state<AlarmTimePickerState>(find.byType(AlarmTimePicker))
+    tester
+        .state<AlarmTimePickerState>(find.byType(AlarmTimePicker))
         .didChangeAppLifecycleState(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
-    expect(tester.widget<TappableNumberPicker>(
-        find.byKey(const ValueKey('alarm-hour-24'))).value, 23);
+    expect(
+        tester
+            .widget<TappableNumberPicker>(
+                find.byKey(const ValueKey('alarm-hour-24')))
+            .value,
+        23);
     await tester.tap(find.text('OK'));
     await tester.pumpAndSettle();
     expect(saved, const TimeOfDay(hour: 23, minute: 37));

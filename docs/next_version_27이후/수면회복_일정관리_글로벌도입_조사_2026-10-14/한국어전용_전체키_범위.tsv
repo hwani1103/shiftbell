@@ -1,0 +1,197 @@
+﻿key	ko	scope	references	metadata	translationStatus
+commonChange	변경	공통 사용처 검토	lib/l10n/korean_only_copy.dart:15	{}	en/de/pt/hi 미번역
+commonRefresh	새로고침	공통 사용처 검토	lib/l10n/korean_only_copy.dart:16	{}	en/de/pt/hi 미번역
+commonGetStarted	시작하기	공통 사용처 검토	lib/l10n/korean_only_copy.dart:17	{}	en/de/pt/hi 미번역
+commonShare	공유하기	이번 도입 제외	lib/l10n/korean_only_copy.dart:18; lib/screens/my_share_code_screen.dart:466	{}	en/de/pt/hi 미번역
+commonCopy	복사	공통 사용처 검토	lib/l10n/korean_only_copy.dart:19; lib/screens/my_share_code_screen.dart:527	{}	en/de/pt/hi 미번역
+navFriendShare	일정공유	이번 도입 제외	lib/l10n/korean_only_copy.dart:20	{}	en/de/pt/hi 미번역
+navScheduleManagement	일정관리	두 기능 이관 대상	lib/main.dart:840; lib/l10n/korean_only_copy.dart:21; lib/screens/settings_tab.dart:871; lib/screens/schedule_management_tab.dart:2405	{}	en/de/pt/hi 미번역
+disableTabButtonLabel	{tab} 화면 사용하지 않기	두 기능 이관 대상	lib/widgets/disable_tab_button.dart:71; lib/widgets/disable_tab_button.dart:131; lib/l10n/korean_only_copy.dart:22	{"placeholders":{"tab":{"type":"String"}}}	en/de/pt/hi 미번역
+disableTabDialogBody	확인 버튼을 누르면 화면 하단의 목록에서 사라집니다.\n설정에서 다시 원복할 수 있습니다.	두 기능 이관 대상	lib/widgets/disable_tab_button.dart:73; lib/l10n/korean_only_copy.dart:23	{}	en/de/pt/hi 미번역
+scheduleTabDisableExtraNotice	예정된 일정 알림도 모두 취소됩니다.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:24; lib/screens/schedule_management_tab.dart:2408	{}	en/de/pt/hi 미번역
+settingsScheduleTabReenableTitle	일정관리 기능	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:25; lib/screens/settings_tab.dart:878; lib/screens/settings_tab.dart:1044	{}	en/de/pt/hi 미번역
+settingsScheduleTabReenableSubtitle	하루의 중요 일정 기록 및 예정시간 알림	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:26; lib/screens/settings_tab.dart:1046	{}	en/de/pt/hi 미번역
+shiftWork	교대 근무	공통 사용처 검토	lib/l10n/korean_only_copy.dart:27	{}	en/de/pt/hi 미번역
+settingsPatternTodayMarker	· 진한 칩이 오늘	공통 사용처 검토	lib/l10n/korean_only_copy.dart:28	{}	en/de/pt/hi 미번역
+shiftTeam	조	이번 도입 제외	lib/l10n/korean_only_copy.dart:29	{}	en/de/pt/hi 미번역
+shiftRegularPattern	규칙적 근무	공통 사용처 검토	lib/l10n/korean_only_copy.dart:30	{}	en/de/pt/hi 미번역
+shiftIrregularPattern	불규칙 근무	공통 사용처 검토	lib/l10n/korean_only_copy.dart:31	{}	en/de/pt/hi 미번역
+shiftWorkHours	근무시간	공통 사용처 검토	lib/l10n/korean_only_copy.dart:32	{}	en/de/pt/hi 미번역
+shiftPayday	급여 산정일	공통 사용처 검토	lib/l10n/korean_only_copy.dart:33	{}	en/de/pt/hi 미번역
+alarmNext	다음 알람	공통 사용처 검토	lib/l10n/korean_only_copy.dart:34	{}	en/de/pt/hi 미번역
+alarmFixed	고정 알람	공통 사용처 검토	lib/l10n/korean_only_copy.dart:35	{}	en/de/pt/hi 미번역
+alarmType	알람 타입	공통 사용처 검토	lib/l10n/korean_only_copy.dart:36	{}	en/de/pt/hi 미번역
+alarmRemoved	알람 제거	공통 사용처 검토	lib/l10n/korean_only_copy.dart:37	{}	en/de/pt/hi 미번역
+alarmSnooze5Min	5분 연장	공통 사용처 검토	lib/l10n/korean_only_copy.dart:38	{}	en/de/pt/hi 미번역
+alarmCountAll	전체	공통 사용처 검토	lib/l10n/korean_only_copy.dart:39	{}	en/de/pt/hi 미번역
+alarmCountFuture	미래	공통 사용처 검토	lib/l10n/korean_only_copy.dart:40	{}	en/de/pt/hi 미번역
+alarmCountPast	과거	공통 사용처 검토	lib/l10n/korean_only_copy.dart:41	{}	en/de/pt/hi 미번역
+calendarMemo	메모	공통 사용처 검토	lib/l10n/korean_only_copy.dart:42	{}	en/de/pt/hi 미번역
+calendarFriendQuickAccessLabel	친구	이번 도입 제외	lib/l10n/korean_only_copy.dart:43	{}	en/de/pt/hi 미번역
+calendarTapDateToEnter	(해당 날짜 탭하여 입력)	공통 사용처 검토	lib/l10n/korean_only_copy.dart:44	{}	en/de/pt/hi 미번역
+calendarMemoDetailTitle	메모 상세	공통 사용처 검토	lib/l10n/korean_only_copy.dart:45	{}	en/de/pt/hi 미번역
+onboardingFixedPatternQuestion	고정적으로 순환하는 교대 근무인가요?	공통 사용처 검토	lib/l10n/korean_only_copy.dart:46	{}	en/de/pt/hi 미번역
+onboardingYesRegular	예 - 규칙적	공통 사용처 검토	lib/l10n/korean_only_copy.dart:47	{}	en/de/pt/hi 미번역
+onboardingNoIrregular	아니요 - 불규칙	공통 사용처 검토	lib/l10n/korean_only_copy.dart:48	{}	en/de/pt/hi 미번역
+onboardingCheckShiftTypes	근무 형태를 확인하세요	공통 사용처 검토	lib/l10n/korean_only_copy.dart:49	{}	en/de/pt/hi 미번역
+onboardingAddIfMissing	없다면 추가 가능합니다	공통 사용처 검토	lib/l10n/korean_only_copy.dart:50	{}	en/de/pt/hi 미번역
+onboardingUsableEvenIfNotInPattern	근무 패턴에 포함되지 않더라도 사용 가능해요.	공통 사용처 검토	lib/l10n/korean_only_copy.dart:51	{}	en/de/pt/hi 미번역
+onboardingSwitchToIrregularPrefix	만약 교대 패턴이 규칙적이지 않다면, 	공통 사용처 검토	lib/l10n/korean_only_copy.dart:52	{}	en/de/pt/hi 미번역
+onboardingSwitchToIrregularLink	여기	공통 사용처 검토	lib/l10n/korean_only_copy.dart:53	{}	en/de/pt/hi 미번역
+onboardingSwitchToIrregularSuffix	 를 눌러주세요.	공통 사용처 검토	lib/l10n/korean_only_copy.dart:54	{}	en/de/pt/hi 미번역
+onboardingSelectAllInPattern	실제 근무 패턴에 포함되는 근무를 모두 선택해주세요	공통 사용처 검토	lib/l10n/korean_only_copy.dart:55	{}	en/de/pt/hi 미번역
+onboardingShiftNameHint	근무명 (최대 {chars}글자)	공통 사용처 검토	lib/l10n/korean_only_copy.dart:56	{"placeholders":{"chars":{"type":"int"}}}	en/de/pt/hi 미번역
+onboardingAllSet	설정 완료!	공통 사용처 검토	lib/l10n/korean_only_copy.dart:57	{}	en/de/pt/hi 미번역
+onboardingScheduleTabPopupTitle	일정관리 탭, 이렇게 써보세요	두 기능 이관 대상	lib/widgets/onboarding_info_popups.dart:242; lib/l10n/korean_only_copy.dart:58	{}	en/de/pt/hi 미번역
+onboardingScheduleTabPopupBody	교대시계 아이콘 버튼을 눌러 일정관리를 시작해 보세요! 정해진 시간에 알림을 받아 일정을 쉽게 관리할 수 있어요.	두 기능 이관 대상	lib/widgets/onboarding_info_popups.dart:243; lib/l10n/korean_only_copy.dart:59	{}	en/de/pt/hi 미번역
+onboardingConditionTabPopupBody	수면·회복 탭에서 수면을 기록해 보세요! 근무시간을 설정하면 내 근무와 수면 기록을 바탕으로 회복 상태와 쉬기 좋은 시간을 확인할 수 있어요.	두 기능 이관 대상	lib/widgets/onboarding_info_popups.dart:231; lib/l10n/korean_only_copy.dart:60	{}	en/de/pt/hi 미번역
+onboardingConditionTabPopupTitle	수면·회복 탭, 이렇게 써보세요	두 기능 이관 대상	lib/widgets/onboarding_info_popups.dart:230; lib/l10n/korean_only_copy.dart:61	{}	en/de/pt/hi 미번역
+settingsFriendShareDesc	공유 코드로 친구와 서로의 일정 확인	이번 도입 제외	lib/l10n/korean_only_copy.dart:62	{}	en/de/pt/hi 미번역
+settingsEditShiftNameDesc	근무 이름을 수정합니다	공통 사용처 검토	lib/l10n/korean_only_copy.dart:63	{}	en/de/pt/hi 미번역
+settingsDataBackupDesc	지금 기기에 근무표·알람·메모 등을 백업해요	공통 사용처 검토	lib/l10n/korean_only_copy.dart:64	{}	en/de/pt/hi 미번역
+settingsDataBackupLastSavedAt	마지막 백업: {date}	공통 사용처 검토	lib/l10n/korean_only_copy.dart:65	{"placeholders":{"date":{"type":"String"}}}	en/de/pt/hi 미번역
+backupRestoreManualPickLink	이전 백업 불러오기	공통 사용처 검토	lib/l10n/korean_only_copy.dart:66	{}	en/de/pt/hi 미번역
+onboardingHasBackupTitle	기존에 쓰시던 분이라면	공통 사용처 검토	lib/l10n/korean_only_copy.dart:67	{}	en/de/pt/hi 미번역
+onboardingHasBackupLoadButton	불러오기	공통 사용처 검토	lib/l10n/korean_only_copy.dart:68	{}	en/de/pt/hi 미번역
+backupRestoreManualPickHint	Download/ShiftBell 폴더의 백업 파일로 쓰던 그대로 이어갈 수 있어요.	공통 사용처 검토	lib/l10n/korean_only_copy.dart:69	{}	en/de/pt/hi 미번역
+settingsScheduleChangedRedoAllTeamsHint	스케줄 변경 시 전체 근무표도 다시 설정해주세요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:70	{}	en/de/pt/hi 미번역
+settingsResetScheduleSharingFailed	스케줄은 초기화됐지만 이전 공유가 남아 있을 수 있어요. 앱 사용이 정상화되면 ‘일정공유 → 내 일정 공유하기’에서 ‘공유 중지’를 눌러 주세요.	공통 사용처 검토	lib/l10n/korean_only_copy.dart:71; lib/screens/settings_tab.dart:344	{}	en/de/pt/hi 미번역
+workHoursEditDialogTitle	"{shift}" 기본 근무시간	공통 사용처 검토	lib/l10n/korean_only_copy.dart:72	{"placeholders":{"shift":{"type":"String"}}}	en/de/pt/hi 미번역
+workHoursUnitHourLabel	시간	공통 사용처 검토	lib/l10n/korean_only_copy.dart:73	{}	en/de/pt/hi 미번역
+workHoursUnitMinuteLabel	분	공통 사용처 검토	lib/l10n/korean_only_copy.dart:74	{}	en/de/pt/hi 미번역
+friendShareMyScheduleTitle	내 일정 공유하기	이번 도입 제외	lib/l10n/korean_only_copy.dart:75; lib/screens/friend_list_screen.dart:211; lib/screens/my_share_code_screen.dart:325	{}	en/de/pt/hi 미번역
+friendAdd	친구 추가	이번 도입 제외	lib/l10n/korean_only_copy.dart:76; lib/screens/friend_list_screen.dart:81; lib/screens/friend_list_screen.dart:228	{}	en/de/pt/hi 미번역
+friendNameOptionalHint	(선택 - 비우면 코드에 담긴 이름 사용)	이번 도입 제외	lib/l10n/korean_only_copy.dart:77; lib/screens/friend_list_screen.dart:89	{}	en/de/pt/hi 미번역
+friendShareCodeFromFriend	친구가 보내준 공유 코드	이번 도입 제외	lib/l10n/korean_only_copy.dart:78; lib/screens/friend_list_screen.dart:103	{}	en/de/pt/hi 미번역
+friendEnterShareCode	친구가 보내준 공유 코드를 붙여넣으면 친구의 일정을 볼 수 있어요	이번 도입 제외	lib/l10n/korean_only_copy.dart:79; lib/screens/friend_list_screen.dart:233	{}	en/de/pt/hi 미번역
+friendCanCheckAnytime	언제든 친구의 일정을 확인할 수 있습니다.	이번 도입 제외	lib/l10n/korean_only_copy.dart:80	{}	en/de/pt/hi 미번역
+friendAddedToast	친구를 추가했어요	이번 도입 제외	lib/l10n/korean_only_copy.dart:81; lib/screens/friend_list_screen.dart:136	{}	en/de/pt/hi 미번역
+friendInvalidCodeOrDuplicate	코드가 올바르지 않거나 이미 추가된 친구예요	이번 도입 제외	lib/l10n/korean_only_copy.dart:82; lib/screens/friend_list_screen.dart:137	{}	en/de/pt/hi 미번역
+friendLoadFailedCheckNetwork	근무표를 불러올 수 없어요. 네트워크 연결을 확인해주세요	이번 도입 제외	lib/l10n/korean_only_copy.dart:83; lib/utils/friend_open_util.dart:47; lib/screens/friend_list_screen.dart:282	{}	en/de/pt/hi 미번역
+friendShowingCachedSchedule	최신 정보를 못 받아와서, 이전에 저장된 근무표를 보여드려요	이번 도입 제외	lib/l10n/korean_only_copy.dart:84; lib/utils/friend_open_util.dart:53; lib/screens/friend_list_screen.dart:284	{}	en/de/pt/hi 미번역
+friendNoneAddedYet	아직 추가한 친구가 없어요	이번 도입 제외	lib/l10n/korean_only_copy.dart:85; lib/screens/friend_list_screen.dart:248	{}	en/de/pt/hi 미번역
+friendRemove	친구 삭제	이번 도입 제외	lib/l10n/korean_only_copy.dart:86; lib/screens/friend_list_screen.dart:311	{}	en/de/pt/hi 미번역
+friendRemoveConfirm	{name}님을 목록에서 삭제할까요?	이번 도입 제외	lib/l10n/korean_only_copy.dart:87; lib/screens/friend_list_screen.dart:313	{"placeholders":{"name":{"type":"String"}}}	en/de/pt/hi 미번역
+friendDisplayNameTitle	친구에게 보여줄 이름	이번 도입 제외	lib/l10n/korean_only_copy.dart:88; lib/screens/my_share_code_screen.dart:347	{}	en/de/pt/hi 미번역
+friendEnterDisplayName	친구에게 보여줄 이름을 입력하세요	이번 도입 제외	lib/l10n/korean_only_copy.dart:89; lib/screens/my_share_code_screen.dart:360	{}	en/de/pt/hi 미번역
+friendShareIncludesSchedule	내 근무 스케줄과 근무 변경 사항이 공유됩니다.	이번 도입 제외	lib/l10n/korean_only_copy.dart:90; lib/screens/my_share_code_screen.dart:341	{}	en/de/pt/hi 미번역
+friendShareExcludesExtras	메모, OT, 근무시간, 알람 설정은 공유되지 않습니다.	이번 도입 제외	lib/l10n/korean_only_copy.dart:91; lib/screens/my_share_code_screen.dart:341	{}	en/de/pt/hi 미번역
+friendStartSharing	공유 시작하기	이번 도입 제외	lib/l10n/korean_only_copy.dart:92; lib/screens/my_share_code_screen.dart:385	{}	en/de/pt/hi 미번역
+friendStopSharing	공유 중지	이번 도입 제외	lib/l10n/korean_only_copy.dart:93; lib/screens/my_share_code_screen.dart:186; lib/screens/my_share_code_screen.dart:479	{}	en/de/pt/hi 미번역
+friendStopSharingConfirm	공유를 중지하면 친구가 더 이상 내 근무표를 볼 수 없어요. 인터넷에 연결되지 않은 상태라면 연결된 뒤 서버에서 지워지고, 친구 기기에 이미 받아 둔 내용은 회수되지 않아요. 계속할까요?	이번 도입 제외	lib/l10n/korean_only_copy.dart:94; lib/screens/my_share_code_screen.dart:188	{}	en/de/pt/hi 미번역
+friendRestartSharingHint	(다시 공유하려면 이 화면에서 "공유 시작하기"를 다시 누르면 돼요. 기존 코드와 링크가 그대로 다시 동작해요)	이번 도입 제외	lib/l10n/korean_only_copy.dart:95; lib/screens/my_share_code_screen.dart:188	{}	en/de/pt/hi 미번역
+friendMyShareCode	앱을 쓰는 친구에게 (공유 코드)	이번 도입 제외	lib/l10n/korean_only_copy.dart:96; lib/screens/my_share_code_screen.dart:422	{}	en/de/pt/hi 미번역
+friendShareCodeInstructions	친구가 앱에서 "친구 추가"에 이 코드를 붙여넣으면 공유가 완료돼요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:97; lib/screens/my_share_code_screen.dart:433	{}	en/de/pt/hi 미번역
+friendShareWithoutApp	앱이 없는 친구에게 (링크)	이번 도입 제외	lib/l10n/korean_only_copy.dart:98; lib/screens/my_share_code_screen.dart:439	{}	en/de/pt/hi 미번역
+friendShareLinkHint	이 링크를 열면 앱 설치 없이 바로 내 일정을 볼 수 있어요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:99; lib/screens/my_share_code_screen.dart:452	{}	en/de/pt/hi 미번역
+friendInstallShortcutHint	주소창의 설치 버튼을 눌러 홈 화면에 바로가기를 추가할 수 있어요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:100; lib/screens/my_share_code_screen.dart:448	{}	en/de/pt/hi 미번역
+friendDisplayNameUpdated	공유 이름을 변경했어요	이번 도입 제외	lib/l10n/korean_only_copy.dart:101; lib/screens/my_share_code_screen.dart:115	{}	en/de/pt/hi 미번역
+friendDisplayNameUpdateFailed	이름 변경에 실패했어요. 네트워크를 확인해주세요	이번 도입 제외	lib/l10n/korean_only_copy.dart:102; lib/screens/my_share_code_screen.dart:125	{}	en/de/pt/hi 미번역
+friendEnterDisplayNameError	친구에게 보일 내 이름을 입력해주세요	이번 도입 제외	lib/l10n/korean_only_copy.dart:103; lib/screens/my_share_code_screen.dart:135	{}	en/de/pt/hi 미번역
+friendConnectionFailed	연결에 실패했어요. 네트워크 연결을 확인하고 화면을 다시 열어주세요	이번 도입 제외	lib/l10n/korean_only_copy.dart:104; lib/screens/my_share_code_screen.dart:410	{}	en/de/pt/hi 미번역
+friendInstallForHomeScreen	홈 화면에서 바로 열려면 주소창의 설치 버튼을 눌러주세요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:105	{}	en/de/pt/hi 미번역
+friendServerNotReady	아직 친구공유 서버 연결 전이에요. 잠시 후 다시 시도해주세요	이번 도입 제외	lib/l10n/korean_only_copy.dart:106; lib/screens/my_share_code_screen.dart:141	{}	en/de/pt/hi 미번역
+friendScheduleNotSet	아직 근무 스케줄이 설정되지 않았어요	이번 도입 제외	lib/l10n/korean_only_copy.dart:107; lib/screens/my_share_code_screen.dart:149	{}	en/de/pt/hi 미번역
+friendStartSharingFailed	공유 시작에 실패했어요. 네트워크 연결을 확인하고 다시 시도해주세요	이번 도입 제외	lib/l10n/korean_only_copy.dart:108; lib/screens/my_share_code_screen.dart:161	{}	en/de/pt/hi 미번역
+friendSyncPendingBanner	친구에게 보이는 근무표를 아직 반영하는 중이에요. 네트워크가 연결되면 자동으로 다시 보내요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:109; lib/screens/my_share_code_screen.dart:247	{}	en/de/pt/hi 미번역
+friendStopPendingBanner	공유 중지를 서버에 보내는 중이에요. 확인되기 전까지는 친구에게 이전 근무표가 보일 수 있어요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:110; lib/screens/my_share_code_screen.dart:245	{}	en/de/pt/hi 미번역
+friendRetrySync	지금 다시 보내기	이번 도입 제외	lib/l10n/korean_only_copy.dart:111; lib/screens/my_share_code_screen.dart:280	{}	en/de/pt/hi 미번역
+friendSyncPendingToast	아직 서버에 반영되지 않았어요. 연결되면 자동으로 다시 보내요	이번 도입 제외	lib/l10n/korean_only_copy.dart:112; lib/screens/my_share_code_screen.dart:121; lib/screens/my_share_code_screen.dart:231	{}	en/de/pt/hi 미번역
+friendStopSharingAction	중지	이번 도입 제외	lib/l10n/korean_only_copy.dart:113; lib/screens/my_share_code_screen.dart:196	{}	en/de/pt/hi 미번역
+friendCodeCopied	코드를 복사했어요	이번 도입 제외	lib/l10n/korean_only_copy.dart:114; lib/screens/my_share_code_screen.dart:430	{}	en/de/pt/hi 미번역
+friendLinkCopied	링크를 복사했어요	이번 도입 제외	lib/l10n/korean_only_copy.dart:115; lib/screens/my_share_code_screen.dart:446	{}	en/de/pt/hi 미번역
+friendShareMessage	{name}님의 교대 스케줄을 공유해요! 🗓️\n\n▶ 앱 없이 바로 보기: {link}\n\n▶ 교대시계 앱 사용 중이면 "친구 추가"에 아래 코드를 붙여넣어주세요.\n\n{code}	이번 도입 제외	lib/l10n/korean_only_copy.dart:116; lib/screens/my_share_code_screen.dart:312	{"placeholders":{"name":{"type":"String"},"link":{"type":"String"},"code":{"type":"String"}}}	en/de/pt/hi 미번역
+friendNameHintExample	친구 이름 입력	이번 도입 제외	lib/l10n/korean_only_copy.dart:117; lib/screens/friend_list_screen.dart:95	{}	en/de/pt/hi 미번역
+friendShareChannelsExplainer	앱이 없는 친구에게는 링크로, 앱을 쓰는 친구에게는 코드로 공유할 수 있어요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:118; lib/screens/friend_list_screen.dart:216	{}	en/de/pt/hi 미번역
+statusDataLoadFailed	데이터 로드 실패	공통 사용처 검토	lib/l10n/korean_only_copy.dart:119	{}	en/de/pt/hi 미번역
+statusShiftChangeFailed	근무 변경 실패	공통 사용처 검토	lib/l10n/korean_only_copy.dart:120	{}	en/de/pt/hi 미번역
+scheduleTabSyncFailed	화면 설정을 바꾸지 못했어요. 잠시 후 다시 시도해주세요.	두 기능 이관 대상	lib/widgets/disable_tab_button.dart:28; lib/l10n/korean_only_copy.dart:121	{}	en/de/pt/hi 미번역
+allTeamsSetupOtherTeamsLabel	다른 조	이번 도입 제외	lib/l10n/korean_only_copy.dart:122	{}	en/de/pt/hi 미번역
+allTeamsSetupOtherTeamsHint	우리 근무표에 실제로 쓰이는 다른 조를 모두 골라주세요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:123	{}	en/de/pt/hi 미번역
+allTeamsSetupPickMyTeamFirstHint	먼저 내 조를 선택해주세요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:124	{}	en/de/pt/hi 미번역
+allTeamsSetupMinOtherTeamHint	다른 조를 최소 1개 이상 선택해주세요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:125	{}	en/de/pt/hi 미번역
+themeInitialBadge	컬러 뱃지	이번 도입 제외	lib/l10n/korean_only_copy.dart:126; lib/models/calendar_theme.dart:71	{}	en/de/pt/hi 미번역
+themeUnderline	미니멀 언더라인	이번 도입 제외	lib/l10n/korean_only_copy.dart:127; lib/models/calendar_theme.dart:73	{}	en/de/pt/hi 미번역
+themeEventChip	이벤트 캘린더	이번 도입 제외	lib/l10n/korean_only_copy.dart:128; lib/models/calendar_theme.dart:75	{}	en/de/pt/hi 미번역
+themeEditorial	매거진	이번 도입 제외	lib/l10n/korean_only_copy.dart:129; lib/models/calendar_theme.dart:77	{}	en/de/pt/hi 미번역
+scheduleDeleteConfirmTitle	일정을 삭제할까요?	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:130	{}	en/de/pt/hi 미번역
+helpScheduleTabSectionTitle	일정관리 탭	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:131; lib/screens/help_screen.dart:145	{}	en/de/pt/hi 미번역
+helpScheduleTabWhatIsItTitle	일정관리 탭은 무엇이 다른가	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:132; lib/screens/help_screen.dart:149	{}	en/de/pt/hi 미번역
+helpScheduleTabWhatIsItBody	달력 탭의 "메모"가 하루 전체에 대한 메모라면, 일정관리 탭은 하루 내에 몇 시부터 몇 시까지 무엇을 할지 시간 단위로 관리할 수 있는 화면이에요. 출근 전 약속, 퇴근 후 일정처럼 구체적인 시각이 있는 일들을 정리할 때 씁니다.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:133; lib/screens/help_screen.dart:150	{}	en/de/pt/hi 미번역
+helpScheduleTabCreateEditTitle	일정 만들고 수정하는 법	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:134; lib/screens/help_screen.dart:153	{}	en/de/pt/hi 미번역
+helpScheduleTabCreateEditBody	화면 오른쪽 아래의 시계 아이콘을 누르면 시각을 고르는 모드로 바뀌어요. 원하는 시각에서 한 번 더 누르면 일정 만들기 화면이 나와요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:135; lib/screens/help_screen.dart:154	{}	en/de/pt/hi 미번역
+helpScheduleTabAutoCategoryTitle	일정에 맞는 아이콘이 붙는 방식	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:136; lib/screens/help_screen.dart:157	{}	en/de/pt/hi 미번역
+helpScheduleTabAutoCategoryBody	앱이 일정 내용을 보고 알아서 관련 있는 아이콘을 붙여줍니다. 관련 있는 아이콘을 찾지 못한 경우에는 기본 도형 아이콘이 대신 붙습니다.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:137; lib/screens/help_screen.dart:158	{}	en/de/pt/hi 미번역
+helpConditionSectionTitle	수면·회복	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:138; lib/screens/help_screen.dart:166	{}	en/de/pt/hi 미번역
+helpConditionWhatIsItTitle	수면·회복 탭은 무엇인가	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:139; lib/screens/help_screen.dart:170	{}	en/de/pt/hi 미번역
+helpConditionWhatIsItBody	내 근무 일정과 실제 수면 기록을 연결해서, 지금 시각을 기준으로 "확인된 사실"(근무 사이 회복시간, 퇴근 후 실제 수면, 연속 야간·장시간 근무 등)과 "추천 행동"(몇 시까지 잠자리에 들기, 카페인을 끊을 시각, 퇴근길 주의 등)을 보여주는 화면입니다. 점수로 상태를 매기지 않고, 수면 기록이 없거나 출퇴근 시각이 비어 있으면 그 한계를 "판단 범위"로 따로 알려드려요. 건강 관련 기준과 조언은 수면의학·산업보건 분야의 연구 근거를 바탕으로 합니다.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:140; lib/screens/help_screen.dart:171	{}	en/de/pt/hi 미번역
+helpConditionEvidenceListTitle	수면·회복 안내 근거	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:141; lib/screens/help_screen.dart:176	{}	en/de/pt/hi 미번역
+helpConditionEvidenceListBody	수면·회복 탭의 안내는 아래 14개 자료를 바탕으로 해요. 연속 근무일수나 내 평균과의 비교처럼 일부 기준은 이 앱이 직접 정한 값이라 따로 출처를 붙이지 않아요.\n\nEVIDENCE-001 · 교대 방향(정방향/역방향) — 정방향 교대(주간→오후→야간)가 역방향보다 적응하기 쉽다고 보고됨. (NIOSH)\n\nEVIDENCE-002 · 근무 사이 최소 회복시간 — 두 근무 사이 최소 11시간의 회복시간을 둘 것을 권장. (Knauth & Hornberger, NIOSH Module 5 인용)\n\nEVIDENCE-003 · 근무 사이 최소 회복시간(법제 기준) — 모든 근로자는 24시간마다 최소 11시간의 연속 휴식을 보장받아야 함. (EU 근로시간지침 제3조)\n\nEVIDENCE-004 · 장시간 근무와 사고·부상 위험 — 8시간 근무 대비 10시간 근무는 상대위험 약 +13%, 12시간 근무는 약 +27% 증가하는 것으로 모델링됨. (Folkard & Lombardi, 2006)\n\nEVIDENCE-005 · 연속 근무 후 휴식일 — 8시간 근무 5일 또는 10시간 근무 4일 연속 뒤에는 1~2일, 12시간 근무 3일 연속 뒤에는 2일의 휴식을 계획할 것을 권고. 며칠 몰아 일하고 몰아 쉬는 패턴은 피하라고도 함. (NIOSH)\n\nEVIDENCE-006 · 야간근무 후 수면 — 야간근무 후에는 수면을 확보하는 것을 우선할 것을 권고. (NIOSH)\n\nEVIDENCE-007 · 야간근무 전 낮잠 — 조건부로 도움이 될 수 있다고 보고되나, 가이드라인 스스로 근거 수준이 매우 낮다고 명시함. 낮잠 직후 졸림에 주의. (AASM, 2025)\n\nEVIDENCE-008 · 카페인과 수면 — 취침 6시간 전 카페인 섭취도 총 수면시간을 1시간 이상 유의하게 감소시킴. (Drake 외, 2013)\n\nEVIDENCE-009 · 야간근무 후 귀가길 빛 노출 — 강한 빛 노출을 줄이면 이후 수면에 도움이 될 수 있음(단, 졸음운전 위험이 있으면 안전 우선). (NIOSH)\n\nEVIDENCE-010 · 야간근무 중 식사 — 자정~새벽 6시 사이 식사량을 줄이고 가벼운 음식 위주로 할 것을 권고. (NIOSH)\n\nEVIDENCE-011 · 성인 권장 수면시간 — 만 18~64세 권장 수면시간은 7~9시간. (National Sleep Foundation, 2015)\n\nEVIDENCE-012 · 주간 최대 근무시간(법제 기준) — 평균 주간 근무시간(연장근무 포함)이 48시간을 넘지 않아야 함. (EU 근로시간지침 제6조)\n\nEVIDENCE-013 · 연속 야간근무 횟수와 사고 위험 — 야간근무가 연속될수록 사고·부상 상대위험이 누적됨(2일째 약 +6%, 3일째 약 +17%, 4일째 약 +36% — 낮/오후근무 연속보다 야간근무 연속에서 위험 증가가 더 가파름). (Folkard & Tucker, 2003)\n\nEVIDENCE-014 · 주간 누적 근무시간 상한 — 간호사 근무시간을 24시간 안에 12시간, 7일 안에 60시간을 넘지 않게 제한할 것을 권고. 2014년 체계적 검토는 주 40시간을 넘는 근무가 환자 안전 저하와 연관된다고 보고. (IOM, 2004 / NIOSH Module 5 인용)	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:142; lib/screens/help_screen.dart:177	{}	en/de/pt/hi 미번역
+helpConditionSetupNeededTitle	오늘의 컨디션을 보려면 먼저 해야 할 설정	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:143; lib/screens/help_screen.dart:180	{}	en/de/pt/hi 미번역
+helpConditionSetupNeededBody	이 기능을 쓰려면 설정 → 근무시간 및 OT 설정에서 최소 하나의 근무명에 대해 출퇴근 시각을 입력해둬야 해요. 하나도 입력돼 있지 않으면 오늘의 컨디션은 나오지 않고, 수면 기록만 남길 수 있어요. 전부 다 채울 필요는 없고, 지금 쓰고 있는 근무명 중 하나만 입력해도 동작해요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:144; lib/screens/help_screen.dart:181	{}	en/de/pt/hi 미번역
+helpSleepSectionTitle	수면 기록	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:145; lib/screens/help_screen.dart:187	{}	en/de/pt/hi 미번역
+helpSleepWidgetTitle	수면 기록 위젯이란	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:146; lib/screens/help_screen.dart:191	{}	en/de/pt/hi 미번역
+helpSleepWidgetBody	홈 화면에 수면 위젯을 올려 두고, 자기 전에 "수면", 일어난 뒤에 "기상" 버튼을 눌러 간단히 기록해 보세요. 위젯에는 오늘의 근무명도 함께 보여요.\n\n기록한 수면은 수면·회복 탭에서 근무 일정과 함께 살펴보고, 지금 챙길 일을 안내받는 데 쓰여요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:147; lib/screens/help_screen.dart:192	{}	en/de/pt/hi 미번역
+helpSleepAutoDetectTitle	자동으로 수면을 추정해주는 기능	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:148; lib/screens/help_screen.dart:195	{}	en/de/pt/hi 미번역
+helpSleepAutoDetectBody	위젯을 누르지 않아도, 근무 일정과 폰을 오래 만지지 않은 시간을 바탕으로 앱이 "이때 주무셨을 것 같다"고 추정해요. 수면 시간대에 최소 5시간 이상 폰을 사용하지 않았을 때만 추정 기록을 보여줘요. 짧은 낮잠이나 근무 중에 잔 잠은 위젯이나 수면 기록 화면에서 직접 기록해주세요.\n\n추정한 기록은 항상 추정일 뿐이라, "맞아요"로 확인해야 정식 기록이 돼요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:149; lib/screens/help_screen.dart:196	{}	en/de/pt/hi 미번역
+helpSleepMiniCalendarTitle	최근 수면 기록 확인/수정하기	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:150; lib/screens/help_screen.dart:199	{}	en/de/pt/hi 미번역
+helpSleepMiniCalendarBody	수면·회복 탭의 "최근 수면 기록" 미니 달력에서 확정된 기록을 하루 단위로 볼 수 있어요. 칸을 탭하면 그 자리에서 기록을 만들거나 고치거나 지울 수 있어요. 더 예전 기록은 "전체보기"에서 월 단위로 넘기며 볼 수 있어요.\n\n그 아래 "내 근무별 수면 패턴"에서는 근무 유형별 평균 수면을 주 수면과 낮잠으로 나눠 볼 수 있어요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:151; lib/screens/help_screen.dart:200	{}	en/de/pt/hi 미번역
+helpFriendSectionTitle	친구 공유	이번 도입 제외	lib/l10n/korean_only_copy.dart:152; lib/screens/help_screen.dart:206	{}	en/de/pt/hi 미번역
+helpFriendWhatIsItTitle	친구 공유란 무엇인가	이번 도입 제외	lib/l10n/korean_only_copy.dart:153; lib/screens/help_screen.dart:210	{}	en/de/pt/hi 미번역
+helpFriendWhatIsItBody	친구나 다른 사람이 내 근무표를 볼 수 있게 공유하거나, 반대로 다른 사람이 공유한 근무표를 내가 볼 수도 있는 기능이에요. 앱이 없는 사용자에게도 내 근무표를 간단하게 공유할 수 있어요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:154; lib/screens/help_screen.dart:211	{}	en/de/pt/hi 미번역
+helpFriendShareCodeTitle	내 공유 코드 만들어서 알려주기	이번 도입 제외	lib/l10n/korean_only_copy.dart:155; lib/screens/help_screen.dart:214	{}	en/de/pt/hi 미번역
+helpFriendShareCodeBody	달력 탭의 "친구" 버튼으로 들어가 "내 일정 공유하기"를 누르면 코드가 발급됩니다. 이 코드를 상대방에게 알려주면, 상대방이 자기 앱에 그 코드를 등록해서 내 근무표를 볼 수 있어요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:156; lib/screens/help_screen.dart:215	{}	en/de/pt/hi 미번역
+helpFriendViewFriendTitle	친구 코드로 친구 근무표 보기	이번 도입 제외	lib/l10n/korean_only_copy.dart:157; lib/screens/help_screen.dart:218	{}	en/de/pt/hi 미번역
+helpFriendViewFriendBody	반대로 친구에게 코드를 받았다면, 친구 목록 화면에서 코드를 입력해 친구를 추가하면 그 친구의 근무표를 내 앱에서 달력 형태로 볼 수 있어요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:158; lib/screens/help_screen.dart:219	{}	en/de/pt/hi 미번역
+helpFriendReinstallNoteTitle	앱을 재설치하면 생기는 일	이번 도입 제외	lib/l10n/korean_only_copy.dart:159; lib/screens/help_screen.dart:222	{}	en/de/pt/hi 미번역
+helpFriendReinstallNoteBody	앱을 지웠다가 다시 설치하면 내부적으로 새로운 계정처럼 인식돼서, 이전에 맺어둔 친구 공유 연결이 끊깁니다. 다시 연결하려면 공유 코드를 새로 발급받아 상대방에게 다시 알려줘야 해요.\n\n이때 상대방 화면에는 에러가 뜨지 않고, 재설치 전 마지막으로 받아온 근무표가 그대로 남아있을 뿐이에요. 상대방이 스스로 알아차리기 어려우니, 재설치했다면 꼭 먼저 알려주세요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:160; lib/screens/help_screen.dart:223	{}	en/de/pt/hi 미번역
+helpTroubleshootFriendDisconnectedTitle	친구 근무표가 며칠째 안 바뀌어요	이번 도입 제외	lib/l10n/korean_only_copy.dart:161; lib/screens/help_screen.dart:283	{}	en/de/pt/hi 미번역
+helpTroubleshootFriendDisconnectedBody	에러 없이 근무표만 그대로 멈춰 있다면, 대부분 친구가 앱을 재설치한 경우예요. 재설치하면 내부 계정이 새로 만들어져 기존 연결이 끊기는데, 이때는 화면에 아무 안내도 뜨지 않고 재설치 전 마지막 모습이 계속 보여요.\n\n친구 근무표 화면 위쪽의 "마지막 동기화" 시간이 계속 옛날 날짜인지 확인해 보세요. 그렇다면 친구에게 새 공유 코드를 받아서, 기존 항목을 지우고 새 코드로 다시 추가하면 돼요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:162; lib/screens/help_screen.dart:284	{}	en/de/pt/hi 미번역
+scheduleOutsideTeamsConfirm	선택한 위치는 전체 근무표의 어느 조와도 일치하지 않습니다. 계속하면 전체 근무표가 삭제되어 다시 설정해야 합니다. 근무 스케줄을 변경할까요?	이번 도입 제외	lib/l10n/korean_only_copy.dart:163	{}	en/de/pt/hi 미번역
+scheduleMyTeam	내 조	이번 도입 제외	lib/l10n/korean_only_copy.dart:164	{}	en/de/pt/hi 미번역
+scheduleTeamsAtToday	오늘을 기준으로 각 조가 배정된 패턴 위치입니다.	이번 도입 제외	lib/l10n/korean_only_copy.dart:165	{}	en/de/pt/hi 미번역
+teamRuleEdit	설정	이번 도입 제외	lib/l10n/korean_only_copy.dart:166	{}	en/de/pt/hi 미번역
+teamRuleChooseTeam	변경하실 조를 선택해 주세요.	이번 도입 제외	lib/l10n/korean_only_copy.dart:167	{}	en/de/pt/hi 미번역
+onboardingShiftLimitHint	(최대 {max}개까지 추가 가능하며 {chars}글자로 제한됩니다.)	공통 사용처 검토	lib/l10n/korean_only_copy.dart:168	{"placeholders":{"max":{"type":"int"},"chars":{"type":"int"}}}	en/de/pt/hi 미번역
+workHoursDurationExcluded	0시간 (근무시간 미포함)	공통 사용처 검토	lib/l10n/korean_only_copy.dart:169; lib/screens/work_hours_settings_screen.dart:362	{}	en/de/pt/hi 미번역
+friendName	친구 이름	이번 도입 제외	lib/widgets/friend_web_calendar.dart:22; lib/widgets/friend_web_calendar.dart:33; lib/widgets/friend_web_calendar.dart:93; lib/widgets/friend_web_calendar.dart:95; lib/web_main.dart:498; lib/l10n/korean_only_copy.dart:170; lib/utils/friend_open_util.dart:70; lib/screens/friend_calendar_view.dart:13; lib/screens/friend_calendar_view.dart:23; lib/screens/friend_calendar_view.dart:36; lib/screens/friend_list_screen.dart:89	{}	en/de/pt/hi 미번역
+permissionAllow	권한 허용하기	공통 사용처 검토	lib/l10n/korean_only_copy.dart:171	{}	en/de/pt/hi 미번역
+permissionRequired	필수	공통 사용처 검토	lib/l10n/korean_only_copy.dart:172	{}	en/de/pt/hi 미번역
+permissionRecommended	권장	공통 사용처 검토	lib/l10n/korean_only_copy.dart:173	{}	en/de/pt/hi 미번역
+scheduleNotifyRegisterFailed	일정은 저장됐지만 알림을 예약하지 못했어요. 정확한 알람 권한을 확인한 뒤 일정을 다시 저장해 주세요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:174; lib/screens/schedule_management_tab.dart:1731; lib/screens/schedule_management_tab.dart:1789	{}	en/de/pt/hi 미번역
+scheduleDuplicateTimeSlot	이미 같은 시간대의 일정이 있어요. 그 일정에 내용을 함께 적어주세요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:175; lib/screens/schedule_management_tab.dart:1689; lib/screens/schedule_management_tab.dart:1760	{}	en/de/pt/hi 미번역
+scheduleMaxPerSlot	이 시간대에는 일정을 최대 {count}개까지만 만들 수 있어요	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:176; lib/screens/schedule_management_tab.dart:1703	{"placeholders":{"count":{"type":"int"}}}	en/de/pt/hi 미번역
+scheduleDeleteConfirmBody	삭제한 일정은 되돌릴 수 없어요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:177; lib/screens/schedule_management_tab.dart:3992	{}	en/de/pt/hi 미번역
+scheduleEditTitle	일정 수정	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:178; lib/screens/schedule_management_tab.dart:3734	{}	en/de/pt/hi 미번역
+scheduleNewTitle	새 일정	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:179; lib/screens/schedule_management_tab.dart:3735	{}	en/de/pt/hi 미번역
+scheduleContentFieldLabel	내용	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:180; lib/screens/schedule_management_tab.dart:3755	{}	en/de/pt/hi 미번역
+scheduleTimeSectionLabel	시간	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:181; lib/screens/schedule_management_tab.dart:3768	{}	en/de/pt/hi 미번역
+scheduleNotifySectionLabel	알림	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:182; lib/screens/schedule_management_tab.dart:3879	{}	en/de/pt/hi 미번역
+scheduleNotifyToggleLabel	일정에 맞춰 알림 받기	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:183; lib/screens/schedule_management_tab.dart:3889	{}	en/de/pt/hi 미번역
+scheduleNotifyDescription	시스템 알림 설정(소리·진동·무음)을 그대로 따르는 알림 1건으로 알려드려요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:184; lib/screens/schedule_management_tab.dart:3909	{}	en/de/pt/hi 미번역
+scheduleNotifyOffsetQuestion	몇 분 전에 알려드릴까요?	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:185; lib/screens/schedule_management_tab.dart:3914	{}	en/de/pt/hi 미번역
+scheduleNotifyOffsetOnTime	정시	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:186; lib/screens/schedule_management_tab.dart:3924	{}	en/de/pt/hi 미번역
+scheduleNotifyOffsetBefore	{minutes}분 전	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:187; lib/screens/schedule_management_tab.dart:3926	{"placeholders":{"minutes":{"type":"int"}}}	en/de/pt/hi 미번역
+scheduleNotifyPastTimeWarning	이미 지난 시각이라 알림이 울리지 않아요. 시간을 바꿔주세요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:188; lib/screens/schedule_management_tab.dart:3949	{}	en/de/pt/hi 미번역
+scheduleCreateButton	생성	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:189; lib/screens/schedule_management_tab.dart:4049	{}	en/de/pt/hi 미번역
+workHoursLegacyClockTimeHint	기존 근무시간은 유지 중이에요. 출퇴근 시간을 입력해주세요.	공통 사용처 검토	lib/l10n/korean_only_copy.dart:190; lib/screens/work_hours_settings_screen.dart:307	{}	en/de/pt/hi 미번역
+helpBackupRestoreOldBackupFailTitle	아주 오래된 백업은 복구가 안 될 수도 있어요	공통 사용처 검토	lib/l10n/korean_only_copy.dart:191; lib/screens/help_screen.dart:252	{}	en/de/pt/hi 미번역
+helpBackupRestoreOldBackupFailBody	앱이 업데이트되면서 저장하는 데이터 형식이 가끔 바뀌어요. 백업을 만든 버전과 복구하는 버전의 차이가 크면(아주 오래전 백업을 한참 뒤에 최신 버전에서 복구하는 경우 등) 복구에 실패할 수 있고, 같은 파일로 다시 해도 같은 이유로 실패하기 쉬워요.\n\n기기를 바꾸거나 재설치하기 직전에 설정의 "데이터 백업"을 한 번 눌러 새 백업을 만들어 두면 안전해요. 자동 백업이 잘 되고 있어도, 중요한 순간 직전에는 직접 한 번 더 해 두는 게 좋아요.	공통 사용처 검토	lib/l10n/korean_only_copy.dart:192; lib/screens/help_screen.dart:253	{}	en/de/pt/hi 미번역
+settingsConditionFeatureTitle	수면회복 컨디션 기능	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:193; lib/screens/settings_tab.dart:872; lib/screens/settings_tab.dart:879; lib/screens/settings_tab.dart:1060	{}	en/de/pt/hi 미번역
+settingsConditionFeatureSubtitle	근무·수면시간 기반 컨디션 예측	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:194; lib/screens/settings_tab.dart:1062	{}	en/de/pt/hi 미번역
+settingsEnableFeatureConfirm	메인 탭에 추가하여 {feature} 기능을 사용하시겠습니까?	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:195; lib/screens/settings_tab.dart:888	{"placeholders":{"feature":{"type":"String"}}}	en/de/pt/hi 미번역
+settingsEnableFeatureAction	추가하여 사용하기	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:196; lib/screens/settings_tab.dart:904	{}	en/de/pt/hi 미번역
+settingsEnablingFeature	메인 탭에 추가하는 중…	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:197; lib/screens/settings_tab.dart:923	{}	en/de/pt/hi 미번역
+settingsEnableFeatureFailed	기능을 켜지 못했습니다. 다시 시도해 주세요.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:198; lib/screens/settings_tab.dart:945	{}	en/de/pt/hi 미번역
+settingsDiagnosticExportTitle	진단 로그 이메일로 보내기	공통 사용처 검토	lib/l10n/korean_only_copy.dart:199	{}	en/de/pt/hi 미번역
+settingsDiagnosticExportSubtitle	문제 확인용 로그 파일을 개발자 메일로 전송	공통 사용처 검토	lib/l10n/korean_only_copy.dart:200	{}	en/de/pt/hi 미번역
+settingsDiagnosticExportConfirm	진단 로그에는 기기 정보, 권한 상태와 알람·백업 동작 기록이 포함됩니다. 메일 앱에서 보내는 계정을 선택한 뒤 직접 전송해 주세요.\n\n받는 주소: lowvibe07@gmail.com	공통 사용처 검토	lib/l10n/korean_only_copy.dart:201	{}	en/de/pt/hi 미번역
+settingsDiagnosticShareTitle	진단 로그 보내기	이번 도입 제외	lib/l10n/korean_only_copy.dart:202	{}	en/de/pt/hi 미번역
+settingsDiagnosticSubject	교대시계 진단 로그	공통 사용처 검토	lib/l10n/korean_only_copy.dart:203	{}	en/de/pt/hi 미번역
+settingsDiagnosticBody	겪으신 문제와 발생 시간을 적어 주세요.\n\n문제 내용:\n발생 시간:	공통 사용처 검토	lib/l10n/korean_only_copy.dart:204	{}	en/de/pt/hi 미번역
+settingsDiagnosticExportFailed	로그를 전송할 메일 앱을 열지 못했습니다. 다른 앱을 선택하거나 다시 시도해 주세요.	공통 사용처 검토	lib/l10n/korean_only_copy.dart:205	{}	en/de/pt/hi 미번역
+settingsDiagnosticSendAction	전송하기	공통 사용처 검토	lib/l10n/korean_only_copy.dart:206	{}	en/de/pt/hi 미번역
+helpAlarmTroubleshootMergedBody	1. 권한과 휴대폰 설정 확인\n설정 → 알람 권한 설정에서 알림, 정확한 알람, 잠금화면 표시, 다른 앱 위에 표시 권한을 확인해 주세요.\n\n휴대폰 설정 → 앱 → 교대시계 → 배터리에서 백그라운드 사용이 제한되어 있지 않은지도 확인해 주세요.\n\n2. 근무와 고정 알람 확인\n달력에서 해당 날짜에 근무가 배정되어 있는지 확인하세요. 설정 → 편집 → 고정 알람 수정에서 그 근무에 알람이 등록되어 있는지도 확인해 주세요. 근무만 배정하고 알람을 등록하지 않으면 알람은 울리지 않습니다.\n\n3. 제조사별 알람 동작\nSamsung, Motorola, OPPO, Xiaomi, Google Pixel, realme의 검증 기기에서는 필요한 권한을 설정한 환경에서 정상적인 알람 동작을 확인했습니다.\n\n그 외 제조사의 기기는 권한을 모두 허용해도 알람이 울리지 않거나 정확한 시간에 작동하지 않을 수 있습니다. 검증 제조사를 늘리고 알람 신뢰도를 높이는 작업을 계속하고 있습니다.\n\n4. 문제가 계속된다면\n기기명, Android 버전, 문제가 발생한 시간을 적어 개발자 이메일 lowvibe07@gmail.com으로 연락해 주세요. 설정 → 부가 기능 → 진단 로그 이메일로 보내기에서 로그 파일을 함께 보내면 원인 확인에 도움이 됩니다.	공통 사용처 검토	lib/l10n/korean_only_copy.dart:207	{}	en/de/pt/hi 미번역
+settingsEnableFeatureHideHint	탭 하단에서 다시 숨길 수 있습니다.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:208; lib/screens/settings_tab.dart:894	{}	en/de/pt/hi 미번역
+settingsScheduleFeatureDescription	시간별 일정을 간편하게 관리하고, 일정에 맞춰 알림을 받을 수 있습니다.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:209; lib/screens/settings_tab.dart:891	{}	en/de/pt/hi 미번역
+settingsConditionFeatureDescription	직접 입력하거나 자동 추정된 수면 기록으로 평균 수면시간을 확인하고, 근무시간과 함께 회복 상태와 컨디션을 살펴볼 수 있습니다.	두 기능 이관 대상	lib/l10n/korean_only_copy.dart:210; lib/screens/settings_tab.dart:892	{}	en/de/pt/hi 미번역

@@ -1,0 +1,197 @@
+Analyzing sync_path_core...
+No issues found!
+00:00 +0: loading test\collision_resolver_test.dart
+00:00 +0: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +1: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +2: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +3: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +4: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +5: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +6: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +7: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +8: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +9: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +10: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +11: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +12: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +13: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +14: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +15: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +16: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +17: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +18: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +19: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +20: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +21: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +22: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +23: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +24: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +25: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +26: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +27: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +28: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +29: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +30: test\constant_speed_test.dart: Straight splitting cannot change timing or collision
+00:00 +31: test\collision_resolver_test.dart: E15 multiple sites and three pairs are preserved and sorted
+00:00 +32: test\collision_resolver_test.dart: E15 multiple sites and three pairs are preserved and sorted
+00:01 +33: test\simulation_engine_test.dart: L01 witness succeeds deterministically regardless of Unit/route order
+00:01 +34: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +35: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +36: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +37: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +38: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +39: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +40: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +41: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +42: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +43: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +44: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +45: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +46: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +47: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +48: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +49: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +50: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +51: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +52: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +53: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +54: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +55: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +56: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +57: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +58: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +59: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +60: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +61: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +62: test\validation_test.dart: V01..V04 float width
+00:02 +63: test\validation_test.dart: V01..V04 string width
+00:02 +64: test\validation_test.dart: V01..V04 rows length
+00:02 +65: test\validation_test.dart: V01..V04 row character
+00:02 +66: test\validation_test.dart: V01..V04 row width
+00:02 +67: test\validation_test.dart: V01..V04 small board
+00:02 +68: test\validation_test.dart: V01..V04 schema
+00:02 +69: test\validation_test.dart: V01..V04 rule
+00:02 +70: test\validation_test.dart: V01..V04 mechanic
+00:02 +71: test\validation_test.dart: V01..V04 duplicate id
+00:02 +72: test\validation_test.dart: V01..V04 empty id
+00:02 +73: test\validation_test.dart: V01..V04 invalid id charset
+00:02 +74: test\validation_test.dart: V01..V04 duplicate start
+00:02 +75: test\validation_test.dart: V01..V04 start goal
+00:02 +76: test\validation_test.dart: V01..V04 blocked placement
+00:02 +77: test\validation_test.dart: V01..V04 coordinate range
+00:02 +78: test\validation_test.dart: V01..V04 negative coordinate
+00:02 +79: test\validation_test.dart: V01..V04 fraction coordinate
+00:02 +80: test\validation_test.dart: V01..V04 disconnected
+00:02 +81: test\validation_test.dart: V01..V04 unreachable within N
+00:02 +82: test\validation_test.dart: V01..V04 oversize units
+00:02 +83: test\validation_test.dart: V01..V04 oversize ID
+00:02 +84: test\validation_test.dart: V10 hostile JSON is bounded before decode, malformed/huge numeric tokens rejected
+00:02 +85: test\validation_test.dart: Goal participates in connectivity but stops rays and allows entry
+00:02 +86: test\validation_test.dart: V05..V08 diagonal
+00:02 +87: test\validation_test.dart: V05..V08 zero
+00:02 +88: test\validation_test.dart: V05..V08 outside
+00:02 +89: test\validation_test.dart: V05..V08 goal pass
+00:02 +90: test\validation_test.dart: V05..V08 after goal
+00:02 +91: test\validation_test.dart: V05..V08 too many
+00:02 +92: test\validation_test.dart: V05..V08 empty
+00:02 +93: test\validation_test.dart: V05..V08 incomplete
+00:02 +94: test\validation_test.dart: Mid-ray wall is rejected even with walkable endpoint
+00:02 +95: test\validation_test.dart: Exact Unit set: missing, extra, duplicate and drafts cannot execute
+00:02 +96: test\validation_test.dart: V09 stale identity/revision rejected and plan JSON round trip preserves binding
+00:02 +97: test\validation_test.dart: R10 split, reverse and revisiting commands are preserved
+00:02 +98: All tests passed!
+Analyzing sync_path_tools...
+No issues found!
+00:00 +0: loading test\constant_speed_oracle_test.dart
+00:00 +0: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +1: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +2: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +3: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +4: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +5: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +6: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +7: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +8: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:02 +9: test\generator_test.dart: S09 preserved every traversed seed cell, even cells between endpoints
+00:02 +10: test\generator_test.dart: S09 preserved every traversed seed cell, even cells between endpoints
+00:02 +11: test\generator_test.dart: UNKNOWN budget never exports verified candidate
+00:02 +12: test\generator_test.dart: S10 early arrival preserved; invalid seed witness and bounds refused
+00:02 +13: All tests passed!
+L01 PASS 2 units pairs=1 solutions=1
+L02 PASS 2 units pairs=4 solutions=3
+L03 PASS 2 units pairs=1 solutions=1
+L04 PASS 3 units pairs=19 solutions=1
+L05 PASS 2 units pairs=16 solutions=2
+L06 PASS 2 units pairs=35 solutions=10
+L07 PASS 3 units pairs=54 solutions=10
+L08 PASS 3 units pairs=50 solutions=5
+L09 PASS 3 units pairs=21 solutions=6
+L10 PASS 3 units pairs=45 solutions=12
+L11 PASS 3 units pairs=35 solutions=6
+L12 PASS 3 units pairs=164 solutions=16
+L13 PASS 3 units pairs=33 solutions=3
+L14 PASS 3 units pairs=327 solutions=27
+L15 PASS 3 units pairs=294 solutions=16
+L16 PASS 4 units pairs=131 solutions=48
+L17 PASS 3 units pairs=74 solutions=3
+L18 PASS 4 units pairs=361 solutions=15
+L19 PASS 3 units pairs=259 solutions=8
+L20 PASS 3 units pairs=236 solutions=2
+L21 PASS 4 units pairs=63 solutions=3
+L22 PASS 3 units pairs=1135 solutions=4
+L23 PASS 4 units pairs=643 solutions=6
+L24 PASS 5 units pairs=111 solutions=48
+L25 PASS 3 units pairs=684 solutions=2
+L26 PASS 4 units pairs=1403 solutions=16
+L27 PASS 5 units pairs=981 solutions=6
+L28 PASS 4 units pairs=876 solutions=22
+L29 PASS 5 units pairs=711 solutions=18
+L30 PASS 5 units pairs=1202 solutions=1
+Analyzing sync_path_ui...                                       
+No issues found! (ran in 16.8s)
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 30 levels preserve safe witnesses, unique identities and six chapter targets
+00:02 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 1.5x applies one common clock; every trajectory, arrival and collision is unchanged
+00:03 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:03 +3: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:04 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:04 +5: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:12 +6: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:13 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:14 +8: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:14 +9: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:14 +10: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:14 +11: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:19 +12: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:19 +13: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:19 +14: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:19 +15: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:19 +16: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:20 +17: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:20 +18: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:20 +19: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:20 +20: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:20 +21: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:20 +22: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:20 +23: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:25 +24: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:30 +25: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 320px planning/undo/success/back with no overflow and reachable controls
+00:32 +26: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype respects reduced motion and manual cell-time replay
+00:32 +27: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 360px planning/undo/success/back with no overflow and reachable controls
+00:34 +28: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 412px planning/undo/success/back with no overflow and reachable controls
+00:36 +29: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 736px planning/undo/success/back with no overflow and reachable controls
+00:38 +30: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U02 board taps another Unit start as a destination; drag does not add a command
+00:38 +31: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U04 failure edits preserve routes; replay slider never moves beyond exact stop
+00:39 +32: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U08 reduced motion remains paused without timers and permits manual scenes
+00:40 +33: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U09 lifecycle pauses replay; return does not start ticker automatically
+00:40 +34: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: Role palette, 6x6 cells, fixed text scaling and controls at 320px
+00:41 +35: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: Capture independent planning screens at narrow/wide and dark palette
+00:42 +36: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: (tearDownAll)
+00:42 +36: All tests passed!
+Analyzing sync_path_lab...                                      
+No issues found! (ran in 15.3s)
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/examples/sync_path_lab/test/lab_isolation_test.dart
+00:00 +0: Bundled prototype atlases decode and release in the independent host
+00:00 +1: only independent devDebug application ID and no app service dependencies
+00:00 +2: All tests passed!
+PASS: isolated DEV game checks. No release or device install performed.

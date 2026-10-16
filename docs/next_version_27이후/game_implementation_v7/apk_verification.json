@@ -1,0 +1,11 @@
+{
+  "apkBytes": 147136163,
+  "sha256": "4d794c1d0895f3d007a3902a845086edba50b7121df33729f2f7c46368685152",
+  "packId": "dev-campaign-30-condensed",
+  "levelCount": 30,
+  "assetsMatch": true,
+  "uiTests": 46,
+  "hostTests": 2,
+  "analyze": "PASS",
+  "device": "NOT_TESTED"
+}

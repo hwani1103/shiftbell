@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.hwani1103.shiftbell.G0NativeMigrationTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-15T22:27:46" hostname="TZJIRTGG0A8S7A6" time="47.994">
+  <properties/>
+  <testcase name="friendRollback_v16_failureAfterV17Drop_restoresOldFriends" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="14.001"/>
+  <testcase name="v27CompletedHistoryBackfillsOnceAndFailedV28UpgradeRollsBack" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="3.355"/>
+  <testcase name="nativeNew_noFile_returnsNull_andDoesNotCreateFile" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="0.35"/>
+  <testcase name="alterFail_repair_propagates_andRollsBackOtherRepairs" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="2.302"/>
+  <testcase name="ruleCases_sharedWithDart" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="0.325"/>
+  <testcase name="versionZero_existingFile_nativeDoesNotCreateSchema" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="0.338"/>
+  <testcase name="onUpgrade_rereadsVersionInsideLock" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="0.776"/>
+  <testcase name="assetPath_nativeLoadsSameScriptAsRepo_andUpgradesWithoutOverride" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="1.03"/>
+  <testcase name="futureVersion_30_gateSkips_andOnDowngradeThrows_versionAndDataUnchanged" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="0.744"/>
+  <testcase name="alterFail_migration_missingTable_isNotSkipped" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="1.397"/>
+  <testcase name="rollback_v12_failureAtV20_restoresEverything_thenRetrySucceeds" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="1.514"/>
+  <testcase name="retiredDevAlarms_cancelOnlyRetiredIds_afterNativeUpgrade" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="1.593"/>
+  <testcase name="missingColumn_stamped24_repairFillsSchema_keepsData" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="1.216"/>
+  <testcase name="migAll_reopen_v1toV23_matchExpectedDataAndReferenceSchema" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="18.35"/>
+  <testcase name="repairReject_oldFriendsStamped24_currentBehaviorRecorded" classname="com.hwani1103.shiftbell.G0NativeMigrationTest" time="0.699"/>
+  <system-out><![CDATA[G0 Robolectric sqlite_version=3.8.7
+REPAIR-REJECT 관찰(Native): open 실패(null)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

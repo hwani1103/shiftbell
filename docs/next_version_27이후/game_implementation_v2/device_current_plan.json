@@ -1,0 +1,62 @@
+{
+  "levelIdentity": {
+    "packId": "dev-pilot-12",
+    "levelId": "L08",
+    "revision": 1,
+    "ruleSetId": "shared-goal-v1"
+  },
+  "routeRevision": 9,
+  "routes": [
+    {
+      "unitId": "A",
+      "endpoints": [
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    },
+    {
+      "unitId": "B",
+      "endpoints": [
+        [
+          4,
+          0
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    },
+    {
+      "unitId": "C",
+      "endpoints": [
+        [
+          1,
+          3
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    }
+  ]
+}

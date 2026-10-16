@@ -1,3 +1,5 @@
+import '../widgets/app_ui_feedback.dart';
+import '../theme/app_ui_theme.dart';
 import '../widgets/adaptive_layout.dart';
 // lib/screens/restore_progress_screen.dart
 //
@@ -16,7 +18,6 @@ import '../models/backup_payload.dart';
 import '../services/app_restart.dart';
 import '../services/backup_validator.dart';
 import '../services/restore_coordinator.dart';
-import '../theme/app_colors.dart';
 import '../services/app_analytics.dart';
 
 /// 화면이 닫히며 돌려주는 결과 - 둘 다 "데이터는 그대로"인 경우. 성공·미완료는 닫히지 않고 앱을 재시작함.
@@ -45,13 +46,17 @@ class _RestoreProgressScreenState extends State<RestoreProgressScreen> {
     try {
       await RestoreCoordinator.instance.start(widget.payload, overwrite: true);
       AppAnalytics.track(AnalyticsEvent.backupRestored);
-      if (mounted) setState(() => _resultMessage = context.l10n.settingsRestoreFromBackupSuccessToast);
+      if (mounted)
+        setState(() => _resultMessage =
+            context.l10n.settingsRestoreFromBackupSuccessToast);
     } on BackupValidationException {
       if (mounted) Navigator.of(context).pop(RestoreProgressOutcome.invalid);
       return;
     } on RestoreIncompleteException {
       // 작업 기록이 남음 - 재시작하면 앱 시작 화면에서 이어서 완료/지금 데이터로 계속을 묻는다
-      if (mounted) setState(() => _resultMessage = context.l10n.backupRestoreIncompleteToast);
+      if (mounted)
+        setState(
+            () => _resultMessage = context.l10n.backupRestoreIncompleteToast);
     } catch (e) {
       // 잠금·작업 사본 저장 등 변경 전 단계에서 실패 - 데이터는 그대로
       debugPrint('🧯 [restore] 복원 시작 실패: $e');
@@ -69,8 +74,9 @@ class _RestoreProgressScreenState extends State<RestoreProgressScreen> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: Colors.white,
-        body: AdaptiveFormBody(child: SafeArea(
+        backgroundColor: AppUiPalette.of(context).surface,
+        body: AdaptiveFormBody(
+            child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -78,28 +84,38 @@ class _RestoreProgressScreenState extends State<RestoreProgressScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.settings_backup_restore, size: 64, color: kAppMainAccent),
+                  Icon(Icons.settings_backup_restore,
+                      size: 64, color: AppUiPalette.of(context).primary),
                   const SizedBox(height: 24),
-                  const Center(child: CircularProgressIndicator()),
+                  const Center(child: AppUiLoading()),
                   const SizedBox(height: 20),
                   Text(
                     _resultMessage ?? l10n.settingsRestoreFromBackupInProgress,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, height: 1.5),
+                    style: const TextStyle(
+                        fontSize: AppFontSize.section,
+                        fontWeight: FontWeight.w700,
+                        height: 1.5),
                   ),
                   if (_waitingAlarm) ...[
                     const SizedBox(height: 12),
                     Text(
                       l10n.restoreWaitingAlarmEnd,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.5),
+                      style: TextStyle(
+                          fontSize: AppFontSize.body,
+                          color: AppUiPalette.of(context).secondaryText,
+                          height: 1.5),
                     ),
                   ],
                   const SizedBox(height: 12),
                   Text(
                     l10n.restoreDoNotLeave,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 13, color: Colors.black45, height: 1.5),
+                    style: TextStyle(
+                        fontSize: AppFontSize.body,
+                        color: AppUiPalette.of(context).secondaryText,
+                        height: 1.5),
                   ),
                 ],
               ),

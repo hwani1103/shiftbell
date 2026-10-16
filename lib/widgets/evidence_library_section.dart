@@ -1,3 +1,4 @@
+import '../theme/app_ui_theme.dart';
 // lib/widgets/evidence_library_section.dart
 //
 // ⭐ 2026-09-01 후속13 - 원래 condition_tab.dart 안에 있던 "근거 자료" 섹션
@@ -42,10 +43,14 @@ class _EvidenceLibrarySectionState extends State<EvidenceLibrarySection> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const Icon(Icons.menu_book_outlined, color: Colors.black45),
+                  Icon(Icons.menu_book_outlined,
+                      color: AppUiPalette.of(context).secondaryText),
                   const SizedBox(width: 10),
                   const Expanded(
-                    child: Text('근거 자료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                    child: Text('근거 자료',
+                        style: TextStyle(
+                            fontSize: AppFontSize.section,
+                            fontWeight: FontWeight.w700)),
                   ),
                   Icon(_expanded ? Icons.expand_less : Icons.expand_more),
                 ],
@@ -77,13 +82,22 @@ class EvidenceTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${evidence.id} · ${evidence.topic}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+          Text('${evidence.id} · ${evidence.topic}',
+              style: const TextStyle(
+                  fontSize: AppFontSize.body, fontWeight: FontWeight.w700)),
           const SizedBox(height: 2),
-          Text(evidence.source, style: const TextStyle(fontSize: 12, color: Colors.black54)),
+          Text(evidence.source,
+              style: TextStyle(
+                  fontSize: AppFontSize.meta,
+                  color: AppUiPalette.of(context).secondaryText)),
           const SizedBox(height: 4),
-          Text(evidence.finding, style: const TextStyle(fontSize: 12.5)),
+          Text(evidence.finding,
+              style: const TextStyle(fontSize: AppFontSize.body)),
           const SizedBox(height: 2),
-          Text('근거 수준: ${evidence.evidenceLevel}', style: const TextStyle(fontSize: 11.5, color: Colors.black45)),
+          Text('근거 수준: ${evidence.evidenceLevel}',
+              style: TextStyle(
+                  fontSize: AppFontSize.meta,
+                  color: AppUiPalette.of(context).secondaryText)),
           // ⭐ URL 링크 줄 삭제(일부가 "not found"로 뜬다는 지적) - 출처(source)/
           // 제목(topic)만으로 어떤 기관·연구인지는 충분히 드러남. url 필드 자체는
           // evidence_database.dart에 원문 조사 이력으로 그대로 남아있음(화면

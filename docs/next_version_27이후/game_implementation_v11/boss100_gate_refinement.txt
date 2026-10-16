@@ -1,0 +1,21 @@
+BASE 21494 max extra 24 domains [50, 1, 157, 152]
+GATES 0 1255 seconds 0
+GATES 100 1255 seconds 3
+GATES 200 1255 seconds 7
+GATES 300 1255 seconds 9
+GATES 400 1255 seconds 13
+GATES 500 1255 seconds 18
+GATES 600 1255 seconds 23
+GATES 700 1255 seconds 27
+GATES 800 1255 seconds 31
+GATES 900 1255 seconds 35
+GATES 1000 1255 seconds 39
+GATES 1100 1255 seconds 43
+GATES 1200 1255 seconds 48
+BEST moves 52 extra 4 safe 12 score 34.36
+BEST moves 54 extra 16 safe 4 score 46.11
+BEST moves 55 extra 16 safe 8 score 45.39
+BEST moves 55 extra 18 safe 11 score 46.53
+BEST moves 56 extra 20 safe 2 score 50.87
+BEST moves 56 extra 24 safe 1 score 55.07
+DONE 51

@@ -1,0 +1,74 @@
+{
+  "levels": 50,
+  "boards": {
+    "5x5": 13,
+    "6x6": 14,
+    "7x7": 23
+  },
+  "units": {
+    "2": 14,
+    "3": 15,
+    "4": 21
+  },
+  "distinctPuzzles": 50,
+  "distinctFloorLayouts": 50,
+  "scoresStrictlyIncrease": true,
+  "maxPostTutorialScoreStep": 0.7779671388184344,
+  "minimumStartGoalManhattan": 3,
+  "allAuthoringSolutionCountsMatchDart": true,
+  "pairComparisons": 40608,
+  "distinctSafeAssignments": 874,
+  "humanPlaytest": "NOT_TESTED",
+  "chapters": [
+    {
+      "levels": "1-5",
+      "meanScore": 3.8609060034294345,
+      "minimumExtraDistance": 0
+    },
+    {
+      "levels": "6-10",
+      "meanScore": 6.490117804022859,
+      "minimumExtraDistance": 2
+    },
+    {
+      "levels": "11-15",
+      "meanScore": 7.867809484051875,
+      "minimumExtraDistance": 2
+    },
+    {
+      "levels": "16-20",
+      "meanScore": 10.069686451929497,
+      "minimumExtraDistance": 2
+    },
+    {
+      "levels": "21-25",
+      "meanScore": 12.517280096205004,
+      "minimumExtraDistance": 6
+    },
+    {
+      "levels": "26-30",
+      "meanScore": 14.984612199468677,
+      "minimumExtraDistance": 4
+    },
+    {
+      "levels": "31-35",
+      "meanScore": 17.537569811032927,
+      "minimumExtraDistance": 4
+    },
+    {
+      "levels": "36-40",
+      "meanScore": 20.038645272920174,
+      "minimumExtraDistance": 6
+    },
+    {
+      "levels": "41-45",
+      "meanScore": 22.471821698681442,
+      "minimumExtraDistance": 12
+    },
+    {
+      "levels": "46-50",
+      "meanScore": 24.906599128196557,
+      "minimumExtraDistance": 12
+    }
+  ]
+}

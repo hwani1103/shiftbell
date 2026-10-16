@@ -1,3 +1,4 @@
+import '../../utils/calendar_dates.dart';
 // lib/services/condition/sleep_by_category_stats.dart
 //
 // ⭐ P2 #6(2026-09-18, 사용자 요청) - "근무 종류별 평균 수면" 인사이트. 야간/주간/
@@ -96,8 +97,8 @@ SleepCategoryStatsSnapshot buildSleepCategoryStats({
   int minSampleDays = kMinSampleDaysForCategoryAverage,
 }) {
   final today = DateTime(now.year, now.month, now.day);
-  final from = today.subtract(Duration(days: lookbackDays));
-  final to = today.subtract(const Duration(days: 1));
+  final from = shiftLocalCalendarDay(today, -lookbackDays);
+  final to = shiftLocalCalendarDay(today, -1);
   if (to.isBefore(from)) return const SleepCategoryStatsSnapshot.empty();
 
   final slots = buildSleepDaySlots(

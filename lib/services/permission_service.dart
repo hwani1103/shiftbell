@@ -159,6 +159,9 @@ class PermissionController extends ChangeNotifier {
       : _read = read ?? PermissionService().snapshot;
   final Future<PermissionSnapshot> Function() _read;
   PermissionSnapshot value = const PermissionSnapshot({});
+  // A completed read may still be unknown; this never implies permission approval.
+  bool _hasLoaded = false;
+  bool get hasLoaded => _hasLoaded;
   Future<void>? _pending;
   bool _dirty = false;
   bool _disposed = false;
@@ -179,6 +182,7 @@ class PermissionController extends ChangeNotifier {
       if (_disposed) return;
       if (_dirty) continue;
       value = next;
+      _hasLoaded = true;
       notifyListeners();
     }
   }

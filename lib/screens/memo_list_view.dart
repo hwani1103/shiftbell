@@ -1,3 +1,4 @@
+import '../theme/app_ui_theme.dart';
 import '../widgets/memo_detail_sheet.dart';
 import '../widgets/adaptive_layout.dart';
 import 'package:flutter/material.dart';
@@ -108,7 +109,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         title: Text(context.l10n.calendarMemoAll,
-            style: TextStyle(fontSize: 18.sp)),
+            style: TextStyle(fontSize: AppFontSize.toolbar)),
         elevation: 0,
       ),
       body: AdaptiveFormBody(
@@ -161,8 +162,8 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
       margin: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 4.h),
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
+        color: AppUiPalette.of(context).surface,
+        borderRadius: BorderRadius.circular(AppUiMetrics.cardRadius),
         boxShadow: [
           BoxShadow(
             color: colorScheme.shadow.withOpacity(0.06),
@@ -178,7 +179,8 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
             controller: _searchController,
             decoration: InputDecoration(
               hintText: '${context.l10n.calendarMemoSearch}...',
-              hintStyle: TextStyle(fontSize: 14.sp, color: colorScheme.outline),
+              hintStyle: TextStyle(
+                  fontSize: AppFontSize.body, color: colorScheme.outline),
               prefixIcon:
                   Icon(Icons.search_rounded, color: colorScheme.primary),
               suffixIcon: _searchQuery.isNotEmpty
@@ -205,7 +207,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                 _searchQuery = value;
               });
             },
-            style: TextStyle(fontSize: 14.sp),
+            style: TextStyle(fontSize: AppFontSize.body),
           ),
           Padding(
             padding: EdgeInsets.only(left: 16.w, right: 12.w, bottom: 8.h),
@@ -214,7 +216,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                   ? context.l10n.calendarMemoTotalCount(totalCount)
                   : context.l10n.calendarMemoSearchResultCount(matchedCount),
               style: TextStyle(
-                  fontSize: 12.sp,
+                  fontSize: AppFontSize.meta,
                   color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500),
             ),
@@ -250,7 +252,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                 ? context.l10n.calendarSearchNoResults
                 : context.l10n.calendarMemoNone,
             style: TextStyle(
-                fontSize: 15.sp,
+                fontSize: AppFontSize.control,
                 color: colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500),
           ),
@@ -271,7 +273,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
           Text(
             _monthLabel(context, monthKey),
             style: TextStyle(
-                fontSize: 15.sp,
+                fontSize: AppFontSize.control,
                 fontWeight: FontWeight.w800,
                 color: colorScheme.primary),
           ),
@@ -280,12 +282,12 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
             decoration: BoxDecoration(
               color: colorScheme.primary.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
             ),
             child: Text(
               '$count',
               style: TextStyle(
-                  fontSize: 11.sp,
+                  fontSize: AppFontSize.meta,
                   fontWeight: FontWeight.w700,
                   color: colorScheme.primary),
             ),
@@ -329,7 +331,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                 child: Text(
                   '${date.day}',
                   style: TextStyle(
-                      fontSize: 13.sp,
+                      fontSize: AppFontSize.body,
                       fontWeight: FontWeight.w800,
                       color: weekdayColor),
                 ),
@@ -338,7 +340,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
               Text(
                 _dateLabel(context, date),
                 style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: AppFontSize.body,
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurfaceVariant),
               ),
@@ -364,20 +366,20 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
       child: Material(
         color: Color.alphaBlend(
             colorScheme.primary.withValues(alpha: .06), colorScheme.surface),
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
           onTap: () => _showMemoActionSheet(context, date, dateStr, memo),
           child: Container(
             foregroundDecoration: BoxDecoration(
               border: Border.all(
                   color: colorScheme.onSurface.withValues(alpha: .18),
                   width: .8),
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
             ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.r),
+              borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
               boxShadow: [
                 BoxShadow(
                   color: colorScheme.shadow.withOpacity(0.04),
@@ -407,7 +409,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                           memo.memoText,
                           _searchQuery,
                           TextStyle(
-                              fontSize: 14.sp,
+                              fontSize: AppFontSize.body,
                               fontWeight: FontWeight.normal,
                               color: colorScheme.onSurface,
                               height: 1.4),

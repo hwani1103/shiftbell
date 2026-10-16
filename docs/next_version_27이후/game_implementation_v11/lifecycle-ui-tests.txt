@@ -1,0 +1,33 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: Mounting while already backgrounded uses the slow heart clock
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <false>
+  Actual: <true>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart:55:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart line 55
+The test description was:
+  Mounting while already backgrounded uses the slow heart clock
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:00 +0 -1: Mounting while already backgrounded uses the slow heart clock [E]
+  Test failed. See exception logs above.
+  The test description was: Mounting while already backgrounded uses the slow heart clock
+  
+00:00 +0 -1: Every level card chooses readable ink, final red grows darker
+00:00 +1 -1: Saved location is visible on first hub and after Android back; test lock stays reachable
+00:03 +2 -1: Shared revisited endpoints show four flags; empty hearts refill visibly
+00:04 +3 -1: Final board remains usable at 320px; campaign stops at its last level
+00:04 +4 -1: (tearDownAll)
+00:05 +4 -1: Some tests failed.

@@ -3,6 +3,36 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftbell/widgets/complete_cell_memo_text.dart';
 
 void main() {
+  for (final shortage in [0.0, 7e-15, 0.25]) {
+    testWidgets('finite memo height tolerates only rounding error: $shortage',
+        (tester) async {
+      const style = TextStyle(fontSize: 9, height: 1, fontFamily: 'Ahem');
+      final painter = TextPainter(
+        text: const TextSpan(text: 'ABC', style: style),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final lineHeight = painter.height;
+      painter.dispose();
+      await tester.pumpWidget(MaterialApp(
+        home: Center(
+            child: SizedBox(
+          width: 60,
+          height: lineHeight - shortage,
+          child: const DefaultTextStyle(
+            style: style,
+            child: CompleteCellMemoText('ABC', style: style),
+          ),
+        )),
+      ));
+      final shown = tester.widget<Text>(find.descendant(
+          of: find.byType(CompleteCellMemoText), matching: find.byType(Text)));
+      expect(shown.data, shortage < 0.01 ? 'ABC' : '',
+          reason:
+              'Rounding must not erase a memo; real height shortage still rejects it');
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   for (final scale in [1.0, 1.3]) {
     for (final value in ['긴메모내용확인', 'Long memo text', '가👨‍👩‍👧‍👦나']) {
       testWidgets('memo uses complete prefix without ellipsis: $value/$scale',

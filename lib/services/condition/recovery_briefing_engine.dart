@@ -1,3 +1,8 @@
+import '../../utils/sleep_format_util.dart' show fmtShortSleepDate;
+import '../../l10n/generated/app_localizations.dart';
+import '../../l10n/generated/app_localizations_ko.dart';
+import '../../l10n/sleep_localization.dart';
+import '../../utils/calendar_dates.dart';
 // lib/services/condition/recovery_briefing_engine.dart
 //
 // ⭐ 2026-09-15 - "오늘의 컨디션" 카드 엔진. today_forecast_engine.dart(날짜 시드 문구 조합)와
@@ -20,7 +25,6 @@
 import 'dart:math' as math;
 
 import '../../models/sleep_record.dart';
-import '../../utils/sleep_format_util.dart' show kWeekdayLabelsKo;
 import 'condition_rule_engine.dart';
 import 'shift_pattern_analyzer.dart';
 import 'shift_time_category.dart';
@@ -158,24 +162,24 @@ const List<String> _eOvertimeSevere = ['EVIDENCE-012', 'EVIDENCE-014'];
 const List<String> _eNightStreak = ['EVIDENCE-013'];
 const List<String> _eConsecutiveWorkdays = ['EVIDENCE-005'];
 
-const BriefingAction _commuteAction = BriefingAction(
+BriefingAction _commuteAction(AppLocalizations copy) => BriefingAction(
   'commute',
-  '퇴근길엔 선글라스 등으로 강한 햇빛을 줄이면 이후 잠들기 쉬워요. 많이 졸리면 운전하지 말고 대중교통이나 동승을 이용하세요.',
+  copy.sleepText071,
   evidenceIds: _eCommute,
 );
-const BriefingAction _napAction = BriefingAction(
+BriefingAction _napAction(AppLocalizations copy) => BriefingAction(
   'nap_before_night',
-  '출근 전에 짧게 눈을 붙이면 야간 졸림을 줄이는 데 도움이 될 수 있어요. 깬 직후엔 잠깐 멍할 수 있으니 바로 운전하지는 마세요.',
+  copy.sleepText072,
   evidenceIds: _eNap,
 );
-const BriefingAction _mealAction = BriefingAction(
+BriefingAction _mealAction(AppLocalizations copy) => BriefingAction(
   'night_meal',
-  '자정~06시에는 식사량을 줄이고 가벼운 음식 위주로 드세요.',
+  copy.sleepText073,
   evidenceIds: _eMeal,
 );
-const BriefingAction _recordSleepAction = BriefingAction(
+BriefingAction _recordSleepAction(AppLocalizations copy) => BriefingAction(
   'record_sleep',
-  '아래 "최근 수면 기록"에 수면 시간을 남겨주세요. 기록이 쌓이면 실제로 잔 시간을 바탕으로 더 정확하게 알려드릴게요.',
+  copy.sleepText074,
 );
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -184,30 +188,32 @@ String _hm(DateTime t) =>
     '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
 /// "7시간 20분" / "7시간" / "40분" (음수는 0분)
-String fmtBriefingDuration(int minutes) {
+String fmtBriefingDuration(int minutes, {AppLocalizations? localizations}) {
+  final copy = localizations ?? AppLocalizationsKo();
   final m = math.max(0, minutes);
   final h = m ~/ 60;
   final r = m % 60;
-  if (h == 0) return '$r분';
-  if (r == 0) return '$h시간';
-  return '$h시간 $r분';
+  if (h == 0) return copy.sleepText075((r).toString());
+  if (r == 0) return copy.sleepText076((h).toString());
+  return copy.sleepText077((h).toString(), (r).toString());
 }
 
 /// "오늘 07:00" / "내일 19:00" / "어제 23:00" / "모레 07:00" / "9/20(일) 07:00"
-String briefingWhenLabel(DateTime t, DateTime now) {
+String briefingWhenLabel(DateTime t, DateTime now, {AppLocalizations? localizations}) {
+  final copy = localizations ?? AppLocalizationsKo();
   final diff = (_day(t).difference(_day(now)).inHours / 24).round();
   final hm = _hm(t);
   switch (diff) {
     case 0:
-      return '오늘 $hm';
+      return copy.sleepText078((hm).toString());
     case 1:
-      return '내일 $hm';
+      return copy.sleepText079((hm).toString());
     case -1:
-      return '어제 $hm';
+      return copy.sleepText080((hm).toString());
     case 2:
-      return '모레 $hm';
+      return copy.sleepText081((hm).toString());
   }
-  return '${t.month}/${t.day}(${kWeekdayLabelsKo[t.weekday - 1]}) $hm';
+  return '${sleepDateLabel(t, copy)} $hm';
 }
 
 /// 출퇴근 시각을 아는 근무일의 인스턴스만(휴무·미설정·시각 미입력은 null).
@@ -251,17 +257,19 @@ RecoveryBriefing buildRecoveryBriefing({
   required DateTime now,
   Map<String, int> otMinutesByDate = const {},
   int pendingCount = 0,
+  AppLocalizations? localizations,
 }) {
+  final copy = localizations ?? AppLocalizationsKo();
   final today = _day(now);
   const target =
       ConditionRuleEngine.recommendedSleepMinMinutes; // 7시간 - EVIDENCE-011
-  String when(DateTime t) => briefingWhenLabel(t, now);
-  String dur(int minutes) => fmtBriefingDuration(minutes);
+  String when(DateTime t) => briefingWhenLabel(t, now, localizations: copy);
+  String dur(int minutes) => fmtBriefingDuration(minutes, localizations: copy);
 
   // ── 1. 지금 근무 흐름에서의 위치 ─────────────────────────────────────
   ShiftInstance? current;
   for (final offset in const [0, -1]) {
-    final inst = _timed(analyzer, today.add(Duration(days: offset)));
+    final inst = _timed(analyzer, shiftLocalCalendarDay(today, offset));
     if (inst != null && !now.isBefore(inst.start!) && now.isBefore(inst.end!)) {
       current = inst;
       break;
@@ -270,7 +278,7 @@ RecoveryBriefing buildRecoveryBriefing({
 
   ShiftInstance? last;
   for (var i = 0; i <= _kSearchDays; i++) {
-    final inst = _timed(analyzer, today.subtract(Duration(days: i)));
+    final inst = _timed(analyzer, shiftLocalCalendarDay(today, -i));
     if (inst == null || inst.end!.isAfter(now)) continue;
     if (last == null || inst.end!.isAfter(last.end!)) last = inst;
     if (i >= 1) break;
@@ -278,7 +286,7 @@ RecoveryBriefing buildRecoveryBriefing({
 
   ShiftInstance? next;
   for (var i = 0; i <= _kSearchDays; i++) {
-    final inst = _timed(analyzer, today.add(Duration(days: i)));
+    final inst = _timed(analyzer, shiftLocalCalendarDay(today, i));
     if (inst != null && inst.start!.isAfter(now)) {
       next = inst;
       break;
@@ -288,7 +296,7 @@ RecoveryBriefing buildRecoveryBriefing({
   // 출퇴근 시각이 없는 근무가 끼어 있으면 "직전/다음 근무"를 단정하지 않는다(설정 의존성 - 재검토 #4)
   final untimedNames = <String>[];
   for (var i = -7; i <= 7; i++) {
-    final inst = analyzer.instanceForDate(today.add(Duration(days: i)));
+    final inst = analyzer.instanceForDate(shiftLocalCalendarDay(today, i));
     if (inst.isWorkDay &&
         inst.start == null &&
         !untimedNames.contains(inst.shiftName)) {
@@ -299,7 +307,7 @@ RecoveryBriefing buildRecoveryBriefing({
   if (next != null) {
     for (var d = today;
         d.isBefore(next.date);
-        d = d.add(const Duration(days: 1))) {
+        d = shiftLocalCalendarDay(d, 1)) {
       final inst = analyzer.instanceForDate(d);
       if (inst.isWorkDay && inst.start == null) {
         untimedNextName = inst.shiftName;
@@ -309,9 +317,9 @@ RecoveryBriefing buildRecoveryBriefing({
     if (untimedNextName != null) next = null;
   }
   if (last != null) {
-    for (var d = last.date.add(const Duration(days: 1));
+    for (var d = shiftLocalCalendarDay(last.date, 1);
         !d.isAfter(today);
-        d = d.add(const Duration(days: 1))) {
+        d = shiftLocalCalendarDay(d, 1)) {
       final inst = analyzer.instanceForDate(d);
       if (inst.isWorkDay && inst.start == null) {
         last = null;
@@ -338,23 +346,21 @@ RecoveryBriefing buildRecoveryBriefing({
   }
 
   final nextText = next != null
-      ? '다음 근무 ${next.shiftName} ${when(next.start!)}'
-      : (untimedNextName != null ? '다음 근무 $untimedNextName(시각 미입력)' : null);
+      ? copy.sleepText082((next.shiftName).toString(), (when(next.start!)).toString())
+      : (untimedNextName != null ? copy.sleepText083((untimedNextName).toString()) : null);
   final String situation = switch (phase) {
     BriefingPhase.onShift =>
-      '지금 ${current!.shiftName} 근무 중 · ${when(current.end!)} 퇴근 '
-          '(${dur(current.end!.difference(now).inMinutes)} 남음)',
+      copy.sleepText084((current!.shiftName).toString(), (when(current.end!)).toString(), (dur(current.end!.difference(now).inMinutes)).toString()),
     BriefingPhase.beforeShift =>
-      '곧 ${next!.shiftName} 출근 · ${when(next.start!)} (${dur(next.start!.difference(now).inMinutes)} 뒤)',
+      copy.sleepText085((next!.shiftName).toString(), (when(next.start!)).toString(), (dur(next.start!.difference(now).inMinutes)).toString()),
     BriefingPhase.recovering =>
-      '${last!.shiftName} 근무 마친 지 ${dur(now.difference(last.end!).inMinutes)}'
-          '${nextText != null ? ' · $nextText' : ''}',
-    BriefingPhase.offDay => '오늘은 휴무${nextText != null ? ' · $nextText' : ''}',
+      copy.sleepText086((last!.shiftName).toString(), (dur(now.difference(last.end!).inMinutes)).toString(), (nextText != null ? ' · $nextText' : '').toString()),
+    BriefingPhase.offDay => copy.sleepText087((nextText != null ? ' · $nextText' : '').toString()),
     BriefingPhase.laterToday =>
-      '오늘 ${next!.shiftName} 근무 · ${when(next.start!)} 출근 (${dur(next.start!.difference(now).inMinutes)} 뒤)',
+      copy.sleepText088((next!.shiftName).toString(), (when(next.start!)).toString(), (dur(next.start!.difference(now).inMinutes)).toString()),
     BriefingPhase.unknown => todayInst.isUnset
-        ? '오늘은 근무 일정이 없는 날이에요'
-        : '오늘 ${todayInst.shiftName} 근무 (출퇴근 시각 미입력)',
+        ? copy.sleepText089
+        : copy.sleepText090((todayInst.shiftName).toString()),
   };
 
   // ── 2. 수면 기록 ────────────────────────────────────────────────────
@@ -379,7 +385,7 @@ RecoveryBriefing buildRecoveryBriefing({
   // 여전히 "이미 끝난 날"만 쓰므로 오늘 칸은 빼고 계산한다.
   final slotsIncludingToday = buildSleepDaySlots(
     records: records,
-    from: today.subtract(const Duration(days: 7)),
+    from: shiftLocalCalendarDay(today, -7),
     to: today,
     analyzer: analyzer,
   );
@@ -477,10 +483,10 @@ RecoveryBriefing buildRecoveryBriefing({
       final enough = last24hSleep >= target;
       // 괄호는 "24시간 총량과 다른 값일 때"만 - 같으면 같은 말을 두 번 하는 셈이라 뺀다.
       final preNote = (preShiftSleep > 0 && preShiftSleep < last24hSleep)
-          ? ' (출근 전 ${dur(preShiftSleep)} 포함)'
+          ? copy.sleepText091((dur(preShiftSleep)).toString())
           : '';
       facts.add(BriefingFact(
-        '지난 24시간 수면 ${dur(last24hSleep)}$preNote${enough ? '' : ', 권장 7시간보다 적어요'}',
+        copy.sleepText092((dur(last24hSleep)).toString(), (preNote).toString(), (enough ? '' : copy.sleepText258).toString()),
         tone: enough ? BriefingTone.good : BriefingTone.caution,
         evidenceIds: const [_eSleepAmount],
         topic: BriefingTopic.sleepAmount,
@@ -488,7 +494,7 @@ RecoveryBriefing buildRecoveryBriefing({
     } else if (!sleepingNow) {
       sleepDataMissing = true;
       if (hasRecentRecords) {
-        facts.add(const BriefingFact('지난 24시간 수면 기록이 없어요',
+        facts.add( BriefingFact(copy.sleepText093,
             topic: BriefingTopic.sleepAmount));
       }
     }
@@ -507,7 +513,7 @@ RecoveryBriefing buildRecoveryBriefing({
       final enough = sleepSinceLast >= target;
       final cannotReach = !enough && sleepSinceLast + canStillSleep < target;
       facts.add(BriefingFact(
-        '퇴근(${when(l.end!)}) 후 수면 ${dur(sleepSinceLast)}${cannotReach ? ', 다음 출근 전까지 7시간을 채우긴 어려워요' : ''}',
+        copy.sleepText094((when(l.end!)).toString(), (dur(sleepSinceLast)).toString(), (cannotReach ? copy.sleepText259 : '').toString()),
         tone: enough
             ? BriefingTone.good
             : (cannotReach ? BriefingTone.caution : BriefingTone.neutral),
@@ -515,21 +521,21 @@ RecoveryBriefing buildRecoveryBriefing({
         topic: BriefingTopic.sleepAmount,
       ));
     } else if (sleepingNow) {
-      facts.add(const BriefingFact('지금 수면 중으로 기록돼 있어요'));
+      facts.add( BriefingFact(copy.sleepText095));
     } else if (now.difference(l.end!) >= _kNoSleepNudgeAfter) {
       sleepDataMissing = true;
       if (hasRecentRecords)
-        facts.add(BriefingFact('퇴근(${when(l.end!)}) 후 기록된 수면이 아직 없어요'));
+        facts.add(BriefingFact(copy.sleepText096((when(l.end!)).toString())));
     }
   }
 
   // 3-3. 어제 수면(휴무·일정 불명일)
   if (phase == BriefingPhase.offDay || phase == BriefingPhase.unknown) {
-    final y = today.subtract(const Duration(days: 1));
+    final y = shiftLocalCalendarDay(today, -1);
     if (yesterdayTotal > 0) {
       final enough = yesterdayTotal >= target;
       facts.add(BriefingFact(
-        '어제(${y.month}/${y.day}) 수면 ${dur(yesterdayTotal)}${enough ? '' : ', 권장 7시간보다 적어요'}',
+        copy.sleepText097(fmtShortSleepDate(y, localizations: copy), dur(yesterdayTotal), enough ? '' : copy.sleepText258),
         tone: enough ? BriefingTone.good : BriefingTone.caution,
         evidenceIds: const [_eSleepAmount],
         topic: BriefingTopic.sleepAmount,
@@ -537,7 +543,7 @@ RecoveryBriefing buildRecoveryBriefing({
     } else {
       sleepDataMissing = true;
       if (hasRecentRecords)
-        facts.add(BriefingFact('어제(${y.month}/${y.day}) 수면 기록이 없어요'));
+        facts.add(BriefingFact(copy.sleepText098(fmtShortSleepDate(y, localizations: copy))));
     }
   }
 
@@ -547,13 +553,11 @@ RecoveryBriefing buildRecoveryBriefing({
   if (comparison != null) {
     final category = comparison.average.category;
     final categoryLabel =
-        category == ShiftTimeCategory.off ? '휴무일' : '${category.label} 근무일';
+        category == ShiftTimeCategory.off ? copy.sleepText040 : copy.sleepText041((sleepShiftLabel(category, copy)).toString());
     final age = today.difference(comparison.slot.date).inDays;
-    final dayLabel = age == 1 ? '어제' : '그제';
+    final dayLabel = age == 1 ? copy.sleepText099 : copy.sleepText100;
     facts.add(BriefingFact(
-      '$dayLabel $categoryLabel 수면 ${dur(comparison.actual)}, 개인 평균 '
-      '${dur(comparison.average.averageMinutes)}보다 ${dur(comparison.deficit)} 적어요 '
-      '(최근 30일 ${comparison.average.sampleDays}일 기준)',
+      copy.sleepText101((dayLabel).toString(), (categoryLabel).toString(), (dur(comparison.actual)).toString(), (dur(comparison.average.averageMinutes)).toString(), (dur(comparison.deficit)).toString(), (comparison.average.sampleDays).toString()),
       tone: BriefingTone.caution,
       // ⭐ 2026-09-22 - 근거 ID를 달지 않는다. 이 사실은 "내 기록끼리의 비교"라 순수 사실에 속하고,
       // EVIDENCE-011(성인 7~9시간)은 절대 기준이라 이 비교의 근거가 아니다(달아 두면 "7시간 기준으로
@@ -564,7 +568,7 @@ RecoveryBriefing buildRecoveryBriefing({
         32,
         BriefingAction(
           'personal_sleep_baseline',
-          '최근 $categoryLabel 수면이 평소보다 적었어요. 다음 수면 기회에는 다른 일정보다 회복할 시간을 조금 더 넉넉히 잡아보세요.',
+          copy.sleepText102((categoryLabel).toString()),
           // 조언(잠을 더 확보하기)은 성인 권장 수면 EVIDENCE-011이 뒷받침한다.
           evidenceIds: const [_eSleepAmount],
           topic: BriefingTopic.personalSleepBaseline,
@@ -588,8 +592,7 @@ RecoveryBriefing buildRecoveryBriefing({
     if (gap > 0 && gap <= 48 * 60) {
       final short = gap < ConditionRuleEngine.minRecoveryMinutes;
       facts.add(BriefingFact(
-        '근무 사이 회복시간 ${dur(gap)} (${when(gapFrom.end!)} 퇴근 → ${when(gapTo.start!)} 출근)'
-        '${short ? ', 권장 최소 11시간보다 짧아요' : ''}',
+        copy.sleepText103((dur(gap)).toString(), (when(gapFrom.end!)).toString(), (when(gapTo.start!)).toString(), (short ? copy.sleepText260 : '').toString()),
         tone: short ? BriefingTone.caution : BriefingTone.neutral,
         evidenceIds: short ? _eRecovery : const [],
         topic: BriefingTopic.recoveryGap,
@@ -621,14 +624,14 @@ RecoveryBriefing buildRecoveryBriefing({
       final text = ConditionRuleEngine.streakClause(
         nightStreakResult,
         normal: (days) => phase == BriefingPhase.recovering
-            ? '야간 $days일 연속 근무 후'
-            : '연속 야간 $days일째',
+            ? copy.sleepText104((days).toString())
+            : copy.sleepText105((days).toString()),
         capped: phase == BriefingPhase.recovering
-            ? '야간 근무가 휴무 없이 매우 오래 이어진 후'
-            : '연속 야간 근무가 휴무 없이 매우 오래 이어지고 있음',
+            ? copy.sleepText106
+            : copy.sleepText107,
       );
       facts.add(BriefingFact(
-        severe ? '$text. 연속될수록 피로와 실수가 쌓이기 쉬워요' : text,
+        severe ? copy.sleepText108((text).toString()) : text,
         tone: severe ? BriefingTone.caution : BriefingTone.neutral,
         evidenceIds: severe ? _eNightStreak : const [],
         topic: BriefingTopic.nightStreak,
@@ -671,13 +674,13 @@ RecoveryBriefing buildRecoveryBriefing({
       final totalNote = (!workStreak.capped &&
               !bucketStreak.capped &&
               workStreak.days > bucketStreak.days)
-          ? '(전체 연속근무는 ${workStreak.days}일째)'
+          ? copy.sleepText109((workStreak.days).toString())
           : '';
       facts.add(BriefingFact(
         ConditionRuleEngine.streakClause(
           bucketStreak,
-          normal: (days) => '$floorHours시간 이상 근무 $days일 연속$totalNote',
-          capped: '$floorHours시간 이상 근무가 휴무 없이 매우 오래 이어지고 있어요',
+          normal: (days) => copy.sleepText110((floorHours).toString(), (days).toString(), (totalNote).toString()),
+          capped: copy.sleepText111((floorHours).toString()),
         ),
         tone: BriefingTone.caution,
         evidenceIds: bucket.evidenceIds,
@@ -687,9 +690,7 @@ RecoveryBriefing buildRecoveryBriefing({
           60,
           BriefingAction(
             'extended_streak_rest',
-            '$floorHours시간 근무가 '
-                '${ConditionRuleEngine.streakClause(bucketStreak, normal: (days) => '$days일', capped: '휴무 없이 매우 오래')} '
-                '이어졌어요. 근무 조정이 가능하다면 이어서 $breakDays일 정도는 쉬어보세요.',
+            copy.sleepText112((floorHours).toString(), (ConditionRuleEngine.streakClause(bucketStreak, normal: (days) => copy.sleepText261((days).toString()), capped: copy.sleepText262)).toString(), (breakDays).toString()),
             evidenceIds: bucket.evidenceIds,
             topic: BriefingTopic.longWorkStreak,
           ));
@@ -699,8 +700,8 @@ RecoveryBriefing buildRecoveryBriefing({
       facts.add(BriefingFact(
         ConditionRuleEngine.streakClause(
           workStreak,
-          normal: (days) => '$days일째 연속 근무 중이에요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요',
-          capped: '휴무 없이 매우 오래 근무가 이어지고 있어요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요',
+          normal: (days) => copy.sleepText113((days).toString()),
+          capped: copy.sleepText114,
         ),
         tone: BriefingTone.caution,
         evidenceIds: _eConsecutiveWorkdays,
@@ -709,9 +710,9 @@ RecoveryBriefing buildRecoveryBriefing({
       if (severe) {
         act(
             65,
-            const BriefingAction(
+             BriefingAction(
               'consecutive_workdays_rest',
-              '연속 근무가 길게 이어지고 있어요. 근무 조정이 가능하다면 하루라도 쉬는 날을 만들어보세요.',
+              copy.sleepText115,
               evidenceIds: _eConsecutiveWorkdays,
               topic: BriefingTopic.longWorkStreak,
             ));
@@ -719,8 +720,8 @@ RecoveryBriefing buildRecoveryBriefing({
     } else if (workStreak.days >= _kLongWorkStreakDays) {
       facts.add(BriefingFact(
         ConditionRuleEngine.streakClause(workStreak,
-            normal: (days) => '$days일째 연속 근무',
-            capped: '휴무 없이 매우 오래 근무가 이어지고 있어요'),
+            normal: (days) => copy.sleepText116((days).toString()),
+            capped: copy.sleepText117),
         topic: BriefingTopic.longWorkStreak,
       ));
     }
@@ -733,13 +734,13 @@ RecoveryBriefing buildRecoveryBriefing({
   // 같은 주장에 다른 숫자를 쓰지 않는다).
   var weeklyBase = 0;
   for (var i = 0; i < ConditionRuleEngine.overtimeLookbackDays; i++) {
-    final inst = analyzer.instanceForDate(today.subtract(Duration(days: i)));
+    final inst = analyzer.instanceForDate(shiftLocalCalendarDay(today, -i));
     if (inst.isWorkDay) weeklyBase += inst.durationMinutes ?? 0;
   }
   var otTotal = 0;
   for (var i = 0; i < ConditionRuleEngine.overtimeLookbackDays; i++) {
     otTotal += otMinutesByDate[
-            ConditionRuleEngine.dateKey(today.subtract(Duration(days: i)))] ??
+            ConditionRuleEngine.dateKey(shiftLocalCalendarDay(today, -i))] ??
         0;
   }
   final weeklyTotal = weeklyBase + otTotal;
@@ -752,7 +753,7 @@ RecoveryBriefing buildRecoveryBriefing({
     final baseline = base.weeklyBaselineMinutes!;
     final extra = loadIncrease.extraMinutes!;
     facts.add(BriefingFact(
-      '최근 7일 실근무시간 ${dur(weeklyTotal)}, 평소(주 ${dur(baseline)} 안팎)보다 ${dur(extra)} 많아요',
+      copy.sleepText118((dur(weeklyTotal)).toString(), (dur(baseline)).toString(), (dur(extra)).toString()),
       tone: BriefingTone.caution,
       evidenceIds: loadIncrease.severe ? _eOvertimeSevere : _eOvertime,
       topic: BriefingTopic.weeklyLoad,
@@ -762,8 +763,8 @@ RecoveryBriefing buildRecoveryBriefing({
         BriefingAction(
           'overtime',
           loadIncrease.severe
-              ? '최근 7일 근무시간이 평소보다 많이 쌓였어요. 가능하면 추가 근무를 줄이고 쉬는 시간부터 먼저 챙기세요.'
-              : '이번 주는 평소보다 근무가 좀 더 많아요. 가능하면 추가 근무를 줄이고 휴식을 챙겨보세요.',
+              ? copy.sleepText119
+              : copy.sleepText120,
           evidenceIds: loadIncrease.severe ? _eOvertimeSevere : _eOvertime,
           topic: BriefingTopic.weeklyLoad,
         ));
@@ -773,7 +774,7 @@ RecoveryBriefing buildRecoveryBriefing({
       base.levelFindings.any((f) => f.ruleId == 'RULE_BACKWARD_DIRECTION')) {
     ShiftInstance? prev;
     for (var i = 1; i <= 7; i++) {
-      final inst = _timed(analyzer, ctx.date.subtract(Duration(days: i)));
+      final inst = _timed(analyzer, shiftLocalCalendarDay(ctx.date, -i));
       if (inst != null) {
         prev = inst;
         break;
@@ -785,7 +786,7 @@ RecoveryBriefing buildRecoveryBriefing({
         prev.category != ctx.category &&
         _isBackwardStep(prev.category, ctx.category)) {
       facts.add(BriefingFact(
-        '역방향 교대 전환(${prev.category.label} → ${ctx.category.label}). 정방향보다 몸이 적응하기 어려운 편이에요',
+        copy.sleepText121((sleepShiftLabel(prev.category, copy)).toString(), (sleepShiftLabel(ctx.category, copy)).toString()),
         tone: BriefingTone.caution,
         evidenceIds: _eDirection,
         topic: BriefingTopic.direction,
@@ -799,12 +800,12 @@ RecoveryBriefing buildRecoveryBriefing({
     return cutoff.isAfter(now)
         ? BriefingAction(
             'caffeine',
-            '${when(cutoff)} 이후엔 커피·에너지음료를 피하세요(잠드는 목표 ${when(bed)}).',
+            copy.sleepText122((when(cutoff)).toString(), (when(bed)).toString()),
             evidenceIds: _eCaffeine,
           )
         : BriefingAction(
             'caffeine',
-            '잠드는 목표(${when(bed)})까지 6시간이 안 남았어요. 지금부터는 커피·에너지음료를 피하세요.',
+            copy.sleepText123((when(bed)).toString()),
             evidenceIds: _eCaffeine,
           );
   }
@@ -814,16 +815,16 @@ RecoveryBriefing buildRecoveryBriefing({
     final isNight = c.category == ShiftTimeCategory.night;
     final bed = c.end!.add(_kPrepBuffer);
     if (isNight && c.end!.difference(now) <= _kCommuteWindow)
-      act(0, _commuteAction);
+      act(0, _commuteAction(copy));
     if (next != null) {
       final wakeBy = next.start!.subtract(_kPrepBuffer);
       final available = wakeBy.difference(bed).inMinutes;
       if (available < 60) {
         act(
             10,
-            const BriefingAction(
+             BriefingAction(
               'sleep_after_shift',
-              '퇴근 후 다음 출근까지 잘 수 있는 시간이 거의 없어요. 가능하다면 근무 조정을 요청하거나 근무 중에라도 잠깐 쉴 수 있는지 알아보세요.',
+              copy.sleepText124,
               evidenceIds: _eRecovery,
             ));
       } else if (available < target) {
@@ -831,7 +832,7 @@ RecoveryBriefing buildRecoveryBriefing({
             10,
             BriefingAction(
               'sleep_after_shift',
-              '퇴근 후 잘 수 있는 시간은 ${when(bed)}~${when(wakeBy)}, 약 ${dur(available)}뿐이에요. 퇴근하면 다른 일정보다 수면을 먼저 챙기세요.',
+              copy.sleepText125((when(bed)).toString(), (when(wakeBy)).toString(), (dur(available)).toString()),
               evidenceIds: [_eSleepAmount, if (isNight) _eAfterNight],
             ));
       } else if (isNight) {
@@ -839,19 +840,19 @@ RecoveryBriefing buildRecoveryBriefing({
             10,
             BriefingAction(
               'sleep_after_shift',
-              '퇴근 후엔 수면을 먼저 챙기세요. ${when(bed)}쯤 잠들면 다음 출근 전까지 7시간 이상 잘 수 있어요.',
+              copy.sleepText126((when(bed)).toString()),
               evidenceIds: const [_eAfterNight, _eSleepAmount],
             ));
       }
     } else if (isNight) {
       act(
           10,
-          const BriefingAction(
-              'sleep_after_shift', '퇴근 후엔 다른 일정보다 수면을 먼저 챙기세요.',
+           BriefingAction(
+              'sleep_after_shift', copy.sleepText127,
               evidenceIds: [_eAfterNight]));
     }
     act(30, caffeineAction(bed));
-    if (isNight && (now.hour >= 22 || now.hour < 6)) act(40, _mealAction);
+    if (isNight && (now.hour >= 22 || now.hour < 6)) act(40, _mealAction(copy));
   }
 
   if (phase == BriefingPhase.beforeShift || phase == BriefingPhase.laterToday) {
@@ -861,20 +862,20 @@ RecoveryBriefing buildRecoveryBriefing({
     if (isNight &&
         lead >= _kNapMinLead &&
         lead <= _kNapMaxLead &&
-        last24hSleep < target) act(20, _napAction);
+        last24hSleep < target) act(20, _napAction(copy));
     final bedAfter = n.end!.add(_kPrepBuffer);
     if (last24hSleep > 0 && last24hSleep < target) {
       act(
           15,
           BriefingAction(
             'sleep_after_next',
-            '지난 24시간 수면이 권장량보다 적어요. 이번 근무를 마치면(${when(bedAfter)}쯤) 다른 일정보다 수면을 먼저 챙기세요.',
+            copy.sleepText128((when(bedAfter)).toString()),
             evidenceIds: const [_eSleepAmount],
           ));
     }
     if (bedAfter.subtract(_kCaffeineCutoff).isAfter(now))
       act(30, caffeineAction(bedAfter));
-    if (isNight) act(40, _mealAction);
+    if (isNight) act(40, _mealAction(copy));
   }
 
   if (phase == BriefingPhase.recovering) {
@@ -885,21 +886,21 @@ RecoveryBriefing buildRecoveryBriefing({
         sleepSinceLast == 0 &&
         !sleepingNow &&
         now.difference(l.end!) <= _kCommuteWindow) {
-      act(0, _commuteAction);
+      act(0, _commuteAction(copy));
     }
     if (need > 0 && !sleepingNow) {
-      final prefix = afterNight ? '야간 근무 뒤에는 수면이 우선이에요. ' : '';
+      final prefix = afterNight ? copy.sleepText129 : '';
       final ids = [if (afterNight) _eAfterNight, _eSleepAmount];
       if (next != null) {
         final wakeBy = next.start!.subtract(_kPrepBuffer);
         final latestBed = wakeBy.subtract(Duration(minutes: need));
         if (latestBed.isAfter(now.add(const Duration(minutes: 30)))) {
-          final goal = sleepSinceLast > 0 ? '${dur(need)} 더 자려면' : '7시간을 자려면';
+          final goal = sleepSinceLast > 0 ? copy.sleepText130((dur(need)).toString()) : copy.sleepText131;
           act(
               10,
               BriefingAction(
                 'sleep_plan',
-                '$prefix다음 출근(${when(next.start!)}) 전에 $goal 늦어도 ${when(latestBed)}에는 잠자리에 드세요.',
+                copy.sleepText132((prefix).toString(), (when(next.start!)).toString(), (goal).toString(), (when(latestBed)).toString()),
                 evidenceIds: ids,
               ));
           act(30, caffeineAction(latestBed));
@@ -910,13 +911,13 @@ RecoveryBriefing buildRecoveryBriefing({
                 10,
                 BriefingAction(
                   'sleep_now',
-                  '$prefix지금 바로 자도 출근 준비 전까지 최대 ${dur(available)}이에요. 다른 일정은 미루고 수면부터 챙기세요.',
+                  copy.sleepText133((prefix).toString(), (dur(available)).toString()),
                   evidenceIds: ids,
                 ));
             act(
                 30,
-                const BriefingAction(
-                    'caffeine', '곧 잠들어야 해요. 지금부터는 커피·에너지음료를 피하세요.',
+                 BriefingAction(
+                    'caffeine', copy.sleepText134,
                     evidenceIds: _eCaffeine));
           }
         }
@@ -926,8 +927,8 @@ RecoveryBriefing buildRecoveryBriefing({
             BriefingAction(
               'sleep_plan',
               afterNight
-                  ? '야간 근무 뒤에는 다른 일정보다 수면을 먼저 챙기세요.'
-                  : '오늘은 7시간 이상 자는 걸 목표로 하세요.',
+                  ? copy.sleepText135
+                  : copy.sleepText136,
               evidenceIds: ids,
             ));
       }
@@ -935,28 +936,28 @@ RecoveryBriefing buildRecoveryBriefing({
     if (next != null && next.category == ShiftTimeCategory.night) {
       final lead = next.start!.difference(now);
       if (lead >= _kNapMinLead && lead <= _kNapMaxLead && sleepSinceLast > 0)
-        act(20, _napAction);
+        act(20, _napAction(copy));
     }
   }
 
   if (phase == BriefingPhase.offDay) {
     final yInst =
-        analyzer.instanceForDate(today.subtract(const Duration(days: 1)));
+        analyzer.instanceForDate(shiftLocalCalendarDay(today, -1));
     if (yInst.isWorkDay && yInst.category == ShiftTimeCategory.night) {
       final streak = analyzer.consecutiveNightStreakEndingAt(yInst.date);
       facts.add(BriefingFact(
         ConditionRuleEngine.streakClause(
           streak,
-          normal: (days) => '어제까지 야간 $days일 연속 근무',
-          capped: '어제까지 야간 근무가 휴무 없이 매우 오래 이어짐',
+          normal: (days) => copy.sleepText137((days).toString()),
+          capped: copy.sleepText138,
         ),
         topic: BriefingTopic.nightStreak,
       ));
       act(
           10,
-          const BriefingAction(
+           BriefingAction(
             'off_after_night',
-            '야간 근무 뒤 휴무예요. 약속이나 집안일보다 수면 회복을 먼저 챙기세요.',
+            copy.sleepText139,
             evidenceIds: [_eAfterNight],
           ));
     }
@@ -970,7 +971,7 @@ RecoveryBriefing buildRecoveryBriefing({
             12,
             BriefingAction(
               'sleep_plan',
-              '다음 근무(${next.shiftName}, ${when(next.start!)})에 맞춰 7시간을 자려면 늦어도 ${when(latestBed)}에는 잠자리에 드세요.',
+              copy.sleepText140((next.shiftName).toString(), (when(next.start!)).toString(), (when(latestBed)).toString()),
               evidenceIds: const [_eSleepAmount],
             ));
         act(30, caffeineAction(latestBed));
@@ -981,9 +982,9 @@ RecoveryBriefing buildRecoveryBriefing({
         personalSleepDeficit == null) {
       act(
           14,
-          const BriefingAction(
+           BriefingAction(
             'catch_up',
-            '최근 수면이 권장량(7시간)보다 적었어요. 쉬는 날엔 수면 시간을 넉넉히 잡아보세요.',
+            copy.sleepText141,
             evidenceIds: [_eSleepAmount],
           ));
     }
@@ -993,13 +994,13 @@ RecoveryBriefing buildRecoveryBriefing({
   // 단계를 준다(예전엔 퇴근 후 구간에서만 안내해서, 출근 전·휴무엔 "기록이 없어요"로
   // 문장이 끊겼음 - 사용자 지적). 수면을 하나도 모르는 상태에서는 일반적인 야간 식사
   // 팁(rank 40)보다 이쪽이 먼저 나와야 해서 카페인(30)과 식사(40) 사이에 둔다.
-  if (sleepDataMissing && !sleepingNow) act(35, _recordSleepAction);
+  if (sleepDataMissing && !sleepingNow) act(35, _recordSleepAction(copy));
 
   // 평균 수면은 사실 목록 맨 끝(오늘 판단의 보조 정보)
   if (avgRecent != null) {
     final low = avgRecent < target;
     facts.add(BriefingFact(
-      '최근 7일 평균 수면 ${dur(avgRecent)} (기록한 ${recordedDays.length}일 기준)${low ? ', 권장 7시간보다 적어요' : ''}',
+      copy.sleepText142((dur(avgRecent)).toString(), (recordedDays.length).toString(), (low ? copy.sleepText258 : '').toString()),
       tone: low ? BriefingTone.caution : BriefingTone.neutral,
       evidenceIds: const [_eSleepAmount],
       topic: BriefingTopic.sleepAverage,
@@ -1011,13 +1012,13 @@ RecoveryBriefing buildRecoveryBriefing({
           phase == BriefingPhase.beforeShift ||
           phase == BriefingPhase.laterToday)) {
     final nightStreakLabel = nightStreakCapped
-        ? '연속 야간 근무가 휴무 없이 매우 오래 이어지고 있어요'
-        : '연속 야간 $nightStreak일째예요';
+        ? copy.sleepText143
+        : copy.sleepText144((nightStreak).toString());
     act(
         50,
         BriefingAction(
           'night_streak',
-          '$nightStreakLabel. 운전이나 위험한 작업은 특히 조심하세요.',
+          copy.sleepText145((nightStreakLabel).toString()),
           evidenceIds: _eNightStreak,
           topic: BriefingTopic.nightStreak,
         ));
@@ -1026,16 +1027,16 @@ RecoveryBriefing buildRecoveryBriefing({
   // ── 5. 판단 범위 ────────────────────────────────────────────────────
   final limitations = <String>[];
   if (!hasRecentRecords) {
-    limitations.add('최근 2주 수면 기록이 없어 근무 일정만 보고 안내했어요.');
+    limitations.add(copy.sleepText146);
   } else if (recordedDays.isNotEmpty && avgRecent == null) {
-    limitations.add('최근 7일 중 기록이 ${recordedDays.length}일뿐이라 평균 수면은 계산하지 않았어요.');
+    limitations.add(copy.sleepText147((recordedDays.length).toString()));
   }
   if (untimedNames.isNotEmpty) {
     final names = untimedNames.map((n) => "'$n'").join(', ');
-    limitations.add('$names 근무는 출퇴근 시각이 없어 그날은 계산에서 빠졌어요. (설정 → 근무시간 및 OT 설정)');
+    limitations.add(copy.sleepText148((names).toString()));
   }
   if (pendingCount > 0) {
-    limitations.add('확인하지 않은 자동 수면 기록 $pendingCount건은 반영하지 않았어요.');
+    limitations.add(copy.sleepText149((pendingCount).toString()));
   }
 
   ranked.sort((a, b) =>

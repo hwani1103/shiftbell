@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "reason": "2026-10-16 user-requested Main merge: fixed White/Dark screen colors are available in all release languages; existing Korean-only features keep their scope.",
+  "keys": {
+    "uiThemeOriginalWhite": {
+      "before": "기본 흰색",
+      "after": "화이트"
+    }
+  },
+  "nativeKeys": []
+}

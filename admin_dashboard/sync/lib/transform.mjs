@@ -1,3 +1,4 @@
+import { eventName } from './report-values.mjs';
 import { syncPolicy } from './sync-policy.mjs';
 import { buildOperations, reportState } from './operations.mjs';
 // admin_dashboard/sync/lib/transform.mjs
@@ -110,7 +111,8 @@ export function buildEvents({ eventsDaily, dates, keep = 40 }) {
   for (const r of table(eventsDaily)) {
     const i = pos.get(ymd(r.d[0]));
     if (i == null) continue;
-    const name = r.d[1];
+    const name = eventName(r.d[1]);
+    if (name == null) continue;
     if (!byName.has(name)) byName.set(name, new Array(dates.length).fill(0));
     byName.get(name)[i] += r.m[0];
   }
@@ -132,7 +134,8 @@ export function buildEvents({ eventsDaily, dates, keep = 40 }) {
 
 /** 최근 30일 이벤트 요약. */
 export function buildEventSummary(resp) {
-  return table(resp).map((r) => ({ name: r.d[0], count: r.m[0], users: r.m[1] }));
+  return table(resp).filter((r) => eventName(r.d[0]) != null)
+    .map((r) => ({ name: r.d[0], count: r.m[0], users: r.m[1] }));
 }
 
 /** 분포(앱 버전·OS·언어·국가·기기) → [{name, users}] */

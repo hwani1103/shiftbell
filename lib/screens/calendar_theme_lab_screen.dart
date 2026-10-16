@@ -290,23 +290,21 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
   // 테마를 보여줌). 2026-09-05 - "다이어리를 4~5번째로, 범례 필수인 언더라인/
   // 매거진을 맨 우측에 나란히" 요청으로 재배치.
   Widget _buildThemeBody(int index) {
-    if (!context.usesKoreanFeatures &&
-        !context.availableCalendarThemes.contains(kAllCalendarThemeIds[index])) {
-      return _themeMainWhite();
-    }
-    switch (index) {
-      case 0: return _themeMainWhite();
-      case 1: return _themeMainDark();
-      case 2: return _theme1MinimalLine();
-      case 3: return _theme2MaterialCard();
-      case 4: return _themeDiaryBody();
-      case 5: return _theme4BoldGrid();
-      case 6: return _theme5InitialBadge();
-      case 7: return _theme9EventChip();
-      case 8: return _theme8Underline();
-      case 9: return _theme10Editorial();
-      default: return const SizedBox.shrink();
-    }
+    final themes = context.availableCalendarThemes;
+    if (index < 0 || index >= themes.length) return const SizedBox.shrink();
+    return switch (themes[index]) {
+      CalendarThemeId.mainWhite => _themeMainWhite(),
+      CalendarThemeId.mainDark => _themeMainDark(),
+      CalendarThemeId.minimal => _theme1MinimalLine(),
+      CalendarThemeId.materialCard => _theme2MaterialCard(),
+      CalendarThemeId.diary => _themeDiaryBody(),
+      CalendarThemeId.boldGrid => _theme4BoldGrid(),
+      CalendarThemeId.initialBadge => _theme5InitialBadge(),
+      CalendarThemeId.eventChip => _theme9EventChip(),
+      CalendarThemeId.underline => _theme8Underline(),
+      CalendarThemeId.editorial => _theme10Editorial(),
+      CalendarThemeId.periwinkle || CalendarThemeId.softMosaic => _themeMainWhite(),
+    };
   }
 
   // ⭐ "전체근무표"는 이미 완성된 실제 화면을 그대로 재사용 (테마와 무관한 별도 화면)

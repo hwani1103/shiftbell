@@ -1,0 +1,48 @@
+달력 탭 복귀 순간 치수 변화 — UI34 (2026-10-15)
+
+사용자 관찰
+- 다른 탭→달력에서 세로/가로가 조금 줄고 메모 표시가 6글자→5글자처럼 달라짐.
+- 심플라인(minimal), 소프트카드(materialCard), 다크그리드(boldGrid), 컬러뱃지(initialBadge)에서 명확함. 전체 가용 테마의 공통 원인 조사 요청.
+- UI12 대기 항목은 UI13 완료 연결을 읽었으며 이번에 온보딩 타이포/칩을 다시 설계하지 않음.
+
+원인 및 재현
+- main.dart의 AppUiThemeScope가 달력 탭에 진입할 때 enabled=false→true로 바뀜.
+- AppUiTheme.withPalette는 팔레트뿐 아니라 textTheme의 크기/줄높이/자간도 공통 타이포로 교체함.
+- AnimatedTheme의 duration=0으로 경계를 바꿔도, 유지되는 Scaffold/Material의 AnimatedDefaultTextStyle 및 하단 탭 텍스트의 내부 애니메이션까지 없어지는 것은 아님.
+- CalendarTab의 _lineHeightOf/_fitOriginalThemeCell은 자신의 Scaffold보다 위 context의 DefaultTextStyle을 사용해 최소 높이를 계산함. 다른 셀은 안쪽 Scaffold의 기존 달력 테마로 그려짐.
+- 이 두 경계 및 하단 탭 높이가 달라지는 동안 실제 남은 달력 높이/최소 셀 높이가 달라짐. 제한된 화면에서는 공통 셀 축소/텍스트 폭 측정이 함께 영향을 받아 가로 움직임과 표시 글자 변화로 이어질 수 있음.
+- 글꼴 및 메모/OT 로딩을 고정한 호스트 재현: minimal의 TableCalendar 아래 경계가 682.2→681.2, rowHeight 99.901709→99.735043으로 바뀜. 메모 위치도 이동. 근거 artifacts/calendar_tab_entry_repro.log.
+- 사용자 기기에서의 정확한 6글자→5글자 사례 자체를 녹화 재현한 것은 아님. 위 로그는 공통 치수 변화의 직접 재현임.
+
+수정
+- 공통 AppUiTheme/AppUiThemeScope에 preserveTextGeometry 옵션 추가(기본 false).
+- MainScreen의 달력 외곽 범위에서는 true로 사용하여 기존 TextTheme 치수를 유지하며 역할 색상만 바꿈.
+- 기존 달력의 디자인/저장된 근무색/DB/가용 테마/스플래시 및 공통 온보딩 타이포 기본 경로는 보존.
+- 화면마다 폰트나 패딩 수치를 새로 하드코딩하지 않음. 온보딩의 공통 모션을 제거하지 않음.
+- 위젯/업데이트 기능 및 대시보드 조사 결과는 기능 원장09번에 별도 연결.
+
+검증
+- 첫 수정 후 한글판10개 테마의 탭 복귀 첫 프레임~400ms 치수 고정10검사 PASS: artifacts/calendar_tab_entry_after.log.
+- 확대 범위:10개×400/800 논리폭×주간/밤=40검사. 달력 사각형/rowHeight/메모 사각형/실제 표시 문자열/폰트 크기/높이/자간을 프레임별 비교. 메모/OT는 고정 데이터, 글꼴은 미리 로딩.
+- 초기 종합 실행의 다른 테스트 컴파일/UI 실패는 원본 로그에 보존하며 종합PASS로 표현하지 않음. 이후 정리된 최종 로그를 아래에 연결.
+- 실기기 탭 복귀/런처 및 prod 설치·배포는 이번 호스트 검사와 구분. 충전 중 화면 유지 설정은 변경하지 않음.
+
+기존 작업 보존
+- 이번에 편집한 기존 소스의 수정 직전본: artifacts/followup_review_2026_10_15/before/.
+- UI30/31/33 원장 및 과거 보존 APK, 이번 이전의 모든 미커밋 변경을 유지함.
+
+최종 달력 대상 검사
+- artifacts/followup_review_2026_10_15/calendar_checks.log:43 PASS. 40개 프레임 비교 + 테마 경계 mount 보존1 + 설정 저장/전환2.
+- 정적 분석: 수정7파일 error 없음. 기존 파일의 스타일/비권장 API info 및 새 검사 경고는 analyze.log에 보존. 이후 새 검사의 미사용 필드/미사용 import만 제거함.
+
+2026-10-15 최종 검증/인계
+- 대상 검사61 PASS: calendar_checks.log 43 / update_checks.log 12 / dev_update_check_pass.log 1 / native_targeted_final.log 및 native_final_summary.json 5.
+- 필수 tools/check_critical_release.ps1 -Build 단독 최종 실행 exit0. Flutter 기능/언어/DB, native 기능/권한/DB, dev debug APK 및 공개 웹 빌드 성공. 로그 critical_build_final.log / critical_build_final.exit.txt.
+- 최초 중복 Gradle 실행에서 발생한 테스트 클래스8개 ClassNotFoundException은 native_collision_reports/에 보존. 단독 최종 실행은 전부 통과했다. 제품 P0 실패로 기록하지 않음.
+- 웹 빌드의 기존 wasm dry-run/아이콘 font 경고는 원본 로그에 보존. build/web은 생성했지만 웹/앱 출시 배포 없음.
+- APK artifacts/followup_review_2026_10_15/shiftbell-dev-debug.apk (com.hwani1103.shiftbell.dev,1.0.25-dev/28).
+- APK SHA256: 45a0d7e2ab333956e218b5198e062c905e450193fcc1a1f4734ea65b3565ffc9
+- 실기기 연결 SM-S948N은 확인했으나 사용자가 직접 확인하기로 변경. 연결/화면크기/밀도/dev 접근 가능 여부/설치된 instrumentation 목록만 읽었으며 설치,UI 조작,기기 시각·권한·테마·위젯 배치·DB 변경은 하지 않았다.
+- prod 알람 실패1회의 기기 진단 로그는 확보하지 않았다. 재시도/실제 울림 결과 미확정 상태를 유지한다.
+- UPDATE-01은 구현/호스트 검사와 별개로 사용자 지정 출시 전 필수 미완료. 상세10번 원장과 핵심 코어 체크리스트 상단/하단에 연결했다. 자동/수동 안내 및 실제 Play 업데이트 설치까지 완료 증거가 있어야 닫는다.
+- 별도 WIDGET-02 메모 높이 레이아웃 잔여는 이번 색상 갱신 및 필수 기능 회귀 PASS로 닫지 않음.

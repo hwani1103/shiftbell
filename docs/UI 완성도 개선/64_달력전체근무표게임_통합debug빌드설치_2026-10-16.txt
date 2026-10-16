@@ -1,0 +1,27 @@
+달력/전체근무표/Sync Paths 통합 dev debug — UI64 (2026-10-16)
+
+사용자 승인/범위
+- 사용자: '일단 debug 빌드 시켜놓고 대답해. 다되면 내 핸드폰에 설치하고.'
+- 통합빌드_인계_2026-10-16.txt 및 ROSTER-01 검증 결과를 읽고 다른 flutter test/build가 없는 상태에서 단독 실행.
+- 이전 UI60/61 달력·초기복구 뒤로가기, ROSTER-01 전체근무표, GAME-15 Sync Paths 본체 연결의 현재 dev 소스를 함께 빌드.
+- OT/근무변경 추가 표시 제안은 미구현. 이번 대화의 겹침·두 줄·약칭 비교는 UI63 검토만. 제품 소스 변경 없이 빌드/설치했다.
+
+통합 검사/산출
+- tools/check_critical_release.ps1 -Build exit0. Flutter257+128+100+67+11=563 PASS, native 기능/권한/언어 및 DB 이관 PASS, dev debug APK/공개 JS웹 빌드 PASS. release 미실행.
+- artifacts/integrated_debug_2026_10_16/critical_build.log. 기존 wasm dry-run의 dart:html/js_util 등 비호환과 CupertinoIcons 경고는 보존. 실제 JS웹 빌드 성공과 구분.
+- APK: artifacts/integrated_debug_2026_10_16/ShiftBell_integrated_dev_debug.apk,216769156 bytes.
+- SHA256:2ee55355760f6471803d16575825c393ab453c0c619900b533f1d32c336df8fb.
+
+설치/데이터
+- 연결 대상 SM-S948N,serial R5KL20DHWAE. com.hwani1103.shiftbell.dev만 force-stop 후 자료 스냅샷, adb install -r -t 성공. 삭제/데이터 초기화/백업 복구 없음. prod 설치본 변경 없음.
+- 설치된 base.apk sha256sum이 보존 APK와 일치. installed_apk_hash.txt/install.log.
+- 설치 직전/직후: DB18테이블 quick_check OK/각 테이블 행 해시 모두 동일, preferences 파일도 동일. installation_data_comparison.json.
+- 정상 실행 이후: DB18테이블 해시 모두 동일/quick_check OK. 변경 설정은 app_ui_preview_theme, calendar_main_before_merge, calendar_main_merge_v1 및 자동백업 시각/해시.
+- 실제 직전 calendar_theme_id=mainWhite, 화면색상=night였다. 명시된 이관 계약에 따라 ID mainWhite 유지, 이전 ID mainWhite 기록, 완료 true, 화면색상 originalWhite로 고정. 이후 사용자의 색상 재선택은 완료 표시로 보존된다. launch_preferences_comparison.json.
+- 앱 MainActivity 정상 실행/달력 표시, 실행 PID30311. 수집 로그에서 Flutter unhandled/RenderFlex overflow/Android fatal 패턴0. device_after_launch.png/device_launch.log.
+- 실제 표시된 메인 달력에서 한글 메모3줄과 날짜/음력/공휴일/저장 근무색 확인. 실제 화면 선택을 바꾸거나 사용자 메모/게임 진행을 수정하지 않음.
+
+증거 범위/후속
+- 이번 설치의 기본 실행 확인과 기존 호스트71개 전체근무표/게임 검사 근거를 구분. 전체근무표 두 보기/7색상 및 게임 소리/하트0/첫Lv1 도움말의 신규 실기기 전수 검증은 이번 미실시. 잠금알람/P0 물리 검증도 신규 PASS로 기록하지 않음.
+- OT 검토 과정에서 UI61 mainWhite 호스트 캡처의 일부 영문 메모가 빈 문자열인 것을 발견. 현재 기기 한글3메모는 정상 확인했으나, Windows 대체 글꼴/문자열별 높이 관련 호스트 제한의 정확한 원인은 미확정이다. 기존 host 전체 가독성 보증으로 확대하지 않는다. 이번 빌드의 제품 코드는 이 관찰로 임의 수정하지 않았다.
+- 앱은 설치된 dev 달력 정상 실행 상태로 인계. 태블릿 설정/충전중 화면켜짐 설정 변경 없음.

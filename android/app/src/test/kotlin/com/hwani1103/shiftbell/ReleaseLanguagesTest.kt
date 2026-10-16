@@ -60,7 +60,7 @@ class ReleaseLanguagesTest {
                 c.resources.getStringArray(R.array.widget_weekday_labels))
         }
     }
-    @Test fun `sleep widget is absent on fresh install and only enabled for Korean`() {
+    @Test fun `sleep widget starts disabled and becomes available in every release language`() {
         val app = ApplicationProvider.getApplicationContext<Context>()
         val component = ComponentName(app, SleepWidgetProvider::class.java)
         val manager = app.packageManager
@@ -71,7 +71,7 @@ class ReleaseLanguagesTest {
             manager.getComponentEnabledSetting(component))
         for ((language, country) in listOf("pt" to "BR", "de" to "DE", "en" to "US", "hi" to "IN")) {
             ReleaseLocalePolicy.syncSleepWidget(context(language, country))
-            assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+            assertEquals(PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
                 manager.getComponentEnabledSetting(component))
         }
     }

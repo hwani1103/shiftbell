@@ -1,9 +1,9 @@
+import '../theme/app_ui_theme.dart';
 import '../widgets/settings_appearance.dart';
 import '../widgets/app_button.dart';
 import 'package:flutter/material.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/team_rule.dart';
-import '../theme/app_colors.dart';
 import '../widgets/adaptive_layout.dart';
 import '../widgets/app_second_button.dart';
 import '../widgets/app_shift_chip.dart';
@@ -174,15 +174,16 @@ class _TeamRuleEditorScreenState extends State<TeamRuleEditorScreen> {
                                       horizontal: 8, vertical: 14),
                                   decoration: BoxDecoration(
                                       color: _week[i] == null
-                                          ? Colors.white
-                                          : kAppSurface,
+                                          ? AppUiPalette.of(context).surface
+                                          : AppUiPalette.of(context).soft,
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
                                           color: _week[i] == null
                                               ? Theme.of(context)
                                                   .colorScheme
                                                   .outlineVariant
-                                              : kAppMainAccent)),
+                                              : AppUiPalette.of(context)
+                                                  .primary)),
                                   child: Column(children: [
                                     Text(weekdays[i],
                                         style: const TextStyle(

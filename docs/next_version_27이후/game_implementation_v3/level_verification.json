@@ -1,0 +1,2439 @@
+{
+  "ruleSetId": "constant-cell-speed-v2",
+  "levels": [
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L01",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 1,
+        "B": 1
+      },
+      "combinations": 1,
+      "safeSolutions": 1,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L01",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              0,
+              2
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              4,
+              0
+            ],
+            "end": [
+              4,
+              2
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              0,
+              2
+            ],
+            "end": [
+              2,
+              2
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              4,
+              2
+            ],
+            "end": [
+              2,
+              2
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 4
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "A",
+            "step": 2,
+            "globalTime": [
+              4,
+              1
+            ]
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "globalTime": [
+              4,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          4,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L01",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L02",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 2,
+        "B": 2
+      },
+      "combinations": 4,
+      "safeSolutions": 3,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L02",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              0,
+              2
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              4,
+              0
+            ],
+            "end": [
+              2,
+              0
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              0,
+              2
+            ],
+            "end": [
+              2,
+              2
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              2,
+              0
+            ],
+            "end": [
+              2,
+              2
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 4
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "A",
+            "step": 2,
+            "globalTime": [
+              4,
+              1
+            ]
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "globalTime": [
+              4,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          4,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L02",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L03",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 1,
+        "B": 1
+      },
+      "combinations": 1,
+      "safeSolutions": 1,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L03",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              0,
+              2
+            ],
+            "end": [
+              4,
+              2
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              2,
+              1
+            ],
+            "end": [
+              2,
+              4
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              2,
+              4
+            ],
+            "end": [
+              4,
+              4
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 5
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              4,
+              2
+            ],
+            "end": [
+              4,
+              4
+            ],
+            "startTimeUnits": 4,
+            "endTimeUnits": 6
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "B",
+            "step": 2,
+            "globalTime": [
+              5,
+              1
+            ]
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "globalTime": [
+              6,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          6,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L03",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L04",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 3,
+        "B": 7
+      },
+      "combinations": 21,
+      "safeSolutions": 4,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L04",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                3
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                1
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              3,
+              3
+            ],
+            "end": [
+              2,
+              3
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              3,
+              1
+            ],
+            "end": [
+              1,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              2,
+              3
+            ],
+            "end": [
+              2,
+              1
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              1,
+              1
+            ],
+            "end": [
+              1,
+              2
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "A",
+            "step": 3,
+            "start": [
+              2,
+              1
+            ],
+            "end": [
+              2,
+              2
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "start": [
+              1,
+              2
+            ],
+            "end": [
+              0,
+              2
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "A",
+            "step": 4,
+            "start": [
+              2,
+              2
+            ],
+            "end": [
+              0,
+              2
+            ],
+            "startTimeUnits": 4,
+            "endTimeUnits": 6
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "B",
+            "step": 3,
+            "globalTime": [
+              4,
+              1
+            ]
+          },
+          {
+            "unitId": "A",
+            "step": 4,
+            "globalTime": [
+              6,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          6,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L04",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L05",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 2,
+        "B": 2
+      },
+      "combinations": 4,
+      "safeSolutions": 3,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L05",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                1
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                1
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                3
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              2,
+              0
+            ],
+            "end": [
+              2,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              2,
+              3
+            ],
+            "end": [
+              2,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              2,
+              1
+            ],
+            "end": [
+              0,
+              1
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              2,
+              1
+            ],
+            "end": [
+              0,
+              1
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "A",
+            "step": 3,
+            "start": [
+              0,
+              1
+            ],
+            "end": [
+              0,
+              3
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 5
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "start": [
+              0,
+              1
+            ],
+            "end": [
+              0,
+              3
+            ],
+            "startTimeUnits": 4,
+            "endTimeUnits": 6
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "A",
+            "step": 3,
+            "globalTime": [
+              5,
+              1
+            ]
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "globalTime": [
+              6,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          6,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L05",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L06",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 30,
+        "B": 30
+      },
+      "combinations": 900,
+      "safeSolutions": 44,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L06",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                2
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              0,
+              2
+            ],
+            "end": [
+              1,
+              2
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              2,
+              0
+            ],
+            "end": [
+              2,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              1,
+              2
+            ],
+            "end": [
+              0,
+              2
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              2,
+              1
+            ],
+            "end": [
+              2,
+              2
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "A",
+            "step": 3,
+            "start": [
+              0,
+              2
+            ],
+            "end": [
+              4,
+              2
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 6
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "start": [
+              2,
+              2
+            ],
+            "end": [
+              2,
+              4
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "B",
+            "step": 4,
+            "start": [
+              2,
+              4
+            ],
+            "end": [
+              4,
+              4
+            ],
+            "startTimeUnits": 4,
+            "endTimeUnits": 6
+          },
+          {
+            "unitId": "A",
+            "step": 4,
+            "start": [
+              4,
+              2
+            ],
+            "end": [
+              4,
+              4
+            ],
+            "startTimeUnits": 6,
+            "endTimeUnits": 8
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "B",
+            "step": 4,
+            "globalTime": [
+              6,
+              1
+            ]
+          },
+          {
+            "unitId": "A",
+            "step": 4,
+            "globalTime": [
+              8,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          8,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L06",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L07",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 7,
+        "B": 7
+      },
+      "combinations": 49,
+      "safeSolutions": 8,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L07",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                2,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              3,
+              0
+            ],
+            "end": [
+              2,
+              0
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              1,
+              0
+            ],
+            "end": [
+              0,
+              0
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              2,
+              0
+            ],
+            "end": [
+              2,
+              1
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              2,
+              0
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "A",
+            "step": 3,
+            "start": [
+              2,
+              1
+            ],
+            "end": [
+              2,
+              4
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 5
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "start": [
+              2,
+              0
+            ],
+            "end": [
+              2,
+              4
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 7
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "A",
+            "step": 3,
+            "globalTime": [
+              5,
+              1
+            ]
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "globalTime": [
+              7,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          7,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L07",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L08",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 3,
+        "B": 2,
+        "C": 1
+      },
+      "combinations": 6,
+      "safeSolutions": 4,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L08",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                3,
+                0
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                3
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              0,
+              4
+            ],
+            "end": [
+              1,
+              4
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              3,
+              0
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "C",
+            "step": 1,
+            "start": [
+              0,
+              3
+            ],
+            "end": [
+              1,
+              3
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              1,
+              4
+            ],
+            "end": [
+              1,
+              2
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "C",
+            "step": 2,
+            "start": [
+              1,
+              3
+            ],
+            "end": [
+              1,
+              2
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "C",
+            "step": 3,
+            "start": [
+              1,
+              2
+            ],
+            "end": [
+              2,
+              2
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "A",
+            "step": 3,
+            "start": [
+              1,
+              2
+            ],
+            "end": [
+              2,
+              2
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              3,
+              0
+            ],
+            "end": [
+              3,
+              2
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 5
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "start": [
+              3,
+              2
+            ],
+            "end": [
+              2,
+              2
+            ],
+            "startTimeUnits": 5,
+            "endTimeUnits": 6
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "C",
+            "step": 3,
+            "globalTime": [
+              3,
+              1
+            ]
+          },
+          {
+            "unitId": "A",
+            "step": 3,
+            "globalTime": [
+              4,
+              1
+            ]
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "globalTime": [
+              6,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          6,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L08",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L09",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 25,
+        "B": 23,
+        "C": 23
+      },
+      "combinations": 13225,
+      "safeSolutions": 9,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L09",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                1
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                0
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                3,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              2,
+              0
+            ],
+            "end": [
+              2,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              1,
+              0
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "C",
+            "step": 1,
+            "start": [
+              4,
+              0
+            ],
+            "end": [
+              2,
+              0
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              2,
+              1
+            ],
+            "end": [
+              1,
+              1
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              1,
+              0
+            ],
+            "end": [
+              0,
+              0
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "A",
+            "step": 3,
+            "start": [
+              1,
+              1
+            ],
+            "end": [
+              1,
+              2
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "start": [
+              0,
+              0
+            ],
+            "end": [
+              1,
+              0
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "C",
+            "step": 2,
+            "start": [
+              2,
+              0
+            ],
+            "end": [
+              3,
+              0
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "B",
+            "step": 4,
+            "start": [
+              1,
+              0
+            ],
+            "end": [
+              1,
+              2
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 5
+          },
+          {
+            "unitId": "C",
+            "step": 3,
+            "start": [
+              3,
+              0
+            ],
+            "end": [
+              1,
+              0
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 5
+          },
+          {
+            "unitId": "C",
+            "step": 4,
+            "start": [
+              1,
+              0
+            ],
+            "end": [
+              1,
+              2
+            ],
+            "startTimeUnits": 5,
+            "endTimeUnits": 7
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "A",
+            "step": 3,
+            "globalTime": [
+              3,
+              1
+            ]
+          },
+          {
+            "unitId": "B",
+            "step": 4,
+            "globalTime": [
+              5,
+              1
+            ]
+          },
+          {
+            "unitId": "C",
+            "step": 4,
+            "globalTime": [
+              7,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          7,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L09",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L10",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 4,
+        "B": 3,
+        "C": 4
+      },
+      "combinations": 48,
+      "safeSolutions": 6,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L10",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                3
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                1
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              3,
+              1
+            ],
+            "end": [
+              4,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              3,
+              3
+            ],
+            "end": [
+              4,
+              3
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "C",
+            "step": 1,
+            "start": [
+              2,
+              1
+            ],
+            "end": [
+              3,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              4,
+              1
+            ],
+            "end": [
+              4,
+              0
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              4,
+              3
+            ],
+            "end": [
+              4,
+              0
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "C",
+            "step": 2,
+            "start": [
+              3,
+              1
+            ],
+            "end": [
+              4,
+              1
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "C",
+            "step": 3,
+            "start": [
+              4,
+              1
+            ],
+            "end": [
+              4,
+              0
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 3
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "A",
+            "step": 2,
+            "globalTime": [
+              2,
+              1
+            ]
+          },
+          {
+            "unitId": "C",
+            "step": 3,
+            "globalTime": [
+              3,
+              1
+            ]
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "globalTime": [
+              4,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          4,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L10",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L11",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 3,
+        "B": 1,
+        "C": 3
+      },
+      "combinations": 9,
+      "safeSolutions": 7,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L11",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                1
+              ],
+              [
+                5,
+                1
+              ],
+              [
+                5,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                1
+              ],
+              [
+                5,
+                1
+              ],
+              [
+                5,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                2,
+                1
+              ],
+              [
+                5,
+                1
+              ],
+              [
+                5,
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              2,
+              5
+            ],
+            "end": [
+              2,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              0,
+              2
+            ],
+            "end": [
+              0,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "C",
+            "step": 1,
+            "start": [
+              2,
+              2
+            ],
+            "end": [
+              2,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 1
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              0,
+              1
+            ],
+            "end": [
+              5,
+              1
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 6
+          },
+          {
+            "unitId": "C",
+            "step": 2,
+            "start": [
+              2,
+              1
+            ],
+            "end": [
+              5,
+              1
+            ],
+            "startTimeUnits": 1,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              2,
+              1
+            ],
+            "end": [
+              5,
+              1
+            ],
+            "startTimeUnits": 4,
+            "endTimeUnits": 7
+          },
+          {
+            "unitId": "C",
+            "step": 3,
+            "start": [
+              5,
+              1
+            ],
+            "end": [
+              5,
+              5
+            ],
+            "startTimeUnits": 4,
+            "endTimeUnits": 8
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "start": [
+              5,
+              1
+            ],
+            "end": [
+              5,
+              5
+            ],
+            "startTimeUnits": 6,
+            "endTimeUnits": 10
+          },
+          {
+            "unitId": "A",
+            "step": 3,
+            "start": [
+              5,
+              1
+            ],
+            "end": [
+              5,
+              5
+            ],
+            "startTimeUnits": 7,
+            "endTimeUnits": 11
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "C",
+            "step": 3,
+            "globalTime": [
+              8,
+              1
+            ]
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "globalTime": [
+              10,
+              1
+            ]
+          },
+          {
+            "unitId": "A",
+            "step": 3,
+            "globalTime": [
+              11,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          11,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L11",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    },
+    {
+      "level": {
+        "packId": "dev-pilot-12-cell-speed",
+        "levelId": "L12",
+        "revision": 2,
+        "ruleSetId": "constant-cell-speed-v2"
+      },
+      "domains": {
+        "A": 9,
+        "B": 8,
+        "C": 6
+      },
+      "combinations": 432,
+      "safeSolutions": 94,
+      "witness": {
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L12",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "routes": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                1,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                3
+              ],
+              [
+                1,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                1
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                3
+              ]
+            ]
+          }
+        ]
+      },
+      "trace": {
+        "outcome": "success",
+        "motions": [
+          {
+            "unitId": "A",
+            "step": 1,
+            "start": [
+              4,
+              2
+            ],
+            "end": [
+              2,
+              2
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "B",
+            "step": 1,
+            "start": [
+              5,
+              2
+            ],
+            "end": [
+              0,
+              2
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 5
+          },
+          {
+            "unitId": "C",
+            "step": 1,
+            "start": [
+              3,
+              1
+            ],
+            "end": [
+              1,
+              1
+            ],
+            "startTimeUnits": 0,
+            "endTimeUnits": 2
+          },
+          {
+            "unitId": "A",
+            "step": 2,
+            "start": [
+              2,
+              2
+            ],
+            "end": [
+              2,
+              3
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "C",
+            "step": 2,
+            "start": [
+              1,
+              1
+            ],
+            "end": [
+              1,
+              2
+            ],
+            "startTimeUnits": 2,
+            "endTimeUnits": 3
+          },
+          {
+            "unitId": "A",
+            "step": 3,
+            "start": [
+              2,
+              3
+            ],
+            "end": [
+              1,
+              3
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "C",
+            "step": 3,
+            "start": [
+              1,
+              2
+            ],
+            "end": [
+              1,
+              3
+            ],
+            "startTimeUnits": 3,
+            "endTimeUnits": 4
+          },
+          {
+            "unitId": "B",
+            "step": 2,
+            "start": [
+              0,
+              2
+            ],
+            "end": [
+              0,
+              3
+            ],
+            "startTimeUnits": 5,
+            "endTimeUnits": 6
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "start": [
+              0,
+              3
+            ],
+            "end": [
+              1,
+              3
+            ],
+            "startTimeUnits": 6,
+            "endTimeUnits": 7
+          }
+        ],
+        "arrivals": [
+          {
+            "unitId": "A",
+            "step": 3,
+            "globalTime": [
+              4,
+              1
+            ]
+          },
+          {
+            "unitId": "C",
+            "step": 3,
+            "globalTime": [
+              4,
+              1
+            ]
+          },
+          {
+            "unitId": "B",
+            "step": 3,
+            "globalTime": [
+              7,
+              1
+            ]
+          }
+        ],
+        "earliestCollisions": [],
+        "durationInSteps": [
+          7,
+          1
+        ],
+        "levelIdentity": {
+          "packId": "dev-pilot-12-cell-speed",
+          "levelId": "L12",
+          "revision": 2,
+          "ruleSetId": "constant-cell-speed-v2"
+        },
+        "routeRevision": 0,
+        "ruleSetId": "constant-cell-speed-v2"
+      }
+    }
+  ]
+}

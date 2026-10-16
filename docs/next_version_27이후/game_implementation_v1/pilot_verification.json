@@ -1,0 +1,634 @@
+{
+  "verificationVersion": 1,
+  "solverVersion": "sync-path-csp-v1.0.0",
+  "status": "PASS",
+  "methods": [
+    "distance-pruned-graph-CSP",
+    "direct-ray-DFS-and-exhaustive-rational-contact"
+  ],
+  "spatialCombinations": 359,
+  "safeSolutions": 47,
+  "levels": [
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L01",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          1,
+          1
+        ],
+        "spatialCombinations": 1,
+        "safeSolutions": 1,
+        "earlySolutions": 0,
+        "minCommands": [
+          2,
+          2
+        ],
+        "minTotalCommands": 4,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": false,
+        "allShortestCanSucceed": true,
+        "interactionEdges": [],
+        "goalApproaches": 2,
+        "arrivalRange": [
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            2
+          ]
+        ],
+        "solutionsWithoutReverse": 1,
+        "solutionsWithoutStraightSplit": 1
+      },
+      "nodesUsed": 18,
+      "exactCount": "1"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L02",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          2,
+          2
+        ],
+        "spatialCombinations": 4,
+        "safeSolutions": 3,
+        "earlySolutions": 0,
+        "minCommands": [
+          2,
+          2
+        ],
+        "minTotalCommands": 4,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": false,
+        "allShortestCanSucceed": true,
+        "interactionEdges": [
+          [
+            "A",
+            "B"
+          ]
+        ],
+        "goalApproaches": 4,
+        "arrivalRange": [
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            2
+          ]
+        ],
+        "solutionsWithoutReverse": 3,
+        "solutionsWithoutStraightSplit": 3
+      },
+      "nodesUsed": 52,
+      "exactCount": "3"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L03",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          1,
+          1
+        ],
+        "spatialCombinations": 1,
+        "safeSolutions": 1,
+        "earlySolutions": 0,
+        "minCommands": [
+          2,
+          2
+        ],
+        "minTotalCommands": 4,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": false,
+        "allShortestCanSucceed": true,
+        "interactionEdges": [],
+        "goalApproaches": 2,
+        "arrivalRange": [
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            2
+          ]
+        ],
+        "solutionsWithoutReverse": 1,
+        "solutionsWithoutStraightSplit": 1
+      },
+      "nodesUsed": 24,
+      "exactCount": "1"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L04",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          1,
+          2
+        ],
+        "spatialCombinations": 2,
+        "safeSolutions": 1,
+        "earlySolutions": 0,
+        "minCommands": [
+          3,
+          3
+        ],
+        "minTotalCommands": 6,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": false,
+        "allShortestCanSucceed": true,
+        "interactionEdges": [
+          [
+            "A",
+            "B"
+          ]
+        ],
+        "goalApproaches": 1,
+        "arrivalRange": [
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        "solutionsWithoutReverse": 1,
+        "solutionsWithoutStraightSplit": 1
+      },
+      "nodesUsed": 31,
+      "exactCount": "1"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L05",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          2,
+          2
+        ],
+        "spatialCombinations": 4,
+        "safeSolutions": 1,
+        "earlySolutions": 0,
+        "minCommands": [
+          3,
+          3
+        ],
+        "minTotalCommands": 6,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": false,
+        "allShortestCanSucceed": true,
+        "interactionEdges": [
+          [
+            "A",
+            "B"
+          ]
+        ],
+        "goalApproaches": 1,
+        "arrivalRange": [
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        "solutionsWithoutReverse": 1,
+        "solutionsWithoutStraightSplit": 1
+      },
+      "nodesUsed": 51,
+      "exactCount": "1"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L06",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          6,
+          6
+        ],
+        "spatialCombinations": 36,
+        "safeSolutions": 22,
+        "earlySolutions": 8,
+        "minCommands": [
+          2,
+          2
+        ],
+        "minTotalCommands": 5,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": false,
+        "allShortestCanSucceed": false,
+        "interactionEdges": [
+          [
+            "A",
+            "B"
+          ]
+        ],
+        "goalApproaches": 2,
+        "arrivalRange": [
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "solutionsWithoutReverse": 22,
+        "solutionsWithoutStraightSplit": 2
+      },
+      "nodesUsed": 171,
+      "exactCount": "22"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L07",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          7,
+          7
+        ],
+        "spatialCombinations": 49,
+        "safeSolutions": 8,
+        "earlySolutions": 2,
+        "minCommands": [
+          2,
+          2
+        ],
+        "minTotalCommands": 5,
+        "requiresAnyReverse": true,
+        "requiresAnyStraightSplit": false,
+        "allShortestCanSucceed": false,
+        "interactionEdges": [
+          [
+            "A",
+            "B"
+          ]
+        ],
+        "goalApproaches": 1,
+        "arrivalRange": [
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "solutionsWithoutReverse": 0,
+        "solutionsWithoutStraightSplit": 2
+      },
+      "nodesUsed": 185,
+      "exactCount": "8"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L08",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          3,
+          2,
+          1
+        ],
+        "spatialCombinations": 6,
+        "safeSolutions": 2,
+        "earlySolutions": 0,
+        "minCommands": [
+          3,
+          3,
+          3
+        ],
+        "minTotalCommands": 9,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": false,
+        "allShortestCanSucceed": true,
+        "interactionEdges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "A",
+            "C"
+          ]
+        ],
+        "goalApproaches": 2,
+        "arrivalRange": [
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        "solutionsWithoutReverse": 2,
+        "solutionsWithoutStraightSplit": 2
+      },
+      "nodesUsed": 100,
+      "exactCount": "2"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L09",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          6,
+          5,
+          5
+        ],
+        "spatialCombinations": 150,
+        "safeSolutions": 2,
+        "earlySolutions": 2,
+        "minCommands": [
+          2,
+          2,
+          2
+        ],
+        "minTotalCommands": 8,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": true,
+        "allShortestCanSucceed": false,
+        "interactionEdges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "A",
+            "C"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "goalApproaches": 1,
+        "arrivalRange": [
+          [
+            3,
+            3
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        "solutionsWithoutReverse": 2,
+        "solutionsWithoutStraightSplit": 0
+      },
+      "nodesUsed": 190,
+      "exactCount": "2"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L10",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          4,
+          3,
+          4
+        ],
+        "spatialCombinations": 48,
+        "safeSolutions": 2,
+        "earlySolutions": 2,
+        "minCommands": [
+          2,
+          2,
+          2
+        ],
+        "minTotalCommands": 7,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": true,
+        "allShortestCanSucceed": false,
+        "interactionEdges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "A",
+            "C"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "goalApproaches": 1,
+        "arrivalRange": [
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        "solutionsWithoutReverse": 2,
+        "solutionsWithoutStraightSplit": 0
+      },
+      "nodesUsed": 94,
+      "exactCount": "2"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L11",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          3,
+          1,
+          3
+        ],
+        "spatialCombinations": 9,
+        "safeSolutions": 1,
+        "earlySolutions": 0,
+        "minCommands": [
+          3,
+          3,
+          3
+        ],
+        "minTotalCommands": 9,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": false,
+        "allShortestCanSucceed": true,
+        "interactionEdges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "A",
+            "C"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "goalApproaches": 1,
+        "arrivalRange": [
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        "solutionsWithoutReverse": 1,
+        "solutionsWithoutStraightSplit": 1
+      },
+      "nodesUsed": 133,
+      "exactCount": "1"
+    },
+    {
+      "levelIdentity": {
+        "packId": "dev-pilot-12",
+        "levelId": "L12",
+        "revision": 1,
+        "ruleSetId": "shared-goal-v1"
+      },
+      "status": "PASS",
+      "stats": {
+        "routeCounts": [
+          7,
+          7,
+          1
+        ],
+        "spatialCombinations": 49,
+        "safeSolutions": 3,
+        "earlySolutions": 2,
+        "minCommands": [
+          2,
+          2,
+          3
+        ],
+        "minTotalCommands": 8,
+        "requiresAnyReverse": false,
+        "requiresAnyStraightSplit": false,
+        "allShortestCanSucceed": false,
+        "interactionEdges": [
+          [
+            "A",
+            "B"
+          ],
+          [
+            "A",
+            "C"
+          ],
+          [
+            "B",
+            "C"
+          ]
+        ],
+        "goalApproaches": 3,
+        "arrivalRange": [
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ]
+        ],
+        "solutionsWithoutReverse": 3,
+        "solutionsWithoutStraightSplit": 3
+      },
+      "nodesUsed": 170,
+      "exactCount": "3"
+    }
+  ],
+  "scope": "Dart host implementation and finite pilot data; UI/device/human play NOT_TESTED"
+}

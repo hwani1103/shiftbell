@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../l10n/l10n_extensions.dart';
 import '../services/permission_service.dart';
 import 'permission_panel.dart';
+import '../theme/app_ui_theme.dart';
+import 'app_ui_components.dart';
 
 class PermissionWarningBanner extends StatefulWidget {
   const PermissionWarningBanner({super.key});
@@ -82,6 +84,45 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner>
       return const SizedBox.shrink();
     }
 
+    if (Theme.of(context).extension<AppUiPalette>() != null) {
+      final p = AppUiPalette.of(context);
+      return AppUiCard(
+          padding: const EdgeInsets.all(4),
+          child: Theme(
+              data:
+                  Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                tilePadding: const EdgeInsets.symmetric(horizontal: 8),
+                childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                iconColor: p.secondaryText,
+                collapsedIconColor: p.secondaryText,
+                title: Row(children: [
+                  Icon(Icons.info_outline, size: 18, color: p.secondaryText),
+                  const SizedBox(width: 8),
+                  Expanded(
+                      child: AppUiText(
+                          context.l10n.permissionRequiredNotGranted,
+                          role: AppTextRole.supporting)),
+                  const SizedBox(width: 8),
+                  AppUiButton(
+                      label: context.l10n.navSettings,
+                      compact: true,
+                      action: AppUiAction.secondary,
+                      onPressed: () async {
+                        await showPermissionSettings(context);
+                        _checkPermissions();
+                      }),
+                ]),
+                children: [
+                  ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 100),
+                      child: SingleChildScrollView(
+                          child: AppUiText(_missingPermissions.join(', '),
+                              role: AppTextRole.supporting,
+                              tone: AppTextTone.secondary)))
+                ],
+              )));
+    }
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(

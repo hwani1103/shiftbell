@@ -4,7 +4,7 @@ import { Ga4, DEFAULTS } from '../lib/ga4.mjs';
 import { reportState, periodStats, segmentStats, countryTrend } from '../lib/operations.mjs';
 import { buildMockDocs } from '../../public/assets/js/mock.js';
 import { computeView } from '../../public/assets/js/views.js';
-import { periodData, eventData, adoptionCard, revenueCard, reliabilityCard, dailyView, dailyOverviewCard, dailySelection, weekdayDauAverages } from '../../public/assets/js/operations.js';
+import { periodData, eventData, adoptionCard, revenueCard, reliabilityCard, dailyView, dailyOverviewCard, dailySelection, weekdayDauAverages, countryCard, groupedCountryRows } from '../../public/assets/js/operations.js';
 const report = (metrics, rows, metadata = {}) => ({metricHeaders: metrics.map(name => ({name})), rows: rows.map(([dims, vals]) => ({dimensionValues: dims.map(value => ({value})), metricValues: vals.map(value => ({value: String(value)}))})), metadata});
 test('all business queries use production stream and completed dates', () => {
   const ga = new Ga4({auth: null});
@@ -77,3 +77,48 @@ test('DAU headline follows selection and missing yesterday remains unknown', () 
 test('feature ranking covers every current user action from shared metadata', async () => {const {EVENT_META}=await import('../../public/assets/js/labels.js');const docs=buildMockDocs();const view=computeView(docs,30);const html=adoptionCard(docs,view);const names=[...html.matchAll(/data-event="([a-z_]+)"/g)].map(m=>m[1]);for(const name of ['calendar_theme_changed','friend_added','shift_name_changed','shift_color_changed','schedule_edited','schedule_deleted','schedule_notification_changed','backup_restored','sleep_record_edited'])assert.ok(names.includes(name),name);for(const [name,meta] of Object.entries(EVENT_META)){if(meta.retired||meta.group==='system'||/^(ops_|alarm_schedule_|alarm_refresh_|device_boot_)/.test(name)||['alarm_fired','auto_backup_created'].includes(name))assert.ok(!names.includes(name),name);else assert.ok(names.includes(name),name);}});
 
 test('weekday DAU uses selected completed period, includes zero, excludes missing and future', () => { const docs={series:{dates:['2026-09-21','2026-09-28','2026-10-05','2026-10-06','2026-10-07','2026-10-08','2026-10-12'],dau:[100,10,0,null,8,NaN,999]}};const rows=weekdayDauAverages(docs,30,'2026-10-11');assert.deepEqual(rows[0],{label:'월',count:3,average:110/3});assert.deepEqual(rows[1],{label:'화',count:0,average:null});assert.equal(rows[2].average,8);assert.equal(rows[3].count,0);const week=weekdayDauAverages(docs,7,'2026-10-11');assert.deepEqual(week[0],{label:'월',count:1,average:0});});
+
+
+test('one country table separates languages within the same country', () => {
+  const docs=buildMockDocs();
+  for (const range of [7,30,100,365]) {
+    const view=computeView(docs,range);const key=JSON.stringify(['United States','Korean']);
+    const html=countryCard(docs,view,{country:key,marketSort:'activeUsers'});
+    assert.match(html,/<th>국가<\/th><th>언어<\/th>/);
+    assert.equal((html.match(/class="ops-table market-table"/g)||[]).length,1);
+    assert.equal(html.includes('ch-language'),false);
+    assert.match(html,/미국 \/ 한국어/);
+    assert.match(html,/남아프리카공화국/);
+    assert.match(html,/<th>고정 알람 저장<\/th>/);
+    assert.match(html,/id="ch-country"/);
+  }
+  docs.operations.byRange[30].countryLanguages=null;
+  assert.match(countryCard(docs,computeView(docs,30),{}),/아직 연결되지/);
+});
+test('country-language metrics and events use joint dimensions, never join separate totals', () => {
+  const ga=new Ga4({auth:null});const dims=['country','language'];
+  for (const query of [ga.segmentSummary(dims,'a','b'),ga.segmentEvents(dims,'a','b'),ga.countryLanguageDaily()]) {
+    assert.match(JSON.stringify(query.dimensionFilter),new RegExp(DEFAULTS.streamId));
+    assert.ok(query.dimensions.some(d=>d.name==='country'));
+    assert.ok(query.dimensions.some(d=>d.name==='language'));
+  }
+  const r=report(['activeUsers'],[[['United States','Korean'],[3]],[['United States','English'],[9]]]);
+  const e=report(['eventCount','totalUsers'],[[['United States','Korean','alarm_template_saved'],[12,2]],[['United States','English','alarm_template_saved'],[5,4]]]);
+  const rows=segmentStats(r,e,2);
+  assert.equal(rows[0].events.alarm_template_saved.users,2);assert.equal(rows[1].events.alarm_template_saved.users,4);
+  assert.notEqual(rows[0].name,rows[1].name);assert.equal(rows[0].country,'United States');assert.equal(rows[0].language,'Korean');
+  const daily=report(['activeUsers','newUsers','sessions'],[[['20261001','United States','Korean'],[3,1,4]],[['20261001','United States','English'],[9,2,12]]]);
+  const trend=countryTrend(daily,100,2);
+  assert.deepEqual(trend.series[JSON.stringify(['United States','Korean'])].dau,[3]);
+  assert.deepEqual(trend.series[JSON.stringify(['United States','English'])].dau,[9]);
+});
+
+
+test('country total ranks groups, keeping small language rows above the next country', () => {
+  const period={countries:[{name:'South Korea',activeUsers:100,newUsers:12},{name:'United States',activeUsers:50,newUsers:5}],countryLanguages:[
+    {country:'United States',language:'English',activeUsers:50,newUsers:5},
+    {country:'South Korea',language:'English',activeUsers:1,newUsers:1},
+    {country:'South Korea',language:'Korean',activeUsers:99,newUsers:11}]};
+  assert.deepEqual(groupedCountryRows(period).map(r=>[r.country,r.language]),[['South Korea','Korean'],['South Korea','English'],['United States','English']]);
+  assert.deepEqual(groupedCountryRows(period,'newUsers').map(r=>r.country),['South Korea','South Korea','United States']);
+});

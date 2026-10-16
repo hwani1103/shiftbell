@@ -1,0 +1,22 @@
+제작 방식: imagegen SKILL.md의 기본 내장 imagegen 도구. 외부 CLI/API key 사용 없음.
+사용자 승인: 간단한 테스트 Unit/타일 에셋을 만들고 독립 게임에 적용.
+
+로봇 제작 명세:
+투명 배경의 4열×3행 atlas. 각 행은 blue/coral/lavender 한 종류.
+각 열은 front/down, back/up, left, right. 귀여운 단순한 capsule robot의 head/body만.
+visor/눈/몸체 색으로 구분, 작은 모바일 캐릭터로 읽힐 것. 팔/다리/바닥 그림자/문자/셀 테두리 제외.
+걷는 다리/팔/그림자/점프는 UI에서 논리 중심과 독립적으로 그릴 수 있게 한다.
+출력 robots_v1.png 1448×1086, 924344 bytes. 3색×4방향 source rect는 asset_visuals.dart에 보존.
+
+타일 제작 명세:
+투명 배경의 가로 3종 atlas. ice-blue floor, dark block with diagonal safety stripe, mint Goal portal.
+동일한 탑다운 정사각형 크기, 단순한 2D 모바일 퍼즐 스타일, 문자/캐릭터/배경 scene 제외.
+출력 tiles_v1.png 2172×724, 1389282 bytes. source rect는 asset_visuals.dart에 보존.
+
+프로젝트 최종 파일:
+packages/sync_path_ui/assets/art/robots_v1.png
+packages/sync_path_ui/assets/art/tiles_v1.png
+기본 생성 파일은 Codex generated_images에서 프로젝트로 복사했다.
+PNG 픽셀은 별도 Python 가공/리사이즈하지 않았다. Python은 크기/alpha의 읽기 전용 조사만 사용했다.
+게임 렌더링에서 원본 atlas의 source rectangle을 사용한다. 두 bitmap의 SHA256은 asset_hashes.json 참조.
+장기 아트 스타일 확정이 아니라 기능/확장 경계 검증용 임시 에셋이다.

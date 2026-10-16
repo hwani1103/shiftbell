@@ -1,0 +1,37 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:02 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Last non-goal endpoint shows red counter and undo restores it
+00:02 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Failure prioritizes fresh restart; partial edit remains in menu
+00:02 +3: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: First rules and first gates lessons persist independently
+00:03 +4: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart
+00:04 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: (setUpAll)
+00:04 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: Mounting while already inactive uses the slow heart clock
+00:07 +5: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: Every level card chooses readable ink, final red grows darker
+00:07 +6: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: Saved location is visible on first hub and after Android back; test lock stays reachable
+00:09 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: Shared revisited endpoints show four flags; empty hearts refill visibly
+00:10 +8: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: Final board remains usable at 320px; campaign stops at its last level
+00:11 +9: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: (tearDownAll)
+00:11 +9: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart
+00:13 +9: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: Lifecycle while loading never overwrites the existing saved game
+00:13 +10: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: No initial selection, no automatic next ball, restart clears selection
+00:13 +11: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: Only exhaustion starts recovery; foreground and background credit combine
+00:13 +12: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: Per-level pools persist, lock toggle is temporary and cannot refill hearts
+00:13 +13: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: Leaving a level does not clear its hearts, completion or saved location
+00:13 +14: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: Repeated and shared stops keep all owners and visit multiplicity
+00:13 +15: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart
+00:16 +15: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U01/U02/U03 explicit selection, complete gating and selected route undo
+00:16 +16: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U02 invalid taps preserve plan; split, reverse and revisit remain legal
+00:16 +17: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U04/U05 failure stops exactly, all three pairs preserved, edit keeps old paths
+00:16 +18: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U06/U12 early removal, no filler, repeat success unlocks exactly once
+00:16 +19: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U09 pause/background/leave/resume needs explicit continuation and retains draft
+00:16 +20: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U08 reduced motion uses manual scenes and exact collision endpoint
+00:16 +21: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U10 process restart restores validated draft to planning, not autoplay
+00:16 +22: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U10 corrupt/stale draft is isolated; progress reset never deletes another store
+00:16 +23: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U11 delayed save is serialized and latest snapshot wins
+00:16 +24: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U10 saving failure remains retryable and does not discard paths
+00:16 +25: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U12 disposed asynchronous load never updates state
+00:16 +26: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: 30/60/120 FPS cursors and large jumps share the exact stop cursor
+00:16 +27: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/replay_geometry_consistency_test.dart
+00:17 +27: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/replay_geometry_consistency_test.dart: Planning endpoint markers never move the physical Units or jump back on Execute
+00:18 +28: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/replay_geometry_consistency_test.dart: Every pilot success/failure render cursor matches exact core motion including all collision pairs
+00:18 +29: All tests passed!

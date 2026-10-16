@@ -1,0 +1,3 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart
+00:00 +0: U11 delayed save is serialized and latest snapshot wins
+00:00 +1: All tests passed!

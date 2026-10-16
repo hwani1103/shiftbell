@@ -1,0 +1,4 @@
+package: name='dev.shiftbell.experiments.sync_path_lab.dev' versionCode='10' versionName='0.8.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+application-label:'Sync Path Lab DEV'
+launchable-activity: name='dev.shiftbell.experiments.sync_path_lab.MainActivity'  label='' icon=''
+native-code: 'arm64-v8a' 'armeabi-v7a' 'x86_64'

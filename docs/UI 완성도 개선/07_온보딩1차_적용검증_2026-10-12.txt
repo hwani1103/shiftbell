@@ -1,0 +1,50 @@
+온보딩 UI 적용 1차 — 첫 화면·패턴/오늘 통합
+작성일: 2026-10-12
+브랜치: dev (main 최종27/게시 태그 보존)
+
+사용자 확정 및 범위
+D01 단색 버튼 채택. 모든 앱 텍스트는 역할별 템플릿(크기·fontWeight)과 색상 토큰 관리 방향. 근무명 칩은 이름/조/순서 옵션 + 크기 옵션으로 통일.
+첫 화면 백업 진입 제거, 더 짧고 즉시 이해되는 문구·배치, 이름 추가 입력창 동일 디자인. 최대한 짧게/약어로 안내.
+두 번째 화면에서 반복패턴 → 다음 버튼 → 같은 화면의 오늘 위치 선택. 별도 오늘 페이지 제거. 이후 알람으로 진행해 전체3단계. 날짜별 직접 지정은 명확한 카드/버튼.
+최신 사용자 지시: 여기까지 구현 후 dev debug APK만 준비. Release/설치/게시 없음. 필수 검사 실행기의 -Build는 지침상 dev debug+공개웹을 함께 빌드한다.
+
+적용
+lib/theme/app_ui_theme.dart: AppTypography title/toolbar/section/body/supporting/button/chip/number 템플릿; AppUiPalette는 일반 텍스트도 포함한 역할별 ThemeExtension. 색상 변경과 크기/굵기 분리.
+lib/widgets/app_ui_components.dart: 단색 AppUiButton(primary/secondary/danger/quiet), 카드, 입력창테마/공통창, AppUiShiftChip(name/team/index/badge/size).
+lib/screens/onboarding_screen.dart: 처음 두 화면 및 이름 추가창에 세이지 공통기반 적용. 다른 화면을 한꺼번에 변경하지 않음.
+5개 common ARB 문구와 새 단계 버튼키 모두 동시 갱신; 생성기로 갱신. 한국어전용 리소스/공개웹 경계 유지.
+원장 연결: ONB-01/02/05 적용. ONB-03 별도페이지는 ONB-02 인라인선택으로 흡수. ONB-04 알람은3단계로 이동하되 기존 알람 조작/예약/템플릿 저장 정책 보존.
+
+UX/기능 의미
+- 첫 화면 기본6개 이름으로 바로 다음 가능. 이름 삭제는 최소1개 유지, 사용자 이름 개수/길이/금칙·중복 정책 유지.
+- 이름 추가창의 검증 오류는 입력필드 아래, 동일 취소/추가 단색 버튼.
+- 패턴 입력 최대40개, 반복되는 같은 이름도 각각 순서인덱스 유지.
+- 다음:오늘근무선택은 별도 route 없이 같은2/3 화면 안내를 AnimatedSwitcher로 교체(모션축소 시0ms). 선택한 칸에 오늘 배지.
+- 오늘 미선택이면 알람으로 진행 불가. 재편집/삭제 시 이전오늘위치 무효화. 알람에서 Back하면 선택한오늘위치 보존; 패턴 수정/앞단계 복귀 지원.
+- 날짜별 직접 지정은 반복순서가 없는 경우 별도 카드/버튼으로 기존 불규칙 근무 저장 경로 사용.
+- 온보딩 수동 백업 메뉴/핸들러 제거. 시작 라우터의 기존 자동 복원 제안 및 설정 백업/복원 기능은 이번 범위에서 변경하지 않음.
+
+검증
+온보딩4개 검사파일62개 PASS: 이름 빈값·중복/입력, 반복근무 정확한오늘칸, Back·재편집 무효화,50개 화면크기×언어 레이아웃,40일 패턴·큰글자, 기존 고정알람 추가/수정/취소/개수제한.
+증거: artifacts/onboarding_ui_2026_10_12_tests_verified.log
+호스트 Flutter 시각증거: artifacts/onboarding_ui_2026_10_12/final_host/{ko,en,de,pt,hi}_names/pattern_empty/pattern_added/today_selected.png 및 de_small_large_text_40_days.png. 당시 날짜 표시는 캡처일.
+Flutter 호스트 캡처를 Android 실기기 PASS로 확대하지 않음.
+필수 check_critical_release.ps1 -Build: 진행중, 완료 후 아래 연결.
+
+잔여/다음
+모든앱 텍스트/칩 일괄 전환이 완료된 상태가 아님. 기반과 온보딩1·2만 적용. 전체근무조/알람/이력/native의 크기·조·순서별 사용처는 이후 ID별 전환.
+권한 화면의 허용/설정·나중에하기도 동일 AppUiButton 역할로 전환할 후속 대상. 이번 APK에서 권한판정·설정복귀·별도오늘페이지 이외 후속 UI를 새로 구현한 것으로 기록하지 않음.
+공통 텍스트 크기 정책은 기존 AppTextScale 계약 보존. 시간대별 동적배경·자동색전환은 아직 구현하지 않음.
+기존 미커밋2개 출시원장 변경 및 기존UI 시안은 보존. Git 커밋·푸시·main변경 없음.
+
+추가 검사/산출물
+이름 추가창 키보드240dp·5개언어 캡처와40일 패턴 포함6검사 PASS. keyboard_host/*_name_input_keyboard.png 및 onboarding_ui_2026_10_12_keyboard.log.
+최종 analyze --no-pub --no-fatal-infos 대상3파일 exit0, 오류/경고0, 기존/스타일 info25개는 별도 정리 범위.
+dev debug APK 생성 완료: artifacts/onboarding_ui_2026_10_12/ShiftBell_Onboarding_UI_dev_debug.apk
+com.hwani1103.shiftbell.dev / 1.0.24-dev(code27) / debuggable / min24 target36.
+216013216 bytes / SHA256 7b675afc31298ccfd0144599e24c9af3144db3d9f0f394025543be8e9e3ebf49. apk_verification.json에 상세.
+Release 빌드·AAB·설치·운영게시 없음. 필수 실행기의 공개웹 단계 종료는 아래 최종 기록으로 연결한다.
+
+최종 필수 회귀 결과: tools/check_critical_release.ps1 -Build exit0. Flutter 기능/리소스·native 권한/알람/언어·DB 검사 + dev debug APK + 공개웹 JS 빌드 PASS.
+웹 Wasm dry-run의 기존 dart:html/js_util 경고는 JS 빌드 실패가 아니며 실행기 최종성공 확인. 실기기 신규PASS는 기록하지 않음.
+최종 APK는 위 경로에 보존. 제품 변경 이후 추가 소스 수정 없음.

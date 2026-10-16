@@ -1,0 +1,447 @@
+﻿id	file	line	source	status
+SRC-0001	lib/widgets/sleep_edit_dialog.dart	45	String title = '수면 시각 입력',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0002	lib/widgets/sleep_edit_dialog.dart	87	message = '기상 시각이 취침보다 빨라요';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0003	lib/widgets/sleep_edit_dialog.dart	89	message = '아직 지나지 않은 시각은 기록할 수 없어요';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0004	lib/widgets/sleep_edit_dialog.dart	91	message = '${fmtDuration(end.difference(start))} 수면';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0005	lib/widgets/sleep_edit_dialog.dart	131	label: '취침',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0006	lib/widgets/sleep_edit_dialog.dart	140	label: '기상',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0007	lib/widgets/sleep_edit_dialog.dart	204	child: const Text('삭제'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0008	lib/widgets/sleep_edit_dialog.dart	212	child: const Text('취소'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0009	lib/widgets/sleep_edit_dialog.dart	223	child: const Text('저장'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0010	lib/widgets/sleep_edit_dialog.dart	303	title: record != null ? '${category.label} 수정' : '${category.label} 기록',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0011	lib/widgets/sleep_edit_dialog.dart	332	? '이미 기록된 수면(${fmtDateTime(conflict.start)}~${fmtTimeOnly(conflict.end!)})'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0012	lib/widgets/sleep_edit_dialog.dart	333	: '진행 중인 수면(${fmtDateTime(conflict.start)}부터)';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0013	lib/widgets/sleep_edit_dialog.dart	334	return '$what과 시간이 겹쳐요. 시각을 고치거나 그 기록을 먼저 수정해 주세요.';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0014	lib/widgets/evidence_library_section.dart	48	child: Text('근거 자료', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0015	lib/widgets/evidence_library_section.dart	86	Text('근거 수준: ${evidence.evidenceLevel}', style: const TextStyle(fontSize: 11.5, color: Colors.black45)),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0016	lib/utils/sleep_format_util.dart	9	const List<String> kWeekdayLabelsKo = ['월', '화', '수', '목', '금', '토', '일'];	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0017	lib/utils/sleep_format_util.dart	27	if (h <= 0) return '$m분';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0018	lib/utils/sleep_format_util.dart	28	if (m == 0) return '$h시간';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0019	lib/utils/sleep_format_util.dart	29	return '$h시간 $m분';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0020	lib/services/condition/sleep_shift_relation.dart	67	return '근무 중 수면';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0021	lib/services/condition/sleep_shift_relation.dart	69	return '주 수면';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0022	lib/services/condition/sleep_shift_relation.dart	71	return '낮잠';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0023	lib/services/condition/sleep_day_slots.dart	47	String get label => this == SleepSlotCategory.main ? '주 수면' : '낮잠';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0024	lib/screens/sleep_calendar_full_screen.dart	84	title: const Text('수면 기록 전체보기'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0025	lib/screens/sleep_calendar_full_screen.dart	115	child: Text('이 달에는 표시할 날짜가 없어요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0026	lib/screens/sleep_calendar_full_screen.dart	151	'${month.year}년 ${month.month}월',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0027	lib/screens/sleep_calendar_full_screen.dart	376	const Text('+ 기록',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0028	lib/screens/sleep_calendar_full_screen.dart	389	: '${fmtTimeOnly(r.start)}~ 진행 중';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0029	lib/services/condition/shift_time_category.dart	30	return '주간';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0030	lib/services/condition/shift_time_category.dart	32	return '오후';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0031	lib/services/condition/shift_time_category.dart	34	return '야간';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0032	lib/services/condition/shift_time_category.dart	36	return '휴무';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0033	lib/services/condition/shift_time_category.dart	38	return '시각 미입력';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0034	lib/screens/schedule_management_tab.dart	1724	debugPrint('❌ 일정 저장 실패: $e');	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0035	lib/screens/schedule_management_tab.dart	1769	debugPrint('❌ 일정 삭제 실패: $e');	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0036	lib/screens/schedule_management_tab.dart	1782	debugPrint('❌ 일정 수정 실패: $e');	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0037	lib/screens/schedule_management_tab.dart	3098	('work', '업무', 'assets/icons/memo_category/work.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0038	lib/screens/schedule_management_tab.dart	3099	('study', '공부', 'assets/icons/memo_category/study.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0039	lib/screens/schedule_management_tab.dart	3100	('exercise', '운동', 'assets/icons/memo_category/exercise.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0040	lib/screens/schedule_management_tab.dart	3101	('health', '병원·건강관리', 'assets/icons/memo_category/health.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0041	lib/screens/schedule_management_tab.dart	3102	('meal', '식사', 'assets/icons/memo_category/meal.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0042	lib/screens/schedule_management_tab.dart	3103	('social', '약속/사교', 'assets/icons/memo_category/social.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0043	lib/screens/schedule_management_tab.dart	3104	('family', '가족', 'assets/icons/memo_category/family.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0044	lib/screens/schedule_management_tab.dart	3105	('shopping', '쇼핑', 'assets/icons/memo_category/shopping.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0045	lib/screens/schedule_management_tab.dart	3106	('leisure', '여가/휴식', 'assets/icons/memo_category/leisure.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0046	lib/screens/schedule_management_tab.dart	3109	('running', '달리기', 'assets/icons/memo_category/running.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0047	lib/screens/schedule_management_tab.dart	3110	('swimming', '수영', 'assets/icons/memo_category/swimming.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0048	lib/screens/schedule_management_tab.dart	3111	('hiking', '등산', 'assets/icons/memo_category/hiking.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0049	lib/screens/schedule_management_tab.dart	3112	('culture', '문화생활', 'assets/icons/memo_category/culture.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0050	lib/screens/schedule_management_tab.dart	3113	('finance', '금융', 'assets/icons/memo_category/finance.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0051	lib/screens/schedule_management_tab.dart	3114	('housework', '집안일', 'assets/icons/memo_category/housework.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0052	lib/screens/schedule_management_tab.dart	3115	('beauty', '미용', 'assets/icons/memo_category/beauty.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0053	lib/screens/schedule_management_tab.dart	3116	('cycling', '자전거', 'assets/icons/memo_category/cycling.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0054	lib/screens/schedule_management_tab.dart	3117	('yoga', '요가/필라테스', 'assets/icons/memo_category/yoga.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0055	lib/screens/schedule_management_tab.dart	3127	('etc', '기타', 'assets/icons/memo_category/etc1.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0056	lib/screens/schedule_management_tab.dart	3128	('etc', '기타', 'assets/icons/memo_category/etc2.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0057	lib/screens/schedule_management_tab.dart	3129	('etc', '기타', 'assets/icons/memo_category/etc3.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0058	lib/screens/schedule_management_tab.dart	3130	('etc', '기타', 'assets/icons/memo_category/etc4.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0059	lib/screens/schedule_management_tab.dart	3131	('etc', '기타', 'assets/icons/memo_category/etc5.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0060	lib/screens/schedule_management_tab.dart	3132	('etc', '기타', 'assets/icons/memo_category/etc6.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0061	lib/screens/schedule_management_tab.dart	3133	('etc', '기타', 'assets/icons/memo_category/etc7.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0062	lib/screens/schedule_management_tab.dart	3134	('etc', '기타', 'assets/icons/memo_category/etc8.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0063	lib/screens/schedule_management_tab.dart	3135	('etc', '기타', 'assets/icons/memo_category/etc9.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0064	lib/screens/schedule_management_tab.dart	3136	('etc', '기타', 'assets/icons/memo_category/etc10.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0065	lib/screens/schedule_management_tab.dart	3145	('racket_sports', '라켓 스포츠', 'assets/icons/memo_category/racket_sports.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0066	lib/screens/schedule_management_tab.dart	3146	('soccer', '축구', 'assets/icons/memo_category/soccer.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0067	lib/screens/schedule_management_tab.dart	3147	('basketball', '농구', 'assets/icons/memo_category/basketball.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0068	lib/screens/schedule_management_tab.dart	3148	('baseball', '야구', 'assets/icons/memo_category/baseball.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0069	lib/screens/schedule_management_tab.dart	3149	('ball_sports', '구기종목', 'assets/icons/memo_category/ball_sports.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0070	lib/screens/schedule_management_tab.dart	3150	('combat_sports', '입식 격투기', 'assets/icons/memo_category/combat_sports.svg'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0071	lib/screens/schedule_management_tab.dart	3199	if (minutes < 60) return '$minutes분';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0072	lib/screens/schedule_management_tab.dart	3202	return m == 0 ? '$h시간' : '$h시간 $m분';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0073	lib/screens/schedule_management_tab.dart	3637	debugPrint('⚠️ 카테고리 자동분류 실패(기타 아이콘으로 저장): $e');	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0074	lib/screens/schedule_management_tab.dart	3656	date: '', // _openCreateSheet/_openEditSheet가 실제 날짜로 덮어씀	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0075	lib/screens/schedule_management_tab.dart	3673	createdAt: '', // 위와 동일 - 호출부가 덮어씀	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0076	lib/screens/schedule_management_tab.dart	3855	label: '5분', onTap: () => _adjustActiveCard(5)),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0077	lib/screens/schedule_management_tab.dart	3864	label: '30분', onTap: () => _adjustActiveCard(30)),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0078	lib/screens/schedule_management_tab.dart	3867	label: '1시간', onTap: () => _adjustActiveCard(60)),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0079	lib/screens/schedule_management_tab.dart	4179	'지속시간 없음',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0080	lib/providers/sleep_record_provider.dart	33	debugPrint('⚠️ recordSleepAutoRejection 실패(무시): $e');	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0081	lib/screens/condition_tab.dart	45	const String kSleepRecoveryTabLabel = '수면·회복';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0082	lib/screens/condition_tab.dart	71	error: (e, st) => Center(child: Text('불러오지 못했습니다: $e')),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0083	lib/screens/condition_tab.dart	96	'먼저 근무 스케줄을 설정해주세요.\n(달력 탭에서 설정할 수 있어요)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0084	lib/screens/condition_tab.dart	179	'$skipped건은 이미 기록된 수면과 겹쳐서 확인하지 않았어요. 남은 카드에서 "기록하지 않기"나 "수정"을 눌러 주세요.')));	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0085	lib/screens/condition_tab.dart	183	label: const Text('보이는 기록 모두 확인'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0086	lib/screens/condition_tab.dart	192	'확인을 기다리는 자동 기록이 ${pending.length - _kMaxPendingCards}건 더 있어요. 위 카드를 처리하면 이어서 보여드려요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0087	lib/screens/condition_tab.dart	245	'오늘의 컨디션을 보려면 근무시간이 필요해요',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0088	lib/screens/condition_tab.dart	250	'쓰고 있는 근무 중 하나 이상의 출퇴근 시각을 입력하면, 근무 사이 회복시간과 퇴근 후 실제 수면을 바탕으로 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0089	lib/screens/condition_tab.dart	251	'몇 시까지 잠자리에 들지·카페인을 언제 끊을지 같은 오늘 챙길 일을 알려드려요.\n'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0090	lib/screens/condition_tab.dart	252	'수면 기록은 지금도 아래 "최근 수면 기록"에서 남길 수 있어요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0091	lib/screens/condition_tab.dart	265	label: const Text('근무시간 입력하기'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0092	lib/screens/condition_tab.dart	314	'오늘의 컨디션',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0093	lib/screens/condition_tab.dart	342	const _SectionLabel('최근 근무·수면'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0094	lib/screens/condition_tab.dart	345	const Text('아직 살펴볼 내용이 없어요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0095	lib/screens/condition_tab.dart	350	const _SectionLabel('추천 행동'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0096	lib/screens/condition_tab.dart	354	'지금 따로 챙길 행동은 없어요. 평소 수면 리듬을 유지하세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0097	lib/screens/condition_tab.dart	377	label: Text(_showEvidence ? '근거 접기' : '근거 보기',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0098	lib/screens/condition_tab.dart	399	ConditionLevel.normal => ('근무 부담 보통', const Color(0xFF2E7D32)),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0099	lib/screens/condition_tab.dart	400	ConditionLevel.attention => ('주의가 필요한 날', const Color(0xFFB26A00)),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0100	lib/screens/condition_tab.dart	401	ConditionLevel.highLoad => ('회복 부담이 큰 날', const Color(0xFFC62828)),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0101	lib/screens/condition_tab.dart	514	'수면·교대근무 연구를 참고한 일반적인 안내예요(의학적 진단이 아니에요).',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0102	lib/screens/condition_tab.dart	546	const _SectionLabel('최근 수면'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0103	lib/screens/condition_tab.dart	578	Text('판단 범위',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0104	lib/screens/condition_tab.dart	636	title: '수면 시각 수정',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0105	lib/screens/condition_tab.dart	661	: '진행 중';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0106	lib/screens/condition_tab.dart	676	'이때 주무셨나요?',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0107	lib/screens/condition_tab.dart	686	? '${fmtDateTime(record.start)} ~ ${fmtDateTime(end)}, 약 $durationText 동안 폰을 쓰지 않아 수면으로 추정했어요.'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0108	lib/screens/condition_tab.dart	687	: '${fmtDateTime(record.start)}부터 수면 중인 것으로 추정됩니다.\n(잠시 후 기상 시각이 추정되면 다시 표시돼요)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0109	lib/screens/condition_tab.dart	693	'확인한 기록만 오늘의 컨디션에 반영돼요. 수면이 아니었다면 "기록하지 않기"를 눌러주세요(다음부터 덜 잡혀요).',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0110	lib/screens/condition_tab.dart	707	child: const Text('기록하지 않기'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0111	lib/screens/condition_tab.dart	711	child: const Text('수정'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0112	lib/screens/condition_tab.dart	720	child: const Text('맞아요'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0113	lib/screens/condition_tab.dart	765	child: Text('최근 수면 기록',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0114	lib/screens/condition_tab.dart	775	label: const Text('전체보기'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0115	lib/screens/condition_tab.dart	782	'칸을 눌러 수면을 기록·수정할 수 있어요. 옆으로 밀면 지난 날짜가 보여요 →',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0116	lib/screens/condition_tab.dart	852	child: Text('내 근무별 수면 패턴',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0117	lib/screens/condition_tab.dart	860	'최근 30일 중 수면 기록이 있는 날을 근무 유형별로 비교해요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0118	lib/screens/condition_tab.dart	884	'아직 평균을 만드는 중이에요. 같은 근무 유형의 수면이 3일 쌓이면 주 수면과 낮잠을 나눠 보여드려요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0119	lib/screens/condition_tab.dart	894	'평균 준비 중 · 유형별 3일 필요',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0120	lib/screens/condition_tab.dart	915	'${_sleepCategoryRowLabel(category)} ${stats.samplesFor(category)}/$kMinSampleDaysForCategoryAverage일',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0121	lib/screens/condition_tab.dart	925	'하루는 주 수면 1건과 낮잠 최대 2건만 합산해요. 빠진 기록이 있으면 평균이 낮게 보일 수 있어요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0122	lib/screens/condition_tab.dart	944	c == ShiftTimeCategory.off ? '휴무일' : '${c.label} 근무일';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0123	lib/screens/condition_tab.dart	958	_item(_swatch(_kMainSleepBarColor), '주 수면'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0124	lib/screens/condition_tab.dart	959	_item(_swatch(_kNapBarColor), '낮잠'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0125	lib/screens/condition_tab.dart	961	Container(width: 1.5, height: 10, color: Colors.black38), '권장 7시간'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0126	lib/screens/condition_tab.dart	1015	'평균 ${fmtDuration(Duration(minutes: total))}',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0127	lib/screens/condition_tab.dart	1023	Text('(${average.sampleDays}일)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0128	lib/screens/condition_tab.dart	1038	? '주 수면 ${fmtDuration(Duration(minutes: average.averageMainMinutes))}'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0129	lib/screens/condition_tab.dart	1039	' · 낮잠 ${fmtDuration(Duration(minutes: average.averageNapMinutes))}'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0130	lib/screens/condition_tab.dart	1040	: '주 수면 ${fmtDuration(Duration(minutes: average.averageMainMinutes))}',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0131	lib/screens/condition_tab.dart	1224	const Text('+ 기록',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0132	lib/screens/condition_tab.dart	1235	: '${fmtTimeOnly(r.start)}~ 진행중';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0133	lib/services/condition/recovery_briefing_engine.dart	163	'퇴근길엔 선글라스 등으로 강한 햇빛을 줄이면 이후 잠들기 쉬워요. 많이 졸리면 운전하지 말고 대중교통이나 동승을 이용하세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0134	lib/services/condition/recovery_briefing_engine.dart	168	'출근 전에 짧게 눈을 붙이면 야간 졸림을 줄이는 데 도움이 될 수 있어요. 깬 직후엔 잠깐 멍할 수 있으니 바로 운전하지는 마세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0135	lib/services/condition/recovery_briefing_engine.dart	173	'자정~06시에는 식사량을 줄이고 가벼운 음식 위주로 드세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0136	lib/services/condition/recovery_briefing_engine.dart	178	'아래 "최근 수면 기록"에 수면 시간을 남겨주세요. 기록이 쌓이면 실제로 잔 시간을 바탕으로 더 정확하게 알려드릴게요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0137	lib/services/condition/recovery_briefing_engine.dart	191	if (h == 0) return '$r분';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0138	lib/services/condition/recovery_briefing_engine.dart	192	if (r == 0) return '$h시간';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0139	lib/services/condition/recovery_briefing_engine.dart	193	return '$h시간 $r분';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0140	lib/services/condition/recovery_briefing_engine.dart	202	return '오늘 $hm';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0141	lib/services/condition/recovery_briefing_engine.dart	204	return '내일 $hm';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0142	lib/services/condition/recovery_briefing_engine.dart	206	return '어제 $hm';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0143	lib/services/condition/recovery_briefing_engine.dart	208	return '모레 $hm';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0144	lib/services/condition/recovery_briefing_engine.dart	341	? '다음 근무 ${next.shiftName} ${when(next.start!)}'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0145	lib/services/condition/recovery_briefing_engine.dart	342	: (untimedNextName != null ? '다음 근무 $untimedNextName(시각 미입력)' : null);	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0146	lib/services/condition/recovery_briefing_engine.dart	345	'지금 ${current!.shiftName} 근무 중 · ${when(current.end!)} 퇴근 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0147	lib/services/condition/recovery_briefing_engine.dart	346	'(${dur(current.end!.difference(now).inMinutes)} 남음)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0148	lib/services/condition/recovery_briefing_engine.dart	348	'곧 ${next!.shiftName} 출근 · ${when(next.start!)} (${dur(next.start!.difference(now).inMinutes)} 뒤)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0149	lib/services/condition/recovery_briefing_engine.dart	350	'${last!.shiftName} 근무 마친 지 ${dur(now.difference(last.end!).inMinutes)}'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0150	lib/services/condition/recovery_briefing_engine.dart	352	BriefingPhase.offDay => '오늘은 휴무${nextText != null ? ' · $nextText' : ''}',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0151	lib/services/condition/recovery_briefing_engine.dart	354	'오늘 ${next!.shiftName} 근무 · ${when(next.start!)} 출근 (${dur(next.start!.difference(now).inMinutes)} 뒤)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0152	lib/services/condition/recovery_briefing_engine.dart	356	? '오늘은 근무 일정이 없는 날이에요'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0153	lib/services/condition/recovery_briefing_engine.dart	357	: '오늘 ${todayInst.shiftName} 근무 (출퇴근 시각 미입력)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0154	lib/services/condition/recovery_briefing_engine.dart	480	? ' (출근 전 ${dur(preShiftSleep)} 포함)'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0155	lib/services/condition/recovery_briefing_engine.dart	483	'지난 24시간 수면 ${dur(last24hSleep)}$preNote${enough ? '' : ', 권장 7시간보다 적어요'}',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0156	lib/services/condition/recovery_briefing_engine.dart	491	facts.add(const BriefingFact('지난 24시간 수면 기록이 없어요',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0157	lib/services/condition/recovery_briefing_engine.dart	510	'퇴근(${when(l.end!)}) 후 수면 ${dur(sleepSinceLast)}${cannotReach ? ', 다음 출근 전까지 7시간을 채우긴 어려워요' : ''}',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0158	lib/services/condition/recovery_briefing_engine.dart	518	facts.add(const BriefingFact('지금 수면 중으로 기록돼 있어요'));	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0159	lib/services/condition/recovery_briefing_engine.dart	522	facts.add(BriefingFact('퇴근(${when(l.end!)}) 후 기록된 수면이 아직 없어요'));	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0160	lib/services/condition/recovery_briefing_engine.dart	532	'어제(${y.month}/${y.day}) 수면 ${dur(yesterdayTotal)}${enough ? '' : ', 권장 7시간보다 적어요'}',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0161	lib/services/condition/recovery_briefing_engine.dart	540	facts.add(BriefingFact('어제(${y.month}/${y.day}) 수면 기록이 없어요'));	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0162	lib/services/condition/recovery_briefing_engine.dart	550	category == ShiftTimeCategory.off ? '휴무일' : '${category.label} 근무일';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0163	lib/services/condition/recovery_briefing_engine.dart	552	final dayLabel = age == 1 ? '어제' : '그제';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0164	lib/services/condition/recovery_briefing_engine.dart	554	'$dayLabel $categoryLabel 수면 ${dur(comparison.actual)}, 개인 평균 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0165	lib/services/condition/recovery_briefing_engine.dart	555	'${dur(comparison.average.averageMinutes)}보다 ${dur(comparison.deficit)} 적어요 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0166	lib/services/condition/recovery_briefing_engine.dart	556	'(최근 30일 ${comparison.average.sampleDays}일 기준)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0167	lib/services/condition/recovery_briefing_engine.dart	567	'최근 $categoryLabel 수면이 평소보다 적었어요. 다음 수면 기회에는 다른 일정보다 회복할 시간을 조금 더 넉넉히 잡아보세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0168	lib/services/condition/recovery_briefing_engine.dart	591	'근무 사이 회복시간 ${dur(gap)} (${when(gapFrom.end!)} 퇴근 → ${when(gapTo.start!)} 출근)'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0169	lib/services/condition/recovery_briefing_engine.dart	592	'${short ? ', 권장 최소 11시간보다 짧아요' : ''}',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0170	lib/services/condition/recovery_briefing_engine.dart	624	? '야간 $days일 연속 근무 후'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0171	lib/services/condition/recovery_briefing_engine.dart	625	: '연속 야간 $days일째',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0172	lib/services/condition/recovery_briefing_engine.dart	627	? '야간 근무가 휴무 없이 매우 오래 이어진 후'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0173	lib/services/condition/recovery_briefing_engine.dart	628	: '연속 야간 근무가 휴무 없이 매우 오래 이어지고 있음',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0174	lib/services/condition/recovery_briefing_engine.dart	631	severe ? '$text. 연속될수록 피로와 실수가 쌓이기 쉬워요' : text,	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0175	lib/services/condition/recovery_briefing_engine.dart	674	? '(전체 연속근무는 ${workStreak.days}일째)'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0176	lib/services/condition/recovery_briefing_engine.dart	679	normal: (days) => '$floorHours시간 이상 근무 $days일 연속$totalNote',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0177	lib/services/condition/recovery_briefing_engine.dart	680	capped: '$floorHours시간 이상 근무가 휴무 없이 매우 오래 이어지고 있어요',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0178	lib/services/condition/recovery_briefing_engine.dart	690	'$floorHours시간 근무가 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0179	lib/services/condition/recovery_briefing_engine.dart	691	'${ConditionRuleEngine.streakClause(bucketStreak, normal: (days) => '$days일', capped: '휴무 없이 매우 오래')} '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0180	lib/services/condition/recovery_briefing_engine.dart	692	'이어졌어요. 근무 조정이 가능하다면 이어서 $breakDays일 정도는 쉬어보세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0181	lib/services/condition/recovery_briefing_engine.dart	702	normal: (days) => '$days일째 연속 근무 중이에요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0182	lib/services/condition/recovery_briefing_engine.dart	703	capped: '휴무 없이 매우 오래 근무가 이어지고 있어요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0183	lib/services/condition/recovery_briefing_engine.dart	714	'연속 근무가 길게 이어지고 있어요. 근무 조정이 가능하다면 하루라도 쉬는 날을 만들어보세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0184	lib/services/condition/recovery_briefing_engine.dart	722	normal: (days) => '$days일째 연속 근무',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0185	lib/services/condition/recovery_briefing_engine.dart	723	capped: '휴무 없이 매우 오래 근무가 이어지고 있어요'),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0186	lib/services/condition/recovery_briefing_engine.dart	755	'최근 7일 실근무시간 ${dur(weeklyTotal)}, 평소(주 ${dur(baseline)} 안팎)보다 ${dur(extra)} 많아요',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0187	lib/services/condition/recovery_briefing_engine.dart	765	? '최근 7일 근무시간이 평소보다 많이 쌓였어요. 가능하면 추가 근무를 줄이고 쉬는 시간부터 먼저 챙기세요.'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0188	lib/services/condition/recovery_briefing_engine.dart	766	: '이번 주는 평소보다 근무가 좀 더 많아요. 가능하면 추가 근무를 줄이고 휴식을 챙겨보세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0189	lib/services/condition/recovery_briefing_engine.dart	788	'역방향 교대 전환(${prev.category.label} → ${ctx.category.label}). 정방향보다 몸이 적응하기 어려운 편이에요',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0190	lib/services/condition/recovery_briefing_engine.dart	802	'${when(cutoff)} 이후엔 커피·에너지음료를 피하세요(잠드는 목표 ${when(bed)}).',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0191	lib/services/condition/recovery_briefing_engine.dart	807	'잠드는 목표(${when(bed)})까지 6시간이 안 남았어요. 지금부터는 커피·에너지음료를 피하세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0192	lib/services/condition/recovery_briefing_engine.dart	826	'퇴근 후 다음 출근까지 잘 수 있는 시간이 거의 없어요. 가능하다면 근무 조정을 요청하거나 근무 중에라도 잠깐 쉴 수 있는지 알아보세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0193	lib/services/condition/recovery_briefing_engine.dart	834	'퇴근 후 잘 수 있는 시간은 ${when(bed)}~${when(wakeBy)}, 약 ${dur(available)}뿐이에요. 퇴근하면 다른 일정보다 수면을 먼저 챙기세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0194	lib/services/condition/recovery_briefing_engine.dart	842	'퇴근 후엔 수면을 먼저 챙기세요. ${when(bed)}쯤 잠들면 다음 출근 전까지 7시간 이상 잘 수 있어요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0195	lib/services/condition/recovery_briefing_engine.dart	850	'sleep_after_shift', '퇴근 후엔 다른 일정보다 수면을 먼저 챙기세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0196	lib/services/condition/recovery_briefing_engine.dart	871	'지난 24시간 수면이 권장량보다 적어요. 이번 근무를 마치면(${when(bedAfter)}쯤) 다른 일정보다 수면을 먼저 챙기세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0197	lib/services/condition/recovery_briefing_engine.dart	891	final prefix = afterNight ? '야간 근무 뒤에는 수면이 우선이에요. ' : '';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0198	lib/services/condition/recovery_briefing_engine.dart	897	final goal = sleepSinceLast > 0 ? '${dur(need)} 더 자려면' : '7시간을 자려면';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0199	lib/services/condition/recovery_briefing_engine.dart	902	'$prefix다음 출근(${when(next.start!)}) 전에 $goal 늦어도 ${when(latestBed)}에는 잠자리에 드세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0200	lib/services/condition/recovery_briefing_engine.dart	913	'$prefix지금 바로 자도 출근 준비 전까지 최대 ${dur(available)}이에요. 다른 일정은 미루고 수면부터 챙기세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0201	lib/services/condition/recovery_briefing_engine.dart	919	'caffeine', '곧 잠들어야 해요. 지금부터는 커피·에너지음료를 피하세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0202	lib/services/condition/recovery_briefing_engine.dart	929	? '야간 근무 뒤에는 다른 일정보다 수면을 먼저 챙기세요.'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0203	lib/services/condition/recovery_briefing_engine.dart	930	: '오늘은 7시간 이상 자는 걸 목표로 하세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0204	lib/services/condition/recovery_briefing_engine.dart	950	normal: (days) => '어제까지 야간 $days일 연속 근무',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0205	lib/services/condition/recovery_briefing_engine.dart	951	capped: '어제까지 야간 근무가 휴무 없이 매우 오래 이어짐',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0206	lib/services/condition/recovery_briefing_engine.dart	959	'야간 근무 뒤 휴무예요. 약속이나 집안일보다 수면 회복을 먼저 챙기세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0207	lib/services/condition/recovery_briefing_engine.dart	973	'다음 근무(${next.shiftName}, ${when(next.start!)})에 맞춰 7시간을 자려면 늦어도 ${when(latestBed)}에는 잠자리에 드세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0208	lib/services/condition/recovery_briefing_engine.dart	986	'최근 수면이 권장량(7시간)보다 적었어요. 쉬는 날엔 수면 시간을 넉넉히 잡아보세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0209	lib/services/condition/recovery_briefing_engine.dart	1002	'최근 7일 평균 수면 ${dur(avgRecent)} (기록한 ${recordedDays.length}일 기준)${low ? ', 권장 7시간보다 적어요' : ''}',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0210	lib/services/condition/recovery_briefing_engine.dart	1014	? '연속 야간 근무가 휴무 없이 매우 오래 이어지고 있어요'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0211	lib/services/condition/recovery_briefing_engine.dart	1015	: '연속 야간 $nightStreak일째예요';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0212	lib/services/condition/recovery_briefing_engine.dart	1020	'$nightStreakLabel. 운전이나 위험한 작업은 특히 조심하세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0213	lib/services/condition/recovery_briefing_engine.dart	1029	limitations.add('최근 2주 수면 기록이 없어 근무 일정만 보고 안내했어요.');	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0214	lib/services/condition/recovery_briefing_engine.dart	1031	limitations.add('최근 7일 중 기록이 ${recordedDays.length}일뿐이라 평균 수면은 계산하지 않았어요.');	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0215	lib/services/condition/recovery_briefing_engine.dart	1035	limitations.add('$names 근무는 출퇴근 시각이 없어 그날은 계산에서 빠졌어요. (설정 → 근무시간 및 OT 설정)');	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0216	lib/services/condition/recovery_briefing_engine.dart	1038	limitations.add('확인하지 않은 자동 수면 기록 $pendingCount건은 반영하지 않았어요.');	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0217	lib/services/condition/evidence_database.dart	35	topic: '교대 방향(정방향/역방향)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0218	lib/services/condition/evidence_database.dart	36	finding: '정방향 교대(주간→오후→야간)가 역방향보다 적응하기 쉽다고 보고됨. '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0219	lib/services/condition/evidence_database.dart	37	'회전 속도가 빠를수록, 주 단위 회전일수록 더 힘든 경향.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0220	lib/services/condition/evidence_database.dart	38	evidenceLevel: '정부기관 종합 훈련자료(다수 생체리듬 연구를 정리한 전문가 합의 수준)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0221	lib/services/condition/evidence_database.dart	39	appUsage: '"일부 연구에서는 정방향이 역방향보다 적응에 유리한 것으로 보고됩니다" '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0222	lib/services/condition/evidence_database.dart	40	'수준의 정보 제공. "정방향=건강에 좋음" 같은 단정 금지.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0223	lib/services/condition/evidence_database.dart	45	source: 'Knauth & Hornberger (NIOSH Module 5 인용)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0224	lib/services/condition/evidence_database.dart	46	topic: '근무 사이 최소 회복시간',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0225	lib/services/condition/evidence_database.dart	47	finding: '두 근무 사이 최소 11시간의 회복시간을 둘 것을 권장.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0226	lib/services/condition/evidence_database.dart	48	evidenceLevel: '학술 권고(정부기관 훈련자료에 인용)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0227	lib/services/condition/evidence_database.dart	49	appUsage: '회복시간이 11시간보다 짧을 때 "짧습니다"라는 사실만 서술.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0228	lib/services/condition/evidence_database.dart	54	source: 'EU Directive 2003/88/EC (Working Time Directive) 제3조',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0229	lib/services/condition/evidence_database.dart	55	topic: '근무 사이 최소 회복시간(법제 기준)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0230	lib/services/condition/evidence_database.dart	56	finding: '모든 근로자는 24시간마다 최소 11시간의 연속 휴식을 보장받아야 함.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0231	lib/services/condition/evidence_database.dart	57	evidenceLevel: '법제/정부 가이드라인(널리 채택된 최소 기준)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0232	lib/services/condition/evidence_database.dart	58	appUsage: 'EVIDENCE-002와 함께 11시간 임계값의 근거로 사용.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0233	lib/services/condition/evidence_database.dart	64	topic: '장시간 근무와 사고/부상 상대위험',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0234	lib/services/condition/evidence_database.dart	65	finding: '8시간 근무 대비 10시간 근무는 상대위험 약 +13%, 12시간 근무는 약 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0235	lib/services/condition/evidence_database.dart	66	'+27% 증가하는 것으로 모델링됨.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0236	lib/services/condition/evidence_database.dart	67	evidenceLevel: '여러 연구를 종합한 메타분석적 모델링(Risk Index)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0237	lib/services/condition/evidence_database.dart	68	appUsage: '오늘 근무가 12시간 이상일 때 "근무시간이 길수록 피로·사고 위험이 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0238	lib/services/condition/evidence_database.dart	69	'상대적으로 높아지는 경향이 보고됩니다" 수준으로만 서술. 개인 위험도를 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0239	lib/services/condition/evidence_database.dart	70	'%로 제시하지 않음.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0240	lib/services/condition/evidence_database.dart	76	topic: '연속 근무 후 휴식일(근무시간대별 일반화)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0241	lib/services/condition/evidence_database.dart	77	finding: '"연속 8시간 근무 5일 또는 10시간 근무 4일 후에는 1~2일의 완전한 휴식을, '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0242	lib/services/condition/evidence_database.dart	78	'연속 12시간 근무 3일 후에는 2일의 휴식을 계획할 것"을 권고. 또한 "며칠 몰아서 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0243	lib/services/condition/evidence_database.dart	79	'일하고 4~7일을 몰아 쉬는" 압축 패턴은 전문가들이 피할 것을 권고한다고 명시(2026-09-17 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0244	lib/services/condition/evidence_database.dart	80	'재조사로 근무시간대별 일반화된 수치 확인 - 기존엔 12시간 근무 축만 반영했음).',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0245	lib/services/condition/evidence_database.dart	81	evidenceLevel: '정부기관 종합 훈련자료의 정성적 권고(정량적 "위험 시작 일수"는 아님)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0246	lib/services/condition/evidence_database.dart	82	appUsage: '근무시간이 8시간대/10시간대/12시간대인지에 따라 각각 5일/4일/3일 연속 뒤 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0247	lib/services/condition/evidence_database.dart	83	'회복시간이 부족(24~48시간 미만)하면 "높은 부담" 판정에 사용 - 원문 숫자를 그대로 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0248	lib/services/condition/evidence_database.dart	84	'씀, 임의로 만든 임계값이 아님. 8시간 미만 근무의 연속일수는 이 근거가 다루지 않아 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0249	lib/services/condition/evidence_database.dart	85	'레벨 판정에 안 씀(RULE_CONSECUTIVE_WORKDAYS 참고 - "며칠 몰아서 일하는 압축 패턴을 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0250	lib/services/condition/evidence_database.dart	86	'피하라"는 이 자료의 일반 원칙만 빌리고, 정확한 일수 기준 자체는 이 앱의 판단).',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0251	lib/services/condition/evidence_database.dart	92	topic: '야간근무 후 수면',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0252	lib/services/condition/evidence_database.dart	93	finding: '야간근무 후에는 수면을 확보하는 것을 우선할 것을 권고.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0253	lib/services/condition/evidence_database.dart	94	evidenceLevel: '정부기관 종합 훈련자료',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0254	lib/services/condition/evidence_database.dart	95	appUsage: '야간근무 다음 날이 휴무인 경우 "회복을 위한 수면·휴식 구간"으로 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0255	lib/services/condition/evidence_database.dart	96	'맥락을 재구성(상태 판정에는 영향 없음, 순수 정보 제공).',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0256	lib/services/condition/evidence_database.dart	102	topic: '야간근무 전 낮잠',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0257	lib/services/condition/evidence_database.dart	103	finding: '졸림을 겪는 교대근무 수면장애 성인에서 야간근무 전 낮잠을 조건부로 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0258	lib/services/condition/evidence_database.dart	104	'권장(단, 가이드라인 스스로 "근거 수준 매우 낮음"이라고 명시). 낮잠 직후 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0259	lib/services/condition/evidence_database.dart	105	'수면관성으로 일시적 졸림/인지저하가 있을 수 있어 운전 등 위험한 활동 전 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0260	lib/services/condition/evidence_database.dart	106	'시간을 둘 것을 권고.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0261	lib/services/condition/evidence_database.dart	107	evidenceLevel: '조건부 권고, 근거 수준 매우 낮음(가이드라인 원문 명시)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0262	lib/services/condition/evidence_database.dart	108	appUsage: '팁으로만 노출("도움이 될 수 있다고 보고됩니다, 근거 수준은 높지 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0263	lib/services/condition/evidence_database.dart	109	'않습니다" + 낮잠 직후 운전 주의). 상태 판정에는 절대 사용하지 않음.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0264	lib/services/condition/evidence_database.dart	115	topic: '카페인과 수면',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0265	lib/services/condition/evidence_database.dart	116	finding: '취침 6시간 전 카페인(400mg) 섭취도 총 수면시간을 1시간 이상 유의하게 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0266	lib/services/condition/evidence_database.dart	117	'감소시킴.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0267	lib/services/condition/evidence_database.dart	118	evidenceLevel: '무작위 대조 실험(반복 인용되는 기준 연구)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0268	lib/services/condition/evidence_database.dart	119	appUsage: '추천 수면 시간대 시작 시각 기준 6시간 전부터 카페인 섭취를 줄이도록 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0269	lib/services/condition/evidence_database.dart	120	'안내.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0270	lib/services/condition/evidence_database.dart	126	topic: '야간근무 후 귀가길 빛 노출',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0271	lib/services/condition/evidence_database.dart	127	finding: '야간근무 후 귀가길에 선글라스 등으로 강한 빛 노출을 줄이면 이후 수면에 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0272	lib/services/condition/evidence_database.dart	128	'도움이 될 수 있음. 단, 매우 졸린 상태에서는 선글라스가 각성 효과를 줄여 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0273	lib/services/condition/evidence_database.dart	129	'졸음운전 위험을 높일 수 있다는 안전 경고가 함께 명시됨.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0274	lib/services/condition/evidence_database.dart	130	evidenceLevel: '정부기관 종합 훈련자료 + 생체리듬 연구 기반',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0275	lib/services/condition/evidence_database.dart	131	appUsage: '야간근무가 끝나는 날 팁으로 노출하되, 졸음운전 안전 경고 문구를 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0276	lib/services/condition/evidence_database.dart	132	'반드시 함께 표시.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0277	lib/services/condition/evidence_database.dart	138	topic: '야간근무 중 식사',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0278	lib/services/condition/evidence_database.dart	139	finding: '자정~새벽 6시 사이 식사량을 줄이고, 주 수면 전 1~2시간 내 과식을 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0279	lib/services/condition/evidence_database.dart	140	'피하며, 가벼운 음식 위주로 할 것을 권고. 기름지고 자극적인 음식·알코올· '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0280	lib/services/condition/evidence_database.dart	141	'설탕 많은 음식은 자제.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0281	lib/services/condition/evidence_database.dart	142	evidenceLevel: '정부기관 종합 훈련자료',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0282	lib/services/condition/evidence_database.dart	143	appUsage: '오늘이 야간근무일 때 "과식·기름진 음식을 피하고 가벼운 식사 위주로" '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0283	lib/services/condition/evidence_database.dart	144	'팁 노출.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0284	lib/services/condition/evidence_database.dart	149	source: 'National Sleep Foundation, Sleep Health 저널(2015) — 다학제 전문가 패널 합의',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0285	lib/services/condition/evidence_database.dart	150	topic: '성인 권장 수면시간',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0286	lib/services/condition/evidence_database.dart	151	finding: '성인(만 18~64세) 권장 수면시간은 7~9시간(고령자 7~8시간).',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0287	lib/services/condition/evidence_database.dart	152	evidenceLevel: '다학제 전문가 패널 합의(RAND/UCLA Appropriateness Method)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0288	lib/services/condition/evidence_database.dart	153	appUsage: '"오늘 목표 수면: 7~9시간"처럼 항상 범위로 표시. 특정 분·시간 단위로 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0289	lib/services/condition/evidence_database.dart	154	'정확히 표현하지 않음.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0290	lib/services/condition/evidence_database.dart	159	source: 'EU Directive 2003/88/EC (Working Time Directive) 제6조',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0291	lib/services/condition/evidence_database.dart	160	topic: '주간 최대 근무시간(법제 기준)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0292	lib/services/condition/evidence_database.dart	161	finding: '평균 주간 근무시간(연장근무 포함)이 기준기간 동안 48시간을 넘지 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0293	lib/services/condition/evidence_database.dart	162	'않아야 함.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0294	lib/services/condition/evidence_database.dart	163	evidenceLevel: '법제/정부 가이드라인(널리 채택된 최소 기준)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0295	lib/services/condition/evidence_database.dart	164	appUsage: '2026-09-18 재설계 - ConditionRuleEngine.scheduleLoadProfileFor()에서 이 사람의 근무 패턴 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0296	lib/services/condition/evidence_database.dart	165	'자체(개인 기준선)가 구조적으로 주 48시간을 넘는지 판단할 때만 절대값으로 씀(레벨과 무관한 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0297	lib/services/condition/evidence_database.dart	166	'배경 정보 한 줄, "이 근무 패턴은 평균 주 N시간이에요"). RULE_WEEKLY_LOAD_INCREASE(최근 7일 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0298	lib/services/condition/evidence_database.dart	167	'실근무시간이 평소보다 늘었는지)는 이 48시간을 더 이상 절대 기준으로 쓰지 않고 개인 기준선 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0299	lib/services/condition/evidence_database.dart	168	'대비 증가 폭만 보되, 같은 축의 배경 근거로 evidenceIds에 계속 인용함(절대 기준 위반을 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0300	lib/services/condition/evidence_database.dart	169	'단정하는 문구는 안 씀 - 12시간 표준 근무자는 원래도 48시간을 구조적으로 넘기 때문). '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0301	lib/services/condition/evidence_database.dart	170	'60시간 이상은 EVIDENCE-014와 함께 씀. 개인 위험도·질병 연관은 절대 언급하지 않음.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0302	lib/services/condition/evidence_database.dart	183	'evidence review에 재인용된 수치 기준)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0303	lib/services/condition/evidence_database.dart	184	topic: '연속 야간근무 횟수와 사고 위험',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0304	lib/services/condition/evidence_database.dart	185	finding: '야간근무가 연속될수록 사고·부상 상대위험이 누적됨(1일째 대비 2일째 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0305	lib/services/condition/evidence_database.dart	186	'약 +6%, 3일째 약 +17%, 4일째 약 +36% - 낮/오후근무의 연속보다 야간근무의 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0306	lib/services/condition/evidence_database.dart	187	'연속에서 위험 증가가 더 가파름). 이 수치를 근거로 원자력 등 안전 최우선 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0307	lib/services/condition/evidence_database.dart	188	'산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 둠.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0308	lib/services/condition/evidence_database.dart	189	evidenceLevel: '동료심사 학술지 원 연구(다수 연구를 종합한 산업안전 지표) - '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0309	lib/services/condition/evidence_database.dart	190	'2차 인용(Frontiers 2024 rapid evidence review)으로 수치 재확인',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0310	lib/services/condition/evidence_database.dart	191	appUsage: '연속 야간근무 3일째부터 "주의" 신호로, 4일째부터는 그 자체로 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0311	lib/services/condition/evidence_database.dart	192	'"회복 부담이 큰 날"로 판정(가속화 구간이라는 원 연구 취지 반영). 개인별 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0312	lib/services/condition/evidence_database.dart	193	'%나 사고 확률은 표시하지 않고 "위험이 누적/가속화되는 경향" 수준으로만 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0313	lib/services/condition/evidence_database.dart	194	'서술.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0314	lib/services/condition/evidence_database.dart	203	source: 'Institute of Medicine, Keeping Patients Safe (2004); 2014년 체계적 검토 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0315	lib/services/condition/evidence_database.dart	204	'(둘 다 NIOSH Training for Nurses Module 5에 인용된 수치로 확인)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0316	lib/services/condition/evidence_database.dart	205	topic: '주간 누적 근무시간 상한',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0317	lib/services/condition/evidence_database.dart	206	finding: '간호사 근무시간을 24시간 내 12시간, 7일 내 60시간을 넘지 않도록 제한할 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0318	lib/services/condition/evidence_database.dart	207	'것을 권고(IOM 2004). 2014년 체계적 검토는 주 40시간을 넘는 근무가 환자안전 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0319	lib/services/condition/evidence_database.dart	208	'저하와 연관된다고 보고.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0320	lib/services/condition/evidence_database.dart	209	evidenceLevel: '정부기관 종합 훈련자료에 인용된 위원회 보고서 + 체계적 검토(원문 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0321	lib/services/condition/evidence_database.dart	210	'직접 확인은 이번 조사에서 못 함 - 2차 인용 확인 수준)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0322	lib/services/condition/evidence_database.dart	211	appUsage: '2026-09-18 재설계 - scheduleLoadProfileFor()에서 개인 기준선이 주 60시간 이상이면 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0323	lib/services/condition/evidence_database.dart	212	'EVIDENCE-012와 함께 배경 정보에 "간호사 근무시간 권고 상한(주 60시간)" 문구 추가. '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0324	lib/services/condition/evidence_database.dart	213	'RULE_WEEKLY_LOAD_INCREASE에서는 최근 7일 실근무시간이 평소보다 크게(기준선의 25% 이상 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0325	lib/services/condition/evidence_database.dart	214	'또는 최소 12시간 이상) 늘었을 때 배경 근거로 evidenceIds에 인용(60시간 절대 위반을 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0326	lib/services/condition/evidence_database.dart	215	'단정하지 않음 - 평소가 이미 60시간대인 사람도 있기 때문). 40시간 수치는 서술에서 참고만 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0327	lib/services/condition/evidence_database.dart	216	'하고 별도 레벨 신호로는 쓰지 않음(EU 48시간 기준과 같은 축의 더 약한 근거를 이중으로 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0328	lib/services/condition/evidence_database.dart	217	'반영하지 않기 위함). 개인 위험도·질병 연관은 언급하지 않음.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0329	lib/services/condition/condition_rule_engine.dart	52	return '일반';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0330	lib/services/condition/condition_rule_engine.dart	54	return '주의가 필요한 날';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0331	lib/services/condition/condition_rule_engine.dart	56	return '회복 부담이 큰 날';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0332	lib/services/condition/condition_rule_engine.dart	288	? '이 근무 패턴은 평균 주 ${_formatHours(baselineWeeklyMinutes)} 안팎이에요. 간호사 근무시간 권고 상한(주 60시간)과 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0333	lib/services/condition/condition_rule_engine.dart	289	'EU 근로시간지침 기준(주 48시간)을 구조적으로 넘는 편이에요.'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0334	lib/services/condition/condition_rule_engine.dart	290	: '이 근무 패턴은 평균 주 ${_formatHours(baselineWeeklyMinutes)} 안팎이에요. EU 근로시간지침 기준(주 48시간)을 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0335	lib/services/condition/condition_rule_engine.dart	291	'구조적으로 넘는 편이에요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0336	lib/services/condition/condition_rule_engine.dart	310	ConditionFinding(message: '근무 일정이 아직 설정되지 않았습니다.', evidenceIds: []),	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0337	lib/services/condition/condition_rule_engine.dart	427	message: '다음 근무까지 회복시간이 ${_formatHours(recoveryMinutes)}로, '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0338	lib/services/condition/condition_rule_engine.dart	428	'권장 최소 기준(11시간)보다 짧습니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0339	lib/services/condition/condition_rule_engine.dart	439	? '최근 7일간 실제 근무시간이 총 ${_formatHours(weeklyTotalMinutes)}으로, 평소(주 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0340	lib/services/condition/condition_rule_engine.dart	440	'${_formatHours(baseline)} 안팎)보다 ${_formatHours(extra)} 더 많습니다. 평소보다 근무가 많이 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0341	lib/services/condition/condition_rule_engine.dart	441	'누적되면 피로가 커질 수 있습니다(정확한 증가 폭 기준은 특정 연구 수치가 아니라 이 앱이 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0342	lib/services/condition/condition_rule_engine.dart	442	'보수적으로 정한 값입니다).'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0343	lib/services/condition/condition_rule_engine.dart	443	: '최근 7일간 실제 근무시간이 총 ${_formatHours(weeklyTotalMinutes)}으로, 평소(주 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0344	lib/services/condition/condition_rule_engine.dart	444	'${_formatHours(baseline)} 안팎)보다 ${_formatHours(extra)} 더 많습니다. 평소보다 근무가 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0345	lib/services/condition/condition_rule_engine.dart	445	'누적되면 피로가 커질 수 있습니다(정확한 증가 폭 기준은 이 앱의 판단입니다).',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0346	lib/services/condition/condition_rule_engine.dart	455	? '오늘로 연속 근무 $days일째입니다. 하루 근무시간과 무관하게 쉬는 날 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0347	lib/services/condition/condition_rule_engine.dart	456	'없이 근무가 길게 이어지는 것 자체가 피로 누적으로 이어질 수 있습니다 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0348	lib/services/condition/condition_rule_engine.dart	457	'(정확한 일수 기준은 특정 연구 수치가 아니라 이 앱이 보수적으로 정한 값입니다).'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0349	lib/services/condition/condition_rule_engine.dart	458	: '오늘로 연속 근무 $days일째입니다. 하루 근무시간과 무관하게 쉬는 날 없이 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0350	lib/services/condition/condition_rule_engine.dart	459	'근무가 이어지면 피로가 쌓일 수 있습니다(정확한 일수 기준은 이 앱의 판단입니다).',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0351	lib/services/condition/condition_rule_engine.dart	460	capped: '휴무 없이 매우 오랜 기간 근무가 이어지고 있습니다. 하루 근무시간과 무관하게 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0352	lib/services/condition/condition_rule_engine.dart	461	'쉬는 날 없이 근무가 길게 이어지는 것 자체가 피로 누적으로 이어질 수 있습니다 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0353	lib/services/condition/condition_rule_engine.dart	462	'(정확한 일수 기준은 특정 연구 수치가 아니라 이 앱이 보수적으로 정한 값입니다).',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0354	lib/services/condition/condition_rule_engine.dart	470	message: '오늘은 역방향 교대 전환에 해당합니다. 일부 연구에서는 역방향이 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0355	lib/services/condition/condition_rule_engine.dart	471	'정방향보다 적응에 상대적으로 불리한 경향으로 보고돼, 다른 부담과 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0356	lib/services/condition/condition_rule_engine.dart	472	'겹치면 회복이 더 어려울 수 있습니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0357	lib/services/condition/condition_rule_engine.dart	482	? '연속 야간근무가 $days일째로 접어들었습니다. 관련 연구는 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0358	lib/services/condition/condition_rule_engine.dart	483	'이 시점부터 사고·실수 위험이 뚜렷하게 가속화된다고 보고하며, 일부 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0359	lib/services/condition/condition_rule_engine.dart	484	'안전 최우선 산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0360	lib/services/condition/condition_rule_engine.dart	485	'둡니다.'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0361	lib/services/condition/condition_rule_engine.dart	486	: '연속 야간근무 $days일째입니다. 관련 연구는 야간근무가 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0362	lib/services/condition/condition_rule_engine.dart	487	'연속될수록(특히 낮·오후근무 연속보다 더 가파르게) 사고·실수 위험이 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0363	lib/services/condition/condition_rule_engine.dart	488	'누적된다고 보고합니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0364	lib/services/condition/condition_rule_engine.dart	489	capped: '연속 야간근무가 휴무 없이 매우 오래 이어지고 있습니다. 관련 연구는 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0365	lib/services/condition/condition_rule_engine.dart	490	'이 시점부터 사고·실수 위험이 뚜렷하게 가속화된다고 보고하며, 일부 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0366	lib/services/condition/condition_rule_engine.dart	491	'안전 최우선 산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 둡니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0367	lib/services/condition/condition_rule_engine.dart	500	if (shortRecovery) '회복시간 부족',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0368	lib/services/condition/condition_rule_engine.dart	501	if (heavyLoad) '평소보다 근무 누적',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0369	lib/services/condition/condition_rule_engine.dart	502	if (isBackward) '역방향 교대 전환',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0370	lib/services/condition/condition_rule_engine.dart	503	if (nightStreakAttention) '연속 야간근무',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0371	lib/services/condition/condition_rule_engine.dart	504	if (workStreakAttention) '연속근무일수 누적',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0372	lib/services/condition/condition_rule_engine.dart	515	message: '${compoundLabels.join(' + ')}이 오늘 함께 겹쳐 회복 부담이 큰 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0373	lib/services/condition/condition_rule_engine.dart	516	'날로 판단됩니다. (여러 부담이 겹치면 누적된다고 보는 것은 이 앱의 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0374	lib/services/condition/condition_rule_engine.dart	517	'판단이며, 개별 요인 각각의 근거는 위 항목을 참고하세요.)',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0375	lib/services/condition/condition_rule_engine.dart	545	normal: (days) => '$floorHours시간 이상 근무가 $days일 연속 이어졌습니다. 관련 훈련자료는 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0376	lib/services/condition/condition_rule_engine.dart	546	'이런 경우 최소 $breakDays일의 휴식을 고려할 것을 제안합니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0377	lib/services/condition/condition_rule_engine.dart	547	capped: '$floorHours시간 이상 근무가 휴무 없이 매우 오래 이어지고 있습니다. 관련 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0378	lib/services/condition/condition_rule_engine.dart	548	'훈련자료는 이런 경우 최소 $breakDays일의 휴식을 고려할 것을 제안합니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0379	lib/services/condition/condition_rule_engine.dart	571	message: '오늘로 연속 야간근무 ${consecutiveNight.days}일째입니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0380	lib/services/condition/condition_rule_engine.dart	582	normal: (days) => '어제까지 이어진 야간근무($days일) 이후의 휴무입니다. 회복을 위한 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0381	lib/services/condition/condition_rule_engine.dart	583	'수면·휴식 구간으로 활용해보세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0382	lib/services/condition/condition_rule_engine.dart	584	capped: '휴무 없이 매우 오래 이어진 야간근무 이후의 휴무입니다. 회복을 위한 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0383	lib/services/condition/condition_rule_engine.dart	585	'수면·휴식 구간으로 활용해보세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0384	lib/services/condition/condition_rule_engine.dart	598	message: '현재 교대는 정방향(주간→오후→야간)으로 진행됩니다. 일부 교대근무 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0385	lib/services/condition/condition_rule_engine.dart	599	'연구에서는 정방향이 역방향보다 적응에 상대적으로 유리한 것으로 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0386	lib/services/condition/condition_rule_engine.dart	600	'보고됩니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0387	lib/services/condition/condition_rule_engine.dart	624	title: '수면',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0388	lib/services/condition/condition_rule_engine.dart	625	message: '${_formatTime(sleepStart)} ~ ${_formatTime(sleepEnd)} 사이에 수면을 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0389	lib/services/condition/condition_rule_engine.dart	626	'확보하기 좋은 시간대입니다. (목표 수면 7~9시간 기준)'	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0390	lib/services/condition/condition_rule_engine.dart	627	'${sleepShorterThanRecommended ? " 다만 오늘은 가용 시간이 권장 범위보다 짧습니다." : ""}',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0391	lib/services/condition/condition_rule_engine.dart	636	title: '카페인',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0392	lib/services/condition/condition_rule_engine.dart	637	message: '취침 목표 시각(${_formatTime(sleepStart)}) 6시간 전인 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0393	lib/services/condition/condition_rule_engine.dart	638	'${_formatTime(cutoff)} 이후부터는 카페인 섭취를 줄이는 것이 좋습니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0394	lib/services/condition/condition_rule_engine.dart	643	message: '다음 근무까지 회복시간이 매우 짧아 별도의 수면 시간대를 제안하기 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0395	lib/services/condition/condition_rule_engine.dart	644	'어렵습니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0396	lib/services/condition/condition_rule_engine.dart	655	title: '식사',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0397	lib/services/condition/condition_rule_engine.dart	656	message: '야간근무 중에는 과식이나 기름지고 자극적인 음식을 피하고, 가벼운 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0398	lib/services/condition/condition_rule_engine.dart	657	'식사 위주로 하는 것이 좋습니다.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0399	lib/services/condition/condition_rule_engine.dart	664	title: '빛 노출',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0400	lib/services/condition/condition_rule_engine.dart	665	message: '야간근무 후 귀가길에 강한 햇빛 노출을 줄이면(선글라스 등) 이후 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0401	lib/services/condition/condition_rule_engine.dart	666	'수면에 도움이 될 수 있습니다. 단, 많이 졸린 상태라면 안전을 우선하고 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0402	lib/services/condition/condition_rule_engine.dart	667	'가능하면 다른 사람이 운전하게 하세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0403	lib/services/condition/condition_rule_engine.dart	674	title: '낮잠',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0404	lib/services/condition/condition_rule_engine.dart	675	message: '야간근무 전 짧은 낮잠이 졸림을 줄이는 데 도움이 될 수 있다고 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0405	lib/services/condition/condition_rule_engine.dart	676	'보고됩니다(근거 수준은 높지 않음). 낮잠 직후엔 잠시 몽롱할 수 있으니 '	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0406	lib/services/condition/condition_rule_engine.dart	677	'운전 등은 피하세요.',	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0407	lib/services/condition/condition_rule_engine.dart	719	if (m == 0) return '$h시간';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0408	lib/services/condition/condition_rule_engine.dart	720	return '$h시간 $m분';	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0409	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt	51	private const val UNSET_SENTINEL = "미설정"	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0410	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt	77	Log.e(TAG, "❌ 위젯($id) 렌더링 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0411	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt	81	Log.e(TAG, "❌ 위젯 갱신 요청 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0412	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt	210	putExtra("openTab", -2) // kOpenConditionTabSentinel(Dart main.dart)과 반드시 같은 값	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0413	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt	240	Log.e(TAG, "❌ 근무명 계산 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0414	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt	375	Log.e(TAG, "❌ 수면 중 여부 확인 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0415	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt	411	Log.e(TAG, "❌ 위젯($id) onUpdate 렌더링 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0416	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt	430	Log.e(TAG, "❌ 위젯($appWidgetId) 크기 변경 렌더링 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0417	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	62	android.widget.Toast.makeText(context, "백업 복원 중이에요. 잠시 후 다시 눌러주세요.", android.widget.Toast.LENGTH_SHORT).show()	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0418	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	68	Log.w(TAG, "⚠️ DB 아직 준비 안 됨 - 버튼 입력 무시")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0419	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	90	else -> Log.d(TAG, "⏭️ 진행 중인 수면이 없어 기상 무시")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0420	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	95	ongoingManual != null -> Log.d(TAG, "⏭️ 이미 수면 중이라 취침 무시 (id=${ongoingManual.first})")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0421	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	97	ongoingAuto != null -> Log.d(TAG, "⏭️ 이미 자동으로 수면 중 인식됨 - 취침 무시 (id=${ongoingAuto.first})")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0422	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	108	Log.d(TAG, "😴 취침 기록 (id=$id)")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0423	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	117	Log.e(TAG, "❌ 위젯 버튼 처리 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0424	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	144	Log.d(TAG, "🗑️ 너무 짧아서(${durationMinutes}분) 기록 버림 (id=$id, 확정시도=$promoteToConfirmed)")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0425	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	145	Toast.makeText(context, "너무 짧아서 기록하지 않았어요", Toast.LENGTH_SHORT).show()	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0426	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	166	Log.d(TAG, "☀️ 기상 기록 (id=$id, 확정=$promoteToConfirmed)")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0427	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepScheduleResolver.kt	36	private const val UNSET_SENTINEL = "미설정"	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0428	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepScheduleResolver.kt	73	if (name.contains("휴")) return true	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0429	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepScheduleResolver.kt	281	Log.e(TAG, "❌ condition_shift_times 읽기 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0430	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionScheduler.kt	75	Log.e(TAG, "❌ 수면 감지 예약 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0431	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionScheduler.kt	95	Log.d(TAG, "⏰ 수면 감지 다음 체크 예약: ${Date(atMillis)}")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0432	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	94	Log.d(TAG, "🙅 자동감지 거부 학습(hour=$hour, count=${prevCount + 1})")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0433	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	148	Log.e(TAG, "❌ 수면 감지 처리 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0434	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	168	Log.d(TAG, "⏭️ 수동 수면 진행 중 - 자동 감지 스킵")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0435	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	188	Log.d(TAG, "⏳ 자동 수면 후보 9시간 종료(id=$id, 확인 대기 유지)")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0436	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	195	Log.d(TAG, "💤 수면 후보 진행 중(id=${ongoing.first}) - 계속 대기")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0437	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	228	Log.d(TAG, "⏭️ 이 수면 추적 창은 이미 기록이 있음 - 중복 추적 안 함")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0438	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	235	Log.d(TAG, "🌙 첫 꺼짐 샘플 기록 - 다음 체크에서 계속 꺼져있으면 후보 생성")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0439	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	251	Log.d(TAG, "⏭️ 반복 거부된 시간대(hour=${hourBucketOf(firstOffAt)}) - 자동 후보 생성 안 함")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0440	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	266	Log.d(TAG, "🌙 수면 후보 생성(id=$id, start=${Date(firstOffAt)})")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0441	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	276	Log.d(TAG, "🗑️ 최소 길이(${minMinutes}분) 미만(${durationMinutes}분) - 후보 폐기(id=$id)")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0442	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	289	Log.d(TAG, "☀️ 수면 후보 종료(id=$id, ${durationMinutes}분, 신뢰도=$confidence)")	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0443	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	309	Log.e(TAG, "❌ 수동 진행 여부 확인 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0444	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	326	Log.e(TAG, "❌ 진행 중 자동 후보 조회 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0445	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	340	Log.e(TAG, "❌ 겹침 기록 확인 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요
+SRC-0446	android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt	355	Log.e(TAG, "❌ 창 내 기존 기록 확인 실패", e)	문자열/템플릿 후보; 로그·데이터키·분기 조립 검토 필요

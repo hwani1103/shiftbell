@@ -1,0 +1,100 @@
+{
+  "onboardingWelcomePopupBody": [
+    "😴  설정에서 수면·회복 기능을 선택해서 사용하세요.",
+    "😴  Enable optional Sleep & Recovery in Settings.",
+    "😴  Schlaf & Erholung bei Bedarf in den Einstellungen aktivieren.",
+    "😴  Ative Sono e recuperação nos Ajustes, se quiser.",
+    "😴  चाहें तो सेटिंग में नींद और रिकवरी चालू करें।"
+  ],
+  "workHoursDefaultDurationDesc": [
+    "수면·회복 기능을 켜면 이 시간을 수면 기록의 날짜 구분과 근무 사이 회복 안내에도 사용합니다.",
+    "If you enable Sleep & Recovery, these times also help assign sleep records to a shift date and provide guidance for rest between shifts.",
+    "Wenn Sie Schlaf & Erholung aktivieren, dienen diese Zeiten auch zur Zuordnung von Schlafaufzeichnungen zu einem Schichtdatum und für Hinweise zur Erholung zwischen Schichten.",
+    "Se ativar Sono e recuperação, esses horários também ajudam a associar os registros de sono à data de um turno e a orientar o descanso entre turnos.",
+    "नींद और रिकवरी चालू करने पर इन समयों से नींद के रिकॉर्ड को शिफ्ट की तारीख से जोड़ने और शिफ्टों के बीच आराम के सुझाव देने में भी मदद मिलती है।"
+  ],
+  "privacyNoCollectionBody": [
+    "수면·회복 기능의 수면 시작·종료 시각과 확인 상태도 기기에 저장됩니다. 수면 추정은 기능을 켠 경우에만 화면 꺼짐과 충전 상태를 주기적으로 확인해 기기 안에서 처리합니다. 이 관찰값이나 수면 기록 내용을 서버로 전송하지 않습니다.",
+    "Sleep start and end times and confirmation status are also stored on your device. When Sleep & Recovery is enabled, sleep estimation periodically checks screen-off and charging status and processes them on the device. These observations and the contents of sleep records are not sent to a server.",
+    "Beginn, Ende und Bestätigungsstatus von Schlafaufzeichnungen werden ebenfalls auf Ihrem Gerät gespeichert. Wenn Schlaf & Erholung aktiviert ist, prüft die Schlafschätzung in regelmäßigen Abständen, ob der Bildschirm ausgeschaltet ist und das Gerät geladen wird. Die Verarbeitung erfolgt auf dem Gerät. Diese Beobachtungen und die Inhalte der Schlafaufzeichnungen werden nicht an einen Server gesendet.",
+    "O início, o fim e o estado de confirmação dos registros de sono também ficam no dispositivo. Com Sono e recuperação ativado, a estimativa de sono verifica periodicamente se a tela está desligada e se o dispositivo está carregando. O processamento ocorre no próprio dispositivo. Essas observações e o conteúdo dos registros de sono não são enviados a um servidor.",
+    "नींद की शुरुआत, अंत और पुष्टि की स्थिति भी आपके डिवाइस पर सहेजी जाती है। नींद और रिकवरी चालू होने पर, नींद का अनुमान लगाने के लिए समय-समय पर स्क्रीन बंद होने और चार्जिंग की स्थिति जाँची जाती है। यह प्रक्रिया डिवाइस पर ही होती है। इन अवलोकनों और नींद के रिकॉर्ड की सामग्री को किसी सर्वर पर नहीं भेजा जाता।"
+  ],
+  "privacyAnalyticsBody": [
+    "수면 기능 사용 횟수 같은 이벤트는 통계에 포함될 수 있지만, 수면 시작·종료 시각과 수면 기록 내용은 포함하지 않습니다.",
+    "Analytics may include events counting use of sleep features, but exclude sleep start and end times and the contents of sleep records.",
+    "Nutzungsstatistiken können Ereignisse zur Häufigkeit der Nutzung von Schlaffunktionen enthalten, jedoch weder Schlafbeginn und -ende noch die Inhalte der Schlafaufzeichnungen.",
+    "As estatísticas podem incluir eventos de contagem de uso dos recursos de sono, mas não incluem horários de início e fim nem o conteúdo dos registros de sono.",
+    "आँकड़ों में नींद की सुविधाओं के उपयोग की गिनती वाले इवेंट शामिल हो सकते हैं, लेकिन नींद की शुरुआत और अंत के समय या नींद के रिकॉर्ड की सामग्री शामिल नहीं होती।"
+  ],
+  "privacyAdsBody": [
+    "수면 기록 내용도 광고 요청에 포함하지 않습니다.",
+    "The contents of sleep records are also excluded from ad requests.",
+    "Auch die Inhalte der Schlafaufzeichnungen werden nicht in Werbeanfragen aufgenommen.",
+    "O conteúdo dos registros de sono também não é incluído nas solicitações de anúncios.",
+    "नींद के रिकॉर्ड की सामग्री भी विज्ञापन अनुरोधों में शामिल नहीं होती।"
+  ],
+  "privacyPermissionsBody": [
+    "수면·회복 기능을 켠 경우에는 수면 추정 상태를 주기적으로 확인하는 예약에도 정확한 알람 기능을 사용합니다.",
+    "When Sleep & Recovery is enabled, exact alarms are also used to schedule periodic sleep-estimation checks.",
+    "Wenn Schlaf & Erholung aktiviert ist, werden genaue Alarme auch für regelmäßige Prüfungen zur Schlafschätzung verwendet.",
+    "Com Sono e recuperação ativado, alarmes exatos também são usados para agendar verificações periódicas da estimativa de sono.",
+    "नींद और रिकवरी चालू होने पर, नींद के अनुमान की नियमित जाँच तय करने के लिए भी सटीक अलार्म का उपयोग होता है।"
+  ],
+  "privacyDataRetentionBody": [
+    "수면 기록도 백업에 포함됩니다. 수면·회복 기능을 끄거나 탭을 숨겨도 이미 저장한 수면 기록은 삭제되지 않습니다.",
+    "Backups also contain sleep records. Turning off Sleep & Recovery or hiding its tab does not delete previously saved sleep records.",
+    "Sicherungen enthalten auch Schlafaufzeichnungen. Das Deaktivieren von Schlaf & Erholung oder das Ausblenden des Tabs löscht bereits gespeicherte Schlafaufzeichnungen nicht.",
+    "Os backups também contêm registros de sono. Desativar Sono e recuperação ou ocultar a aba não exclui registros de sono já salvos.",
+    "बैकअप में नींद के रिकॉर्ड भी शामिल होते हैं। नींद और रिकवरी बंद करने या उसका टैब छिपाने से पहले से सहेजे गए नींद के रिकॉर्ड नहीं मिटते।"
+  ],
+  "publicWebIntroBody": [
+    "Android 앱에서는 수면·회복 기능도 선택해서 사용할 수 있습니다.",
+    "The Android app also offers optional Sleep & Recovery.",
+    "In der Android-App können Sie außerdem Schlaf & Erholung bei Bedarf aktivieren.",
+    "O aplicativo Android também oferece Sono e recuperação como recurso opcional.",
+    "Android ऐप में नींद और रिकवरी भी वैकल्पिक सुविधा के रूप में उपलब्ध है।"
+  ],
+  "settingsRestoreFromBackupWarningBody": [
+    "수면 기록도 복원 대상에 포함됩니다.",
+    "Sleep records are also included in the restore.",
+    "Auch Schlafaufzeichnungen werden wiederhergestellt.",
+    "Os registros de sono também são incluídos na restauração.",
+    "नींद के रिकॉर्ड भी बहाल किए जाते हैं।"
+  ],
+  "settingsRestoreFromBackupConfirmBody": [
+    "수면 기록도 복원 대상에 포함됩니다.",
+    "Sleep records are also included in the restore.",
+    "Auch Schlafaufzeichnungen werden wiederhergestellt.",
+    "Os registros de sono também são incluídos na restauração.",
+    "नींद के रिकॉर्ड भी बहाल किए जाते हैं।"
+  ],
+  "backupRestoreFoundDesc": [
+    "수면 기록도 복원 대상에 포함됩니다.",
+    "Sleep records are also included in the restore.",
+    "Auch Schlafaufzeichnungen werden wiederhergestellt.",
+    "Os registros de sono também são incluídos na restauração.",
+    "नींद के रिकॉर्ड भी बहाल किए जाते हैं।"
+  ],
+  "restoreInterruptedDesc": [
+    "수면 기록도 복원 대상에 포함됩니다.",
+    "Sleep records are also included in the restore.",
+    "Auch Schlafaufzeichnungen werden wiederhergestellt.",
+    "Os registros de sono também são incluídos na restauração.",
+    "नींद के रिकॉर्ड भी बहाल किए जाते हैं।"
+  ],
+  "helpBackupRestoreBody": [
+    "수면 기록도 복원 대상에 포함됩니다.",
+    "Sleep records are also included in the restore.",
+    "Auch Schlafaufzeichnungen werden wiederhergestellt.",
+    "Os registros de sono também são incluídos na restauração.",
+    "नींद के रिकॉर्ड भी बहाल किए जाते हैं।"
+  ],
+  "helpBackupDataStorageBody": [
+    "수면 기록도 기기에 저장되며 로컬 백업에 포함됩니다.",
+    "Sleep records are also stored on your device and included in local backups.",
+    "Schlafaufzeichnungen werden ebenfalls auf Ihrem Gerät gespeichert und in lokale Sicherungen aufgenommen.",
+    "Os registros de sono também ficam no dispositivo e são incluídos nos backups locais.",
+    "नींद के रिकॉर्ड भी डिवाइस पर सहेजे जाते हैं और स्थानीय बैकअप में शामिल होते हैं।"
+  ]
+}

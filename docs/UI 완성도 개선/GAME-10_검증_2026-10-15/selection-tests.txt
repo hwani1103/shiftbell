@@ -1,0 +1,13 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: U07 320px planning/undo/success/back with no overflow and reachable controls
+00:02 +1: U07 360px planning/undo/success/back with no overflow and reachable controls
+00:03 +2: U07 412px planning/undo/success/back with no overflow and reachable controls
+00:04 +3: U07 736px planning/undo/success/back with no overflow and reachable controls
+00:05 +4: U02 board taps another Unit start as a destination; drag does not add a command
+00:05 +5: Lower buttons select balls; board centers remain route inputs
+00:05 +6: U04 menu path edits preserve routes after failure
+00:06 +7: U08 reduced motion remains paused without timers and permits manual scenes
+00:06 +8: U09 lifecycle pauses replay; return does not start ticker automatically
+00:06 +9: (tearDownAll)
+00:06 +9: All tests passed!

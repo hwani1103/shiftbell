@@ -63,4 +63,18 @@ class SleepDetectionDirectBootTest {
         shadowOf(base.getSystemService(UserManager::class.java)).setUserUnlocked(true)
         assertFalse(SleepDetectionScheduler.isSleepDetectionEnabled(context))
     }
+    @Test @Config(qualifiers = "en-rUS")
+    fun globalOptInIsIndependentAndWaitsForUnlock() {
+        val prefs = base.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("flutter.condition_tab_enabled", true).commit()
+        assertFalse(SleepDetectionScheduler.isSleepDetectionEnabled(context))
+        prefs.edit().putBoolean("flutter.sleep_global_enabled_v1", true).commit()
+        assertTrue(SleepDetectionScheduler.isSleepDetectionEnabled(context))
+        shadowOf(base.getSystemService(UserManager::class.java)).setUserUnlocked(false)
+        assertFalse(SleepDetectionScheduler.isSleepDetectionEnabled(context))
+        shadowOf(base.getSystemService(UserManager::class.java)).setUserUnlocked(true)
+        assertTrue(SleepDetectionScheduler.isSleepDetectionEnabled(context))
+        prefs.edit().putBoolean("flutter.sleep_global_enabled_v1", false).commit()
+        assertFalse(SleepDetectionScheduler.isSleepDetectionEnabled(context))
+    }
 }

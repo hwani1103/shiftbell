@@ -1,3 +1,4 @@
+import '../../utils/calendar_dates.dart';
 // lib/services/condition/sleep_stats.dart
 //
 // ⭐ 실제 수면 기록과 근무 일정의 관계 통계(스펙 17장 "야간근무 후 평균 수면" 등).
@@ -46,7 +47,7 @@ ShiftSleepStat computePostInstanceSleepStat({
       records.where((r) => !(r.source == SleepSource.autoDetected && r.status == SleepStatus.pendingConfirmation));
 
   for (var i = 0; i < lookbackDays; i++) {
-    final day = referenceDate.subtract(Duration(days: i));
+    final day = shiftLocalCalendarDay(referenceDate, -i);
     final inst = analyzer.instanceForDate(day);
     if (!matches(inst) || inst.end == null) continue;
 
@@ -83,7 +84,7 @@ double? computeAverageNapMinutes({
   required DateTime referenceDate,
   int days = 30,
 }) {
-  final cutoff = referenceDate.subtract(Duration(days: days));
+  final cutoff = shiftLocalCalendarDay(referenceDate, -days);
   var count = 0;
   var total = 0;
   for (final r in records) {

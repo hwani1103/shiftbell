@@ -1,0 +1,4 @@
+analyzer:
+  exclude:
+    - .pub-cache/**
+    - build/**

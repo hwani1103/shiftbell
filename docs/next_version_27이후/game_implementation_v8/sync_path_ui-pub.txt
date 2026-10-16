@@ -1,0 +1,6 @@
+Resolving dependencies...
+Downloading packages...
+  meta 1.17.0 (1.19.0 available)
+Got dependencies!
+1 package has newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.

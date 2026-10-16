@@ -1,7 +1,8 @@
+import '../theme/app_ui_theme.dart';
+import 'shift_chip_label.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../theme/app_colors.dart';
 
 /// Shared by roster creation and team switching: number, shift and team badge
 /// belong to one chip. My team's chip is grey and cannot be selected.
@@ -28,9 +29,9 @@ class TeamAssignmentGrid extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.all(AppUiMetrics.compactCardPadding),
       decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppUiPalette.of(context).surface,
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(color: colors.outlineVariant)),
       child: LayoutBuilder(builder: (context, constraints) {
@@ -56,8 +57,8 @@ class TeamAssignmentGrid extends StatelessWidget {
           return height;
         }
 
-        final shiftHeight =
-            lineHeight(TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700));
+        final shiftHeight = lineHeight(
+            TextStyle(fontSize: AppFontSize.meta, fontWeight: FontWeight.w700));
         final badgeHeight = lineHeight(
             TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold));
         final height = math.max(width / 0.82, shiftHeight + badgeHeight + 30.h);
@@ -109,33 +110,33 @@ class TeamAssignmentChip extends StatelessWidget {
     final border = isMine
         ? colors.outlineVariant
         : selected
-            ? kAppMainAccent
+            ? AppUiPalette.of(context).primary
             : team != null
-                ? kAppMainAccent.withValues(alpha: 0.6)
+                ? AppUiPalette.of(context).primary.withValues(alpha: 0.6)
                 : colors.outlineVariant;
     final fill = isMine
         ? colors.surfaceContainerHighest.withValues(alpha: 0.4)
         : selected
-            ? kAppMainAccent.withValues(alpha: 0.18)
+            ? AppUiPalette.of(context).primary.withValues(alpha: 0.18)
             : team != null
-                ? kAppSurface
-                : Colors.white;
+                ? AppUiPalette.of(context).soft
+                : AppUiPalette.of(context).surface;
     final badge = isMine
         ? colors.onSurfaceVariant.withValues(alpha: 0.7)
         : selected
-            ? kAppMainAccent
-            : kAppChipBorder;
+            ? AppUiPalette.of(context).primary
+            : AppUiPalette.of(context).chipBorder;
     return InkWell(
-      borderRadius: BorderRadius.circular(8.r),
-      splashColor: kAppMainAccent.withValues(alpha: 0.25),
-      highlightColor: kAppMainAccent.withValues(alpha: 0.15),
+      borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
+      splashColor: AppUiPalette.of(context).primary.withValues(alpha: 0.25),
+      highlightColor: AppUiPalette.of(context).primary.withValues(alpha: 0.15),
       onTap: onTap,
       child: Opacity(
           opacity: isMine ? 0.65 : 1,
           child: Container(
             decoration: BoxDecoration(
                 color: fill,
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(AppUiMetrics.controlRadius),
                 border: Border.all(
                     color: border,
                     width: selected
@@ -157,16 +158,7 @@ class TeamAssignmentChip extends StatelessWidget {
                   padding: EdgeInsets.fromLTRB(3.w, 8.h, 3.w, 4.h),
                   child: Center(
                       child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(shift,
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            softWrap: false,
-                            style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w700,
-                                color: colors.onSurface))),
+                    ShiftChipLabel(label: shift, color: colors.onSurface),
                     if (team != null) ...[
                       SizedBox(height: 4.h),
                       Container(
@@ -174,12 +166,13 @@ class TeamAssignmentChip extends StatelessWidget {
                               horizontal: 7.w, vertical: 2.h),
                           decoration: BoxDecoration(
                               color: badge,
-                              borderRadius: BorderRadius.circular(20.r)),
+                              borderRadius: BorderRadius.circular(
+                                  AppUiMetrics.cardRadius)),
                           child: Text(team!,
                               style: TextStyle(
                                   fontSize: 9.5.sp,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white))),
+                                  color: AppUiPalette.of(context).surface))),
                     ],
                   ]))),
             ]),

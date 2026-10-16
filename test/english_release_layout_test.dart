@@ -1,3 +1,5 @@
+import 'package:shiftbell/widgets/app_ui_components.dart';
+import 'package:shiftbell/widgets/fixed_alarm_summary_card.dart';
 import 'package:shiftbell/l10n/korean_only_copy.dart';
 import 'dart:io';
 import 'package:timezone/data/latest.dart' as tzdata;
@@ -59,22 +61,27 @@ void main() {
   const newLocales = bool.fromEnvironment('AUDIT_NEW_LOCALES');
   const windows = [
     if (bool.fromEnvironment('AUDIT_FOLD8_ONLY')) ...[
-      Size(475.43, 751.24), Size(932.57, 704),
+      Size(475.43, 751.24),
+      Size(932.57, 704),
     ] else if (bool.fromEnvironment('AUDIT_COMPACT_LAYOUT')) ...[
-      Size(320, 640), Size(500, 800), Size(501, 800), Size(600, 800),
+      Size(320, 640),
+      Size(500, 800),
+      Size(501, 800),
+      Size(600, 800),
     ] else ...[
-    Size(411, 891), // Existing S26 Ultra DEV reference, not a new device claim.
-    Size(360, 840), // Fold Ultra cover reference.
-    Size(752, 834.67), Size(834.67, 752), // Fold Ultra inner / landscape.
-    Size(475.43, 751.24), // Existing Fold8 cover reference.
-    Size(704, 932.57), Size(932.57, 704), // Fold8 inner / landscape.
+      Size(411,
+          891), // Existing S26 Ultra DEV reference, not a new device claim.
+      Size(360, 840), // Fold Ultra cover reference.
+      Size(752, 834.67), Size(834.67, 752), // Fold Ultra inner / landscape.
+      Size(475.43, 751.24), // Existing Fold8 cover reference.
+      Size(704, 932.57), Size(932.57, 704), // Fold8 inner / landscape.
     ],
   ];
   const locales = bool.fromEnvironment('AUDIT_HINDI_ONLY')
       ? [Locale('hi', 'IN')]
       : newLocales
-      ? [Locale('de', 'DE'), Locale('pt', 'BR'), Locale('hi', 'IN')]
-      : [Locale('en', 'US'), Locale('en', 'GB')];
+          ? [Locale('de', 'DE'), Locale('pt', 'BR'), Locale('hi', 'IN')]
+          : [Locale('en', 'US'), Locale('en', 'GB')];
   setUpAll(() async {
     await initializeDateFormatting();
     // Actual glyph metrics instead of the square test font. Screenshots remain
@@ -113,8 +120,10 @@ void main() {
             const MethodChannel('plugins.flutter.io/path_provider'),
             (call) async => databaseDirectory.path);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(kAlarmChannel, (call) async =>
-            call.method == 'checkExactAlarmPermission' ? true : null);
+        .setMockMethodCallHandler(
+            kAlarmChannel,
+            (call) async =>
+                call.method == 'checkExactAlarmPermission' ? true : null);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
             const MethodChannel('flutter.baseflow.com/permissions/methods'),
@@ -122,7 +131,8 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMessageHandler(
             'plugins.flutter.io/google_mobile_ads/ump',
-            (_) async => const StandardMethodCodec().encodeSuccessEnvelope(false));
+            (_) async =>
+                const StandardMethodCodec().encodeSuccessEnvelope(false));
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
             const MethodChannel('plugins.flutter.io/google_mobile_ads'),
@@ -179,14 +189,22 @@ void main() {
     // Exercise the same settings/onboarding paths in English and new locales.
     ...{
       'settings_sounds': () => SettingsTab(),
-      for (final key in ['settings_schedule_menu', 'settings_shift_names',
-        'settings_fixed_alarms', 'settings_fixed_dialog', 'settings_reset_confirm'])
+      for (final key in [
+        'settings_schedule_menu',
+        'settings_shift_names',
+        'settings_fixed_alarms',
+        'settings_fixed_dialog',
+        'settings_reset_confirm'
+      ])
         key: () => SettingsTab(),
       for (final key in ['team_edit', 'team_switch', 'team_recreate_confirm'])
         key: () => TeamScheduleEditScreen(
-            teams: const TeamScheduleConfig(names: ['A', 'B', 'C'],
-                offsets: {'A': 0, 'B': 1, 'C': 2}, myTeam: 'A'),
-            pattern: shifts, date: DateTime(2026, 10, 5)),
+            teams: const TeamScheduleConfig(
+                names: ['A', 'B', 'C'],
+                offsets: {'A': 0, 'B': 1, 'C': 2},
+                myTeam: 'A'),
+            pattern: shifts,
+            date: DateTime(2026, 10, 5)),
       'onboarding_pattern': () => const OnboardingScreen(),
       'onboarding_today': () => const OnboardingScreen(),
       'onboarding_alarms': () => const OnboardingScreen(),
@@ -198,9 +216,10 @@ void main() {
     'work_hours_period': () => const WorkHoursSettingsScreen(),
     'overtime_summary': () => CalendarTab(),
     'weekly_hours': () => CalendarTab(),
-    'help_team_change': () => HelpDetailScreen(topic: HelpTopic(
-        titleKey: (l) => l.helpShiftTeamChangeTitle,
-        bodyKey: (l) => l.helpShiftTeamChangeBody)),
+    'help_team_change': () => HelpDetailScreen(
+        topic: HelpTopic(
+            titleKey: (l) => l.helpShiftTeamChangeTitle,
+            bodyKey: (l) => l.helpShiftTeamChangeBody)),
     'themes': () => const CalendarThemePickerScreen(),
     'teams': () => const AllTeamsSetupScreen(pattern: shifts, myTodayIndex: 0),
     'all_shifts': () => const AllShiftsView(),
@@ -212,7 +231,8 @@ void main() {
         body: AlarmTimePicker(
             shiftName: 'Night duty',
             initialTime: const TimeOfDay(hour: 23, minute: 55),
-            alarmTypeId: 1, onTypeChanged: (_) {},
+            alarmTypeId: 1,
+            onTypeChanged: (_) {},
             onTimeSelected: (_, offset) {})),
     'navigation': () => const MainScreen(initialIndex: 1),
   };
@@ -246,7 +266,9 @@ void main() {
               id: 1,
               time: '09:30',
               date: entry.key == 'snoozed_next'
-                  ? tz.TZDateTime.from(DateTime.parse('2026-11-01T01:04:00-04:00'), tz.getLocation('America/New_York'))
+                  ? tz.TZDateTime.from(
+                      DateTime.parse('2026-11-01T01:04:00-04:00'),
+                      tz.getLocation('America/New_York'))
                   : DateTime.now().add(const Duration(hours: 8)),
               type: entry.key == 'snoozed_next' ? 'snoozed' : 'fixed',
               alarmTypeId: 1,
@@ -284,35 +306,21 @@ void main() {
                             ],
                             theme: base.copyWith(
                                 dialogTheme: base.dialogTheme.copyWith(
-                                    titleTextStyle: base.dialogTheme.titleTextStyle
-                                        ?.copyWith(fontFamily: 'EnglishPreview'),
-                                    contentTextStyle: base.dialogTheme.contentTextStyle
-                                        ?.copyWith(fontFamily: 'EnglishPreview')),
+                                    titleTextStyle:
+                                        base.dialogTheme.titleTextStyle?.copyWith(
+                                            fontFamily: 'EnglishPreview'),
+                                    contentTextStyle: base
+                                        .dialogTheme.contentTextStyle
+                                        ?.copyWith(
+                                            fontFamily: 'EnglishPreview')),
                                 elevatedButtonTheme: ElevatedButtonThemeData(
                                     style: base.elevatedButtonTheme.style?.copyWith(
                                         textStyle: WidgetStatePropertyAll(
-                                            (base.elevatedButtonTheme.style?.textStyle?.resolve({}) ??
-                                                    const TextStyle())
-                                                .copyWith(fontFamily: 'EnglishPreview')))),
-                                appBarTheme: base.appBarTheme.copyWith(
-                                    titleTextStyle: base.appBarTheme.titleTextStyle
-                                        ?.copyWith(fontFamily: 'EnglishPreview')),
-                                textTheme: base.textTheme
-                                    .apply(fontFamily: 'EnglishPreview')),
-                            builder: (context, child) => RepaintBoundary(
-                                key: boundaryKey,
-                                child: MediaQuery(
-                                    data: MediaQuery.of(context).copyWith(
-                                        textScaler: TextScaler.linear(scale)),
-                                    child: AppContentFrame(child: child!))),
-                            home: Scaffold(
-                                body: Padding(
-                                    padding: const EdgeInsets.only(top: 32),
-                                    child: entry.value()),
-                                bottomNavigationBar: SizedBox(
-                                    height: entry.key.startsWith('calendar_')
-                                        ? 140
-                                        : 24)));
+                                            (base.elevatedButtonTheme.style?.textStyle?.resolve({}) ?? const TextStyle()).copyWith(fontFamily: 'EnglishPreview')))),
+                                appBarTheme: base.appBarTheme.copyWith(titleTextStyle: base.appBarTheme.titleTextStyle?.copyWith(fontFamily: 'EnglishPreview')),
+                                textTheme: base.textTheme.apply(fontFamily: 'EnglishPreview')),
+                            builder: (context, child) => RepaintBoundary(key: boundaryKey, child: MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)), child: AppContentFrame(child: child!))),
+                            home: Scaffold(body: Padding(padding: const EdgeInsets.only(top: 32), child: entry.value()), bottomNavigationBar: SizedBox(height: entry.key.startsWith('calendar_') ? 140 : 24)));
                       })));
               for (var i = 0; i < 4; i++) {
                 await tester.runAsync(() =>
@@ -326,9 +334,11 @@ void main() {
                 final target = find.text(l.settingsPaydayBasis);
                 // Wide sections live inside a Wrap. Scroll by actual gestures
                 // until the option is hittable, not merely built off-screen.
-                for (var i = 0; i < 20 && target.hitTestable().evaluate().isEmpty; i++) {
-                  await tester.drag(find.byType(Scrollable).first,
-                      const Offset(0, -250));
+                for (var i = 0;
+                    i < 20 && target.hitTestable().evaluate().isEmpty;
+                    i++) {
+                  await tester.drag(
+                      find.byType(Scrollable).first, const Offset(0, -250));
                   await tester.pumpAndSettle();
                 }
                 expect(target.hitTestable(), findsOneWidget);
@@ -338,15 +348,19 @@ void main() {
                 expect(tester.takeException(), isNull,
                     reason: '$locale custom monthly period $size scale=$scale');
               }
-              if (entry.key == 'overtime_summary' || entry.key == 'weekly_hours') {
+              if (entry.key == 'overtime_summary' ||
+                  entry.key == 'weekly_hours') {
                 final l = lookupAppLocalizations(locale);
-                final target = find.textContaining(entry.key == 'overtime_summary'
-                    ? l.shiftThisMonthOt : l.shiftWeeklyWorkHours).first;
+                final target = find
+                    .textContaining(entry.key == 'overtime_summary'
+                        ? l.shiftThisMonthOt
+                        : l.shiftWeeklyWorkHours)
+                    .first;
                 await tester.ensureVisible(target);
                 await tester.tap(target);
                 for (var i = 0; i < 6; i++) {
-                  await tester.runAsync(() => Future<void>.delayed(
-                      const Duration(milliseconds: 60)));
+                  await tester.runAsync(() =>
+                      Future<void>.delayed(const Duration(milliseconds: 60)));
                   await tester.pump(const Duration(milliseconds: 150));
                 }
                 expect(find.byType(DraggableScrollableSheet), findsOneWidget,
@@ -355,33 +369,38 @@ void main() {
                     reason: '$locale ${entry.key} detail $size scale=$scale');
               }
               if (entry.key == 'settings_sounds') {
-                final target = find.text(lookupAppLocalizations(locale).alarmSoundManage);
+                final target =
+                    find.text(lookupAppLocalizations(locale).alarmSoundManage);
                 await tester.ensureVisible(target);
                 await tester.tap(target);
                 for (var i = 0; i < 4; i++) {
-                  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 60)));
+                  await tester.runAsync(() =>
+                      Future<void>.delayed(const Duration(milliseconds: 60)));
                   await tester.pump(const Duration(milliseconds: 150));
                 }
                 expect(tester.takeException(), isNull,
                     reason: '$locale settings sounds $size scale=$scale');
               }
-              if (entry.key.startsWith('settings_') && entry.key != 'settings_sounds') {
+              if (entry.key.startsWith('settings_') &&
+                  entry.key != 'settings_sounds') {
                 final l = lookupAppLocalizations(locale);
                 Future<void> tapLabel(String label) async {
                   final target = find.text(label).last;
                   await tester.ensureVisible(target);
                   await tester.tap(target);
                   for (var i = 0; i < 4; i++) {
-                    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 60)));
+                    await tester.runAsync(() =>
+                        Future<void>.delayed(const Duration(milliseconds: 60)));
                     await tester.pump(const Duration(milliseconds: 150));
                   }
                   expect(tester.takeException(), isNull,
                       reason: '$locale ${entry.key} $label $size scale=$scale');
                 }
+
                 if (entry.key == 'settings_reset_confirm') {
                   await tapLabel(l.shiftResetSchedule);
                 } else {
-                  await tapLabel(l.commonEdit);
+                  await tapLabel(l.settingsShiftManagementEditButton);
                   if (entry.key == 'settings_shift_names') {
                     await tapLabel(l.settingsEditShiftNameTitle);
                   } else if (entry.key.startsWith('settings_fixed')) {
@@ -389,7 +408,7 @@ void main() {
                     // A slow SQLite read must not let a loading spinner pass as
                     // a successful layout of the long-name alarm cards.
                     final fixedCard = find.descendant(
-                        of: find.byType(GridView),
+                        of: find.byType(FixedAlarmSummaryCard),
                         matching: find.text(shifts[1]));
                     for (var i = 0;
                         i < 60 && fixedCard.evaluate().isEmpty;
@@ -402,7 +421,14 @@ void main() {
                     expect(tester.takeException(), isNull,
                         reason: '$locale fixed cards $size scale=$scale');
                     if (entry.key == 'settings_fixed_dialog') {
-                      await tapLabel(shifts[1]);
+                      final edit = find.descendant(
+                          of: find.byWidgetPredicate((w) =>
+                              w is FixedAlarmSummaryCard &&
+                              w.shift == shifts[1]),
+                          matching: find.text(l.onboardingEditAlarms));
+                      await tester.ensureVisible(edit);
+                      await tester.tap(edit);
+                      await tester.pumpAndSettle();
                       await tapLabel(l.alarmAdd);
                       await tapLabel(l.commonOk);
                       expect(find.byType(AlarmTypeButton), findsNWidgets(3));
@@ -410,9 +436,11 @@ void main() {
                   }
                 }
               }
-              if (entry.key == 'team_switch' || entry.key == 'team_recreate_confirm') {
+              if (entry.key == 'team_switch' ||
+                  entry.key == 'team_recreate_confirm') {
                 await tester.tap(find.byKey(ValueKey(entry.key == 'team_switch'
-                    ? 'team-edit-switch' : 'team-edit-recreate')));
+                    ? 'team-edit-switch'
+                    : 'team-edit-recreate')));
                 await tester.pumpAndSettle();
                 expect(tester.takeException(), isNull,
                     reason: '$locale ${entry.key} $size scale=$scale');
@@ -422,20 +450,25 @@ void main() {
                 final label = find.text(l.shiftResetSchedule);
                 await tester.ensureVisible(label);
                 await tester.pumpAndSettle();
-                final action = find.ancestor(of: label,
-                    matching: find.byType(InkWell)).first;
-                final icon = find.descendant(of: action,
-                    matching: find.byIcon(Icons.refresh));
+                final action = find
+                    .ancestor(of: label, matching: find.byType(AppUiButton))
+                    .first;
+                final icon = find.descendant(
+                    of: action, matching: find.byIcon(Icons.restart_alt));
                 final paragraph = tester.renderObject<RenderParagraph>(label);
-                final firstGlyph = paragraph.getBoxesForSelection(
-                    TextSelection(baseOffset: 0,
-                        extentOffset: l.shiftResetSchedule.length)).first;
-                final glyphLeft = paragraph.localToGlobal(
-                    Offset(firstGlyph.left, firstGlyph.top)).dx;
+                final firstGlyph = paragraph
+                    .getBoxesForSelection(TextSelection(
+                        baseOffset: 0,
+                        extentOffset: l.shiftResetSchedule.length))
+                    .first;
+                final glyphLeft = paragraph
+                    .localToGlobal(Offset(firstGlyph.left, firstGlyph.top))
+                    .dx;
                 final gap = glyphLeft - tester.getRect(icon).right;
                 expect(gap, greaterThanOrEqualTo(0));
                 expect(gap, lessThanOrEqualTo(9.w),
-                    reason: '$locale reset icon must stay beside its text at $size / $scale');
+                    reason:
+                        '$locale reset icon must stay beside its text at $size / $scale');
               }
               if (entry.key.startsWith('onboarding_')) {
                 final l = lookupAppLocalizations(locale);
@@ -447,11 +480,13 @@ void main() {
                   expect(tester.takeException(), isNull,
                       reason: '$locale ${entry.key} $label $size scale=$scale');
                 }
-                await tapLabel(l.commonNext);
+
+                await tapLabel(l.onboardingNextPattern);
                 if (entry.key == 'onboarding_irregular') {
                   final target = find.byWidgetPredicate((widget) =>
                       widget is Semantics &&
-                      widget.properties.label == l.onboardingIrregularChoiceTitle);
+                      widget.properties.label ==
+                          l.onboardingIrregularChoiceTitle);
                   await tester.ensureVisible(target);
                   await tester.tap(target);
                   await tester.pumpAndSettle();
@@ -461,10 +496,10 @@ void main() {
                   await tapLabel(l.shiftDay);
                   await tapLabel(l.shiftNight);
                   await tapLabel(l.shiftDayOff);
-                  await tapLabel(l.commonNext);
+                  await tapLabel(l.onboardingNextToday);
                   if (entry.key != 'onboarding_today') {
                     await tapLabel(l.shiftDay);
-                    await tapLabel(l.commonNext);
+                    await tapLabel(l.onboardingNextAlarms);
                     if (entry.key == 'onboarding_alarm_dialog') {
                       await tapLabel(l.shiftDay);
                       await tapLabel(l.alarmAdd);
@@ -478,24 +513,29 @@ void main() {
                 await tester.tap(find.text(
                     lookupAppLocalizations(locale).alarmViewAllRegistered));
                 for (var i = 0; i < 4; i++) {
-                  await tester.runAsync(() => Future<void>.delayed(
-                      const Duration(milliseconds: 60)));
+                  await tester.runAsync(() =>
+                      Future<void>.delayed(const Duration(milliseconds: 60)));
                   await tester.pump(const Duration(milliseconds: 150));
                 }
                 expect(tester.takeException(), isNull,
                     reason: '$locale registered alarm list $size scale=$scale');
               }
               if (entry.key == 'date_alarm_popup') {
-                final calendar = tester.widget<TableCalendar>(find.byType(TableCalendar));
+                final calendar =
+                    tester.widget<TableCalendar>(find.byType(TableCalendar));
                 final tomorrow = DateTime.now().add(const Duration(days: 1));
                 calendar.onDaySelected!(tomorrow, tomorrow);
                 for (var i = 0; i < 4; i++) {
-                  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 60)));
+                  await tester.runAsync(() =>
+                      Future<void>.delayed(const Duration(milliseconds: 60)));
                   await tester.pump(const Duration(milliseconds: 150));
                 }
                 await tester.tap(find.text('09:30').last);
                 await tester.pumpAndSettle();
-                expect(find.text(lookupAppLocalizations(locale).calendarSelectAlarmType), findsOneWidget);
+                expect(
+                    find.text(
+                        lookupAppLocalizations(locale).calendarSelectAlarmType),
+                    findsOneWidget);
                 expect(tester.takeException(), isNull,
                     reason: '$locale date alarm popup $size scale=$scale');
               }
@@ -512,15 +552,23 @@ void main() {
                         : StartingDayOfWeek.sunday);
               }
               if (entry.key == 'snoozed_next') {
-                expect(find.textContaining(lookupAppLocalizations(locale).alarmSnoozedLabel), findsWidgets);
-                expect(find.textContaining(lookupAppLocalizations(locale).alarmClockFirstOccurrence), findsWidgets);
+                expect(
+                    find.textContaining(
+                        lookupAppLocalizations(locale).alarmSnoozedLabel),
+                    findsWidgets);
+                expect(
+                    find.textContaining(lookupAppLocalizations(locale)
+                        .alarmClockFirstOccurrence),
+                    findsWidgets);
               }
               if (entry.key == 'help') {
                 for (final title in [
                   KoreanOnlyCopy.forLocale('ko').helpFriendSectionTitle,
-                  KoreanOnlyCopy.forLocale('ko').helpSleepSectionTitle,
+                  lookupAppLocalizations(const Locale('ko'))
+                      .helpSleepSectionTitle,
                   KoreanOnlyCopy.forLocale('ko').helpScheduleTabSectionTitle,
-                  KoreanOnlyCopy.forLocale('ko').helpConditionSectionTitle
+                  lookupAppLocalizations(const Locale('ko'))
+                      .helpConditionSectionTitle
                 ]) {
                   expect(find.text(title), findsNothing);
                 }
@@ -528,14 +576,16 @@ void main() {
               if (entry.key == 'navigation') {
                 final navigation = tester.widget<BottomNavigationBar>(
                     find.byType(BottomNavigationBar));
-                expect(navigation.items.map((item) => item.label).toList(),
-                    [lookupAppLocalizations(locale).navNextAlarm,
-                     lookupAppLocalizations(locale).navCalendar,
-                     lookupAppLocalizations(locale).navSettings]);
+                expect(navigation.items.map((item) => item.label).toList(), [
+                  lookupAppLocalizations(locale).navNextAlarm,
+                  lookupAppLocalizations(locale).navCalendar,
+                  lookupAppLocalizations(locale).navSettings
+                ]);
                 expect(
                     find.byKey(const ValueKey('one-tap-open')), findsNothing);
               }
-              if (capture && (locale.countryCode == 'GB' || newLocales) &&
+              if (capture &&
+                  (locale.countryCode == 'GB' || newLocales) &&
                   (!const bool.fromEnvironment('CAPTURE_COPY_REVIEW') ||
                       (size.width == 411 && scale == 1.3))) {
                 final boundary = boundaryKey.currentContext!.findRenderObject()
@@ -544,13 +594,15 @@ void main() {
                   final image = await boundary.toImage();
                   final bytes =
                       await image.toByteData(format: ui.ImageByteFormat.png);
-                  const captureDirectory = String.fromEnvironment('LAYOUT_CAPTURE_DIR');
+                  const captureDirectory =
+                      String.fromEnvironment('LAYOUT_CAPTURE_DIR');
                   final directory = Directory(captureDirectory.isNotEmpty
                       ? '$captureDirectory/$locale/$scale'
                       : const bool.fromEnvironment('CAPTURE_COPY_REVIEW')
-                      ? 'build/localization_copy_2026-10-05/previews/$locale/$scale'
-                      : newLocales
-                      ? 'build/localized_release_previews/$locale/$scale' : 'build/english_release_previews');
+                          ? 'build/localization_copy_2026-10-05/previews/$locale/$scale'
+                          : newLocales
+                              ? 'build/localized_release_previews/$locale/$scale'
+                              : 'build/english_release_previews');
                   await directory.create(recursive: true);
                   await File(
                           '${directory.path}/${entry.key}_${size.width.toInt()}x${size.height.toInt()}.png')
@@ -570,7 +622,9 @@ void main() {
       });
     }
   }
-  testWidgets('removed one-tap controls leave calendar gestures enabled in both languages', (tester) async {
+  testWidgets(
+      'removed one-tap controls leave calendar gestures enabled in both languages',
+      (tester) async {
     SharedPreferences.setMockInitialValues({
       'welcome_popup_shown': true,
       'shift_assign_tutorial_shown': true,
@@ -581,35 +635,47 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     final container = ProviderContainer();
     Widget app(Locale locale) => UncontrolledProviderScope(
-      container: container,
-      child: ScreenUtilInit(
-        designSize: const Size(360, 780),
-        builder: (context, _) => MaterialApp(
-          locale: locale,
-          supportedLocales: const [Locale('ko'), Locale('en', 'US')],
-          localizationsDelegates: const [AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate],
-          home: Scaffold(body: CalendarTab()),
-        ),
-      ),
-    );
+          container: container,
+          child: ScreenUtilInit(
+            designSize: const Size(360, 780),
+            builder: (context, _) => MaterialApp(
+              locale: locale,
+              supportedLocales: const [Locale('ko'), Locale('en', 'US')],
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate
+              ],
+              home: Scaffold(body: CalendarTab()),
+            ),
+          ),
+        );
     try {
       await tester.pumpWidget(app(const Locale('ko')));
       for (var i = 0; i < 4; i++) {
-        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 60)));
+        await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 60)));
         await tester.pump(const Duration(milliseconds: 150));
       }
       expect(find.byKey(const ValueKey('one-tap-open')), findsNothing);
-      expect(tester.widget<TableCalendar>(find.byType(TableCalendar)).availableGestures, AvailableGestures.all);
+      expect(
+          tester
+              .widget<TableCalendar>(find.byType(TableCalendar))
+              .availableGestures,
+          AvailableGestures.all);
       await tester.pumpWidget(app(const Locale('en', 'US')));
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byKey(const ValueKey('one-tap-open')), findsNothing);
-      expect(tester.widget<TableCalendar>(find.byType(TableCalendar)).availableGestures,
+      expect(
+          tester
+              .widget<TableCalendar>(find.byType(TableCalendar))
+              .availableGestures,
           isNot(AvailableGestures.none));
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
-      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 120)));
+      await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 120)));
       await tester.pump(const Duration(seconds: 3));
     } finally {
       container.dispose();

@@ -1,0 +1,4 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/examples/sync_path_lab/test/lab_isolation_test.dart
+00:00 +0: Procedural host starts without atlas assets or the full font
+00:00 +1: only independent devDebug application ID and no app service dependencies
+00:00 +2: All tests passed!

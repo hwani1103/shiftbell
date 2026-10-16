@@ -1,0 +1,31 @@
+{
+  "apk": "C:\\Users\\Administrator\\Desktop\\shiftbell\\examples\\sync_path_lab\\build\\app\\outputs\\flutter-apk\\app-dev-debug.apk",
+  "bytes": 161924877,
+  "sha256": "86b197206ca17fa9def98603af01403c184ca8f629c61ab1568e105abddd6d45",
+  "assetMatchesSource": {
+    "assets/flutter_assets/assets/pilot_levels.json": true,
+    "assets/flutter_assets/assets/pilot_copy.json": true,
+    "assets/flutter_assets/packages/sync_path_ui/assets/fonts/GameSansSubset.ttf": true
+  },
+  "levels": 70,
+  "portalLevels": 20,
+  "mixedPortalGateLevels": 11,
+  "applicationId": "dev.shiftbell.experiments.sync_path_lab.dev",
+  "versionName": "0.8.0",
+  "versionCode": 10,
+  "buildType": "dev debug",
+  "installedOnDevice": false,
+  "web": {
+    "build": "debug",
+    "assetsMatchSource": {
+      "pilot_levels.json": true,
+      "pilot_copy.json": true,
+      "font": true
+    },
+    "mainDartJsBytes": 8440141,
+    "mainDartJsSha256": "39dc97bf31643c355d2d40fe54e99d487ef160132d6e785d157fd52e0390619e"
+  },
+  "finalPortalContactDisplayFix": true,
+  "testsPassed": 194,
+  "apkSignatureVerified": true
+}

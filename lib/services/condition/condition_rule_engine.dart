@@ -1,3 +1,4 @@
+import '../../utils/calendar_dates.dart';
 // lib/services/condition/condition_rule_engine.dart
 //
 // ⭐ 컨디션 매니저 Phase 2~3 - Evidence 기반 Rule Engine + 수면 추천.
@@ -334,7 +335,7 @@ class ConditionRuleEngine {
     if (relevantShiftMinutes == null && window != null) {
       // window.end는 직전 근무의 종료시각 - 그 날짜의 인스턴스를 다시 찾음(최대 14일 역탐색)
       for (var i = 0; i <= 14; i++) {
-        final d = date.subtract(Duration(days: i));
+        final d = shiftLocalCalendarDay(date, -i);
         final inst = analyzer.instanceForDate(d);
         if (inst.end == window.end) {
           relevantShiftMinutes = inst.durationMinutes;
@@ -357,12 +358,12 @@ class ConditionRuleEngine {
     // 위 클래스 주석 참고).
     var weeklyBaseMinutes = 0;
     for (var i = 0; i < overtimeLookbackDays; i++) {
-      final inst = analyzer.instanceForDate(date.subtract(Duration(days: i)));
+      final inst = analyzer.instanceForDate(shiftLocalCalendarDay(date, -i));
       if (inst.isWorkDay) weeklyBaseMinutes += inst.durationMinutes ?? 0;
     }
     var otTotalMinutes = 0;
     for (var i = 0; i < overtimeLookbackDays; i++) {
-      otTotalMinutes += otMinutesByDate[dateKey(date.subtract(Duration(days: i)))] ?? 0;
+      otTotalMinutes += otMinutesByDate[dateKey(shiftLocalCalendarDay(date, -i))] ?? 0;
     }
     final weeklyTotalMinutes = weeklyBaseMinutes + otTotalMinutes;
     final weeklyBaselineMinutes = analyzer.baselineWeeklyMinutesAsOf(date);
@@ -573,7 +574,7 @@ class ConditionRuleEngine {
       ));
     }
     if (today.isOff && consecutiveNight.days == 0) {
-      final ySt = analyzer.consecutiveNightStreakEndingAt(date.subtract(const Duration(days: 1)));
+      final ySt = analyzer.consecutiveNightStreakEndingAt(shiftLocalCalendarDay(date, -1));
       if (ySt.days >= 1) {
         contextFindings.add(ConditionFinding(
           ruleId: 'RULE_NIGHT_FOLLOWED_BY_OFF',
@@ -701,7 +702,7 @@ class ConditionRuleEngine {
 
   DateTime? _findInstanceDateByEnd(DateTime around, DateTime end) {
     for (var i = 0; i <= 14; i++) {
-      final d = around.subtract(Duration(days: i));
+      final d = shiftLocalCalendarDay(around, -i);
       if (analyzer.instanceForDate(d).end == end) return d;
     }
     return null;

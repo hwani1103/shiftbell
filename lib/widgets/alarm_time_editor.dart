@@ -9,6 +9,9 @@ import 'tappable_number_picker.dart';
 import 'app_second_button.dart';
 import 'word_safe_spans.dart';
 import 'alarm_mode_label.dart';
+import '../theme/app_ui_theme.dart';
+import 'app_ui_components.dart';
+import '../constants/layout_limits.dart';
 
 class AlarmTimePicker extends StatefulWidget {
   final String shiftName; // ⭐ 제목 왼쪽에 "{근무명} - 시간 선택"으로 표시
@@ -92,6 +95,8 @@ class AlarmTimePickerState extends State<AlarmTimePicker>
   Widget build(BuildContext context) {
     final use24 = _systemUse24 ?? MediaQuery.alwaysUse24HourFormatOf(context);
     final displayHour = use24 ? _hour : (_hour % 12 == 0 ? 12 : _hour % 12);
+    if (Theme.of(context).extension<AppUiPalette>() != null)
+      return _buildUiPicker(use24, displayHour);
     return Dialog(
       child: SingleChildScrollView(
           child: Container(
@@ -298,6 +303,133 @@ class AlarmTimePickerState extends State<AlarmTimePicker>
       )),
     );
   }
+
+  Widget _buildUiPicker(bool use24, int displayHour) {
+    final p = AppUiPalette.of(context);
+    Widget number({required bool hours}) => TappableNumberPicker(
+        key: hours ? ValueKey('alarm-hour-' + (use24 ? '24' : '12')) : null,
+        value: hours ? displayHour : _minute,
+        minValue: hours && !use24 ? 1 : 0,
+        maxValue: hours ? (use24 ? 23 : 12) : 59,
+        zeroPad: !hours || use24,
+        infiniteLoop: true,
+        itemHeight: 48,
+        itemWidth: 56,
+        textStyle: AppTypography.style(context, AppTextRole.body,
+            tone: AppTextTone.secondary),
+        selectedTextStyle: AppTypography.style(context, AppTextRole.title),
+        decoration: BoxDecoration(
+            border: Border(
+                top: BorderSide(color: p.border),
+                bottom: BorderSide(color: p.border))),
+        onChanged: (value) => setState(() {
+              if (!hours) {
+                _minute = value;
+              } else if (use24) {
+                _hour = value;
+              } else {
+                var am = _isAM;
+                if ((displayHour == 11 && value == 12) ||
+                    (displayHour == 12 && value == 11)) am = !am;
+                _hour = value % 12 + (am ? 0 : 12);
+              }
+            }));
+    return MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+        child: Dialog(
+            insetPadding: const EdgeInsets.all(16),
+            child: ConstrainedBox(
+                constraints:
+                    BoxConstraints(maxWidth: AppLayout.of(context).dialogWidth),
+                child: SingleChildScrollView(
+                    child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              AppUiText(
+                                  widget.showDayOffset
+                                      ? widget.shiftName +
+                                          ' - ' +
+                                          context.l10n.commonSelectTime
+                                      : widget.shiftName,
+                                  role: AppTextRole.section,
+                                  textAlign: TextAlign.center),
+                              const SizedBox(height: 16),
+                              if (widget.description != null) ...[
+                                AppUiText(widget.description!,
+                                    role: AppTextRole.supporting,
+                                    tone: AppTextTone.secondary),
+                                const SizedBox(height: 12),
+                              ],
+                              if (widget.showDayOffset)
+                                DayOffsetSelector(
+                                    value: _dayOffset,
+                                    onChanged: (value) =>
+                                        setState(() => _dayOffset = value)),
+                              const SizedBox(height: 16),
+                              Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (!use24) ...[
+                                      Column(children: [
+                                        AppUiButton(
+                                            label: context.l10n.commonAm,
+                                            compact: true,
+                                            action: _isAM
+                                                ? AppUiAction.primary
+                                                : AppUiAction.secondary,
+                                            onPressed: () =>
+                                                setState(() => _hour %= 12)),
+                                        const SizedBox(height: 8),
+                                        AppUiButton(
+                                            label: context.l10n.commonPm,
+                                            compact: true,
+                                            action: !_isAM
+                                                ? AppUiAction.primary
+                                                : AppUiAction.secondary,
+                                            onPressed: () => setState(
+                                                () => _hour = _hour % 12 + 12)),
+                                      ]),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    number(hours: true),
+                                    const AppUiText(':',
+                                        role: AppTextRole.title),
+                                    number(hours: false),
+                                  ]),
+                              if (widget.onTypeChanged != null) ...[
+                                const SizedBox(height: 16),
+                                AlarmTypeSelector(
+                                    value: _alarmTypeId,
+                                    onChanged: (value) {
+                                      setState(() => _alarmTypeId = value);
+                                      widget.onTypeChanged!(value);
+                                    }),
+                              ],
+                              const SizedBox(height: 16),
+                              Row(children: [
+                                Expanded(
+                                    child: AppUiButton(
+                                        label: context.l10n.commonCancel,
+                                        action: AppUiAction.secondary,
+                                        onPressed: () =>
+                                            Navigator.pop(context))),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                    child: AppUiButton(
+                                        label: context.l10n.commonOk,
+                                        onPressed: () async {
+                                          await widget.onTimeSelected(
+                                              TimeOfDay(
+                                                  hour: _hour, minute: _minute),
+                                              _dayOffset);
+                                          if (mounted) Navigator.pop(context);
+                                        })),
+                              ]),
+                            ]))))));
+  }
 }
 
 class AlarmTypeSelector extends StatelessWidget {
@@ -344,6 +476,45 @@ class AlarmTypeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSelected = value == typeId;
+    if (Theme.of(context).extension<AppUiPalette>() != null) {
+      final p = AppUiPalette.of(context);
+      return Expanded(
+          child: Semantics(
+              button: true,
+              selected: isSelected,
+              child: Material(
+                  color: isSelected ? p.primary : p.soft,
+                  shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppUiMetrics.controlRadius),
+                      side:
+                          BorderSide(color: isSelected ? p.primary : p.border)),
+                  child: InkWell(
+                      onTap: () => onChanged(typeId),
+                      borderRadius:
+                          BorderRadius.circular(AppUiMetrics.controlRadius),
+                      child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 8),
+                          child: Column(children: [
+                            Icon(
+                                typeId == 2
+                                    ? Icons.vibration
+                                    : typeId == 3
+                                        ? Icons.volume_off_outlined
+                                        : Icons.notifications_active_outlined,
+                                size: 18,
+                                color:
+                                    isSelected ? p.onPrimary : p.secondaryText),
+                            const SizedBox(height: 4),
+                            AppUiText(label,
+                                role: AppTextRole.supporting,
+                                tone: isSelected
+                                    ? AppTextTone.onPrimary
+                                    : AppTextTone.secondary,
+                                textAlign: TextAlign.center),
+                          ]))))));
+    }
     return Expanded(
       child: GestureDetector(
         onTap: () {

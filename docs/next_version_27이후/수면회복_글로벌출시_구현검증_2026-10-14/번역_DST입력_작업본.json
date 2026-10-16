@@ -1,0 +1,30 @@
+{
+  "sleepClockGap": [
+    "시계가 앞으로 바뀌어 이 지역에는 없는 시각이에요. 다른 시각을 선택해주세요.",
+    "The clock moved forward, so this local time does not exist. Choose another time.",
+    "Durch die Zeitumstellung existiert diese Ortszeit nicht. Wähle eine andere Uhrzeit.",
+    "O relógio foi adiantado, então este horário local não existe. Escolha outro horário.",
+    "घड़ी आगे होने के कारण यह स्थानीय समय मौजूद नहीं है। कोई दूसरा समय चुनें।"
+  ],
+  "sleepClockRepeatedTitle": [
+    "두 번 나타나는 시각이에요",
+    "This time occurs twice",
+    "Diese Uhrzeit kommt zweimal vor",
+    "Este horário ocorre duas vezes",
+    "यह समय दो बार आता है"
+  ],
+  "sleepClockRepeatedBody": [
+    "시계가 뒤로 바뀐 날이에요. 실제로 잠들거나 깬 시각을 선택해주세요.",
+    "The clock moved back on this date. Choose when you actually fell asleep or woke up.",
+    "An diesem Tag wurde die Uhr zurückgestellt. Wähle den tatsächlichen Einschlaf- oder Aufwachzeitpunkt.",
+    "O relógio foi atrasado nesta data. Escolha o momento em que você realmente dormiu ou acordou.",
+    "इस तारीख को घड़ी पीछे हुई थी। चुनें कि आप वास्तव में कब सोए या जागे थे।"
+  ],
+  "sleepTooShort": [
+    "수면은 2분 이상으로 기록해주세요.",
+    "Sleep records must be at least 2 minutes long.",
+    "Schlafeinträge müssen mindestens 2 Minuten dauern.",
+    "O registro de sono deve ter pelo menos 2 minutos.",
+    "नींद का रिकॉर्ड कम से कम 2 मिनट का होना चाहिए।"
+  ]
+}

@@ -33,7 +33,7 @@ void main() {
       for (final theme in CalendarThemeId.values) {
         SharedPreferences.setMockInitialValues(
             {'calendar_theme_id': theme.name});
-        expect(await CalendarThemeNotifier.loadInitial(), theme);
+        expect(await CalendarThemeNotifier.loadInitial(), theme.canonical);
       }
     }
   });
@@ -73,7 +73,8 @@ void main() {
       final colors =
           effectiveShiftColors(names, CalendarThemeId.periwinkle, null);
       expect(colors[l.shiftDayOff], kPeriwinkleRestColor);
-      expect(colors[l.shiftAnnualLeave], kPeriwinkleRestColor);
+      expect(colors[l.shiftAnnualLeave], isNot(kPeriwinkleRestColor));
+      expect(colors.values.toSet(), hasLength(names.length));
       expect(names.take(4).map((n) => colors[n]).toSet(), hasLength(4));
       expect(colors.values, isNot(contains(kMainRestColor)));
       final custom = effectiveShiftColors(names, CalendarThemeId.periwinkle,

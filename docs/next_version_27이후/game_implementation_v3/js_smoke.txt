@@ -1,0 +1,1 @@
+PASS: constant-cell-speed-v2 A=6 B=8 C=3, exact half-cell collision

@@ -1,0 +1,22 @@
+5개 언어 근무명 실기기 미리보기 패턴 (2026-10-15)
+
+사용자 지시
+- 연결된 dev 기기에 한국어 포함 5개 언어의 기본 제공 근무명을 하나씩 넣어 반복 패턴 작성.
+- 최장 이름 스트레스 테스트가 아닌 보통 길이 이름, 한국어는 두 글자.
+
+적용
+- 한국어 주간 / 영어 Early / 독일어 Früh / 포르투갈어 Manhã / 힌디어 सुबह.
+- ARB의 기본 제공 키 shiftDay(ko), shiftMorning(en/de/pt/hi)에서 가져옴. 기본 목록에는 더 긴 연차 등의 이름도 존재하며 최장 이름은 선택하지 않음.
+- 위 순서의 5일 반복, 기기 로컬 2026-10-15를 시작일/첫 근무 인덱스0으로 지정.
+- 기존 ID를 사용하여 ScheduleNotifier.saveSchedule의 정상 저장/상태 통지/위젯 갱신 경로로 적용. 오늘 이후 기기 재시작에도 유지되는 실제 dev 테스트 데이터임.
+- 날짜별 배정 예외는 비워 모든 날짜에 반복 패턴이 나타나게 함. 기존 customShiftColors/shiftDurations 맵은 보존하며 기존 달력 테마 기준으로 위젯용 shiftColors 캐시 계산.
+- 앱 언어/달력 디자인/메모/OT/기기 권한을 변경하지 않음. 새로운 알람이나 근무 시각은 만들지 않음.
+
+보관 및 실행
+- 변경 전 BackupService.exportAll의 읽기 전용 일관된 DB 스냅샷/설정 백업을 생성하고 파일 읽기 일치 확인 후 패턴을 저장함.
+- artifacts/five_language_pattern_2026_10_15/before_backup.json 및 before_schedule.json 보관. 백업16테이블, 원래 근무표1개 포함. 백업 SHA256 279f44ecf9a4ab9b7eb34f91d28cb07747e581ddf0e6b9856fbde8c660488cc1.
+- 기기 DP DB 옆 shiftbell.db.before_five_languages_2026_10_15.json에도 원본 보관. 수동/자동 공개 백업 슬롯을 덮어쓰지 않음.
+- VM 소스 평가 경로는 compilation service 부재로 실행되지 않음. 이후 임시 일회 dev 코드로 백업/저장/재조회 검증을 수행함.
+- 저장 완료 증거: 기기 결과 파일 OK, 로그 FIVE_LANGUAGE_PATTERN_OK 및 DB 재조회에서 동일 패턴 확인.
+- main.dart의 임시 코드/추가 import는 모두 제거했고 직전 main.before.dart와 바이트 일치 확인. 이후 편집 창 수정 핫리로드에 제거도 반영됨. 앱 제품 코드에 데이터 주입 경로를 남기지 않음.
+- 백업 JSON 파싱/보존 확인이며 복구 버튼을 통한 실제 복원 PASS를 의미하지 않음.

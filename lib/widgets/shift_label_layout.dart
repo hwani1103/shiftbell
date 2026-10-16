@@ -1,3 +1,4 @@
+import 'shift_chip_label.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
@@ -82,17 +83,5 @@ class ShiftLabel extends StatelessWidget {
   final TextStyle style;
   @override
   Widget build(BuildContext context) =>
-      LayoutBuilder(builder: (context, bounds) {
-        final text = wrapShiftLabel(
-            label, bounds.maxWidth, style, MediaQuery.textScalerOf(context));
-        return Semantics(
-            label: label,
-            excludeSemantics: true,
-            child: Center(
-              child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(text,
-                      textAlign: TextAlign.center, style: style, maxLines: 2)),
-            ));
-      });
+      Center(child: ShiftChipLabel(label: label, color: style.color));
 }

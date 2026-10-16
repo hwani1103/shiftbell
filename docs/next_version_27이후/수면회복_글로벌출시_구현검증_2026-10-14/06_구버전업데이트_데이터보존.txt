@@ -1,0 +1,16 @@
+구버전 및 데이터 보존 판정
+
+1. 실제 Play 설치 prod27
+패키지 com.hwani1103.shiftbell / versionCode27 / versionName1.0.24 / installer com.android.vending. 영어에서 수면·개인일정 탭 및 활성화 설정이 없음 확인. 원본 APK/splits와 화면, 자동백업 보존.
+실제 prod27백업을 새 dev의 파일선택/복원 UI로 읽음. 원본에 condition_tab_enabled=true가 잠복해 있어도 외국어 수면은 기본off, 사용자가 켜야 보임.
+
+2. 실제 dev 동일패키지 덮어쓰기 PASS
+원래 dev APK/DP DB+WAL+SHM/CE prefs를 복원하고 영어 실행. 최종후보03을 adb install -r, 제거없이 업데이트. 업데이트직전/직후17테이블 완전일치. 기본3탭/수면자동활성화 없음. 한국어 복귀 시 기존5탭 유지.
+증거 device_final_inplace_update_comparison.json, old_dev_before_final_update/tables.json, after_final_update_consistent/tables.json.
+최종 원래 언어복구 후 original_consistent/tables.json과 final_original_user_data/tables.json도17테이블 전체일치.
+
+3. 앞선 비교 증거 정정
+초기 device_dev_inplace_update_comparison.json은 DB본체만 복사해 WAL에 있는 최신행을 놓칠 수 있는 방법이었다. 그 비교만으로 최종 보존을 판단하지 않는다. 이번6번 원장의 DB+WAL+SHM 일관복사/실제 SQLite읽기 비교가 최종 증거다. 실패·부분파일은 삭제하지 않고 당시 관측으로 보존.
+
+4. 실제 Play서명 업데이트는 별도
+Play prod와 dev debug는 패키지 및 인증서가 다르다. dev 설치 또는 prod백업 복원을 Play업데이트 PASS로 쓰지 않는다. 실제 검증에는 적합한 versionCode의 prod AAB를 Play 내부테스트에 올려 Google배포 서명으로 설치받는 경로가 필요하다. AGENTS.md에 따라 명시승인 전 release빌드는 실행하지 않았다.

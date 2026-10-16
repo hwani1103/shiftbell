@@ -1,0 +1,32 @@
+온보딩 일관성·패턴 고정 카드·알람 설정 후속 (2026-10-12)
+
+사용자 합의: 통일성과 일관성을 우선한다. 첫·두 번째 화면의 제목 시작점과 글자 역할, 근무명 카드와 칩 배치를 같게 한다. 패턴은 4열로 확대하고 최대 사용 면적을 미리 확보하며, 넘치는 칩은 내부에서 스크롤한다. 날짜별 지정은 다음 버튼 바로 위에 고정한다. 정규·불규칙 알람 설정은 동일한 구성요소로 다듬는다.
+
+적용
+- 모든 단계에서 동일한 Scaffold/공통 테마/툴바/20px 바깥 여백을 사용한다. 제목은 title, 설명은 body, 간격은 8px로 통일.
+- 제공 근무명은 첫·두 번째 화면 모두 흰 공통 카드와 12px 안쪽 여백, regular 높이40, 4열·간격6, 최대2줄 이후 내부 스크롤. 첫 화면의 추가 버튼·약어 안내는 유지.
+- 패턴 칩은 regular 높이40, 4열·간격4. 이름 중앙/번호 좌상단/오늘 배지 규칙 재사용. 카드가 내용 수에 따라 성장하지 않으며, 빈 상태부터 같은 면적을 예약한다. 긴 번역·작은 화면·가로 화면은 최소 칩 표시 영역 확보 후 상단 영역을 스크롤하는 보완 경로가 있다. 하단 날짜별 지정과 다음 버튼은 고정.
+- 오늘 지정 후 파란 테두리·패턴 수정 버튼·선택 모드가 유지되며, 명시적으로 패턴 수정을 눌러야 삭제할 수 있다.
+- 정규·불규칙 모두 한 개의 공통 알람 화면. 근무별 세로 카드 목록만 스크롤하고 설정 완료 버튼은 고정한다. 카드 안에는 최대5개의 날짜 구분·시각·알람 타입을 모두 표시하며 별도 내부 스크롤을 두지 않는다. 8근무/40알람의 접근성과 정보 읽기를 우선한 선택.
+- 편집 팝업은 목록만 스크롤하고 추가·취소·저장은 항상 아래 고정한다. 알람0개 저장, 취소 시 원본 유지, 5개 제한, 삭제 후 재추가, 기존 시간 정렬·중복 조건을 보존.
+- 공용 AlarmTimePicker/AlarmTypeSelector/DayOffsetBadge는 AppUiPalette가 있는 범위에서 공통 테마를 사용한다. 기존 비테마 호출자는 기존 디자인을 유지한다. 12/24시간·AM/PM·시스템 설정 복귀 기능은 동일 계약.
+- 알람 권한 안내는 공통 카드의 접이식 상세를 사용한다. 미허용/확인 불가/채널 차단/해당 없음 판정 및 설정 복귀 재조회는 원본 그대로다. 상세는 펼쳐서 모두 확인 가능하고, 설정 버튼은 동일 permission panel을 연다.
+- 한국어 알람 제목/설명을 짧게 조정. ARB 키·placeholder·기능 언어 범위를 유지하고 생성기로 갱신.
+
+DB Flutter29/Android29 변경 없음. release 빌드/앱 설치/앱 커밋·푸시 없음. 기존 미커밋 작업 및 이전 원장 보존.
+
+검증 증거는 최종 결과를 아래에 추가한다. 호스트 캡처와 자동 검사 결과를 실기기 PASS로 기록하지 않는다.
+
+최종 화면 검증: 공통 텍스트 자간을 0으로 명시했다. 상위 DefaultTextStyle의 자간 상속 때문에 TextPainter 측정과 실제 줄바꿈이 달랐던 원인을 제거했다. 패턴 카드 최소 높이는 실제 패턴 제목·힌트·카운트 폭과 날짜/버튼 행 높이를 기준으로 계산한다. 한국어400×632에서 오늘 표시하기까지 잘림 없이 표시되고, 짧은 화면/긴 번역은 상단 스크롤을 통해 접근한다.
+대상 화면69검사 PASS: artifacts/onboarding_round4_typography_verified.log. 10화면 크기×5언어, 40패턴 제한·피드백, 동일 제목좌표/텍스트크기/칩크기, 정규·불규칙8근무×5알람, 작은화면·가로화면·독일어/힌디어 팝업, 시스템텍스트배율 고정 포함. RenderFlex 오류 및 missed-tap 경고 없음.
+알람 편집/공통 흐름/권한 레이아웃56검사 PASS: artifacts/onboarding_round4_final_flow_verified.log.
+공통 테마 시간 선택 기능6검사 PASS: artifacts/onboarding_round4_time_theme_verified.log(12/24시간의24시간×3날짜오프셋, 시스템형식 변경/복귀, 정오·자정 변환, 큰텍스트/폴더블). 이전 비테마6검사도 PASS: onboarding_round4_verified.log.
+최종 호스트 캡처: artifacts/onboarding_round4/final_host/. 실제 기기 PASS가 아니다.
+
+작업 순서 후속 합의: 지금은 공통 디자인과 전체 흐름을 먼저 완성한다. Flip8/Fold8/Fold8 Ultra의 접힘·펼침별 열 수·여백·배치 세부 조정은 전체 화면 적용 후 별도 단계에서 한다. 현재도 잘림·넘침·버튼 접근 불가 같은 사용을 막는 문제는 해결하며, 향후 기기별 배치가 바뀌어도 공통 카드/칩/텍스트 계약을 유지한다. 실제 기기별 화면 치수나 실측 검증을 이번 호스트 검사와 혼동하지 않는다.
+최종 정적 분석 analyzer_exit0: artifacts/onboarding_round4_final_analyze.log. 오류·경고 없음, 기존 정보 수준 린트 보존.
+APK: artifacts/onboarding_round4/ShiftBell_Onboarding_consistency_dev_debug.apk
+패키지 com.hwani1103.shiftbell.dev / 1.0.24-dev(code27), debuggable, min24/target36.
+SHA256: 232314105CD3E9235A3EBC2C0A4975DBF990FBCD65907103B09D9BC1E9FADB9E
+
+필수 검사 최종 완료: tools/check_critical_release.ps1 -Build 종료0, P0 automated checks passed. 기능·리소스/Flutter/native 권한·언어/DB이관 회귀 검사와 dev debug APK·JS 웹 빌드 성공. 웹 Wasm dry-run/기존 폰트 경고는 JS 빌드 실패가 아니며 웹 배포는 수행하지 않았다. 로그 artifacts/onboarding_round4_critical_build.log. 실기기 잠금 알람·권한 설정 왕복 검증은 별도이며 이번 자동 검사를 실기기 PASS로 확장하지 않는다.

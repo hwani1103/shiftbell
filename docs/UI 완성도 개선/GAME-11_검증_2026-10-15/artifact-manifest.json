@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-15",
+  "title": "Sync Paths",
+  "testsPassed": 45,
+  "androidDevDebug": "PASS",
+  "webDebug": "PASS",
+  "deviceInstalled": false,
+  "files": [
+    {
+      "path": "examples/sync_path_lab/artifacts/game11/app-dev-debug.apk",
+      "bytes": 161973323,
+      "sha256": "d16e75f76bab60eb29ecc001ef87879fb954c74be821e50072939afd96d71712"
+    },
+    {
+      "path": "examples/sync_path_lab/build/web/main.dart.js",
+      "bytes": 8804166,
+      "sha256": "1507b1700fb47b0dcdbf3bd242964a9533ca6c5c283014d1091f54f38fe5dc76"
+    },
+    {
+      "path": "examples/sync_path_lab/assets/art/sync_paths_splash.webp",
+      "bytes": 20584,
+      "sha256": "8573edb5cf71040b742a9cf319ff16a2ff7ff51ae4ac3a674ee836701da4f977"
+    },
+    {
+      "path": "examples/sync_path_lab/lib/main.dart",
+      "bytes": 2709,
+      "sha256": "475a9bcd4f2f62e0a8f450dca9b6201ab0b838d27ff28b964b0f95f4dec3a77a"
+    },
+    {
+      "path": "examples/sync_path_lab/lib/launch_splash.dart",
+      "bytes": 2035,
+      "sha256": "c93e31788f823b63c90b0fc56b36a720c37d4cb6338bf6aec58c47efbe808b67"
+    },
+    {
+      "path": "examples/sync_path_lab/pubspec.yaml",
+      "bytes": 562,
+      "sha256": "667e6a2a31b04ad8120c09912e932a34a11fe02719c0fa52e788d012cd436492"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/game_app.dart",
+      "bytes": 27785,
+      "sha256": "5f941606218366afb1a354c6cfac5d1e9a54f15c79f2f28d16a84277f1a10928"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/session.dart",
+      "bytes": 15942,
+      "sha256": "411488ecd2cdb0cc5bfbeb0a1b21c05c8b270421ec48e85a220f890124e75555"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/skin.dart",
+      "bytes": 15803,
+      "sha256": "bd80142c8e62d78169eec2dc69079a1006afadb09c927c48f34b1b39c999548d"
+    },
+    {
+      "path": "packages/sync_path_ui/assets/fonts/GameSansSubset.ttf",
+      "bytes": 98248,
+      "sha256": "8b647d50c58931bebe206c6f36a0cba49d19c6fd42d2e8d148bf7ff17fcf49d4"
+    }
+  ]
+}

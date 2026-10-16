@@ -1,0 +1,37 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Independent progress key round-trips without touching schedule preferences
+00:00 +1: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Host effects release on route disposal and ignore later plays
+00:00 +2: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games
+00:10 +3: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Only game assets and production entry are connected
+00:10 +4: loading C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart
+00:18 +4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: (setUpAll)
+00:19 +4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Layout choice survives a new provider container and latest rapid tap wins
+00:19 +5: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for dawn
+00:19 +6: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn overview preserves names/colors and fits 360px
+00:25 +7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn timeline preserves names/colors and fits 360px
+00:28 +8: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for morning
+00:28 +9: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: morning overview preserves names/colors and fits 360px
+00:32 +10: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: morning timeline preserves names/colors and fits 360px
+00:35 +11: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for daytime
+00:35 +12: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: daytime overview preserves names/colors and fits 360px
+00:38 +13: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: daytime timeline preserves names/colors and fits 360px
+00:41 +14: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for evening
+00:41 +15: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: evening overview preserves names/colors and fits 360px
+00:44 +16: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: evening timeline preserves names/colors and fits 360px
+00:47 +17: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for night
+00:47 +18: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: night overview preserves names/colors and fits 360px
+00:50 +19: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: night timeline preserves names/colors and fits 360px
+00:53 +20: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for originalWhite
+00:53 +21: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: originalWhite overview preserves names/colors and fits 360px
+00:56 +22: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: originalWhite timeline preserves names/colors and fits 360px
+00:59 +23: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for originalDark
+00:59 +24: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: originalDark overview preserves names/colors and fits 360px
+01:02 +25: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: originalDark timeline preserves names/colors and fits 360px
+01:04 +26: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-02-01 00:00:00.000 at 320.0 has exactly real days and no overflow
+01:06 +27: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-02-01 00:00:00.000 at 800.0 has exactly real days and no overflow
+01:07 +28: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2028-02-01 00:00:00.000 at 320.0 has exactly real days and no overflow
+01:08 +29: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2028-02-01 00:00:00.000 at 800.0 has exactly real days and no overflow
+01:10 +30: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-04-01 00:00:00.000 at 320.0 has exactly real days and no overflow
+01:11 +31: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-04-01 00:00:00.000 at 800.0 has exactly real days and no overflow
+01:12 +32: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: (tearDownAll)
+01:12 +32: All tests passed!

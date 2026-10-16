@@ -1,0 +1,191 @@
+{
+  "disableTabButtonLabel": {
+    "ko": "{tab} 화면 사용하지 않기",
+    "en": "Hide {tab}",
+    "de": "{tab} ausblenden",
+    "pt": "Ocultar {tab}",
+    "hi": "{tab} छिपाएँ"
+  },
+  "disableTabDialogBody": {
+    "ko": "확인 버튼을 누르면 화면 하단의 목록에서 사라집니다.\n설정에서 다시 원복할 수 있습니다.",
+    "en": "This removes the tab from the bottom navigation.\nYou can enable it again in Settings.",
+    "de": "Der Tab wird aus der unteren Navigation entfernt.\nDu kannst ihn in den Einstellungen wieder aktivieren.",
+    "pt": "Isso remove a aba da navegação inferior.\nVocê pode ativá-la novamente nas Configurações.",
+    "hi": "यह टैब नीचे की नेविगेशन सूची से हट जाएगा।\nआप सेटिंग में इसे फिर चालू कर सकते हैं।"
+  },
+  "scheduleTabSyncFailed": {
+    "ko": "화면 설정을 바꾸지 못했어요. 잠시 후 다시 시도해주세요.",
+    "en": "Could not change this setting. Please try again.",
+    "de": "Die Einstellung konnte nicht geändert werden. Bitte versuche es erneut.",
+    "pt": "Não foi possível alterar esta configuração. Tente novamente.",
+    "hi": "यह सेटिंग नहीं बदली जा सकी। फिर कोशिश करें।"
+  },
+  "settingsConditionFeatureTitle": {
+    "ko": "수면회복 컨디션 기능",
+    "en": "Sleep & recovery",
+    "de": "Schlaf & Erholung",
+    "pt": "Sono e recuperação",
+    "hi": "नींद और रिकवरी"
+  },
+  "settingsConditionFeatureSubtitle": {
+    "ko": "수면 기록과 근무시간 기반 회복 안내",
+    "en": "Sleep records and shift-based recovery guidance",
+    "de": "Schlafeinträge und Erholungshinweise zum Schichtplan",
+    "pt": "Registros de sono e orientações conforme sua escala",
+    "hi": "नींद के रिकॉर्ड और शिफ़्ट के अनुसार रिकवरी के सुझाव"
+  },
+  "settingsEnableFeatureConfirm": {
+    "ko": "메인 탭에 추가하여 {feature} 기능을 사용하시겠습니까?",
+    "en": "Add {feature} to the main tabs?",
+    "de": "{feature} zu den Haupttabs hinzufügen?",
+    "pt": "Adicionar {feature} às abas principais?",
+    "hi": "क्या मुख्य टैब में {feature} जोड़ें?"
+  },
+  "settingsEnableFeatureAction": {
+    "ko": "추가하여 사용하기",
+    "en": "Add and enable",
+    "de": "Hinzufügen und aktivieren",
+    "pt": "Adicionar e ativar",
+    "hi": "जोड़कर चालू करें"
+  },
+  "settingsEnablingFeature": {
+    "ko": "메인 탭에 추가하는 중…",
+    "en": "Adding the tab…",
+    "de": "Tab wird hinzugefügt…",
+    "pt": "Adicionando a aba…",
+    "hi": "टैब जोड़ा जा रहा है…"
+  },
+  "settingsEnableFeatureFailed": {
+    "ko": "기능을 켜지 못했습니다. 다시 시도해 주세요.",
+    "en": "Could not enable this feature. Please try again.",
+    "de": "Die Funktion konnte nicht aktiviert werden. Bitte versuche es erneut.",
+    "pt": "Não foi possível ativar este recurso. Tente novamente.",
+    "hi": "यह सुविधा चालू नहीं हो सकी। फिर कोशिश करें।"
+  },
+  "settingsEnableFeatureHideHint": {
+    "ko": "탭 하단에서 다시 숨길 수 있습니다.",
+    "en": "You can hide it again using the button at the bottom of the tab.",
+    "de": "Mit der Schaltfläche unten im Tab kannst du ihn wieder ausblenden.",
+    "pt": "Você pode ocultá-la novamente pelo botão no final da aba.",
+    "hi": "टैब के नीचे वाले बटन से इसे फिर छिपा सकते हैं।"
+  },
+  "settingsConditionFeatureDescription": {
+    "ko": "직접 입력하거나 자동 추정된 수면 기록으로 평균 수면시간을 확인하고, 근무시간과 함께 회복 상태와 컨디션을 살펴볼 수 있습니다.",
+    "en": "Log sleep manually or confirm automatic estimates. View your sleep averages and recovery guidance alongside your shift times.",
+    "de": "Erfasse Schlaf manuell oder bestätige automatische Schätzungen. Sieh dir Schlafdurchschnitte und Erholungshinweise zusammen mit deinen Schichtzeiten an.",
+    "pt": "Registre o sono manualmente ou confirme estimativas automáticas. Veja médias de sono e orientações de recuperação junto aos horários dos seus turnos.",
+    "hi": "नींद खुद दर्ज करें या स्वचालित अनुमानों की पुष्टि करें। शिफ़्ट के समय के साथ नींद का औसत और रिकवरी के सुझाव देखें।"
+  },
+  "onboardingConditionTabPopupTitle": {
+    "ko": "수면·회복 탭, 이렇게 써보세요",
+    "en": "Get started with Sleep & recovery",
+    "de": "So nutzt du Schlaf & Erholung",
+    "pt": "Comece com Sono e recuperação",
+    "hi": "नींद और रिकवरी का इस्तेमाल शुरू करें"
+  },
+  "onboardingConditionTabPopupBody": {
+    "ko": "수면·회복 탭에서 수면을 기록해 보세요! 근무시간을 설정하면 내 근무와 수면 기록을 바탕으로 회복 상태와 쉬기 좋은 시간을 확인할 수 있어요.",
+    "en": "Log your sleep here. Add your shift times to see recovery guidance and opportunities to rest based on your schedule and confirmed sleep records.",
+    "de": "Erfasse hier deinen Schlaf. Mit deinen Schichtzeiten erhältst du Hinweise zur Erholung und zu Ruhegelegenheiten auf Grundlage deines Dienstplans und bestätigter Schlafeinträge.",
+    "pt": "Registre seu sono aqui. Adicione os horários dos turnos para ver orientações e oportunidades de descanso com base na sua escala e nos registros confirmados.",
+    "hi": "यहाँ अपनी नींद दर्ज करें। शिफ़्ट का समय जोड़ने पर शेड्यूल और पुष्टि किए गए नींद रिकॉर्ड के आधार पर रिकवरी के सुझाव और आराम के मौके देखें।"
+  },
+  "helpConditionSectionTitle": {
+    "ko": "수면·회복",
+    "en": "Sleep & recovery",
+    "de": "Schlaf & Erholung",
+    "pt": "Sono e recuperação",
+    "hi": "नींद और रिकवरी"
+  },
+  "helpConditionWhatIsItTitle": {
+    "ko": "수면·회복 탭은 무엇인가",
+    "en": "What does Sleep & recovery show?",
+    "de": "Was zeigt Schlaf & Erholung?",
+    "pt": "O que Sono e recuperação mostra?",
+    "hi": "नींद और रिकवरी में क्या दिखता है?"
+  },
+  "helpConditionWhatIsItBody": {
+    "ko": "선택적으로 켜는 이 탭은 내 근무 일정과 확인된 수면 기록을 연결해요. 근무 사이 회복시간, 퇴근 후 수면, 연속 야간근무 같은 사실과 수면·카페인·퇴근길에 관한 추천 행동을 보여줘요. 건강 점수나 의학적 진단을 제공하지 않아요. 근무 부담 단계는 근무 일정으로 판단하며, 수면 기록은 수면 관련 안내에 반영돼요. 기록이나 출퇴근 시각이 없으면 그 한계를 따로 알려드려요. 안내는 수면·산업보건 연구를 참고해요.",
+    "en": "This optional tab combines your shifts with confirmed sleep records. It shows facts such as rest between shifts, sleep after work and consecutive night shifts, along with suggestions on sleep, caffeine and the journey home. It does not give a health score or diagnosis. The work-load level is based on your work schedule; sleep records inform the sleep guidance. Missing records or shift times are explained separately. The guidance draws on sleep and occupational-health research.",
+    "de": "Dieser optionale Tab verbindet deinen Schichtplan mit bestätigten Schlafeinträgen. Er zeigt Fakten wie Ruhezeiten zwischen Schichten, Schlaf nach der Arbeit und Nachtschichten in Folge sowie Hinweise zu Schlaf, Koffein und Heimweg. Es gibt keinen Gesundheitsscore und keine Diagnose. Die Belastungsstufe beruht auf dem Dienstplan; Schlafeinträge fließen in die Schlafhinweise ein. Fehlende Einträge oder Schichtzeiten werden gesondert erklärt. Grundlage sind Schlaf- und arbeitsmedizinische Forschung.",
+    "pt": "Esta aba opcional combina sua escala com registros de sono confirmados. Mostra fatos como descanso entre turnos, sono após o trabalho e turnos noturnos seguidos, além de sugestões sobre sono, cafeína e a volta para casa. Não fornece uma pontuação de saúde nem um diagnóstico. O nível de carga considera a escala; os registros de sono orientam as sugestões de sono. A falta de registros ou horários é explicada separadamente. As orientações se baseiam em pesquisas sobre sono e saúde ocupacional.",
+    "hi": "यह वैकल्पिक टैब आपकी शिफ़्ट को पुष्टि किए गए नींद रिकॉर्ड से जोड़ता है। इसमें शिफ़्ट के बीच आराम, काम के बाद नींद और लगातार रात की शिफ़्ट जैसे तथ्य तथा नींद, कैफ़ीन और घर लौटने के सुझाव दिखते हैं। यह स्वास्थ्य स्कोर या निदान नहीं देता। काम के बोझ का स्तर शेड्यूल पर आधारित है; नींद के रिकॉर्ड से नींद संबंधी सुझाव बनते हैं। रिकॉर्ड या शिफ़्ट का समय न होने की जानकारी अलग दी जाती है। सुझाव नींद और व्यावसायिक स्वास्थ्य शोध पर आधारित हैं।"
+  },
+  "helpConditionEvidenceListTitle": {
+    "ko": "수면·회복 안내 근거",
+    "en": "Sources behind the guidance",
+    "de": "Quellen der Hinweise",
+    "pt": "Fontes das orientações",
+    "hi": "सुझावों के स्रोत"
+  },
+  "helpConditionSetupNeededTitle": {
+    "ko": "오늘의 컨디션을 보려면 먼저 해야 할 설정",
+    "en": "Setting up shift-based guidance",
+    "de": "Hinweise zum Schichtplan einrichten",
+    "pt": "Configurar orientações conforme a escala",
+    "hi": "शिफ़्ट के अनुसार सुझाव सेट करना"
+  },
+  "helpConditionSetupNeededBody": {
+    "ko": "설정 → 근무시간 및 OT 설정에서 사용 중인 근무명 하나 이상의 출퇴근 시각을 입력해주세요. 모든 근무를 채울 필요는 없어요. 시각을 입력하지 않아도 수면을 기록하고 가능한 수면 요약은 볼 수 있지만, 근무와 연결한 회복 안내에는 출퇴근 시각이 필요해요.",
+    "en": "In Settings → Work Hours & Overtime, enter start and end times for at least one shift you use. You do not need to fill in every shift. Without shift times, you can still record sleep and see available sleep summaries; shift-based recovery guidance needs those times.",
+    "de": "Trage unter Einstellungen → Arbeitszeit und Überstunden Beginn und Ende für mindestens eine verwendete Schicht ein. Du musst nicht alle Schichten ausfüllen. Ohne Schichtzeiten kannst du weiterhin Schlaf erfassen und verfügbare Schlafübersichten sehen; Hinweise zur schichtbezogenen Erholung benötigen diese Zeiten.",
+    "pt": "Em Configurações → Horas de trabalho e horas extras, informe o início e o fim de pelo menos um turno que você usa. Não é preciso preencher todos. Sem esses horários, você ainda pode registrar o sono e ver os resumos disponíveis; as orientações de recuperação ligadas à escala precisam dos horários.",
+    "hi": "सेटिंग → काम के घंटे और ओवरटाइम में कम से कम एक इस्तेमाल होने वाली शिफ़्ट का शुरू और खत्म होने का समय दर्ज करें। हर शिफ़्ट भरना ज़रूरी नहीं है। शिफ़्ट का समय न होने पर भी नींद दर्ज कर सकते हैं और उपलब्ध सारांश देख सकते हैं; शिफ़्ट के अनुसार रिकवरी के सुझावों के लिए समय चाहिए।"
+  },
+  "helpSleepSectionTitle": {
+    "ko": "수면 기록",
+    "en": "Sleep records",
+    "de": "Schlafeinträge",
+    "pt": "Registros de sono",
+    "hi": "नींद के रिकॉर्ड"
+  },
+  "helpSleepWidgetTitle": {
+    "ko": "수면 기록 위젯이란",
+    "en": "Recording with the sleep widget",
+    "de": "Mit dem Schlaf-Widget aufzeichnen",
+    "pt": "Registrar com o widget de sono",
+    "hi": "नींद विजेट से रिकॉर्ड करना"
+  },
+  "helpSleepWidgetBody": {
+    "ko": "홈 화면에 수면 위젯을 추가하고, 자기 전에 “수면”, 일어난 뒤에 “기상” 버튼을 눌러 기록해보세요. 오늘의 근무명도 함께 보여요. 기록은 수면·회복 탭에서 근무 일정과 함께 볼 수 있어요. 먼저 설정에서 기능을 켜주세요. 기능을 끄면 위젯 기록과 자동 추정도 멈춰요.",
+    "en": "Add the sleep widget to your home screen. Tap “Sleep” when going to bed and “Wake up” when you get up. It also shows your shift for today. Records appear in Sleep & recovery alongside your shifts. Enable the feature in Settings first; when it is off, widget recording and automatic estimates are disabled.",
+    "de": "Füge das Schlaf-Widget zum Startbildschirm hinzu. Tippe beim Zubettgehen auf „Schlafen“ und beim Aufstehen auf „Aufwachen“. Es zeigt auch deine heutige Schicht. Die Einträge erscheinen unter Schlaf & Erholung zusammen mit deinem Schichtplan. Aktiviere die Funktion zuerst in den Einstellungen. Bei ausgeschalteter Funktion sind Widget-Aufzeichnung und automatische Schätzungen deaktiviert.",
+    "pt": "Adicione o widget de sono à tela inicial. Toque em “Dormir” ao se deitar e em “Acordar” ao levantar. Ele também mostra o turno de hoje. Os registros aparecem em Sono e recuperação junto à sua escala. Ative o recurso nas Configurações primeiro; quando desativado, o registro pelo widget e as estimativas automáticas ficam desligados.",
+    "hi": "होम स्क्रीन पर नींद विजेट जोड़ें। सोते समय “सोना” और उठते समय “जागना” दबाएँ। इसमें आज की शिफ़्ट भी दिखती है। रिकॉर्ड नींद और रिकवरी में आपकी शिफ़्ट के साथ दिखते हैं। पहले सेटिंग में सुविधा चालू करें; बंद होने पर विजेट से रिकॉर्डिंग और स्वचालित अनुमान भी बंद रहते हैं।"
+  },
+  "helpSleepAutoDetectTitle": {
+    "ko": "자동으로 수면을 추정해주는 기능",
+    "en": "How automatic sleep estimates work",
+    "de": "So entstehen automatische Schlafschätzungen",
+    "pt": "Como funcionam as estimativas automáticas",
+    "hi": "स्वचालित नींद अनुमान कैसे काम करते हैं"
+  },
+  "helpSleepAutoDetectBody": {
+    "ko": "기능이 켜져 있으면, 근무 일정에서 정한 수면 가능 시간대에 화면 꺼짐과 충전 상태를 주기적으로 확인해 수면을 추정해요. 폰 사용을 연속으로 감시하거나 실제로 잤는지를 확인하는 기능은 아니에요. 자동 후보는 최소 5시간 이상일 때만 보여줘요. 짧은 낮잠이나 근무 중에 잔 잠은 직접 입력하거나 위젯으로 기록해주세요.\n\n추정은 확인한 뒤에만 수면 요약에 반영돼요. 수정하거나 기록하지 않기를 선택할 수 있어요. 수면·회복 기능을 끄면 이후 자동 추정도 멈춰요.",
+    "en": "When enabled, the app periodically checks whether the screen is off and whether the device is charging during sleep windows derived from your shifts. It does not continuously monitor phone use and cannot prove you were asleep. Automatic candidates are shown only after at least 5 hours. Log short naps or sleep during work manually or with the widget.\n\nEstimates count in sleep summaries only after you confirm them. You can edit or discard them. Turning off Sleep & recovery stops future estimation.",
+    "de": "Wenn aktiviert, prüft die App in aus dem Schichtplan abgeleiteten Schlafzeitfenstern regelmäßig, ob der Bildschirm aus ist und das Gerät lädt. Sie überwacht die Nutzung nicht durchgehend und kann Schlaf nicht sicher feststellen. Automatische Vorschläge erscheinen erst ab mindestens 5 Stunden. Kurze Nickerchen oder Schlaf während der Arbeit erfasst du manuell oder per Widget.\n\nSchätzungen fließen erst nach deiner Bestätigung in Schlafübersichten ein. Du kannst sie bearbeiten oder verwerfen. Beim Ausschalten von Schlaf & Erholung enden weitere Schätzungen.",
+    "pt": "Quando ativado, o app verifica periodicamente se a tela está apagada e se o aparelho está carregando, em janelas de sono baseadas na sua escala. Ele não monitora o uso continuamente e não pode comprovar que você dormiu. Estimativas automáticas só aparecem após pelo menos 5 horas. Registre cochilos curtos ou sono durante o trabalho manualmente ou pelo widget.\n\nAs estimativas só entram nos resumos após sua confirmação. Você pode editá-las ou descartá-las. Desativar Sono e recuperação interrompe novas estimativas.",
+    "hi": "चालू होने पर ऐप शिफ़्ट से तय नींद के समय में बीच-बीच में जाँचता है कि स्क्रीन बंद है या नहीं और डिवाइस चार्ज हो रहा है या नहीं। यह फ़ोन के उपयोग की लगातार निगरानी नहीं करता और यह साबित नहीं कर सकता कि आप सो रहे थे। स्वचालित अनुमान कम से कम 5 घंटे बाद ही दिखते हैं। छोटी झपकी या काम के दौरान की नींद खुद या विजेट से दर्ज करें।\n\nआपकी पुष्टि के बाद ही अनुमान नींद के सारांश में शामिल होते हैं। आप उन्हें बदल या हटा सकते हैं। नींद और रिकवरी बंद करने पर नए अनुमान बनना रुक जाता है।"
+  },
+  "helpSleepMiniCalendarTitle": {
+    "ko": "최근 수면 기록 확인/수정하기",
+    "en": "Viewing and editing sleep records",
+    "de": "Schlafeinträge ansehen und bearbeiten",
+    "pt": "Ver e editar registros de sono",
+    "hi": "नींद रिकॉर्ड देखना और बदलना"
+  },
+  "helpSleepMiniCalendarBody": {
+    "ko": "미니 달력에서 확정된 수면을 귀속 날짜별로 볼 수 있어요. 칸을 탭해 기록을 만들거나 수정·삭제하고, “전체보기”에서 이전 달도 살펴볼 수 있어요. 수면 패턴 카드는 최근 30일의 주 수면과 기록된 모든 낮잠을 비교해요. 근무 유형별 기록이 3일 이상일 때 평균을 표시하고, 기록하지 않은 날은 제외해요.\n\n야간근무 후 수면은 그 근무가 시작된 날짜에 묶일 수 있어요. 2시간 이상이라고 모두 주 수면은 아니에요. 근무와 겹치거나 야간 출근 전에 준비하며 잔 잠은 낮잠이 될 수 있고, 주 수면 후보 중 가장 긴 기록을 주 수면으로 표시해요.\n\n시각은 기기의 현재 시간대를 기준으로 해요. 시계 변경으로 없는 시각은 입력할 수 없고, 두 번 나타나는 시각은 첫 번째인지 두 번째인지 선택해요. 수면 길이는 실제로 흐른 시간으로 계산해요.",
+    "en": "The mini calendar shows confirmed sleep by its assigned sleep day. Tap a slot to add, edit or delete a record. “View all” lets you browse earlier months. The sleep pattern card compares main sleep and all recorded naps over the past 30 days, after at least 3 recorded days per shift type. Days without records are excluded.\n\nSleep after a night shift can belong to the day that shift started. Main sleep is not simply any sleep lasting 2 hours: sleep overlapping work or preparing for a night shift may be a nap; among eligible records, the longest is main sleep.\n\nTimes use the device’s current time zone. During a clock change, an unavailable time is rejected and a repeated time requires choosing the first or second occurrence. Duration uses actual elapsed time.",
+    "de": "Der Minikalender zeigt bestätigten Schlaf nach zugeordnetem Schlaftag. Tippe auf ein Feld zum Hinzufügen, Bearbeiten oder Löschen. „Alle anzeigen“ öffnet frühere Monate. Die Schlafmusterkarte vergleicht Hauptschlaf und alle erfassten Nickerchen der letzten 30 Tage, sobald je Schichtart mindestens 3 Tage erfasst sind. Tage ohne Einträge zählen nicht mit.\n\nSchlaf nach einer Nachtschicht kann dem Tag ihres Beginns zugeordnet werden. Nicht jeder Schlaf ab 2 Stunden ist Hauptschlaf: Schlaf während der Arbeit oder vor einer Nachtschicht kann ein Nickerchen sein. Unter geeigneten Einträgen ist der längste der Hauptschlaf.\n\nEs gilt die aktuelle Zeitzone des Geräts. Nicht existierende Uhrzeiten werden abgelehnt; bei wiederholten Uhrzeiten wählst du das erste oder zweite Vorkommen. Die Dauer entspricht der tatsächlich verstrichenen Zeit.",
+    "pt": "O minicalendário mostra o sono confirmado pelo dia ao qual foi atribuído. Toque em um espaço para adicionar, editar ou excluir. “Ver todos” permite consultar meses anteriores. O cartão de padrões compara o sono principal e todos os cochilos registrados nos últimos 30 dias, a partir de 3 dias por tipo de turno. Dias sem registros ficam de fora.\n\nO sono após um turno noturno pode ser atribuído ao dia em que o turno começou. Nem todo sono de 2 horas é sono principal: dormir durante o trabalho ou antes de um turno noturno pode contar como cochilo. Entre os registros elegíveis, o mais longo é o sono principal.\n\nOs horários usam o fuso atual do aparelho. Em mudanças do relógio, um horário inexistente é recusado e um horário repetido exige escolher a primeira ou a segunda ocorrência. A duração usa o tempo realmente decorrido.",
+    "hi": "छोटे कैलेंडर में पुष्टि की गई नींद उस दिन के अनुसार दिखती है जिसे वह सौंपी गई है। रिकॉर्ड जोड़ने, बदलने या मिटाने के लिए खाने पर टैप करें। “सभी देखें” से पुराने महीने देख सकते हैं। नींद के पैटर्न का कार्ड पिछले 30 दिनों की मुख्य नींद और सभी दर्ज झपकियों की तुलना करता है। इसके लिए हर शिफ़्ट प्रकार के कम से कम 3 दिन चाहिए। बिना रिकॉर्ड वाले दिन शामिल नहीं होते।\n\nरात की शिफ़्ट के बाद की नींद उस दिन में गिनी जा सकती है जिस दिन शिफ़्ट शुरू हुई थी। हर 2 घंटे की नींद मुख्य नींद नहीं होती: काम के दौरान या रात की शिफ़्ट की तैयारी में ली गई नींद झपकी हो सकती है। योग्य रिकॉर्ड में सबसे लंबी नींद मुख्य नींद होती है।\n\nसमय डिवाइस के मौजूदा समय क्षेत्र में दिखता है। घड़ी बदलने पर मौजूद न होने वाला समय स्वीकार नहीं होता; दोहराए गए समय के लिए पहली या दूसरी बार चुनना होता है। अवधि वास्तव में बीते समय से निकाली जाती है।"
+  },
+  "helpConditionEvidenceListBody": {
+    "ko": "아래 14개 자료를 참고해요. 일반 연속근무 경고나 개인 평균 비교의 일부 경계값은 앱 자체 규칙이에요. 연구의 집단별 상대위험은 개인의 사고 확률이 아니에요. EU 법제와 간호사 권고는 비교 자료이며, 거주 국가에 그대로 적용되는 법률이라는 뜻은 아니에요.\n\nEVIDENCE-001 · 교대 방향(정방향/역방향) — 정방향 교대(주간→오후→야간)가 역방향보다 적응하기 쉽다고 보고됨. (NIOSH)\n\nEVIDENCE-002 · 근무 사이 최소 회복시간 — 두 근무 사이 최소 11시간의 회복시간을 둘 것을 권장. (Knauth & Hornberger, NIOSH Module 5 인용)\n\nEVIDENCE-003 · 근무 사이 최소 회복시간(법제 기준) — EU 지침은 24시간마다 최소 11시간의 연속 휴식을 규정하며, 적용 범위·예외·국가별 이행을 고려해야 함. (EU 근로시간지침 제3조)\n\nEVIDENCE-004 · 장시간 근무와 사고·부상 위험 — 8시간 근무 대비 10시간 근무는 상대위험 약 +13%, 12시간 근무는 약 +27% 증가하는 것으로 모델링됨. (Folkard & Lombardi, 2006)\n\nEVIDENCE-005 · 연속 근무 후 휴식일 — 8시간 근무 5일 또는 10시간 근무 4일 연속 뒤에는 1~2일, 12시간 근무 3일 연속 뒤에는 2일의 휴식을 계획할 것을 권고. 며칠 몰아 일하고 몰아 쉬는 패턴은 피하라고도 함. (NIOSH)\n\nEVIDENCE-006 · 야간근무 후 수면 — 야간근무 후에는 수면을 확보하는 것을 우선할 것을 권고. (NIOSH)\n\nEVIDENCE-007 · 야간근무 전 낮잠 — 조건부로 도움이 될 수 있다고 보고되나, 가이드라인 스스로 근거 수준이 매우 낮다고 명시함. 낮잠 직후 졸림에 주의. (AASM, 2025년 5월 공개 의견수렴판)\n\nEVIDENCE-008 · 카페인과 수면 — 연구에서 취침 6시간 전 카페인 400mg 섭취도 총 수면시간을 1시간 이상 유의하게 감소시킴. (Drake 외, 2013)\n\nEVIDENCE-009 · 야간근무 후 귀가길 빛 노출 — 강한 빛 노출을 줄이면 이후 수면에 도움이 될 수 있음(단, 졸음운전 위험이 있으면 안전 우선). (NIOSH)\n\nEVIDENCE-010 · 야간근무 중 식사 — 자정~새벽 6시 사이 식사량을 줄이고 가벼운 음식 위주로 할 것을 권고. (NIOSH)\n\nEVIDENCE-011 · 성인 권장 수면시간 — 만 18~64세 권장 수면시간은 7~9시간. (National Sleep Foundation, 2015)\n\nEVIDENCE-012 · 주간 최대 근무시간(법제 기준) — 평균 주간 근무시간(연장근무 포함)이 48시간을 넘지 않아야 함. (EU 근로시간지침 제6조)\n\nEVIDENCE-013 · 연속 야간근무 횟수와 사고 위험 — 야간근무가 연속될수록 사고·부상 상대위험이 누적됨(2일째 약 +6%, 3일째 약 +17%, 4일째 약 +36% — 낮/오후근무 연속보다 야간근무 연속에서 위험 증가가 더 가파름). (Folkard & Tucker, 2003)\n\nEVIDENCE-014 · 주간 누적 근무시간 상한 — 간호사 근무시간을 24시간 안에 12시간, 7일 안에 60시간을 넘지 않게 제한할 것을 권고. 2014년 체계적 검토는 주 40시간을 넘는 근무가 환자 안전 저하와 연관된다고 보고. (IOM, 2004 / NIOSH Module 5 인용)",
+    "en": "The guidance refers to the 14 sources below. Some cutoffs, such as general consecutive-day warnings and comparisons with your own average, are app rules. Research findings describe groups, not your individual risk. EU legal references and nursing recommendations are comparisons, not rules that necessarily apply in your country.\n\nEVIDENCE-001 · Rotation direction — Forward rotation (day → evening → night) may be easier to adjust to than backward rotation. NIOSH training; no single schedule is best for everyone.\n\nEVIDENCE-002 · Rest between shifts — A minimum of 11 hours between shifts is recommended. Knauth & Hornberger, cited by NIOSH Module 5.\n\nEVIDENCE-003 · Daily rest — Article 3 of EU Directive 2003/88/EC sets an 11-hour consecutive daily-rest reference. Its scope, exceptions and national implementation matter.\n\nEVIDENCE-004 · Long shifts — A research model estimated relative injury risk about 13% higher for 10-hour shifts and 27% higher for 12-hour shifts than for 8-hour shifts. Folkard & Lombardi, 2006. These are not personal risk estimates.\n\nEVIDENCE-005 · Rest days — Consider 1–2 full days off after five 8-hour or four 10-hour shifts, and 2 days after three 12-hour shifts. NIOSH also cautions against long work stretches followed by compressed breaks.\n\nEVIDENCE-006 · Sleep after night work — Prioritise sleep after a night shift. NIOSH sleep guidance.\n\nEVIDENCE-007 · Pre-shift naps — The AASM May 2025 public-comment guideline version conditionally suggests pre-night-shift naps for adults with shift work disorder and excessive sleepiness; certainty is very low. Allow time for grogginess to pass before driving.\n\nEVIDENCE-008 · Caffeine — In a trial, 400 mg taken even 6 hours before bedtime reduced sleep by more than an hour. Drake et al., 2013. Effects vary with dose and person.\n\nEVIDENCE-009 · Light on the journey home — Reducing bright light may help subsequent sleep. Drowsy-driving safety takes priority. NIOSH.\n\nEVIDENCE-010 · Food during night work — NIOSH suggests smaller, lighter meals between midnight and 06:00 and avoiding heavy meals shortly before sleep.\n\nEVIDENCE-011 · Adult sleep duration — The National Sleep Foundation recommends 7–9 hours for adults aged 18–64 (2015 expert consensus). Individual needs vary.\n\nEVIDENCE-012 · Weekly work — Article 6 of EU Directive 2003/88/EC uses an average 48-hour weekly limit including overtime over the applicable reference period. Exceptions and national rules can apply.\n\nEVIDENCE-013 · Consecutive nights — A research model reported cumulative relative injury risk, compared with night one: about +6% on night two, +17% on night three and +36% on night four. Folkard & Tucker, 2003. The app does not calculate personal accident probabilities.\n\nEVIDENCE-014 · Nursing hours — IOM (2004) recommended no more than 12 hours in 24 and 60 hours in 7 days for nurses. A 2014 systematic review associated weeks above 40 hours with poorer patient safety. Both are cited in NIOSH Module 5; they are not universal legal limits.",
+    "de": "Die Hinweise beziehen sich auf die folgenden 14 Quellen. Einige Schwellen, etwa für allgemeine Serien von Arbeitstagen und Vergleiche mit deinem Durchschnitt, sind App-Regeln. Forschungsergebnisse beschreiben Gruppen, nicht dein persönliches Risiko. EU-Rechtsbezüge und Pflegeempfehlungen sind Vergleiche und gelten nicht automatisch in deinem Land.\n\nEVIDENCE-001 · Rotationsrichtung — Vorwärtsrotation (Früh → Spät → Nacht) kann leichter sein als Rückwärtsrotation. NIOSH-Schulungsmaterial; kein Dienstplan ist für alle optimal.\n\nEVIDENCE-002 · Ruhe zwischen Schichten — Empfohlen werden mindestens 11 Stunden. Knauth & Hornberger, zitiert in NIOSH Modul 5.\n\nEVIDENCE-003 · Tägliche Ruhe — Artikel 3 der EU-Richtlinie 2003/88/EG nennt 11 zusammenhängende Stunden täglicher Ruhe. Geltungsbereich, Ausnahmen und nationale Umsetzung sind zu beachten.\n\nEVIDENCE-004 · Lange Schichten — Ein Forschungsmodell schätzte das relative Verletzungsrisiko bei 10-Stunden-Schichten um etwa 13 % und bei 12-Stunden-Schichten um 27 % höher als bei 8 Stunden. Folkard & Lombardi, 2006. Keine persönlichen Risikowerte.\n\nEVIDENCE-005 · Freie Tage — Nach fünf 8-Stunden- oder vier 10-Stunden-Schichten 1–2 volle Ruhetage erwägen, nach drei 12-Stunden-Schichten 2 Tage. NIOSH warnt auch vor langen Arbeitsblöcken mit anschließenden komprimierten Pausen.\n\nEVIDENCE-006 · Schlaf nach Nachtarbeit — Schlaf nach einer Nachtschicht priorisieren. NIOSH-Schlafhinweise.\n\nEVIDENCE-007 · Nickerchen vor der Schicht — Die AASM-Leitlinienfassung zur öffentlichen Kommentierung vom Mai 2025 empfiehlt bedingt Nickerchen vor Nachtschichten für Erwachsene mit Schichtarbeitsstörung und übermäßiger Schläfrigkeit. Die Evidenzsicherheit ist sehr niedrig. Vor dem Fahren Benommenheit abklingen lassen.\n\nEVIDENCE-008 · Koffein — In einer Studie verkürzten 400 mg selbst 6 Stunden vor dem Zubettgehen den Schlaf um mehr als eine Stunde. Drake et al., 2013. Die Wirkung hängt von Dosis und Person ab.\n\nEVIDENCE-009 · Licht auf dem Heimweg — Weniger helles Licht kann den anschließenden Schlaf fördern. Sicherheit bei Schläfrigkeit am Steuer geht vor. NIOSH.\n\nEVIDENCE-010 · Essen in Nachtschichten — NIOSH empfiehlt zwischen Mitternacht und 06:00 kleinere, leichte Mahlzeiten und keine schweren Mahlzeiten kurz vor dem Schlafen.\n\nEVIDENCE-011 · Schlafdauer für Erwachsene — Die National Sleep Foundation empfiehlt für 18–64-Jährige 7–9 Stunden (Expertenkonsens 2015). Der individuelle Bedarf variiert.\n\nEVIDENCE-012 · Wochenarbeitszeit — Artikel 6 der EU-Richtlinie 2003/88/EG nennt durchschnittlich 48 Stunden einschließlich Überstunden im geltenden Bezugszeitraum. Ausnahmen und nationale Regelungen sind möglich.\n\nEVIDENCE-013 · Nachtschichten in Folge — Ein Forschungsmodell berichtete gegenüber der ersten Nacht etwa +6 % relatives Verletzungsrisiko in der zweiten, +17 % in der dritten und +36 % in der vierten Nacht. Folkard & Tucker, 2003. Die App berechnet keine persönlichen Unfallwahrscheinlichkeiten.\n\nEVIDENCE-014 · Arbeitszeit in der Pflege — Das IOM (2004) empfahl für Pflegekräfte höchstens 12 Stunden in 24 und 60 Stunden in 7 Tagen. Eine systematische Übersicht von 2014 verknüpfte Wochen über 40 Stunden mit geringerer Patientensicherheit. Beide werden in NIOSH Modul 5 zitiert; keine weltweit geltenden Rechtsgrenzen.",
+    "pt": "As orientações usam as 14 fontes abaixo. Alguns limites, como alertas gerais de dias seguidos e comparações com sua própria média, são regras do app. Os estudos descrevem grupos, não seu risco individual. As referências legais da UE e recomendações de enfermagem são comparações, não regras necessariamente aplicáveis no seu país.\n\nEVIDENCE-001 · Direção da rotação — A rotação para a frente (dia → tarde → noite) pode facilitar a adaptação em relação à rotação para trás. Material do NIOSH; nenhuma escala é a melhor para todas as pessoas.\n\nEVIDENCE-002 · Descanso entre turnos — Recomenda-se um intervalo mínimo de 11 horas. Knauth & Hornberger, citados no Módulo 5 do NIOSH.\n\nEVIDENCE-003 · Descanso diário — O artigo 3 da Diretiva 2003/88/CE da UE estabelece a referência de 11 horas consecutivas. O âmbito, as exceções e a aplicação nacional devem ser considerados.\n\nEVIDENCE-004 · Turnos longos — Um modelo de pesquisa estimou risco relativo de lesões cerca de 13% maior em turnos de 10 horas e 27% maior em turnos de 12 horas, comparados aos de 8 horas. Folkard & Lombardi, 2006. Não são estimativas de risco pessoal.\n\nEVIDENCE-005 · Folgas — Considere 1–2 dias completos de descanso após cinco turnos de 8 horas ou quatro de 10 horas, e 2 dias após três de 12 horas. O NIOSH também alerta contra longas sequências de trabalho seguidas de folgas concentradas.\n\nEVIDENCE-006 · Sono após trabalho noturno — Priorize o sono após um turno noturno. Orientações do NIOSH.\n\nEVIDENCE-007 · Cochilos antes do turno — A versão de maio de 2025 da diretriz da AASM para consulta pública sugere, de forma condicional, cochilos antes do turno noturno para adultos com transtorno do trabalho em turnos e sonolência excessiva. A certeza da evidência é muito baixa. Espere a sensação de torpor passar antes de dirigir.\n\nEVIDENCE-008 · Cafeína — Em um estudo, 400 mg consumidos até 6 horas antes de deitar reduziram o sono em mais de uma hora. Drake et al., 2013. O efeito varia conforme a dose e a pessoa.\n\nEVIDENCE-009 · Luz na volta para casa — Reduzir luz forte pode ajudar a dormir depois. A segurança ao dirigir com sono vem primeiro. NIOSH.\n\nEVIDENCE-010 · Alimentação no turno noturno — O NIOSH sugere refeições menores e leves entre meia-noite e 06:00 e evitar refeições pesadas pouco antes de dormir.\n\nEVIDENCE-011 · Sono de adultos — A National Sleep Foundation recomenda 7–9 horas para adultos de 18–64 anos (consenso de especialistas de 2015). As necessidades individuais variam.\n\nEVIDENCE-012 · Trabalho semanal — O artigo 6 da Diretiva 2003/88/CE da UE usa o limite médio de 48 horas semanais, incluindo horas extras, no período de referência aplicável. Pode haver exceções e regras nacionais.\n\nEVIDENCE-013 · Noites consecutivas — Um modelo relatou aumento do risco relativo de lesões em relação à primeira noite: cerca de +6% na segunda, +17% na terceira e +36% na quarta. Folkard & Tucker, 2003. O app não calcula probabilidades pessoais de acidentes.\n\nEVIDENCE-014 · Horas de enfermagem — O IOM (2004) recomendou no máximo 12 horas em 24 e 60 horas em 7 dias para profissionais de enfermagem. Uma revisão sistemática de 2014 associou semanas acima de 40 horas à pior segurança dos pacientes. Ambos são citados no Módulo 5 do NIOSH; não são limites legais universais.",
+    "hi": "सुझाव नीचे दिए 14 स्रोतों पर आधारित हैं। लगातार काम के सामान्य अलर्ट और आपके अपने औसत से तुलना जैसी कुछ सीमाएँ ऐप के नियम हैं। शोध समूहों के बारे में बताते हैं, आपके व्यक्तिगत जोखिम के बारे में नहीं। यूरोपीय संघ के क़ानूनी संदर्भ और नर्सिंग की सिफ़ारिशें तुलना के लिए हैं; ज़रूरी नहीं कि आपके देश में वही नियम लागू हों।\n\nEVIDENCE-001 · शिफ़्ट बदलने की दिशा — आगे की ओर बदलाव (दिन → शाम → रात) की आदत डालना पीछे की ओर बदलाव से आसान हो सकता है। NIOSH प्रशिक्षण; कोई एक शेड्यूल सभी के लिए सबसे अच्छा नहीं है।\n\nEVIDENCE-002 · शिफ़्ट के बीच आराम — कम से कम 11 घंटे का अंतर सुझाया गया है। Knauth और Hornberger, NIOSH मॉड्यूल 5 में उद्धृत।\n\nEVIDENCE-003 · रोज़ का आराम — यूरोपीय संघ निर्देश 2003/88/EC का अनुच्छेद 3 लगातार 11 घंटे के दैनिक आराम का संदर्भ देता है। दायरा, अपवाद और देश में लागू नियम मायने रखते हैं।\n\nEVIDENCE-004 · लंबी शिफ़्ट — एक शोध मॉडल में 8 घंटे की शिफ़्ट की तुलना में 10 घंटे पर चोट का सापेक्ष जोखिम लगभग 13% और 12 घंटे पर 27% अधिक था। Folkard और Lombardi, 2006। ये व्यक्तिगत जोखिम के अनुमान नहीं हैं।\n\nEVIDENCE-005 · छुट्टी के दिन — लगातार पाँच 8-घंटे या चार 10-घंटे की शिफ़्ट के बाद 1–2 पूरे आराम के दिन, और तीन 12-घंटे की शिफ़्ट के बाद 2 दिन पर विचार करें। NIOSH लंबे काम के क्रम के बाद एक साथ छुट्टियाँ लेने वाले पैटर्न से भी सावधान करता है।\n\nEVIDENCE-006 · रात के काम के बाद नींद — रात की शिफ़्ट के बाद नींद को प्राथमिकता दें। NIOSH के नींद संबंधी सुझाव।\n\nEVIDENCE-007 · शिफ़्ट से पहले झपकी — AASM के मई 2025 के सार्वजनिक टिप्पणी हेतु दिशानिर्देश संस्करण में अत्यधिक उनींदापन वाले शिफ़्ट वर्क डिसऑर्डर के वयस्कों के लिए रात की शिफ़्ट से पहले झपकी की सशर्त सिफ़ारिश है। साक्ष्य की निश्चितता बहुत कम है। गाड़ी चलाने से पहले जागने के बाद की सुस्ती दूर होने दें।\n\nEVIDENCE-008 · कैफ़ीन — एक अध्ययन में सोने से 6 घंटे पहले भी 400 मिलीग्राम कैफ़ीन लेने से नींद एक घंटे से अधिक कम हुई। Drake और सहकर्मी, 2013। असर मात्रा और व्यक्ति के अनुसार बदलता है।\n\nEVIDENCE-009 · घर लौटते समय रोशनी — तेज़ रोशनी कम करने से बाद में सोने में मदद मिल सकती है। उनींदेपन में गाड़ी चलाने की सुरक्षा पहले है। NIOSH।\n\nEVIDENCE-010 · रात के काम में भोजन — NIOSH आधी रात से सुबह 06:00 तक कम मात्रा में हल्का भोजन और सोने से ठीक पहले भारी भोजन से बचना सुझाता है।\n\nEVIDENCE-011 · वयस्कों की नींद — National Sleep Foundation 18–64 वर्ष के वयस्कों के लिए 7–9 घंटे सुझाता है (2015 विशेषज्ञ सहमति)। हर व्यक्ति की ज़रूरत अलग हो सकती है।\n\nEVIDENCE-012 · साप्ताहिक काम — यूरोपीय संघ निर्देश 2003/88/EC का अनुच्छेद 6 लागू संदर्भ अवधि में ओवरटाइम सहित औसतन 48 घंटे की साप्ताहिक सीमा देता है। अपवाद और देश के नियम लागू हो सकते हैं।\n\nEVIDENCE-013 · लगातार रातें — एक मॉडल में पहली रात की तुलना में चोट का सापेक्ष जोखिम दूसरी रात लगभग +6%, तीसरी +17% और चौथी +36% था। Folkard और Tucker, 2003। ऐप व्यक्तिगत दुर्घटना की संभावना नहीं निकालता।\n\nEVIDENCE-014 · नर्सिंग के घंटे — IOM (2004) ने नर्सों के लिए 24 घंटे में अधिकतम 12 और 7 दिनों में 60 घंटे सुझाए। 2014 की व्यवस्थित समीक्षा ने 40 घंटे से अधिक के हफ़्तों को रोगी सुरक्षा में कमी से जोड़ा। दोनों NIOSH मॉड्यूल 5 में उद्धृत हैं; ये सार्वभौमिक क़ानूनी सीमाएँ नहीं हैं।"
+  }
+}

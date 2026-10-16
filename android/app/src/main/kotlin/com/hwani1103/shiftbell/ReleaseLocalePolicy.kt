@@ -13,6 +13,8 @@ object ReleaseLocalePolicy {
     fun locale(context: Context): Locale = context.resources.configuration.locales[0]
     fun koreanFeatures(context: Context): Boolean = locale(context).language == "ko"
 
+    fun sleepFeatures(context: Context): Boolean = true
+
     // Same regional defaults as lib/l10n/release_locale.dart.
     private val mondayRegions = setOf(
         "AE", "GB", "IE", "AU", "NZ", "AT", "BE", "BG", "CH", "CY", "CZ", "DE",
@@ -46,16 +48,15 @@ object ReleaseLocalePolicy {
     }
 
     fun syncSleepWidget(context: Context) {
-        // Start disabled so a fresh foreign install cannot advertise this widget
-        // before the first app launch. Enable for Korean on app resume, locale
-        // change or package replacement (including existing Korean installs).
+        // Available in every release language after app launch. A placed widget
+        // shows the disabled state until the user enables the sleep feature.
         val manager = context.packageManager
         val component = ComponentName(context, SleepWidgetProvider::class.java)
-        val target = if (koreanFeatures(context)) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        val target = if (sleepFeatures(context)) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
             else PackageManager.COMPONENT_ENABLED_STATE_DISABLED
         if (manager.getComponentEnabledSetting(component) != target) {
             manager.setComponentEnabledSetting(component, target, PackageManager.DONT_KILL_APP)
-            if (!koreanFeatures(context)) SleepWidgetProvider.requestUpdate(context)
+            if (!sleepFeatures(context)) SleepWidgetProvider.requestUpdate(context)
         }
     }
 }
@@ -67,6 +68,12 @@ class ReleaseLocaleReceiver : BroadcastReceiver() {
         ReleaseLocalePolicy.syncSleepWidget(context)
         ScheduleNotificationScheduler.syncLocale(context)
         CalendarWidgetProvider.requestUpdate(context)
+        SleepWidgetProvider.requestUpdate(context)
+        val pending = goAsync()
+        Thread {
+            try { SleepDetectionScheduler.ensureScheduled(context.applicationContext) }
+            finally { pending.finish() }
+        }.start()
         // Receivers still check the locale at delivery in case a transition races.
     }
 }

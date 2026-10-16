@@ -1,0 +1,3973 @@
+{
+  "levels": [
+    {
+      "previousCandidate": "S501014-14572",
+      "gateScore": 4.9605211128544635,
+      "baseMetrics": {
+        "units": 2,
+        "temporalChoices": {
+          "A": 16,
+          "B": 4
+        },
+        "rawDomains": [
+          54,
+          10
+        ],
+        "distinctSolutions": 42,
+        "exactCommandSolutions": 227,
+        "minimumExtraDistance": 0,
+        "minimumDetouringUnits": 0,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 5,
+        "shortestDistances": [
+          4,
+          9
+        ],
+        "minimumCommands": [
+          2,
+          3
+        ],
+        "shortestConflictParticipation": [
+          0,
+          0
+        ],
+        "conflictParticipation": [
+          1,
+          1
+        ],
+        "pairConflictRates": [
+          0.34375
+        ],
+        "constraintBits": 0.6076825772212396,
+        "score": 2.9949936751938058,
+        "sharedMandatoryCells": [
+          [
+            6,
+            3
+          ],
+          [
+            6,
+            4
+          ]
+        ],
+        "walkableCells": 19,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                6,
+                4
+              ],
+              [
+                6,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                6,
+                4
+              ],
+              [
+                6,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 15,
+      "rawSolutions": 125,
+      "baseDistinctSolutions": 42,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        }
+      ],
+      "id": "L31"
+    },
+    {
+      "previousCandidate": "S501014-2408",
+      "gateScore": 5.010451250937503,
+      "baseMetrics": {
+        "units": 2,
+        "temporalChoices": {
+          "A": 18,
+          "B": 4
+        },
+        "rawDomains": [
+          30,
+          7
+        ],
+        "distinctSolutions": 20,
+        "exactCommandSolutions": 77,
+        "minimumExtraDistance": 0,
+        "minimumDetouringUnits": 0,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 5,
+        "shortestDistances": [
+          4,
+          6
+        ],
+        "minimumCommands": [
+          2,
+          3
+        ],
+        "shortestConflictParticipation": [
+          0,
+          0
+        ],
+        "conflictParticipation": [
+          1,
+          1
+        ],
+        "pairConflictRates": [
+          0.7222222222222222
+        ],
+        "constraintBits": 1.84799690655495,
+        "score": 3.8011979892607175,
+        "sharedMandatoryCells": [
+          [
+            4,
+            5
+          ],
+          [
+            5,
+            5
+          ]
+        ],
+        "walkableCells": 20,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                5,
+                5
+              ],
+              [
+                5,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                5
+              ],
+              [
+                5,
+                5
+              ],
+              [
+                5,
+                3
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 16,
+      "rawSolutions": 67,
+      "baseDistinctSolutions": 20,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              5,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              5,
+              3
+            ]
+          ]
+        }
+      ],
+      "id": "L32"
+    },
+    {
+      "previousCandidate": "S501014-10468",
+      "gateScore": 6.580225625468751,
+      "baseMetrics": {
+        "units": 2,
+        "temporalChoices": {
+          "A": 2,
+          "B": 12
+        },
+        "rawDomains": [
+          6,
+          22
+        ],
+        "distinctSolutions": 3,
+        "exactCommandSolutions": 43,
+        "minimumExtraDistance": 0,
+        "minimumDetouringUnits": 0,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 5,
+        "shortestDistances": [
+          7,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          2
+        ],
+        "shortestConflictParticipation": [
+          0,
+          0
+        ],
+        "conflictParticipation": [
+          1,
+          1
+        ],
+        "pairConflictRates": [
+          0.875
+        ],
+        "constraintBits": 3.0,
+        "score": 4.55,
+        "sharedMandatoryCells": [
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            4,
+            3
+          ]
+        ],
+        "walkableCells": 16,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 1,
+      "rawSolutions": 35,
+      "baseDistinctSolutions": 3,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        }
+      ],
+      "id": "L33"
+    },
+    {
+      "previousCandidate": "S501015-47552",
+      "gateScore": 8.38,
+      "baseMetrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 18,
+          "B": 2,
+          "C": 2
+        },
+        "rawDomains": [
+          49,
+          5,
+          2
+        ],
+        "distinctSolutions": 44,
+        "exactCommandSolutions": 366,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 9,
+        "shortestDistances": [
+          6,
+          6,
+          6
+        ],
+        "minimumCommands": [
+          2,
+          3,
+          4
+        ],
+        "shortestConflictParticipation": [
+          1,
+          0,
+          1
+        ],
+        "conflictParticipation": [
+          1,
+          1,
+          2
+        ],
+        "pairConflictRates": [
+          0.0,
+          0.1388888888888889,
+          0.25
+        ],
+        "constraintBits": 0.7104933828050153,
+        "score": 6.54182069882326,
+        "sharedMandatoryCells": [],
+        "walkableCells": 32,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 18,
+      "rawSolutions": 158,
+      "baseDistinctSolutions": 44,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        }
+      ],
+      "id": "L34"
+    },
+    {
+      "previousCandidate": "S501015-15964",
+      "gateScore": 8.91432944839994,
+      "baseMetrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 2,
+          "B": 14,
+          "C": 2
+        },
+        "rawDomains": [
+          2,
+          29,
+          2
+        ],
+        "distinctSolutions": 28,
+        "exactCommandSolutions": 63,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 10,
+        "shortestDistances": [
+          6,
+          6,
+          6
+        ],
+        "minimumCommands": [
+          4,
+          2,
+          4
+        ],
+        "shortestConflictParticipation": [
+          1,
+          0,
+          1
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.03571428571428571,
+          0.25,
+          0.21428571428571427
+        ],
+        "constraintBits": 1.0,
+        "score": 6.8500000000000005,
+        "sharedMandatoryCells": [],
+        "walkableCells": 33,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                6,
+                4
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                6
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 9,
+      "rawSolutions": 14,
+      "baseDistinctSolutions": 28,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              3,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              3,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              3,
+              4
+            ]
+          ]
+        }
+      ],
+      "id": "L35"
+    },
+    {
+      "previousCandidate": "S501015-26376",
+      "gateScore": 9.186204314066911,
+      "baseMetrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 21,
+          "B": 3,
+          "C": 3
+        },
+        "rawDomains": [
+          37,
+          5,
+          5
+        ],
+        "distinctSolutions": 71,
+        "exactCommandSolutions": 319,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 9,
+        "shortestDistances": [
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          2,
+          3,
+          3
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.07936507936507936,
+          0.12698412698412698,
+          0.5555555555555556
+        ],
+        "constraintBits": 1.4124953047163906,
+        "score": 6.998121948065654,
+        "sharedMandatoryCells": [
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ]
+        ],
+        "walkableCells": 26,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                4
+              ],
+              [
+                2,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 20,
+      "rawSolutions": 118,
+      "baseDistinctSolutions": 71,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        }
+      ],
+      "id": "L36"
+    },
+    {
+      "previousCandidate": "S501015-23200",
+      "gateScore": 10.099478887145537,
+      "baseMetrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 10,
+          "B": 3,
+          "C": 10
+        },
+        "rawDomains": [
+          26,
+          3,
+          26
+        ],
+        "distinctSolutions": 81,
+        "exactCommandSolutions": 979,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 13,
+        "shortestDistances": [
+          11,
+          11,
+          11
+        ],
+        "minimumCommands": [
+          4,
+          5,
+          4
+        ],
+        "shortestConflictParticipation": [
+          0,
+          1,
+          1
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.23333333333333334,
+          0.23,
+          0.5333333333333333
+        ],
+        "constraintBits": 1.8889686876112561,
+        "score": 7.787829646947317,
+        "sharedMandatoryCells": [],
+        "walkableCells": 34,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 20,
+      "rawSolutions": 277,
+      "baseDistinctSolutions": 81,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        }
+      ],
+      "id": "L37"
+    },
+    {
+      "previousCandidate": "S501015-3744",
+      "gateScore": 10.630225625468752,
+      "baseMetrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 4,
+          "B": 3,
+          "C": 2
+        },
+        "rawDomains": [
+          9,
+          8,
+          2
+        ],
+        "distinctSolutions": 6,
+        "exactCommandSolutions": 56,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 10,
+        "shortestDistances": [
+          8,
+          8,
+          8
+        ],
+        "minimumCommands": [
+          3,
+          3,
+          4
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.25,
+          0.25,
+          0.5
+        ],
+        "constraintBits": 2.0,
+        "score": 8.6,
+        "sharedMandatoryCells": [],
+        "walkableCells": 33,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                4,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                6
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                4,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                0
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                4,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 2,
+      "rawSolutions": 42,
+      "baseDistinctSolutions": 6,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        }
+      ],
+      "id": "L38"
+    },
+    {
+      "previousCandidate": "S501015-39160",
+      "gateScore": 11.476679388187684,
+      "baseMetrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 9,
+          "B": 11,
+          "C": 17
+        },
+        "rawDomains": [
+          12,
+          14,
+          23
+        ],
+        "distinctSolutions": 64,
+        "exactCommandSolutions": 109,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 11,
+        "shortestDistances": [
+          6,
+          6,
+          6
+        ],
+        "minimumCommands": [
+          3,
+          3,
+          3
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.8484848484848485,
+          0.5555555555555556,
+          0.5935828877005348
+        ],
+        "constraintBits": 4.7168194613299494,
+        "score": 9.385932649864468,
+        "sharedMandatoryCells": [
+          [
+            4,
+            2
+          ],
+          [
+            4,
+            3
+          ]
+        ],
+        "walkableCells": 34,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                5,
+                3
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                6
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 20,
+      "rawSolutions": 41,
+      "baseDistinctSolutions": 64,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              6
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        }
+      ],
+      "id": "L39"
+    },
+    {
+      "previousCandidate": "S501015-2236",
+      "gateScore": 12.200766522374561,
+      "baseMetrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 23,
+          "B": 9,
+          "C": 8
+        },
+        "rawDomains": [
+          45,
+          12,
+          11
+        ],
+        "distinctSolutions": 24,
+        "exactCommandSolutions": 50,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 10,
+        "shortestDistances": [
+          6,
+          6,
+          6
+        ],
+        "minimumCommands": [
+          2,
+          3,
+          3
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.7971014492753623,
+          0.9239130434782609,
+          0.6805555555555556
+        ],
+        "constraintBits": 6.108524456778169,
+        "score": 10.170540896905809,
+        "sharedMandatoryCells": [
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            4
+          ]
+        ],
+        "walkableCells": 28,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                1,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                3,
+                3
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                6,
+                5
+              ],
+              [
+                6,
+                4
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                1,
+                3
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 8,
+      "rawSolutions": 28,
+      "baseDistinctSolutions": 24,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              5
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        }
+      ],
+      "id": "L40"
+    },
+    {
+      "previousCandidate": "S501015-14024",
+      "gateScore": 12.913600404124782,
+      "baseMetrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 8,
+          "B": 18,
+          "C": 8
+        },
+        "rawDomains": [
+          16,
+          26,
+          14
+        ],
+        "distinctSolutions": 43,
+        "exactCommandSolutions": 807,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 8,
+        "shortestDistances": [
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          2,
+          3
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.8194444444444444,
+          0.625,
+          0.5347222222222222
+        ],
+        "constraintBits": 4.743660246740214,
+        "score": 11.04337916038114,
+        "sharedMandatoryCells": [],
+        "walkableCells": 19,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                3,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                3,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 17,
+      "rawSolutions": 125,
+      "baseDistinctSolutions": 43,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              3,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ]
+          ]
+        }
+      ],
+      "id": "L41"
+    },
+    {
+      "previousCandidate": "S501015-37957",
+      "gateScore": 15.690451250937503,
+      "baseMetrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 3,
+          "B": 4,
+          "C": 2,
+          "D": 3
+        },
+        "rawDomains": [
+          3,
+          11,
+          9,
+          3
+        ],
+        "distinctSolutions": 6,
+        "exactCommandSolutions": 83,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 14,
+        "shortestDistances": [
+          10,
+          10,
+          10,
+          10
+        ],
+        "minimumCommands": [
+          4,
+          3,
+          3,
+          4
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          1,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          2,
+          2,
+          3
+        ],
+        "pairConflictRates": [
+          0.3333333333333333,
+          0.16666666666666666,
+          0.4444444444444444,
+          0.0,
+          0.16666666666666666,
+          0.16666666666666666
+        ],
+        "constraintBits": 3.584962500721156,
+        "score": 12.010225625468752,
+        "sharedMandatoryCells": [],
+        "walkableCells": 34,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 1,
+      "rawSolutions": 1,
+      "baseDistinctSolutions": 6,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        }
+      ],
+      "id": "L42"
+    },
+    {
+      "previousCandidate": "S501015-43187",
+      "gateScore": 17.404780699337444,
+      "baseMetrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 1,
+          "B": 28,
+          "C": 4,
+          "D": 4
+        },
+        "rawDomains": [
+          1,
+          64,
+          10,
+          10
+        ],
+        "distinctSolutions": 9,
+        "exactCommandSolutions": 279,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 14,
+        "shortestDistances": [
+          9,
+          9,
+          9,
+          9
+        ],
+        "minimumCommands": [
+          4,
+          2,
+          3,
+          3
+        ],
+        "shortestConflictParticipation": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "conflictParticipation": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "pairConflictRates": [
+          0.0,
+          0.25,
+          0.0,
+          0.0,
+          0.9732142857142857,
+          0.0
+        ],
+        "constraintBits": 5.637429920615292,
+        "score": 13.34432944839994,
+        "sharedMandatoryCells": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            6,
+            0
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            6,
+            4
+          ]
+        ],
+        "walkableCells": 32,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                4
+              ],
+              [
+                6,
+                4
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                6
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 1,
+      "rawSolutions": 63,
+      "baseDistinctSolutions": 9,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        }
+      ],
+      "id": "L43"
+    },
+    {
+      "previousCandidate": "S501015-35117",
+      "gateScore": 18.665849843536677,
+      "baseMetrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 23,
+          "B": 23,
+          "C": 2,
+          "D": 4
+        },
+        "rawDomains": [
+          38,
+          38,
+          2,
+          7
+        ],
+        "distinctSolutions": 57,
+        "exactCommandSolutions": 213,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 13,
+        "shortestDistances": [
+          6,
+          6,
+          6,
+          6
+        ],
+        "minimumCommands": [
+          2,
+          2,
+          4,
+          3
+        ],
+        "shortestConflictParticipation": [
+          0,
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          3,
+          2,
+          3
+        ],
+        "pairConflictRates": [
+          0.05860113421550094,
+          0.0,
+          0.010869565217391304,
+          0.782608695652174,
+          0.9239130434782609,
+          0.375
+        ],
+        "constraintBits": 6.214233897949284,
+        "score": 14.699252033667037,
+        "sharedMandatoryCells": [
+          [
+            2,
+            1
+          ],
+          [
+            2,
+            2
+          ]
+        ],
+        "walkableCells": 34,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                6
+              ],
+              [
+                0,
+                6
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 7,
+      "rawSolutions": 18,
+      "baseDistinctSolutions": 57,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        }
+      ],
+      "id": "L44"
+    },
+    {
+      "previousCandidate": "S501015-11306",
+      "gateScore": 19.971686646205182,
+      "baseMetrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 12,
+          "B": 14,
+          "C": 14,
+          "D": 19
+        },
+        "rawDomains": [
+          20,
+          20,
+          20,
+          39
+        ],
+        "distinctSolutions": 40,
+        "exactCommandSolutions": 2274,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 12,
+        "shortestDistances": [
+          5,
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          3,
+          3,
+          2
+        ],
+        "shortestConflictParticipation": [
+          2,
+          0,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.6190476190476191,
+          0.7797619047619048,
+          0.868421052631579,
+          0.6173469387755102,
+          0.5263157894736842,
+          0.7819548872180451
+        ],
+        "constraintBits": 10.125671763392587,
+        "score": 16.021686646205183,
+        "sharedMandatoryCells": [
+          [
+            2,
+            4
+          ]
+        ],
+        "walkableCells": 34,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                6
+              ],
+              [
+                4,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                6,
+                4
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                4,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                6,
+                4
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                4,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                6
+              ],
+              [
+                4,
+                6
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 5,
+      "rawSolutions": 405,
+      "baseDistinctSolutions": 40,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              4,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              4,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              4,
+              6
+            ]
+          ]
+        }
+      ],
+      "id": "L45"
+    },
+    {
+      "previousCandidate": "S501015-28338",
+      "gateScore": 20.968732148822326,
+      "baseMetrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 2,
+          "B": 25,
+          "C": 6,
+          "D": 16
+        },
+        "rawDomains": [
+          2,
+          37,
+          10,
+          24
+        ],
+        "distinctSolutions": 6,
+        "exactCommandSolutions": 6,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 16,
+        "shortestDistances": [
+          7,
+          7,
+          7,
+          7
+        ],
+        "minimumCommands": [
+          4,
+          3,
+          3,
+          3
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.68,
+          0.9166666666666666,
+          0.875,
+          0.5533333333333333,
+          0.53,
+          0.8125
+        ],
+        "constraintBits": 9.643856189774725,
+        "score": 17.288506523353576,
+        "sharedMandatoryCells": [
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ]
+        ],
+        "walkableCells": 35,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                6,
+                1
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                0
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                2,
+                6
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 1,
+      "rawSolutions": 1,
+      "baseDistinctSolutions": 6,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        }
+      ],
+      "id": "L46"
+    },
+    {
+      "previousCandidate": "S501015-34794",
+      "gateScore": 22.566104108489505,
+      "baseMetrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 5,
+          "B": 4,
+          "C": 17,
+          "D": 2
+        },
+        "rawDomains": [
+          9,
+          8,
+          38,
+          2
+        ],
+        "distinctSolutions": 15,
+        "exactCommandSolutions": 39,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 15,
+        "shortestDistances": [
+          7,
+          7,
+          7,
+          7
+        ],
+        "minimumCommands": [
+          3,
+          3,
+          2,
+          4
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.5,
+          0.7647058823529411,
+          0.3,
+          0.5882352941176471,
+          0.625,
+          0.4411764705882353
+        ],
+        "constraintBits": 5.502500340529183,
+        "score": 18.67662522134397,
+        "sharedMandatoryCells": [
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ]
+        ],
+        "walkableCells": 34,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                6
+              ],
+              [
+                0,
+                6
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                6,
+                2
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                4
+              ],
+              [
+                6,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 2,
+      "rawSolutions": 2,
+      "baseDistinctSolutions": 15,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        }
+      ],
+      "id": "L47"
+    },
+    {
+      "previousCandidate": "S501015-25389",
+      "gateScore": 23.38970451261429,
+      "baseMetrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 5,
+          "B": 8,
+          "C": 2,
+          "D": 9
+        },
+        "rawDomains": [
+          8,
+          11,
+          2,
+          12
+        ],
+        "distinctSolutions": 4,
+        "exactCommandSolutions": 4,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 3,
+        "minimumTotalCommands": 16,
+        "shortestDistances": [
+          6,
+          6,
+          6,
+          6
+        ],
+        "minimumCommands": [
+          3,
+          3,
+          4,
+          3
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.7,
+          0.6,
+          0.6444444444444445,
+          0.5,
+          0.6944444444444444,
+          0.5555555555555556
+        ],
+        "constraintBits": 7.491853096329675,
+        "score": 20.08970451261429,
+        "sharedMandatoryCells": [
+          [
+            4,
+            1
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            4,
+            3
+          ]
+        ],
+        "walkableCells": 28,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                3
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 1,
+      "rawSolutions": 1,
+      "baseDistinctSolutions": 4,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        }
+      ],
+      "id": "L48"
+    },
+    {
+      "previousCandidate": "S501015-45753",
+      "gateScore": 25.470381389020545,
+      "baseMetrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 35,
+          "B": 27,
+          "C": 12,
+          "D": 12
+        },
+        "rawDomains": [
+          69,
+          39,
+          14,
+          20
+        ],
+        "distinctSolutions": 121,
+        "exactCommandSolutions": 993,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 13,
+        "shortestDistances": [
+          5,
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          2,
+          2,
+          3,
+          2
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.6349206349206349,
+          0.7666666666666667,
+          0.4142857142857143,
+          0.6574074074074074,
+          0.6234567901234568,
+          0.5625
+        ],
+        "constraintBits": 10.135232283276153,
+        "score": 21.4479009841295,
+        "sharedMandatoryCells": [],
+        "walkableCells": 30,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 14,
+      "rawSolutions": 42,
+      "baseDistinctSolutions": 121,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        }
+      ],
+      "id": "L49"
+    },
+    {
+      "previousCandidate": "S501015-10882",
+      "gateScore": 26.773395256051494,
+      "baseMetrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 22,
+          "B": 5,
+          "C": 40,
+          "D": 39
+        },
+        "rawDomains": [
+          51,
+          9,
+          77,
+          82
+        ],
+        "distinctSolutions": 42,
+        "exactCommandSolutions": 236,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 14,
+        "shortestDistances": [
+          7,
+          7,
+          7,
+          7
+        ],
+        "minimumCommands": [
+          2,
+          3,
+          2,
+          2
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.6818181818181818,
+          0.7818181818181819,
+          0.6561771561771562,
+          0.775,
+          0.6102564102564103,
+          0.8102564102564103
+        ],
+        "constraintBits": 11.99637260449551,
+        "score": 22.777642192922084,
+        "sharedMandatoryCells": [],
+        "walkableCells": 34,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                3
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                2
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "distinctSolutions": 5,
+      "rawSolutions": 25,
+      "baseDistinctSolutions": 42,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        }
+      ],
+      "id": "L50"
+    }
+  ]
+}

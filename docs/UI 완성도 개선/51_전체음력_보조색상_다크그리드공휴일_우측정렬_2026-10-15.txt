@@ -1,0 +1,25 @@
+전체 달력 음력 보조 색상 / 다크그리드 공휴일 우측 정렬 (2026-10-15)
+
+기준/요청
+- UI12 대기 항목의 UI13 연결, UI47 현황 및 UI48~50 후속 규칙을 보존.
+- 사용자 요청: 모든 테마의 음력을 날짜 숫자보다 조금 연하게 표시.
+- 다크 그리드 공휴일명은 최초 남은 영역 중앙 정렬 요청 후, 사용자 정정으로 우측 정렬 확정.
+
+공통 규칙
+- CalendarContrast.lunarInk(dateInk,surface) = ensure(lerp(dateInk,surface,0.25),surface).
+- 일반 날짜색에서 배경 쪽으로25% 혼합. 기존 ensure를 통해 배경과 최소4.5 대비를 유지.
+- 음력 전용 CalendarReadingPalette.lunar 역할 추가. muted를 변경하지 않아 메모/다른 보조 표시가 함께 연해지지 않음.
+- 공통 _lunarCellTextStyle + 다크그리드 및 이벤트 별도 행 + WideCalendarCell 음력 분기 연결.
+- 메인 다크 등 reading 비적용 경로도 원래 달력 ColorScheme의 onSurface/surface로 같은 계산. 화면 색상 고정 계약 유지.
+- 음력 없는 외국어는 표시 추가 없음. 외국어 추가2개 GlobalConceptCalendarCell에는 원래 음력 표시가 없음.
+- 음력 글자 크기/높이/정렬은 유지. 공휴일/요일 빨강/날짜 숫자/메모/근무칩 색상은 유지.
+- 다크그리드의 날짜 마커를 제외한 Expanded annotation 공간에서 Align.centerRight 및 TextAlign.right 적용. 음력과 공휴일 모두 셀 오른쪽 끝을 기준으로 표시. 기존 테두리/패딩 안전영역 유지.
+- UI49의 chipLift/dateRowHeight 관계 및 메모 시작 위치 변경 없음.
+
+적용/검증
+- 연결 dev debug 핫리로드12/2161 libraries,2665ms 성공. 이벤트 별도 행 후속1/2161,1166ms 성공.
+- 기존 calendar_reading_palette_test + calendar_app_frame_test 실행. 결과는 artifacts/calendar_lunar_ink_2026_10_15/test.log.
+- 수정 직전 소스와 diff 같은 폴더 보존. 실기기 전체 테마 시각 PASS는 사용자 후속 확인이며 자동 검사로 대체하지 않음.
+- 알람/권한/출시 언어 리소스 기능 변경 없음. release/APK 빌드 없음.
+
+최종 검사 결과: 공통 대비 및 달력 프레임 기존 검사24 PASS, 02:02 All tests passed! 확인. 한글10개 및 외국어 경로 포함.

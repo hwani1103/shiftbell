@@ -22,6 +22,8 @@ import { buildMockDocs } from '../public/assets/js/mock.js';
 import { Ga4, DEFAULTS, makeAuthClient } from './lib/ga4.mjs';
 import { buildDocs, table, ymd } from './lib/transform.mjs';
 import { alreadySyncedInSlot, syncPolicy } from './lib/sync-policy.mjs';
+import { emptyDimensions, assertNonemptyFields } from './lib/report-values.mjs';
+import { hasUnknownCountry, mergeUnknownCountryReport } from './lib/unknown-countries.mjs';
 
 const { values: args } = parseArgs({
   options: {
@@ -62,7 +64,7 @@ async function fetchReal() {
     return [range, { from, to, report }];
   })));
   // 나머지는 실패해도 대시보드 일부만 비워 두고 계속한다
-  const [ads, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily] = await Promise.all([
+  let [ads, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, countryLanguageDaily] = await Promise.all([
     ga.tryReport('광고', ga.adsDaily(days)),
     ga.tryReport('앱 버전 분포', ga.breakdown('appVersion')),
     ga.tryReport('OS 분포', ga.breakdown('operatingSystemVersion')),
@@ -73,30 +75,72 @@ async function fetchReal() {
     ga.tryReport('리텐션', ga.cohort({ ...cohortRange, endOffset: 14 })),
     webGa.tryReport('웹 친구 근무표 열람', webGa.webFriendViews()),
     ga.tryReport('국가 일별 추이', ga.countryDaily(100)),
+    ga.tryReport('국가·언어 일별 추이', ga.countryLanguageDaily(100)),
   ]);
+  if(hasUnknownCountry(countryDaily,1) || hasUnknownCountry(countryLanguageDaily,1)) {
+    const [unknownDaily,unknownLanguageDaily]=await Promise.all([
+      ga.tryReport('확인불가 국가 일별 통합',ga.unknownCountries(ga.countryDaily(100))),
+      ga.tryReport('확인불가 국가·언어 일별 통합',ga.unknownCountries(ga.countryLanguageDaily(100))),
+    ]);
+    countryDaily=mergeUnknownCountryReport(countryDaily,unknownDaily,1);
+    countryLanguageDaily=mergeUnknownCountryReport(countryLanguageDaily,unknownLanguageDaily,1);
+  }
   const operationsByRange = {};
-  // Limit concurrency: eight optional reports at a time, not every range at once.
+  // Query one range at a time; ten optional reports per range.
   for (const range of eventRanges) {
     const from = dates[Math.max(0, dates.length - range)]; const to = dates.at(-1);
     if (!from || !to) continue;
     const previousTo = iso(new Date(Date.parse(from) - 86400000));
     const previousFrom = iso(new Date(Date.parse(from) - Math.min(range, dates.length) * 86400000));
-    const [current, previous, countries, previousCountries, countryEvents, manufacturers, manufacturerEvents] = await Promise.all([
+    const [current, previous, countries, previousCountries, countryEvents, countryLanguages, previousCountryLanguages, countryLanguageEvents, manufacturers, manufacturerEvents] = await Promise.all([
       ga.tryReport('기간 이용자', ga.periodSummary(from, to)),
       ga.tryReport('직전 기간 이용자', ga.periodSummary(previousFrom, previousTo)),
       ga.tryReport('국가 운영 지표', ga.segmentSummary('country', from, to)),
       ga.tryReport('직전 국가 운영 지표', ga.segmentSummary('country', previousFrom, previousTo)),
       ga.tryReport('국가 기능 활용', ga.segmentEvents('country', from, to)),
+      ga.tryReport('국가·언어 운영 지표', ga.segmentSummary(['country', 'language'], from, to)),
+      ga.tryReport('직전 국가·언어 운영 지표', ga.segmentSummary(['country', 'language'], previousFrom, previousTo)),
+      ga.tryReport('국가·언어 기능 활용', ga.segmentEvents(['country', 'language'], from, to)),
       ga.tryReport('제조사 이용자', ga.segmentSummary('mobileDeviceBranding', from, to)),
       ga.tryReport('제조사 알람 관측', ga.segmentEvents('mobileDeviceBranding', from, to)),
     ]);
-    operationsByRange[range] = { from, to, current, previous, countries, previousCountries, countryEvents, manufacturers, manufacturerEvents };
+    const data = { from, to, current, previous, countries, previousCountries, countryEvents, countryLanguages, previousCountryLanguages, countryLanguageEvents, manufacturers, manufacturerEvents };
+    if(hasUnknownCountry(countries) || hasUnknownCountry(countryLanguages)) {
+      const [unknown,unknownLanguages,unknownEvents]=await Promise.all([
+        ga.tryReport('확인불가 국가 기간 통합',ga.unknownCountries(ga.segmentSummary('country',from,to))),
+        ga.tryReport('확인불가 국가 언어 통합',ga.unknownCountries(ga.segmentSummary(['country','language'],from,to))),
+        ga.tryReport('확인불가 국가 기능 통합',ga.unknownCountries(ga.segmentEvents(['country','language'],from,to))),
+      ]);
+      data.countries=mergeUnknownCountryReport(countries,unknown);
+      if(unknownLanguages && unknownEvents) {
+        data.countryLanguages=mergeUnknownCountryReport(countryLanguages,unknownLanguages);
+        data.countryLanguageEvents=mergeUnknownCountryReport(countryLanguageEvents,unknownEvents);
+      }
+    }
+    if(hasUnknownCountry(previousCountries) || hasUnknownCountry(previousCountryLanguages)) {
+      const [unknown,unknownLanguages]=await Promise.all([
+        ga.tryReport('직전 확인불가 국가 통합',ga.unknownCountries(ga.segmentSummary('country',previousFrom,previousTo))),
+        ga.tryReport('직전 확인불가 국가 언어 통합',ga.unknownCountries(ga.segmentSummary(['country','language'],previousFrom,previousTo))),
+      ]);
+      data.previousCountries=mergeUnknownCountryReport(previousCountries,unknown);
+      data.previousCountryLanguages=mergeUnknownCountryReport(previousCountryLanguages,unknownLanguages);
+    }
+    operationsByRange[range] = data;
   }
+  const raw = { core, ads, eventsDaily, eventsByRange, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, countryLanguageDaily, operationsByRange };
+  const findings = emptyDimensions(raw);
+  for (const finding of findings) console.warn('Empty GA4 dimension:', JSON.stringify(finding));
   const docs = buildDocs({
-    raw: { core, ads, eventsDaily, eventsByRange, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, operationsByRange },
+    raw,
     meta: { now: new Date(), propertyId, streamId, cohortRange, source: 'ga4' },
   });
+  const { fetchGrowth } = await import('./lib/growth.mjs');
+  docs.growth = await fetchGrowth(ga, dates.at(-1), new Date(docs.summary.updatedAt));
+  const { fetchPulse } = await import('./lib/pulse.mjs');
+  docs.pulse = await fetchPulse(ga, new Date(docs.summary.updatedAt), dates.at(-1));
+  docs.summary.pipelineVersion = 4;
   docs.summary.currency = core?.metadata?.currencyCode || 'USD';
+  docs.summary.dataQuality = { emptyDimensions: findings };
   return docs;
 }
 
@@ -121,6 +165,7 @@ async function writeFirestore(db, docs) {
   const batch = db.batch();
   for (const [name, doc] of Object.entries(docs)) {
     if (Buffer.byteLength(JSON.stringify(doc)) > 900000) throw new Error('Dashboard document exceeds safe size: ' + name);
+    assertNonemptyFields(doc, name);
     batch.set(col.doc(name), doc);
   }
   await batch.commit();

@@ -1,0 +1,22 @@
+27. 저녁 네이비 / 흰색 텍스트 팔레트 (2026-10-13)
+
+사용자 합의: 저녁부터 흰색 글씨가 어울릴 만큼 짙게 하고 보라보다 네이비 계열로 변경.
+밤보다 밝은 저녁 네이비로 구분하며 본문·보조·칩·인덱스의 색상 역할을 함께 조정.
+
+주요 역할
+background #354B67 / surface #405A79 / primary #B5D4F5 / onPrimary #172F4B
+본문 #F4F8FE / 보조 #CFDBE9 / soft #49617F / border #7A96B4
+chipSurface #496582 / chipBorder #AEC9E2 / chipText #F8FAFC
+선택 강조 #AFE8DE / danger #FFC1CA / dangerSurface #624654
+비활성 표면 #435670 / 비활성 글자 #A8B6C8
+
+저녁은 네이비·흰색 텍스트, 밤은 더 깊은 기존 네이비 유지.
+밝은 채움의 primary 버튼에는 대비에 맞는 짙은 글자를 사용한다.
+자동 시간 구간/선택 저장/공통 모션·글자 크기 계약은 유지.
+스플래시 #EEF6FD 고정. 화면 하드코딩 없이 evening 팔레트의 역할만 변경.
+
+증거: artifacts/onboarding_evening_navy_tests.log,
+artifacts/onboarding_evening_navy/host/, onboarding_evening_navy_build.log.
+UI24~26 색상 설명은 당시 초안으로 보존, 저녁 현행은 이 원장을 따른다.
+앱 전체 테마 적용·잠금 알람 실기 검증·release/prod 배포로 확대하지 않는다.
+최종 증거: 관련7검사 PASS / host 저녁 화면 시각 확인 / assembleDevDebug exit0. APK SHA256 69DBB02309F47F0F92F276B2FB592545510F12B682AFEB6F5BCE850F732112B5. 설치 시 기존 기기 R5KL20DHWAE 연결을 찾을 수 없어 이번 APK의 실기기 업데이트 설치는 미완료. 기존 데이터 삭제·release 빌드·production 앱 배포 없음.

@@ -1,0 +1,60 @@
+{
+  "sourceBytes": 10414588,
+  "fontBytes": 98528,
+  "requiredCodepoints": 345,
+  "missingCodepoints": [],
+  "existingFallbackCodepoints": [],
+  "fontAxes": [
+    {
+      "tag": "wght",
+      "minimum": 100.0,
+      "maximum": 900.0
+    }
+  ],
+  "assetBytes": 467461,
+  "assetBudgetBytes": 500000,
+  "compiledCodeIncluded": false,
+  "assets": [
+    {
+      "path": "packages\\sync_path_ui\\assets\\fonts\\GameSansSubset.ttf",
+      "bytes": 98528
+    },
+    {
+      "path": "examples\\sync_path_lab\\assets\\pilot_copy.json",
+      "bytes": 121619
+    },
+    {
+      "path": "examples\\sync_path_lab\\assets\\pilot_levels.json",
+      "bytes": 117312
+    },
+    {
+      "path": "examples\\sync_path_lab\\assets\\art\\sync_paths_splash.webp",
+      "bytes": 20584
+    },
+    {
+      "path": "examples\\sync_path_lab\\android\\app\\src\\main\\assets\\sync_paths_audio\\clear.wav",
+      "bytes": 40176
+    },
+    {
+      "path": "examples\\sync_path_lab\\android\\app\\src\\main\\assets\\sync_paths_audio\\failure.wav",
+      "bytes": 21654
+    },
+    {
+      "path": "examples\\sync_path_lab\\android\\app\\src\\main\\assets\\sync_paths_audio\\route.wav",
+      "bytes": 6220
+    },
+    {
+      "path": "examples\\sync_path_lab\\android\\app\\src\\main\\assets\\sync_paths_audio\\select.wav",
+      "bytes": 8204
+    },
+    {
+      "path": "examples\\sync_path_lab\\android\\app\\src\\main\\assets\\sync_paths_audio\\start.wav",
+      "bytes": 21212
+    },
+    {
+      "path": "examples\\sync_path_lab\\android\\app\\src\\main\\assets\\sync_paths_audio\\undo.wav",
+      "bytes": 11952
+    }
+  ],
+  "fontSha256": "634f6d613f2d1512ece7eb6ad121c2f4a9f148c0e7c56061fb0b8f488f26882d"
+}

@@ -1,10 +1,15 @@
-import '../widgets/team_label.dart';
+import '../widgets/app_ui_feedback.dart';
+import '../widgets/shift_chip_label.dart';
 import '../widgets/app_shift_chip.dart';
-import '../widgets/shift_label_layout.dart';
+import '../widgets/all_shifts_timeline_metrics.dart';
+import '../constants/layout_limits.dart';
+import '../widgets/all_shifts_overview.dart';
+import '../widgets/app_ui_theme_scope.dart';
+import '../theme/app_ui_theme.dart';
+import '../providers/all_shifts_layout_provider.dart';
 import '../models/team_schedule_config.dart';
 import 'team_schedule_edit_screen.dart';
 import '../widgets/fold_calendar_text_scale.dart';
-import '../constants/layout_limits.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -30,8 +35,9 @@ class AllShiftsView extends StatelessWidget {
   const AllShiftsView({super.key, this.initialMonth});
 
   @override
-  Widget build(BuildContext context) =>
-      FoldCalendarTextScale(child: _AllShiftsBody(initialMonth: initialMonth));
+  Widget build(BuildContext context) => AppUiThemeScope(
+      builder: (_) => FoldCalendarTextScale(
+          child: _AllShiftsBody(initialMonth: initialMonth)));
 }
 
 class _AllShiftsBody extends ConsumerStatefulWidget {
@@ -42,8 +48,10 @@ class _AllShiftsBody extends ConsumerStatefulWidget {
 }
 
 class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
+  final _chipFitCache = ShiftChipFitCache();
   late PageController _pageController;
-  late DateTime _currentMonth;
+  late final DateTime _pageAnchorMonth;
+  late final ValueNotifier<DateTime> _currentMonth;
   bool _isLoading = true;
   bool _isConfigured = false; // ⭐ 전체 교대조 근무표 설정 여부
   TeamScheduleConfig? _config;
@@ -70,24 +78,29 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
   @override
   void initState() {
     super.initState();
+    PaintingBinding.instance.systemFonts.addListener(_chipFitCache.clear);
     AppAnalytics.track(AnalyticsEvent.allShiftsOpened);
     final now = DateTime.now();
-    _currentMonth = widget.initialMonth == null
-        ? now
-        : DateTime(widget.initialMonth!.year, widget.initialMonth!.month);
+    _pageAnchorMonth = DateTime(now.year, now.month);
+    _currentMonth = ValueNotifier(widget.initialMonth == null
+        ? _pageAnchorMonth
+        : DateTime(widget.initialMonth!.year, widget.initialMonth!.month));
     // ⭐ itemBuilder(아래 build())가 매 페이지를 "오늘이 속한 달"(now) 기준
     // monthsDiff로 계산하므로(now.year, now.month + (index - _initialPage)),
     // _currentMonth로 열리는 페이지 인덱스도 그 기준에 맞춰 역산해야 함 -
     // 안 그러면 PageController는 _initialPage(항상 "오늘" 페이지)에서 시작해서
     // widget.initialMonth를 무시하게 됨.
-    final monthsFromNow = (_currentMonth.year - now.year) * 12 +
-        (_currentMonth.month - now.month);
+    final monthsFromNow = (_currentMonth.value.year - now.year) * 12 +
+        (_currentMonth.value.month - now.month);
     _pageController = PageController(initialPage: _initialPage + monthsFromNow);
     _loadTeamData();
   }
 
   @override
   void dispose() {
+    PaintingBinding.instance.systemFonts.removeListener(_chipFitCache.clear);
+    _chipFitCache.clear();
+    _currentMonth.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -98,7 +111,8 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
       final config = await DatabaseService.instance.getTeamScheduleConfig();
       _config = config;
       _legacyRecovery = config == null
-          ? await DatabaseService.instance.getRecoverableLegacyTeams() : null;
+          ? await DatabaseService.instance.getRecoverableLegacyTeams()
+          : null;
       _isConfigured = config != null;
       _teams = config?.names ?? [];
       _teamOffsets = config?.offsets ?? {};
@@ -117,21 +131,26 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
   Future<void> _recoverLegacyTeams() async {
     final config = _legacyRecovery;
     if (config == null) return;
-    final accepted = await showDialog<bool>(context: context, builder: (context) =>
-      AlertDialog(title: Text(context.l10n.teamLegacyRecoverAction),
-        content: Text(context.l10n.teamLegacyRecoverBody), actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.commonCancel)),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.backupRestoreButton)),
-        ]));
+    final accepted = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+                title: Text(context.l10n.teamLegacyRecoverAction),
+                content: Text(context.l10n.teamLegacyRecoverBody),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(context.l10n.commonCancel)),
+                  TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text(context.l10n.backupRestoreButton)),
+                ]));
     if (accepted != true || !mounted) return;
     // Only the roster row is restored. Main schedule, memos and alarms are kept.
     await DatabaseService.instance.saveTeamScheduleConfig(config);
     await _loadTeamData();
   }
 
-  // ⭐ 2026-09-05 - 월 이동 버튼 3종 - 위쪽 헤더와 두 블록 사이 보조 내비게이션
-  // 바가 공유해서 씀(중복 코드 방지). PageView의 스와이프 제스처는 껐지만
-  // (위 physics 주석 참고) 이 프로그램적 페이지 이동은 physics와 무관하게 계속 동작함.
+  // Timeline uses month buttons; overview uses horizontal month swipes.
   void _goToPreviousMonth() {
     _pageController.previousPage(
         duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
@@ -143,7 +162,12 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
   }
 
   void _jumpToCurrentMonth() {
-    _pageController.animateToPage(_initialPage,
+    final now = DateTime.now();
+    final page = _initialPage +
+        (now.year - _pageAnchorMonth.year) * 12 +
+        now.month -
+        _pageAnchorMonth.month;
+    _pageController.animateToPage(page,
         duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
   }
 
@@ -180,10 +204,12 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
 
     if (_isConfigured) {
       final result = await Navigator.of(context).push<TeamScheduleEditResult>(
-        MaterialPageRoute(builder: (_) => TeamScheduleEditScreen(
-          teams: _config!,
-          pattern: schedule.pattern!, date: DateTime.now(),
-        )),
+        MaterialPageRoute(
+            builder: (_) => TeamScheduleEditScreen(
+                  teams: _config!,
+                  pattern: schedule.pattern!,
+                  date: DateTime.now(),
+                )),
       );
       await _loadTeamData();
       if (!mounted || result != TeamScheduleEditResult.recreate) return;
@@ -209,7 +235,8 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
         builder: (context) => AllTeamsSetupScreen(
           pattern: schedule.pattern!,
           myTodayIndex: myTodayIndex,
-          shiftTypes: schedule.shiftTypes, referenceDate: now,
+          shiftTypes: schedule.shiftTypes,
+          referenceDate: now,
         ),
       ),
     );
@@ -238,271 +265,336 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
   Widget build(BuildContext context) {
     // ⭐ schedule 가져오기
     final scheduleAsync = ref.watch(scheduleProvider);
+    final layout = ref.watch(allShiftsLayoutProvider);
     final colorScheme = Theme.of(context).colorScheme;
+    final shiftColors = _shiftColorMap(scheduleAsync.valueOrNull);
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        title: Text(context.l10n.shiftFullSchedule),
-        backgroundColor: colorScheme.surface,
-        elevation: 0,
-        foregroundColor: colorScheme.onSurface,
-      ),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : !_isConfigured
-              ? Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(24.w),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.groups_outlined,
-                          size: 80.sp,
-                          color: colorScheme.outline,
-                        ),
-                        SizedBox(height: 24.h),
-                        Text(
-                          context.l10n.allTeamsNotConfigured,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        SizedBox(height: 32.h),
-                        if (_legacyRecovery != null) ...[
-                          OutlinedButton(onPressed: _recoverLegacyTeams,
-                            child: Text(context.l10n.teamLegacyRecoverAction)),
-                          SizedBox(height: 16.h),
-                        ],
-                        // ⭐ 전체 교대조 근무표 만들기 버튼
-                        ElevatedButton.icon(
-                          onPressed: () => _openAllTeamsSetupScreen(),
-                          icon: Icon(Icons.add_circle_outline, size: 22.sp),
-                          label: Text(context.l10n.allTeamsCreateButton,
-                              style: TextStyle(fontSize: 16.sp)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colorScheme.primary,
-                            foregroundColor: colorScheme.onPrimary,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 24.w, vertical: 14.h),
-                          ),
-                        ),
-                        SizedBox(height: 12.h),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(context.l10n.commonGoBack,
-                              style: TextStyle(
-                                  color: colorScheme.onSurfaceVariant,
-                                  fontSize: 15.sp)),
-                        ),
-                      ],
-                    ),
+    return ShiftChipFitCacheScope(
+        cache: _chipFitCache,
+        child: Scaffold(
+          backgroundColor: AppUiPalette.of(context).background,
+          appBar: AppBar(
+            title: Text(context.l10n.shiftFullSchedule),
+            backgroundColor: AppUiPalette.of(context).background,
+            elevation: 0,
+            foregroundColor: colorScheme.onSurface,
+            actions: [
+              for (final mode in [
+                AllShiftsLayout.timeline,
+                AllShiftsLayout.overview
+              ])
+                IconButton(
+                  key: ValueKey('roster-layout-${mode.name}'),
+                  tooltip: mode == AllShiftsLayout.timeline
+                      ? context.l10n.allShiftsTimelineLayout
+                      : context.l10n.allShiftsOverviewLayout,
+                  isSelected:
+                      (layout.valueOrNull ?? AllShiftsLayout.overview) == mode,
+                  style: IconButton.styleFrom(
+                    foregroundColor: colorScheme.onSurfaceVariant,
+                    backgroundColor:
+                        (layout.valueOrNull ?? AllShiftsLayout.overview) == mode
+                            ? colorScheme.primary
+                            : colorScheme.surface,
                   ),
+                  icon: Icon(mode == AllShiftsLayout.timeline
+                      ? Icons.view_agenda_outlined
+                      : Icons.crop_square_rounded),
+                  selectedIcon: Icon(
+                      mode == AllShiftsLayout.timeline
+                          ? Icons.view_agenda_outlined
+                          : Icons.crop_square_rounded,
+                      color: colorScheme.onPrimary),
+                  onPressed: layout.isLoading
+                      ? null
+                      : () async {
+                          try {
+                            await ref
+                                .read(allShiftsLayoutProvider.notifier)
+                                .select(mode);
+                          } catch (_) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  AppUiSnackBar(
+                                      content: Text(
+                                          context.l10n.statusErrorOccurred)));
+                            }
+                          }
+                        },
+                ),
+            ],
+          ),
+          body: _isLoading || layout.isLoading
+              ? const Center(
+                  child: AppUiLoading(),
                 )
-              : scheduleAsync.when(
-                  loading: () => Center(child: CircularProgressIndicator()),
-                  error: (error, stack) => Center(
-                      child: Text(context.l10n
-                          .statusErrorWithDetail(context.localizedErrorDetail(error)))),
-                  data: (schedule) => SafeArea(
-                    child: Column(
-                      children: [
-                        // ⭐ 년월 표시
-                        // ⭐ 2026-09-05 후속 - 편집 아이콘과 겹치던 문제 수정. 텍스트를
-                        // "화면 전체" 기준으로 가운데 정렬하면 글자가 크거나 로케일에
-                        // 따라 길어질 때 옆 버튼 자리를 침범할 수 있었음 - 양쪽에 같은
-                        // 폭의 자리를 대칭으로 두는 구조로, 텍스트는 그 "가운데 남는
-                        // 공간" 안에서만 가운데 정렬되게 함.
-                        // ⭐ 후속2 - "이번 달" 버튼을 두 블록 사이에서 이 줄의 왼쪽으로
-                        // 옮김(요청) - 왼쪽엔 이번 달, 오른쪽엔 편집(기존 그대로).
-                        Container(
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          color: colorScheme.surface,
-                          child: Row(
-                            children: [
-                              SizedBox(
-                                width: 76.w,
-                                child: Center(
-                                  // Global labels vary too much for this fixed
-                                  // header slot. Keep the action language-neutral
-                                  // and expose its full name via the tooltip.
-                                  child: !context.usesKoreanFeatures
-                                      ? IconButton(
-                                          tooltip: context.l10n
-                                              .allTeamsThisMonthButton,
-                                          onPressed: _jumpToCurrentMonth,
-                                          style: IconButton.styleFrom(
-                                            backgroundColor:
-                                                colorScheme.surfaceVariant,
-                                            foregroundColor:
-                                                colorScheme.primary,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(16.r),
-                                            ),
-                                          ),
-                                          icon: Icon(Icons.today_outlined,
-                                              size: 20.sp),
-                                        )
-                                      : GestureDetector(
-                                    onTap: _jumpToCurrentMonth,
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 14.w, vertical: 7.h),
-                                      decoration: BoxDecoration(
-                                        color: colorScheme.surfaceVariant,
-                                        borderRadius:
-                                            BorderRadius.circular(16.r),
-                                      ),
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Text(
-                                        context.l10n.allTeamsThisMonthButton,
-                                        style: TextStyle(
-                                            fontSize: 13.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: colorScheme.primary),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        softWrap: false,
-                                      ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
+              : !_isConfigured
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.w),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.groups_outlined,
+                              size: 80.sp,
+                              color: colorScheme.outline,
+                            ),
+                            SizedBox(height: 24.h),
+                            Text(
+                              context.l10n.allTeamsNotConfigured,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurfaceVariant,
                               ),
-                              Expanded(
-                                child: Center(
+                            ),
+                            SizedBox(height: 32.h),
+                            if (_legacyRecovery != null) ...[
+                              OutlinedButton(
+                                  onPressed: _recoverLegacyTeams,
                                   child: Text(
-                                    DateFormat.yMMMM(
-                                            Localizations.localeOf(context)
-                                                .toString())
-                                        .format(_currentMonth),
-                                    style: TextStyle(
-                                      fontSize: 19.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: colorScheme.onSurface,
+                                      context.l10n.teamLegacyRecoverAction)),
+                              SizedBox(height: 16.h),
+                            ],
+                            // ⭐ 전체 교대조 근무표 만들기 버튼
+                            ElevatedButton.icon(
+                              onPressed: () => _openAllTeamsSetupScreen(),
+                              icon: Icon(Icons.add_circle_outline, size: 22.sp),
+                              label: Text(context.l10n.allTeamsCreateButton,
+                                  style: TextStyle(fontSize: 16.sp)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: colorScheme.primary,
+                                foregroundColor: colorScheme.onPrimary,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24.w, vertical: 14.h),
+                              ),
+                            ),
+                            SizedBox(height: 12.h),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text(context.l10n.commonGoBack,
+                                  style: TextStyle(
+                                      color: colorScheme.onSurfaceVariant,
+                                      fontSize: 15.sp)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : scheduleAsync.when(
+                      loading: () => const Center(child: AppUiLoading()),
+                      error: (error, stack) => Center(
+                          child: Text(context.l10n.statusErrorWithDetail(
+                              context.localizedErrorDetail(error)))),
+                      data: (schedule) => SafeArea(
+                        child: Column(
+                          children: [
+                            // ⭐ 년월 표시
+                            // ⭐ 2026-09-05 후속 - 편집 아이콘과 겹치던 문제 수정. 텍스트를
+                            // "화면 전체" 기준으로 가운데 정렬하면 글자가 크거나 로케일에
+                            // 따라 길어질 때 옆 버튼 자리를 침범할 수 있었음 - 양쪽에 같은
+                            // 폭의 자리를 대칭으로 두는 구조로, 텍스트는 그 "가운데 남는
+                            // 공간" 안에서만 가운데 정렬되게 함.
+                            // ⭐ 후속2 - "이번 달" 버튼을 두 블록 사이에서 이 줄의 왼쪽으로
+                            // 옮김(요청) - 왼쪽엔 이번 달, 오른쪽엔 편집(기존 그대로).
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 12.h),
+                              color: AppUiPalette.of(context).background,
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 76.w,
+                                    child: Center(
+                                      // Global labels vary too much for this fixed
+                                      // header slot. Keep the action language-neutral
+                                      // and expose its full name via the tooltip.
+                                      child: !context.usesKoreanFeatures
+                                          ? IconButton(
+                                              tooltip: context
+                                                  .l10n.allTeamsThisMonthButton,
+                                              onPressed: _jumpToCurrentMonth,
+                                              style: IconButton.styleFrom(
+                                                backgroundColor: colorScheme
+                                                    .surfaceContainerHighest,
+                                                foregroundColor:
+                                                    colorScheme.primary,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          16.r),
+                                                ),
+                                              ),
+                                              icon: Icon(Icons.today_outlined,
+                                                  size: 20.sp),
+                                            )
+                                          : GestureDetector(
+                                              onTap: _jumpToCurrentMonth,
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 14.w,
+                                                    vertical: 7.h),
+                                                decoration: BoxDecoration(
+                                                  color: colorScheme
+                                                      .surfaceContainerHighest,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          16.r),
+                                                ),
+                                                child: FittedBox(
+                                                  fit: BoxFit.scaleDown,
+                                                  child: Text(
+                                                    context.l10n
+                                                        .allTeamsThisMonthButton,
+                                                    style: TextStyle(
+                                                        fontSize: 13.sp,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: colorScheme
+                                                            .primary),
+                                                    textAlign: TextAlign.center,
+                                                    maxLines: 2,
+                                                    softWrap: false,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 76.w,
-                                // ⭐ 2026-09-05 후속 - "편집 버튼도 버튼 느낌으로, 이번
-                                // 달 버튼이랑 스타일은 비슷하게" 요청 - IconButton
-                                // 대신 왼쪽 "이번 달"과 같은 알약(pill) 모양의
-                                // Container로 통일(배경색/둥글기/강조색 전부 동일).
-                                // ⭐ 후속2 - 아이콘을 24.sp로 키웠다가 "왜 커졌냐"는
-                                // 지적으로 이전 크기(20.sp/패딩 8.w)로 되돌림 - "이번
-                                // 달" 글자 크기(13.sp)는 이것과 무관하게 그대로 둠(둘은
-                                // 서로 다른 요청이었을 뿐 연동되는 값이 아님).
-                                child: _isConfigured
-                                    ? Center(
-                                        child: Tooltip(
-                                          message: context
-                                              .l10n.allTeamsSetupEditTooltip,
-                                          child: GestureDetector(
-                                            onTap: () =>
-                                                _openAllTeamsSetupScreen(),
-                                            child: Container(
-                                              padding: EdgeInsets.all(8.w),
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    colorScheme.surfaceVariant,
-                                                borderRadius:
-                                                    BorderRadius.circular(16.r),
-                                              ),
-                                              child: Icon(Icons.edit_outlined,
-                                                  size: 20.sp,
-                                                  color: colorScheme.primary),
-                                            ),
+                                  Expanded(
+                                    child: Center(
+                                      child: ValueListenableBuilder<DateTime>(
+                                        valueListenable: _currentMonth,
+                                        builder: (context, month, _) => Text(
+                                          DateFormat.yMMMM(
+                                                  Localizations.localeOf(
+                                                          context)
+                                                      .toString())
+                                              .format(month),
+                                          style: TextStyle(
+                                            fontSize: 19.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.onSurface,
                                           ),
                                         ),
-                                      )
-                                    : null,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 76.w,
+                                    // ⭐ 2026-09-05 후속 - "편집 버튼도 버튼 느낌으로, 이번
+                                    // 달 버튼이랑 스타일은 비슷하게" 요청 - IconButton
+                                    // 대신 왼쪽 "이번 달"과 같은 알약(pill) 모양의
+                                    // Container로 통일(배경색/둥글기/강조색 전부 동일).
+                                    // ⭐ 후속2 - 아이콘을 24.sp로 키웠다가 "왜 커졌냐"는
+                                    // 지적으로 이전 크기(20.sp/패딩 8.w)로 되돌림 - "이번
+                                    // 달" 글자 크기(13.sp)는 이것과 무관하게 그대로 둠(둘은
+                                    // 서로 다른 요청이었을 뿐 연동되는 값이 아님).
+                                    child: _isConfigured
+                                        ? Center(
+                                            child: Tooltip(
+                                              message: context.l10n
+                                                  .allTeamsSetupEditTooltip,
+                                              child: GestureDetector(
+                                                onTap: () =>
+                                                    _openAllTeamsSetupScreen(),
+                                                child: Container(
+                                                  padding: EdgeInsets.all(8.w),
+                                                  decoration: BoxDecoration(
+                                                    color: colorScheme
+                                                        .surfaceContainerHighest,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16.r),
+                                                  ),
+                                                  child: Icon(
+                                                      Icons.edit_outlined,
+                                                      size: 20.sp,
+                                                      color:
+                                                          colorScheme.primary),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        : null,
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                        Divider(height: 1, color: colorScheme.outline),
-                        // ⭐ PageView로 여러 달 표시
-                        Expanded(
-                          child: PageView.builder(
-                            controller: _pageController,
-                            // ⭐ 2026-09-05 - 버그 수정. 좌우 스와이프로 월을 넘기던
-                            // 제스처가, 각 블록 안의 가로 스크롤(날짜 넘기기)과 같은
-                            // 축이라 서로 겹쳐서 손이 자꾸 엉뚱한 쪽으로 반응했음
-                            // ("때때로 겹친다"는 신고). 월 이동은 이제 버튼(위/아래
-                            // 두 자리)으로만 하게 하고, 스와이프 제스처 자체를 꺼서
-                            // 이 화면엔 "가로 드래그"가 블록 내부 날짜 스크롤 하나만
-                            // 남게 함 - 애매함 자체가 구조적으로 없어짐. previousPage/
-                            // nextPage/animateToPage 같은 프로그램적 페이지 이동은
-                            // physics와 무관하게 그대로 동작(버튼은 계속 잘 작동함).
-                            physics: const NeverScrollableScrollPhysics(),
-                            onPageChanged: (page) {
-                              final now = DateTime.now();
-                              final monthsDiff = page - _initialPage;
-                              setState(() {
-                                _currentMonth = DateTime(
-                                  now.year,
-                                  now.month + monthsDiff,
-                                );
-                              });
-                            },
-                            itemBuilder: (context, index) {
-                              final now = DateTime.now();
-                              final monthsDiff = index - _initialPage;
-                              final targetMonth = DateTime(
-                                now.year,
-                                now.month + monthsDiff,
-                              );
-                              final year = targetMonth.year;
-                              final month = targetMonth.month;
-                              final lastDay = DateTime(year, month + 1, 0).day;
+                            ),
+                            Divider(height: 1, color: colorScheme.outline),
+                            // ⭐ PageView로 여러 달 표시
+                            Expanded(
+                              child: PageView.builder(
+                                controller: _pageController,
+                                // Overview swipes months; timeline reserves horizontal
+                                // gestures for its date bands and keeps month buttons.
+                                physics: (layout.valueOrNull ??
+                                            AllShiftsLayout.overview) ==
+                                        AllShiftsLayout.overview
+                                    ? const PageScrollPhysics()
+                                    : const NeverScrollableScrollPhysics(),
+                                onPageChanged: (page) {
+                                  _currentMonth.value = DateTime(
+                                      _pageAnchorMonth.year,
+                                      _pageAnchorMonth.month +
+                                          page -
+                                          _initialPage);
+                                },
+                                itemBuilder: (context, index) {
+                                  final now = DateTime.now();
+                                  final targetMonth = DateTime(
+                                      _pageAnchorMonth.year,
+                                      _pageAnchorMonth.month +
+                                          index -
+                                          _initialPage);
+                                  final year = targetMonth.year;
+                                  final month = targetMonth.month;
+                                  final lastDay =
+                                      DateTime(year, month + 1, 0).day;
 
-                              // ⭐ 2026-09-05 - "팀 로우 타임라인" 안으로 전면 교체.
-                              // 1~15일/16~31일 두 블록이 화면을 정확히 반씩 채우고
-                              // (Expanded), 각 블록 안에서만 가로 스크롤 + (조가
-                              // 많을 때만) 세로 스크롤이 생김 - 페이지 자체를 감싸는
-                              // 바깥 스크롤은 더 이상 필요 없음(MonthShiftTable 참고).
-                              return Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 8.w, vertical: 4.h),
-                                child: MonthShiftTable(
-                                  key: ValueKey('$year-$month'),
-                                  year: year,
-                                  month: month,
-                                  lastDay: lastDay,
-                                  teams: _teams,
-                                  myTeam: _myTeam,
-                                  teamOffsets: _teamOffsets,
-                                  teamConfig: _config,
-                                  baseDate: _baseDate,
-                                  pattern: schedule?.pattern ?? const [],
-                                  shiftColorMap: _shiftColorMap(schedule),
-                                  isViewingCurrentRealMonth:
-                                      _currentMonth.year ==
-                                              DateTime.now().year &&
-                                          _currentMonth.month ==
-                                              DateTime.now().month,
-                                  onPrevMonth: _goToPreviousMonth,
-                                  onNextMonth: _goToNextMonth,
-                                ),
-                              );
-                            },
-                          ),
+                                  // ⭐ 2026-09-05 - "팀 로우 타임라인" 안으로 전면 교체.
+                                  // 1~15일/16~31일 두 블록이 화면을 정확히 반씩 채우고
+                                  // (Expanded), 각 블록 안에서만 가로 스크롤 + (조가
+                                  // 많을 때만) 세로 스크롤이 생김 - 페이지 자체를 감싸는
+                                  // 바깥 스크롤은 더 이상 필요 없음(MonthShiftTable 참고).
+                                  return Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: (layout.valueOrNull ??
+                                                    AllShiftsLayout.overview) ==
+                                                AllShiftsLayout.timeline
+                                            ? 8.w
+                                            : 0,
+                                        vertical: 4.h),
+                                    child: MonthShiftTable(
+                                      key: ValueKey('$year-$month'),
+                                      year: year,
+                                      month: month,
+                                      layout: layout.valueOrNull ??
+                                          AllShiftsLayout.overview,
+                                      lastDay: lastDay,
+                                      teams: _teams,
+                                      myTeam: _myTeam,
+                                      teamOffsets: _teamOffsets,
+                                      teamConfig: _config,
+                                      baseDate: _baseDate,
+                                      pattern: schedule?.pattern ?? const [],
+                                      shiftColorMap: shiftColors,
+                                      isViewingCurrentRealMonth:
+                                          targetMonth.year == now.year &&
+                                              targetMonth.month == now.month,
+                                      onPrevMonth: _goToPreviousMonth,
+                                      onNextMonth: _goToNextMonth,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-    );
+        ));
   }
 }
 
@@ -570,6 +662,7 @@ const double kAllShiftsBlockGap = 12;
 /// 스크롤이 블록 내부에 있어서 Transform.translate로 위치를 맞춰야 했는데,
 /// 이제 블록 자체가 고정 높이라 팀명 열도 그냥 평범한 Column 하나로 끝남).
 class MonthShiftTable extends StatefulWidget {
+  final AllShiftsLayout layout;
   final int year;
   final int month;
   final int lastDay;
@@ -586,6 +679,7 @@ class MonthShiftTable extends StatefulWidget {
 
   const MonthShiftTable({
     super.key,
+    this.layout = AllShiftsLayout.timeline,
     required this.year,
     required this.month,
     required this.lastDay,
@@ -609,11 +703,15 @@ class MonthShiftTable extends StatefulWidget {
 
 class MonthShiftTableState extends State<MonthShiftTable> {
   double _cellWidth = 40;
+  double _preferredCellWidth = 40;
   double _rowHeight = 36;
-  double get _teamWidth => (_cellWidth / 2).clamp(20.0, 48.0);
-  TextStyle get _shiftStyle => TextStyle(fontSize: kAllShiftsShiftTextFontSize.sp,
-    height: 1.15, fontWeight: FontWeight.w600,
-    leadingDistribution: TextLeadingDistribution.even);
+  double get _teamWidth => (_preferredCellWidth / 2).clamp(20.0, 48.0);
+  double get _chipWidth => _preferredCellWidth.clamp(0.0, _cellWidth);
+  TextStyle get _shiftStyle => TextStyle(
+      fontSize: kAllShiftsShiftTextFontSize.sp,
+      height: 1.15,
+      fontWeight: FontWeight.w600,
+      leadingDistribution: TextLeadingDistribution.even);
 
   @override
   void didChangeDependencies() {
@@ -628,19 +726,37 @@ class MonthShiftTableState extends State<MonthShiftTable> {
   }
 
   void _measureCells() {
-    final oldWidth = _cellWidth;
+    if (widget.layout == AllShiftsLayout.overview) return;
     final scaler = MediaQuery.textScalerOf(context);
-    final metrics = ShiftCellMetrics.forNames(widget.pattern, _shiftStyle, scaler,
-        minWidth: 40.w, minHeight: 36.h);
-    final width = metrics.width;
-    _cellWidth = width;
+    final metrics = AllShiftsTimelineMetrics.measure(
+        context,
+        [
+          for (final team in widget.teams)
+            ...(widget.teamConfig?.rules[team]?.shifts ?? widget.pattern)
+        ],
+        _shiftStyle,
+        scaler);
+    _preferredCellWidth = metrics.width;
     _rowHeight = metrics.height;
+    _headerRowHeight = _measureHeaderRowHeight();
+  }
+
+  void _fitTimelineWidth(double availableWidth) {
+    final oldWidth = _cellWidth;
+    final dateWidth = availableWidth - 8.w - 2 * _teamWidth;
+    final width = AppLayout.of(context).isWide || dateWidth <= 0
+        ? _preferredCellWidth
+        : AllShiftsTimelineMetrics.fittedColumnWidth(
+            dateWidth, _preferredCellWidth);
+    _cellWidth = width;
     if (oldWidth != width) {
       for (final c in [_block1Controller, _block2Controller]) {
         final offset = c.hasClients ? c.offset : c.initialScrollOffset;
         final target = (offset / oldWidth).round() * width;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && c.hasClients) c.jumpTo(target.clamp(0.0, c.position.maxScrollExtent));
+          if (mounted && c.hasClients) {
+            c.jumpTo(target.clamp(0.0, c.position.maxScrollExtent));
+          }
         });
       }
     }
@@ -665,14 +781,20 @@ class MonthShiftTableState extends State<MonthShiftTable> {
     return height;
   }
 
-  double get _headerRowHeight => (_headerLineHeight('28',
+  double _headerRowHeight = 40;
+
+  double _measureHeaderRowHeight() => (_headerLineHeight('28',
               _headerTextStyle(kAllShiftsDateNumberFontSize, bold: true)) +
           _headerLineHeight(weekdayLabel(context, 0, narrow: true),
               _headerTextStyle(kAllShiftsWeekdayFontSize)) +
           1.h +
           2 * kAllShiftsCellGap.w +
           4)
-      .clamp(_rowHeight > kAllShiftsHeaderRowHeight.h ? _rowHeight : kAllShiftsHeaderRowHeight.h, double.infinity);
+      .clamp(
+          _rowHeight > kAllShiftsHeaderRowHeight.h
+              ? _rowHeight
+              : kAllShiftsHeaderRowHeight.h,
+          double.infinity);
 
   // ⭐ 2026-09-05 - "오늘 날짜가 바로 보이게" 요청 - 오늘이 속한 블록의 가로
   // 스크롤을 처음부터 오늘 칸 근처로 맞춰서 시작함(initialScrollOffset). 오늘이
@@ -740,8 +862,8 @@ class MonthShiftTableState extends State<MonthShiftTable> {
   }
 
   Color _shiftColor(String shift, ColorScheme colorScheme) {
-    if (shift.isEmpty) return colorScheme.surfaceVariant;
-    return widget.shiftColorMap[shift] ?? colorScheme.surfaceVariant;
+    if (shift.isEmpty) return colorScheme.surfaceContainerHighest;
+    return widget.shiftColorMap[shift] ?? colorScheme.surfaceContainerHighest;
   }
 
   Color _shiftTextColor(String shift, ColorScheme colorScheme) {
@@ -753,29 +875,44 @@ class MonthShiftTableState extends State<MonthShiftTable> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.layout == AllShiftsLayout.overview) {
+      return AllShiftsOverview(
+          year: widget.year,
+          month: widget.month,
+          lastDay: widget.lastDay,
+          teams: widget.teams,
+          myTeam: widget.myTeam,
+          shiftFor: _shiftFor,
+          shiftColors: widget.shiftColorMap,
+          today: widget.isViewingCurrentRealMonth ? DateTime.now() : null);
+    }
+
     final hasBlock2 = widget.lastDay >= MonthShiftTable._block2Start;
     final colorScheme = Theme.of(context).colorScheme;
     // ⭐ 화면 전체(두 블록 다 합친 것) 기준 세로 스크롤 하나 - 클래스
     // docstring 3번 참고. 보통은 다 들어가서 스크롤이 아예 안 생김.
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _dayBlock(context, colorScheme,
-              start: 1,
-              end: hasBlock2 ? 15 : widget.lastDay,
-              controller: _block1Controller),
-          if (hasBlock2) ...[
-            SizedBox(height: kAllShiftsBlockGap.h),
-            _monthNavRow(context, colorScheme),
-            SizedBox(height: kAllShiftsBlockGap.h),
+    return LayoutBuilder(builder: (context, constraints) {
+      _fitTimelineWidth(constraints.maxWidth);
+      return SingleChildScrollView(
+        child: Column(
+          children: [
             _dayBlock(context, colorScheme,
-                start: MonthShiftTable._block2Start,
-                end: widget.lastDay,
-                controller: _block2Controller),
+                start: 1,
+                end: hasBlock2 ? 15 : widget.lastDay,
+                controller: _block1Controller),
+            if (hasBlock2) ...[
+              SizedBox(height: kAllShiftsBlockGap.h),
+              _monthNavRow(context, colorScheme),
+              SizedBox(height: kAllShiftsBlockGap.h),
+              _dayBlock(context, colorScheme,
+                  start: MonthShiftTable._block2Start,
+                  end: widget.lastDay,
+                  controller: _block2Controller),
+            ],
           ],
-        ],
-      ),
-    );
+        ),
+      );
+    });
   }
 
   // ⭐ 2026-09-05 - 두 블록(1~15일/16~말일) 사이에 넣는 보조 월 이동 바(위쪽
@@ -810,41 +947,40 @@ class MonthShiftTableState extends State<MonthShiftTable> {
     if (AppLayout.of(context).isWide) {
       final columns = widget.lastDay == 31 ? 16 : 15;
       return Center(
+          key: ValueKey('roster-timeline-block-$start'),
           child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        controller: controller,
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _teamLabelColumn(colorScheme),
-          Column(children: [
-            Row(children: [
-              for (var i = 0; i < columns; i++)
-                start + i <= end
-                    ? _dateHeaderCell(context, start + i, colorScheme)
-                    : SizedBox(
-                        width: _cellWidth,
-                        height: _headerRowHeight)
-            ]),
-            for (final team in widget.teams)
-              Row(children: [
-                for (var i = 0; i < columns; i++)
-                  start + i <= end
-                      ? _shiftCell(team, start + i, colorScheme)
-                      : SizedBox(
-                          width: _cellWidth,
-                          height: _rowHeight)
+            key: ValueKey('roster-timeline-days-$start'),
+            scrollDirection: Axis.horizontal,
+            controller: controller,
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              _teamLabelColumn(colorScheme),
+              Column(children: [
+                Row(children: [
+                  for (var i = 0; i < columns; i++)
+                    start + i <= end
+                        ? _dateHeaderCell(context, start + i, colorScheme)
+                        : SizedBox(width: _cellWidth, height: _headerRowHeight)
+                ]),
+                for (final team in widget.teams)
+                  Row(children: [
+                    for (var i = 0; i < columns; i++)
+                      start + i <= end
+                          ? _shiftCell(team, start + i, colorScheme)
+                          : SizedBox(width: _cellWidth, height: _rowHeight)
+                  ]),
               ]),
-          ]),
-          _teamLabelColumn(colorScheme),
-        ]),
-      ));
+              _teamLabelColumn(colorScheme),
+            ]),
+          ));
     }
     return Container(
+      key: ValueKey('roster-timeline-block-$start'),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-              color: colorScheme.shadow.withOpacity(0.08),
+              color: colorScheme.shadow.withValues(alpha: 0.08),
               blurRadius: 8,
               offset: const Offset(0, 2))
         ],
@@ -855,60 +991,32 @@ class MonthShiftTableState extends State<MonthShiftTable> {
         children: [
           _teamLabelColumn(colorScheme),
           Expanded(
-            // ⭐ 2026-09-05 - 요청: "가로 스크롤하다가 어중간하게 잘린 날짜
-            // 칸이 보이는 게 부자연스럽다, 완전히 다 보이는 날짜까지만
-            // 보이게". 두 가지를 같이 적용해야 함:
-            //  1) LayoutBuilder로 이 자리가 실제로 받은 폭을 재서, 정확히
-            //     "칸 폭(kAllShiftsDayColumnWidth)의 정수배"만큼만 이 영역이
-            //     쓰게 함(floor 계산) - 나머지 자투리 폭은 오른쪽 팀명 열
-            //     바로 앞의 여백처럼 그냥 비워둠. 이렇게 하면 스크롤을 맨
-            //     끝까지 밀어도 오른쪽 끝에서 칸이 잘릴 일이 아예 없음(뷰포트
-            //     폭 자체가 칸 폭의 배수라서).
-            //  2) 스크롤이 "칸 폭의 배수" 위치에서만 멈추도록
-            //     _SnapToCellScrollPhysics를 적용 - 왼쪽 끝도 항상 칸 경계에서
-            //     시작하게 됨. 두 조건이 같이 있어야 "왼쪽도 오른쪽도 항상
-            //     완전한 칸만 보인다"가 성립함(폭만 맞추면 왼쪽 시작점이
-            //     안 맞을 수 있고, snap만 하면 뷰포트 폭이 안 맞아 오른쪽이
-            //     잘릴 수 있음).
-            // 드래그 도중엔 손가락을 그대로 따라가며 자연스럽게 움직이고,
-            // 손을 뗀 순간(관성 멈출 때)만 가장 가까운 칸 경계로 스냅됨 -
-            // 흔한 캐러셀/페이지 넘김 UX와 같은 느낌이라 부자연스럽지 않음.
-            child: LayoutBuilder(builder: (context, constraints) {
-              final cellW = _cellWidth;
-              final visibleWidth =
-                  (constraints.maxWidth / cellW).floor() * cellW;
-              return Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: SizedBox(
-                  width: visibleWidth > 0 ? visibleWidth : constraints.maxWidth,
-                  // ⭐ 스크롤바 안 보이게(요청) - ScrollConfiguration으로 이
-                  // 서브트리에서만 기본 스크롤바 표시를 꺼서, 다른 화면(설정 등
-                  // 기본 스크롤바가 필요할 수 있는 곳)에는 영향 없음.
-                  child: ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context)
-                        .copyWith(scrollbars: false),
-                    child: SingleChildScrollView(
-                      controller: controller,
-                      scrollDirection: Axis.horizontal,
-                      physics: _SnapToCellScrollPhysics(itemExtent: cellW),
-                      child: Column(
-                        children: [
-                          Row(children: [
-                            for (int d = start; d <= end; d++)
-                              _dateHeaderCell(context, d, colorScheme)
-                          ]),
-                          for (final team in widget.teams)
-                            Row(children: [
-                              for (int d = start; d <= end; d++)
-                                _shiftCell(team, d, colorScheme)
-                            ]),
-                        ],
-                      ),
-                    ),
-                  ),
+            // Both blocks use all space between the fixed team columns.
+            // The column stride is fitted once to a whole number of dates;
+            // no near-complete extra column is discarded by floor rounding.
+            child: ScrollConfiguration(
+              behavior:
+                  ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                key: ValueKey('roster-timeline-days-$start'),
+                controller: controller,
+                scrollDirection: Axis.horizontal,
+                physics: _SnapToCellScrollPhysics(itemExtent: _cellWidth),
+                child: Column(
+                  children: [
+                    Row(children: [
+                      for (int d = start; d <= end; d++)
+                        _dateHeaderCell(context, d, colorScheme)
+                    ]),
+                    for (final team in widget.teams)
+                      Row(children: [
+                        for (int d = start; d <= end; d++)
+                          _shiftCell(team, d, colorScheme)
+                      ]),
+                  ],
                 ),
-              );
-            }),
+              ),
+            ),
           ),
           _teamLabelColumn(colorScheme),
         ],
@@ -941,7 +1049,9 @@ class MonthShiftTableState extends State<MonthShiftTable> {
                 margin: EdgeInsets.all(kAllShiftsCellGap.w),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    color: team == widget.myTeam ? kMyTeamBackground : colorScheme.surfaceVariant,
+                    color: team == widget.myTeam
+                        ? colorScheme.primary
+                        : colorScheme.surfaceContainerHighest,
                     borderRadius:
                         BorderRadius.circular(kAllShiftsCellRadius.r)),
                 child: Text(
@@ -949,7 +1059,9 @@ class MonthShiftTableState extends State<MonthShiftTable> {
                   style: TextStyle(
                       fontSize: kAllShiftsTeamLabelFontSize.sp,
                       fontWeight: FontWeight.bold,
-                      color: colorScheme.primary),
+                      color: team == widget.myTeam
+                          ? colorScheme.onPrimary
+                          : colorScheme.onSurface),
                 ),
               ),
             ),
@@ -973,7 +1085,9 @@ class MonthShiftTableState extends State<MonthShiftTable> {
         margin: EdgeInsets.all(kAllShiftsCellGap.w),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isToday ? colorScheme.primary : colorScheme.surfaceVariant,
+          color: isToday
+              ? colorScheme.primary
+              : colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(kAllShiftsCellRadius.r),
         ),
         child: FittedBox(
@@ -1014,11 +1128,23 @@ class MonthShiftTableState extends State<MonthShiftTable> {
     return SizedBox(
       width: _cellWidth,
       height: _rowHeight,
-      child: Padding(
-        padding: EdgeInsets.all(kAllShiftsCellGap.w),
-        child: AppShiftChip(label: shift, dense: true, wrapLabel: true,
-          cellColor: _shiftColor(shift, colorScheme),
-          cellTextStyle: _shiftStyle.copyWith(color: _shiftTextColor(shift, colorScheme))),
+      child: Center(
+        child: SizedBox(
+          width: _chipWidth,
+          height: _rowHeight,
+          child: Padding(
+            padding: EdgeInsets.all(kAllShiftsCellGap.w),
+            child: AppShiftChip(
+                label: shift,
+                dense: true,
+                wrapLabel: true,
+                labelFontScale: AllShiftsTimelineMetrics.labelFontScale,
+                cellPadding: AllShiftsTimelineMetrics.cellPadding,
+                cellColor: _shiftColor(shift, colorScheme),
+                cellTextStyle: _shiftStyle.copyWith(
+                    color: _shiftTextColor(shift, colorScheme))),
+          ),
+        ),
       ),
     );
   }
@@ -1029,8 +1155,8 @@ class MonthShiftTableState extends State<MonthShiftTable> {
 /// "페이지" 단위로 스냅시키는 그 물리)와 완전히 같은 방식을 그대로 가져오되,
 /// "페이지 1장" 대신 "칸 하나(itemExtent 픽셀)" 단위로 스냅하도록 바꾼 것뿐임.
 /// 드래그 중엔 평소처럼 손가락을 그대로 따라가고(부자연스러움 없음), 손을
-/// 떼서 관성이 멈추려는 지점만 가장 가까운 칸 경계로 보정됨 - _dayBlock의
-/// 뷰포트 폭도 칸 폭의 정수배로 맞춰두므로(위 LayoutBuilder 참고), 이 둘이
+/// 떼서 관성이 멈추려는 지점만 가장 가까운 칸 경계로 보정됨 - 두 줄 공통 LayoutBuilder가
+/// 실제 날짜 영역에 맞춰 칸 폭을 정수 개로 나누므로, 이 둘이
 /// 같이 있어야 "왼쪽도 오른쪽도 항상 완전한 칸만 보인다"가 성립함.
 class _SnapToCellScrollPhysics extends ScrollPhysics {
   final double itemExtent;

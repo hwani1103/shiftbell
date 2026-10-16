@@ -52,6 +52,7 @@ abstract final class AnalyticsEvent {
   static const calendarThemeChanged = 'calendar_theme_changed';
   static const memoSaved = 'memo_saved';
   static const otSaved = 'ot_saved';
+  static const workHoursSettingsSaved = 'work_hours_settings_saved';
   static const scheduleCreated = 'schedule_created';
   static const sleepRecordSaved = 'sleep_record_saved';
   static const friendShareStarted = 'friend_share_started';
@@ -105,6 +106,7 @@ abstract final class AnalyticsEvent {
     calendarThemeChanged,
     memoSaved,
     otSaved,
+    workHoursSettingsSaved,
     scheduleCreated,
     sleepRecordSaved,
     friendShareStarted,

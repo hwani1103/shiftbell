@@ -1,13 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_widget_sleep_label">수면 기록</string>
     <string name="channel_schedule_notify">일정 알림</string>
-    <string name="sleep_widget_brand">교대시계</string>
-    <string name="sleep_widget_description">버튼으로 취침/기상을 기록해요.</string>
-    <string name="sleep_widget_no_shift">근무없음</string>
-    <string name="sleep_widget_not_set">미설정</string>
-    <string name="sleep_widget_sleep">수면</string>
-    <string name="sleep_widget_tab_off">탭 꺼짐</string>
-    <string name="sleep_widget_unknown">정보 없음</string>
-    <string name="sleep_widget_wake">기상</string>
+    <string name="widget_public_holiday">공휴일</string>
 </resources>

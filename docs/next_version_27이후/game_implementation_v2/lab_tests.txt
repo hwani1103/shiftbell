@@ -1,0 +1,3 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/examples/sync_path_lab/test/lab_isolation_test.dart
+00:00 +0: only independent devDebug application ID and no app service dependencies
+00:01 +1: All tests passed!

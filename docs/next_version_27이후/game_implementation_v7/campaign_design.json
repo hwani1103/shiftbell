@@ -1,0 +1,6210 @@
+{
+  "humanPlaytest": "NOT_TESTED",
+  "difficulty": "Strictly increasing analytical authoring score; human difficulty still requires playtesting",
+  "candidatesReviewed": 2354,
+  "levels": [
+    {
+      "id": "L01",
+      "source": {
+        "seed": null,
+        "attempt": null,
+        "family": "handcrafted"
+      },
+      "concept": "Separated routes; every legal complete plan is safe",
+      "authoringDifficulty": 2.48,
+      "metrics": {
+        "units": 2,
+        "temporalChoices": {
+          "A": 1,
+          "B": 1
+        },
+        "rawDomains": [
+          1,
+          1
+        ],
+        "distinctSolutions": 1,
+        "exactCommandSolutions": 1,
+        "minimumExtraDistance": 0,
+        "minimumDetouringUnits": 0,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 4,
+        "shortestDistances": [
+          4,
+          4
+        ],
+        "minimumCommands": [
+          2,
+          2
+        ],
+        "shortestConflictParticipation": [
+          0,
+          0
+        ],
+        "conflictParticipation": [
+          0,
+          0
+        ],
+        "pairConflictRates": [
+          0.0
+        ],
+        "constraintBits": 0.0,
+        "score": 2.48,
+        "sharedMandatoryCells": [],
+        "walkableCells": 9,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              2,
+              2
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 1
+    },
+    {
+      "id": "L02",
+      "source": {
+        "seed": null,
+        "attempt": null,
+        "family": "handcrafted"
+      },
+      "concept": "Obvious unsafe top meeting; three safe shortest combinations",
+      "authoringDifficulty": 2.7497743745312486,
+      "metrics": {
+        "units": 2,
+        "temporalChoices": {
+          "A": 2,
+          "B": 2
+        },
+        "rawDomains": [
+          2,
+          2
+        ],
+        "distinctSolutions": 3,
+        "exactCommandSolutions": 3,
+        "minimumExtraDistance": 0,
+        "minimumDetouringUnits": 0,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 4,
+        "shortestDistances": [
+          4,
+          4
+        ],
+        "minimumCommands": [
+          2,
+          2
+        ],
+        "shortestConflictParticipation": [
+          1,
+          1
+        ],
+        "conflictParticipation": [
+          1,
+          1
+        ],
+        "pairConflictRates": [
+          0.25
+        ],
+        "constraintBits": 0.41503749927884376,
+        "score": 2.7497743745312486,
+        "sharedMandatoryCells": [],
+        "walkableCells": 25,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                2,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              2,
+              2
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 2
+    },
+    {
+      "id": "L03",
+      "source": {
+        "seed": 501014,
+        "attempt": 10248,
+        "family": "maze"
+      },
+      "concept": "2-ball coordination; required extra 2 cells",
+      "authoringDifficulty": 5.406655264677466,
+      "metrics": {
+        "units": 2,
+        "temporalChoices": {
+          "A": 13,
+          "B": 8
+        },
+        "rawDomains": [
+          31,
+          12
+        ],
+        "distinctSolutions": 44,
+        "exactCommandSolutions": 140,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 5,
+        "shortestDistances": [
+          4,
+          4
+        ],
+        "minimumCommands": [
+          2,
+          3
+        ],
+        "shortestConflictParticipation": [
+          1,
+          1
+        ],
+        "conflictParticipation": [
+          1,
+          1
+        ],
+        "pairConflictRates": [
+          0.5769230769230769
+        ],
+        "constraintBits": 1.2410080995037949,
+        "score": 5.406655264677466,
+        "sharedMandatoryCells": [],
+        "walkableCells": 19,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                4
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                3,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              3,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              3,
+              4
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 4
+    },
+    {
+      "id": "L04",
+      "source": {
+        "seed": 501014,
+        "attempt": 1796,
+        "family": "rooms"
+      },
+      "concept": "2-ball coordination; required extra 2 cells",
+      "authoringDifficulty": 6.930225625468751,
+      "metrics": {
+        "units": 2,
+        "temporalChoices": {
+          "A": 3,
+          "B": 4
+        },
+        "rawDomains": [
+          5,
+          6
+        ],
+        "distinctSolutions": 1,
+        "exactCommandSolutions": 3,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 5,
+        "shortestDistances": [
+          4,
+          4
+        ],
+        "minimumCommands": [
+          2,
+          2
+        ],
+        "shortestConflictParticipation": [
+          1,
+          1
+        ],
+        "conflictParticipation": [
+          1,
+          1
+        ],
+        "pairConflictRates": [
+          0.9166666666666666
+        ],
+        "constraintBits": 3.584962500721156,
+        "score": 6.930225625468751,
+        "sharedMandatoryCells": [
+          [
+            2,
+            4
+          ]
+        ],
+        "walkableCells": 14,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 10
+    },
+    {
+      "id": "L05",
+      "source": {
+        "seed": 501014,
+        "attempt": 15000,
+        "family": "rooms"
+      },
+      "concept": "2-ball coordination; required extra 2 cells",
+      "authoringDifficulty": 7.570937980999601,
+      "metrics": {
+        "units": 2,
+        "temporalChoices": {
+          "A": 10,
+          "B": 23
+        },
+        "rawDomains": [
+          14,
+          43
+        ],
+        "distinctSolutions": 11,
+        "exactCommandSolutions": 55,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 6,
+        "shortestDistances": [
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          2
+        ],
+        "shortestConflictParticipation": [
+          1,
+          1
+        ],
+        "conflictParticipation": [
+          1,
+          1
+        ],
+        "pairConflictRates": [
+          0.9521739130434783
+        ],
+        "constraintBits": 4.386058432307078,
+        "score": 7.570937980999601,
+        "sharedMandatoryCells": [
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            1
+          ]
+        ],
+        "walkableCells": 20,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                3,
+                1
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                2,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                5,
+                1
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                2,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 12
+    },
+    {
+      "id": "L06",
+      "source": {
+        "seed": 501014,
+        "attempt": 1400,
+        "family": "rooms"
+      },
+      "concept": "2-ball coordination; required extra 2 cells",
+      "authoringDifficulty": 7.97,
+      "metrics": {
+        "units": 2,
+        "temporalChoices": {
+          "A": 8,
+          "B": 4
+        },
+        "rawDomains": [
+          14,
+          5
+        ],
+        "distinctSolutions": 1,
+        "exactCommandSolutions": 4,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 6,
+        "shortestDistances": [
+          4,
+          4
+        ],
+        "minimumCommands": [
+          2,
+          3
+        ],
+        "shortestConflictParticipation": [
+          1,
+          1
+        ],
+        "conflictParticipation": [
+          1,
+          1
+        ],
+        "pairConflictRates": [
+          0.96875
+        ],
+        "constraintBits": 5.0,
+        "score": 7.97,
+        "sharedMandatoryCells": [
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ]
+        ],
+        "walkableCells": 15,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                3
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 14
+    },
+    {
+      "id": "L07",
+      "source": {
+        "seed": 501015,
+        "attempt": 46168,
+        "family": "rooms"
+      },
+      "concept": "3-ball coordination; required extra 2 cells",
+      "authoringDifficulty": 9.029864020499554,
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 2,
+          "B": 8,
+          "C": 23
+        },
+        "rawDomains": [
+          2,
+          11,
+          48
+        ],
+        "distinctSolutions": 18,
+        "exactCommandSolutions": 40,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 10,
+        "shortestDistances": [
+          6,
+          6,
+          6
+        ],
+        "minimumCommands": [
+          4,
+          3,
+          2
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.3125,
+          0.43478260869565216,
+          0.8913043478260869
+        ],
+        "constraintBits": 4.3536369546147,
+        "score": 9.029864020499554,
+        "sharedMandatoryCells": [
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ]
+        ],
+        "walkableCells": 24,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                5
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                5,
+                4
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                5,
+                2
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 16
+    },
+    {
+      "id": "L08",
+      "source": {
+        "seed": 501015,
+        "attempt": 30588,
+        "family": "rooms"
+      },
+      "concept": "3-ball coordination; required extra 2 cells",
+      "authoringDifficulty": 10.14115288373833,
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 8,
+          "B": 19,
+          "C": 8
+        },
+        "rawDomains": [
+          14,
+          32,
+          14
+        ],
+        "distinctSolutions": 16,
+        "exactCommandSolutions": 80,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 9,
+        "shortestDistances": [
+          4,
+          4,
+          4
+        ],
+        "minimumCommands": [
+          2,
+          2,
+          2
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.375,
+          0.96875,
+          0.375
+        ],
+        "constraintBits": 6.247927513443585,
+        "score": 10.14115288373833,
+        "sharedMandatoryCells": [
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ]
+        ],
+        "walkableCells": 21,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                3,
+                5
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                2,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 18
+    },
+    {
+      "id": "L09",
+      "source": {
+        "seed": 501015,
+        "attempt": 44784,
+        "family": "maze"
+      },
+      "concept": "3-ball coordination; required extra 2 cells",
+      "authoringDifficulty": 10.53282362246807,
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 5,
+          "B": 12,
+          "C": 22
+        },
+        "rawDomains": [
+          7,
+          18,
+          38
+        ],
+        "distinctSolutions": 13,
+        "exactCommandSolutions": 35,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 10,
+        "shortestDistances": [
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          3,
+          2
+        ],
+        "shortestConflictParticipation": [
+          1,
+          0,
+          1
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.35,
+          0.9818181818181818,
+          0.4166666666666667
+        ],
+        "constraintBits": 6.665882496104723,
+        "score": 10.53282362246807,
+        "sharedMandatoryCells": [
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ]
+        ],
+        "walkableCells": 33,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                6,
+                2
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                0
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              1
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 19
+    },
+    {
+      "id": "L10",
+      "source": {
+        "seed": 501015,
+        "attempt": 10504,
+        "family": "rooms"
+      },
+      "concept": "3-ball coordination; required extra 6 cells",
+      "authoringDifficulty": 11.080196166958109,
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 5,
+          "B": 2,
+          "C": 22
+        },
+        "rawDomains": [
+          9,
+          2,
+          34
+        ],
+        "distinctSolutions": 29,
+        "exactCommandSolutions": 83,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 9,
+        "shortestDistances": [
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          4,
+          2
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.3,
+          0.5272727272727272,
+          0.5454545454545454
+        ],
+        "constraintBits": 2.9233787183970876,
+        "score": 11.080196166958109,
+        "sharedMandatoryCells": [],
+        "walkableCells": 24,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                5
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 20
+    },
+    {
+      "id": "L11",
+      "source": {
+        "seed": 501015,
+        "attempt": 5460,
+        "family": "maze"
+      },
+      "concept": "3-ball coordination; required extra 6 cells",
+      "authoringDifficulty": 12.020000000000001,
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 2,
+          "B": 4,
+          "C": 2
+        },
+        "rawDomains": [
+          2,
+          12,
+          2
+        ],
+        "distinctSolutions": 1,
+        "exactCommandSolutions": 9,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 11,
+        "shortestDistances": [
+          11,
+          11,
+          11
+        ],
+        "minimumCommands": [
+          4,
+          3,
+          4
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.25,
+          0.5,
+          0.5
+        ],
+        "constraintBits": 4.0,
+        "score": 12.020000000000001,
+        "sharedMandatoryCells": [
+          [
+            6,
+            2
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            6,
+            4
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            6,
+            6
+          ]
+        ],
+        "walkableCells": 34,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                4,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                4,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                4,
+                6
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 22
+    },
+    {
+      "id": "L12",
+      "source": {
+        "seed": 501015,
+        "attempt": 41052,
+        "family": "rooms"
+      },
+      "concept": "3-ball coordination; required extra 6 cells",
+      "authoringDifficulty": 13.020451250937505,
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 18,
+          "B": 8,
+          "C": 7
+        },
+        "rawDomains": [
+          32,
+          10,
+          9
+        ],
+        "distinctSolutions": 28,
+        "exactCommandSolutions": 58,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 13,
+        "shortestDistances": [
+          6,
+          6,
+          6
+        ],
+        "minimumCommands": [
+          3,
+          4,
+          4
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.7916666666666666,
+          0.7936507936507936,
+          0.6607142857142857
+        ],
+        "constraintBits": 5.169925001442312,
+        "score": 13.020451250937505,
+        "sharedMandatoryCells": [
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            4
+          ]
+        ],
+        "walkableCells": 18,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 24
+    },
+    {
+      "id": "L13",
+      "source": {
+        "seed": 501015,
+        "attempt": 46576,
+        "family": "rooms"
+      },
+      "concept": "3-ball coordination; required extra 6 cells",
+      "authoringDifficulty": 13.99455507386869,
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 7,
+          "B": 16,
+          "C": 24
+        },
+        "rawDomains": [
+          9,
+          22,
+          34
+        ],
+        "distinctSolutions": 18,
+        "exactCommandSolutions": 50,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 10,
+        "shortestDistances": [
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          3,
+          2
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.6964285714285714,
+          0.7321428571428571,
+          0.7630208333333334
+        ],
+        "constraintBits": 7.222392421336448,
+        "score": 13.99455507386869,
+        "sharedMandatoryCells": [],
+        "walkableCells": 18,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 26
+    },
+    {
+      "id": "L14",
+      "source": {
+        "seed": 501015,
+        "attempt": 47956,
+        "family": "rooms"
+      },
+      "concept": "3-ball coordination; required extra 6 cells",
+      "authoringDifficulty": 14.969759612669307,
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 19,
+          "B": 21,
+          "C": 18
+        },
+        "rawDomains": [
+          33,
+          31,
+          23
+        ],
+        "distinctSolutions": 17,
+        "exactCommandSolutions": 53,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 10,
+        "shortestDistances": [
+          4,
+          4,
+          4
+        ],
+        "minimumCommands": [
+          2,
+          2,
+          2
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.7192982456140351,
+          0.7134502923976608,
+          0.8571428571428571
+        ],
+        "constraintBits": 8.722707096414318,
+        "score": 14.969759612669307,
+        "sharedMandatoryCells": [],
+        "walkableCells": 18,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                3,
+                3
+              ],
+              [
+                3,
+                5
+              ],
+              [
+                3,
+                1
+              ],
+              [
+                2,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                5,
+                2
+              ],
+              [
+                5,
+                1
+              ],
+              [
+                2,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                5,
+                1
+              ],
+              [
+                2,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 28
+    },
+    {
+      "id": "L15",
+      "source": {
+        "seed": 501015,
+        "attempt": 36288,
+        "family": "rooms"
+      },
+      "concept": "3-ball coordination; required extra 6 cells",
+      "authoringDifficulty": 15.375231950274946,
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 6,
+          "B": 14,
+          "C": 6
+        },
+        "rawDomains": [
+          8,
+          22,
+          8
+        ],
+        "distinctSolutions": 1,
+        "exactCommandSolutions": 1,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 12,
+        "shortestDistances": [
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          2,
+          3
+        ],
+        "shortestConflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "conflictParticipation": [
+          2,
+          2,
+          2
+        ],
+        "pairConflictRates": [
+          0.9404761904761905,
+          0.7777777777777778,
+          0.9285714285714286
+        ],
+        "constraintBits": 8.977279923499916,
+        "score": 15.375231950274946,
+        "sharedMandatoryCells": [
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            2,
+            5
+          ]
+        ],
+        "walkableCells": 18,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                5
+              ],
+              [
+                2,
+                5
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                3,
+                6
+              ],
+              [
+                2,
+                6
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                3,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              6
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 29
+    },
+    {
+      "id": "L16",
+      "source": {
+        "seed": 501015,
+        "attempt": 2155,
+        "family": "rooms"
+      },
+      "concept": "4-ball coordination; required extra 4 cells",
+      "authoringDifficulty": 16.15319908909338,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 10,
+          "B": 12,
+          "C": 13,
+          "D": 29
+        },
+        "rawDomains": [
+          16,
+          14,
+          15,
+          59
+        ],
+        "distinctSolutions": 40,
+        "exactCommandSolutions": 284,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 13,
+        "shortestDistances": [
+          5,
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          3,
+          3,
+          2
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.43333333333333335,
+          0.5230769230769231,
+          0.7034482758620689,
+          0.7307692307692307,
+          0.8189655172413793,
+          0.7506631299734748
+        ],
+        "constraintBits": 10.14338321398982,
+        "score": 16.15319908909338,
+        "sharedMandatoryCells": [],
+        "walkableCells": 23,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                5,
+                2
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                2,
+                2
+              ],
+              [
+                5,
+                2
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                1,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 30
+    },
+    {
+      "id": "L17",
+      "source": {
+        "seed": 501015,
+        "attempt": 33483,
+        "family": "rooms"
+      },
+      "concept": "4-ball coordination; required extra 4 cells",
+      "authoringDifficulty": 17.137256992227837,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 17,
+          "B": 4,
+          "C": 19,
+          "D": 5
+        },
+        "rawDomains": [
+          26,
+          5,
+          29,
+          6
+        ],
+        "distinctSolutions": 2,
+        "exactCommandSolutions": 20,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 13,
+        "shortestDistances": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "minimumCommands": [
+          2,
+          3,
+          2,
+          3
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.9705882352941176,
+          0.5356037151702786,
+          0.32941176470588235,
+          0.5,
+          0.3,
+          0.9263157894736842
+        ],
+        "constraintBits": 11.657318449581288,
+        "score": 17.137256992227837,
+        "sharedMandatoryCells": [
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            2,
+            5
+          ]
+        ],
+        "walkableCells": 24,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                1
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                0,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                0,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                5
+              ],
+              [
+                0,
+                5
+              ],
+              [
+                0,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                2,
+                5
+              ],
+              [
+                0,
+                5
+              ],
+              [
+                0,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 32
+    },
+    {
+      "id": "L18",
+      "source": {
+        "seed": 501015,
+        "attempt": 21667,
+        "family": "maze"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 18.046121802537563,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 6,
+          "B": 3,
+          "C": 6,
+          "D": 3
+        },
+        "rawDomains": [
+          12,
+          3,
+          12,
+          3
+        ],
+        "distinctSolutions": 14,
+        "exactCommandSolutions": 62,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 15,
+        "shortestDistances": [
+          9,
+          9,
+          9,
+          9
+        ],
+        "minimumCommands": [
+          3,
+          4,
+          3,
+          4
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.16666666666666666,
+          0.75,
+          0.2777777777777778,
+          0.16666666666666666,
+          0.3333333333333333,
+          0.2222222222222222
+        ],
+        "constraintBits": 4.532495080827021,
+        "score": 18.046121802537563,
+        "sharedMandatoryCells": [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            6,
+            2
+          ]
+        ],
+        "walkableCells": 33,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                6,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                6
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                6,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                6,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                0,
+                6
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                6,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 34
+    },
+    {
+      "id": "L19",
+      "source": {
+        "seed": 501015,
+        "attempt": 23147,
+        "family": "rooms"
+      },
+      "concept": "4-ball coordination; required extra 6 cells",
+      "authoringDifficulty": 19.099094152337187,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 7,
+          "B": 25,
+          "C": 16,
+          "D": 26
+        },
+        "rawDomains": [
+          12,
+          53,
+          33,
+          52
+        ],
+        "distinctSolutions": 15,
+        "exactCommandSolutions": 290,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 17,
+        "shortestDistances": [
+          9,
+          9,
+          9,
+          9
+        ],
+        "minimumCommands": [
+          4,
+          3,
+          4,
+          3
+        ],
+        "shortestConflictParticipation": [
+          2,
+          3,
+          3,
+          2
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.14285714285714285,
+          0.6696428571428571,
+          0.11538461538461539,
+          0.4475,
+          0.8892307692307693,
+          0.3798076923076923
+        ],
+        "constraintBits": 12.244760234364902,
+        "score": 19.099094152337187,
+        "sharedMandatoryCells": [],
+        "walkableCells": 37,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                6,
+                5
+              ],
+              [
+                1,
+                5
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                5,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                3
+              ],
+              [
+                5,
+                3
+              ],
+              [
+                5,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                6,
+                0
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                6,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                3
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              3
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 36
+    },
+    {
+      "id": "L20",
+      "source": {
+        "seed": 501015,
+        "attempt": 2433,
+        "family": "maze"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 19.548138897770425,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 6,
+          "B": 3,
+          "C": 29,
+          "D": 3
+        },
+        "rawDomains": [
+          11,
+          3,
+          77,
+          3
+        ],
+        "distinctSolutions": 12,
+        "exactCommandSolutions": 316,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 14,
+        "shortestDistances": [
+          8,
+          8,
+          8,
+          8
+        ],
+        "minimumCommands": [
+          3,
+          4,
+          2,
+          4
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.2222222222222222,
+          0.9310344827586207,
+          0.2222222222222222,
+          0.40229885057471265,
+          0.4444444444444444,
+          0.367816091954023
+        ],
+        "constraintBits": 7.027905996569885,
+        "score": 19.548138897770425,
+        "sharedMandatoryCells": [
+          [
+            4,
+            6
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            6,
+            4
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            6,
+            6
+          ]
+        ],
+        "walkableCells": 34,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 37
+    },
+    {
+      "id": "L21",
+      "source": {
+        "seed": 501015,
+        "attempt": 6961,
+        "family": "rooms"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 20.04001264961239,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 13,
+          "B": 7,
+          "C": 21,
+          "D": 3
+        },
+        "rawDomains": [
+          19,
+          9,
+          41,
+          5
+        ],
+        "distinctSolutions": 26,
+        "exactCommandSolutions": 126,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 14,
+        "shortestDistances": [
+          5,
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          3,
+          2,
+          3
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.7142857142857143,
+          0.5494505494505495,
+          0.4358974358974359,
+          0.47619047619047616,
+          0.5238095238095238,
+          0.5555555555555556
+        ],
+        "constraintBits": 7.7846348455575205,
+        "score": 20.04001264961239,
+        "sharedMandatoryCells": [],
+        "walkableCells": 27,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                6
+              ],
+              [
+                1,
+                6
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                4,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                6
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                4,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                5,
+                6
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                4,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                6,
+                4
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 38
+    },
+    {
+      "id": "L22",
+      "source": {
+        "seed": 501015,
+        "attempt": 3723,
+        "family": "maze"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 20.510225625468752,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 8,
+          "B": 6,
+          "C": 6,
+          "D": 8
+        },
+        "rawDomains": [
+          12,
+          10,
+          10,
+          12
+        ],
+        "distinctSolutions": 12,
+        "exactCommandSolutions": 60,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 3,
+        "minimumTotalCommands": 19,
+        "shortestDistances": [
+          8,
+          8,
+          8,
+          8
+        ],
+        "minimumCommands": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.3333333333333333,
+          0.3125,
+          0.78125,
+          0.75,
+          0.375,
+          0.3125
+        ],
+        "constraintBits": 7.584962500721156,
+        "score": 20.510225625468752,
+        "sharedMandatoryCells": [
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            4,
+            4
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            6,
+            2
+          ]
+        ],
+        "walkableCells": 32,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                6
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                3,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                6,
+                5
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                3,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                6,
+                2
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                3,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                0,
+                0
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                6
+              ],
+              [
+                3,
+                6
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              3,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              5
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              3,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              3,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              3,
+              6
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 39
+    },
+    {
+      "id": "L23",
+      "source": {
+        "seed": 501015,
+        "attempt": 18309,
+        "family": "maze"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 20.995755039412124,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 31,
+          "B": 2,
+          "C": 14,
+          "D": 8
+        },
+        "rawDomains": [
+          66,
+          2,
+          26,
+          18
+        ],
+        "distinctSolutions": 10,
+        "exactCommandSolutions": 210,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 13,
+        "shortestDistances": [
+          7,
+          7,
+          7,
+          7
+        ],
+        "minimumCommands": [
+          2,
+          4,
+          3,
+          3
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.41935483870967744,
+          0.4539170506912442,
+          0.6169354838709677,
+          0.8571428571428571,
+          0.5,
+          0.5892857142857143
+        ],
+        "constraintBits": 9.439623137557117,
+        "score": 20.995755039412124,
+        "sharedMandatoryCells": [
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            4,
+            2
+          ]
+        ],
+        "walkableCells": 34,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                2,
+                6
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                0,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 40
+    },
+    {
+      "id": "L24",
+      "source": {
+        "seed": 501015,
+        "attempt": 48203,
+        "family": "maze"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 21.979335773206135,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 14,
+          "B": 4,
+          "C": 14,
+          "D": 12
+        },
+        "rawDomains": [
+          26,
+          9,
+          26,
+          26
+        ],
+        "distinctSolutions": 9,
+        "exactCommandSolutions": 180,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 18,
+        "shortestDistances": [
+          9,
+          9,
+          9,
+          9
+        ],
+        "minimumCommands": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.4107142857142857,
+          0.673469387755102,
+          0.6607142857142857,
+          0.5178571428571429,
+          0.4375,
+          0.7916666666666666
+        ],
+        "constraintBits": 10.029747343394051,
+        "score": 21.979335773206135,
+        "sharedMandatoryCells": [
+          [
+            4,
+            2
+          ]
+        ],
+        "walkableCells": 33,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                6
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                5,
+                6
+              ],
+              [
+                2,
+                6
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              5,
+              6
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 42
+    },
+    {
+      "id": "L25",
+      "source": {
+        "seed": 501015,
+        "attempt": 21425,
+        "family": "rooms"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 22.926104108489504,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 10,
+          "B": 12,
+          "C": 17,
+          "D": 16
+        },
+        "rawDomains": [
+          21,
+          21,
+          31,
+          20
+        ],
+        "distinctSolutions": 6,
+        "exactCommandSolutions": 60,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 3,
+        "minimumTotalCommands": 13,
+        "shortestDistances": [
+          4,
+          4,
+          4,
+          4
+        ],
+        "minimumCommands": [
+          2,
+          2,
+          2,
+          3
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.925,
+          0.5058823529411764,
+          0.43125,
+          0.5245098039215687,
+          0.4375,
+          0.8308823529411765
+        ],
+        "constraintBits": 12.409390936137703,
+        "score": 22.926104108489504,
+        "sharedMandatoryCells": [],
+        "walkableCells": 23,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                5
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                3,
+                5
+              ],
+              [
+                0,
+                5
+              ],
+              [
+                1,
+                5
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                5,
+                3
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                3,
+                0
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              3
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 44
+    },
+    {
+      "id": "L26",
+      "source": {
+        "seed": 501015,
+        "attempt": 36251,
+        "family": "maze"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 23.95436783029876,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 43,
+          "B": 12,
+          "C": 12,
+          "D": 43
+        },
+        "rawDomains": [
+          92,
+          20,
+          22,
+          92
+        ],
+        "distinctSolutions": 31,
+        "exactCommandSolutions": 291,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 18,
+        "shortestDistances": [
+          8,
+          8,
+          8,
+          8
+        ],
+        "minimumCommands": [
+          3,
+          4,
+          4,
+          3
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.5872093023255814,
+          0.7596899224806202,
+          0.950784207679827,
+          0.5972222222222222,
+          0.5794573643410853,
+          0.7674418604651163
+        ],
+        "constraintBits": 13.068258200459633,
+        "score": 23.95436783029876,
+        "sharedMandatoryCells": [
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            4,
+            4
+          ]
+        ],
+        "walkableCells": 33,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                4
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                6
+              ],
+              [
+                0,
+                6
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                6
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                6,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 46
+    },
+    {
+      "id": "L27",
+      "source": {
+        "seed": 501015,
+        "attempt": 16890,
+        "family": "rooms"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 24.420948270330676,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 25,
+          "B": 19,
+          "C": 36,
+          "D": 19
+        },
+        "rawDomains": [
+          42,
+          24,
+          106,
+          33
+        ],
+        "distinctSolutions": 23,
+        "exactCommandSolutions": 98,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 18,
+        "shortestDistances": [
+          5,
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          4,
+          2,
+          3
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.6778947368421052,
+          0.9033333333333333,
+          0.7978947368421052,
+          0.72953216374269,
+          0.628808864265928,
+          0.9210526315789473
+        ],
+        "constraintBits": 13.786074262047196,
+        "score": 24.420948270330676,
+        "sharedMandatoryCells": [
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        "walkableCells": 24,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                1
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                1
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                5,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                2,
+                3
+              ],
+              [
+                2,
+                5
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                1,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 47
+    },
+    {
+      "id": "L28",
+      "source": {
+        "seed": 501015,
+        "attempt": 31695,
+        "family": "rooms"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 24.88226742903468,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 22,
+          "B": 6,
+          "C": 22,
+          "D": 14
+        },
+        "rawDomains": [
+          34,
+          7,
+          36,
+          16
+        ],
+        "distinctSolutions": 2,
+        "exactCommandSolutions": 4,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 19,
+        "shortestDistances": [
+          5,
+          5,
+          5,
+          5
+        ],
+        "minimumCommands": [
+          3,
+          4,
+          3,
+          4
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.6515151515151515,
+          0.6611570247933884,
+          0.7954545454545454,
+          0.9242424242424242,
+          0.6904761904761905,
+          0.7175324675324676
+        ],
+        "constraintBits": 14.311180660053354,
+        "score": 24.88226742903468,
+        "sharedMandatoryCells": [
+          [
+            4,
+            4
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            5,
+            5
+          ]
+        ],
+        "walkableCells": 28,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                0,
+                4
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                5,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                6,
+                6
+              ],
+              [
+                6,
+                5
+              ],
+              [
+                4,
+                5
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                5,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                2,
+                5
+              ],
+              [
+                5,
+                5
+              ],
+              [
+                4,
+                5
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                5,
+                3
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                3,
+                4
+              ],
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                5,
+                3
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              5,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              5,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              5
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              5,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              5,
+              3
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 48
+    },
+    {
+      "id": "L29",
+      "source": {
+        "seed": 501015,
+        "attempt": 46306,
+        "family": "rooms"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 25.376799077489487,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 39,
+          "B": 32,
+          "C": 36,
+          "D": 23
+        },
+        "rawDomains": [
+          51,
+          50,
+          50,
+          43
+        ],
+        "distinctSolutions": 30,
+        "exactCommandSolutions": 120,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 3,
+        "minimumTotalCommands": 19,
+        "shortestDistances": [
+          7,
+          7,
+          7,
+          7
+        ],
+        "minimumCommands": [
+          4,
+          4,
+          4,
+          3
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.6498397435897436,
+          0.8148148148148148,
+          0.6387959866220736,
+          0.6822916666666666,
+          0.9728260869565217,
+          0.572463768115942
+        ],
+        "constraintBits": 15.071998580753055,
+        "score": 25.376799077489487,
+        "sharedMandatoryCells": [
+          [
+            1,
+            5
+          ]
+        ],
+        "walkableCells": 31,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                3
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                6,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                3
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                6,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                5
+              ],
+              [
+                3,
+                5
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                6,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                0,
+                4
+              ],
+              [
+                0,
+                5
+              ],
+              [
+                3,
+                5
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                6,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              6,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              6,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              6,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              6,
+              4
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 49
+    },
+    {
+      "id": "L30",
+      "source": {
+        "seed": 501015,
+        "attempt": 42517,
+        "family": "rooms"
+      },
+      "concept": "4-ball coordination; required extra 12 cells",
+      "authoringDifficulty": 25.898613033829182,
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 12,
+          "B": 29,
+          "C": 14,
+          "D": 37
+        },
+        "rawDomains": [
+          18,
+          52,
+          20,
+          67
+        ],
+        "distinctSolutions": 3,
+        "exactCommandSolutions": 12,
+        "minimumExtraDistance": 12,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 3,
+        "minimumTotalCommands": 19,
+        "shortestDistances": [
+          7,
+          7,
+          7,
+          7
+        ],
+        "minimumCommands": [
+          4,
+          3,
+          4,
+          3
+        ],
+        "shortestConflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "conflictParticipation": [
+          3,
+          3,
+          3,
+          3
+        ],
+        "pairConflictRates": [
+          0.8189655172413793,
+          0.7083333333333334,
+          0.8220720720720721,
+          0.9310344827586207,
+          0.8583410997204101,
+          0.8822393822393823
+        ],
+        "constraintBits": 15.874789282814126,
+        "score": 25.898613033829182,
+        "sharedMandatoryCells": [
+          [
+            2,
+            3
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            2,
+            5
+          ]
+        ],
+        "walkableCells": 27,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                3
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                2,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                2
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                0
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                2,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                3,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                2,
+                5
+              ],
+              [
+                0,
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        }
+      ],
+      "previousLevel": 50
+    }
+  ]
+}

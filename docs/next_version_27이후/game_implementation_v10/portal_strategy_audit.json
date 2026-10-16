@@ -1,0 +1,231 @@
+[
+  {
+    "id": "L51",
+    "safePortalUserSets": [
+      "AB"
+    ],
+    "unitsChoosingPortalOrNormal": [],
+    "minimumTransfers": 2
+  },
+  {
+    "id": "L52",
+    "safePortalUserSets": [
+      "A",
+      "AB"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "B"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L53",
+    "safePortalUserSets": [
+      "AB"
+    ],
+    "unitsChoosingPortalOrNormal": [],
+    "minimumTransfers": 2
+  },
+  {
+    "id": "L54",
+    "safePortalUserSets": [
+      "A",
+      "AB",
+      "ABC",
+      "AC"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "B",
+      "C"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L55",
+    "safePortalUserSets": [
+      "A",
+      "C"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "C"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L56",
+    "safePortalUserSets": [
+      "BC"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A"
+    ],
+    "minimumTransfers": 2
+  },
+  {
+    "id": "L57",
+    "safePortalUserSets": [
+      "AB",
+      "B"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "B"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L58",
+    "safePortalUserSets": [
+      "B",
+      "BC"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "B",
+      "C"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L59",
+    "safePortalUserSets": [
+      "B"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "B"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L60",
+    "safePortalUserSets": [
+      "AC"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "B",
+      "C"
+    ],
+    "minimumTransfers": 2
+  },
+  {
+    "id": "L61",
+    "safePortalUserSets": [
+      "C"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "C"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L62",
+    "safePortalUserSets": [
+      "B"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "B",
+      "C"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L63",
+    "safePortalUserSets": [
+      "A",
+      "D"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "B",
+      "D"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L64",
+    "safePortalUserSets": [
+      "ABCD",
+      "ACD"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "B"
+    ],
+    "minimumTransfers": 3
+  },
+  {
+    "id": "L65",
+    "safePortalUserSets": [
+      "D"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "C",
+      "D"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L66",
+    "safePortalUserSets": [
+      "D"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "C",
+      "D"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L67",
+    "safePortalUserSets": [
+      "C"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "B",
+      "C"
+    ],
+    "minimumTransfers": 1
+  },
+  {
+    "id": "L68",
+    "safePortalUserSets": [
+      "ABD",
+      "AD"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "minimumTransfers": 2
+  },
+  {
+    "id": "L69",
+    "safePortalUserSets": [
+      "AC"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "minimumTransfers": 2
+  },
+  {
+    "id": "L70",
+    "safePortalUserSets": [
+      "C"
+    ],
+    "unitsChoosingPortalOrNormal": [
+      "C"
+    ],
+    "minimumTransfers": 1
+  }
+]

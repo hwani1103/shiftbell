@@ -1,3 +1,4 @@
+import 'package:shiftbell/providers/app_ui_theme_preview_provider.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -10,9 +11,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/l10n/generated/app_localizations.dart';
 import 'package:shiftbell/screens/onboarding_screen.dart';
 import 'package:shiftbell/theme/app_theme.dart';
+import 'package:shiftbell/theme/app_ui_theme.dart';
 import 'package:shiftbell/widgets/app_content_frame.dart';
 import 'package:shiftbell/constants/layout_limits.dart';
 import 'package:shiftbell/widgets/app_shift_chip.dart';
+import 'package:shiftbell/widgets/app_ui_components.dart';
 
 const capture = bool.fromEnvironment('CAPTURE_ONBOARDING_FEEDBACK');
 final _choices = find.byKey(const ValueKey('onboarding-shift-choices'));
@@ -25,7 +28,9 @@ Future<void> snapshot(WidgetTester tester, GlobalKey key, String name) async {
   await tester.runAsync(() async {
     final picture = await boundary.toImage(pixelRatio: 2);
     final bytes = await picture.toByteData(format: ui.ImageByteFormat.png);
-    final folder = Directory('artifacts/onboarding_theme_2026_10_09/host');
+    final folder = Directory(const String.fromEnvironment(
+        'ONBOARDING_CAPTURE_DIR',
+        defaultValue: 'artifacts/onboarding_theme_2026_10_09/host'));
     await folder.create(recursive: true);
     await File('${folder.path}/$name.png')
         .writeAsBytes(bytes!.buffer.asUint8List());
@@ -34,8 +39,12 @@ Future<void> snapshot(WidgetTester tester, GlobalKey key, String name) async {
 }
 
 Future<AppLocalizations> pumpOnboarding(WidgetTester tester, Locale locale,
-    Size size, double scale, GlobalKey boundary) async {
-  SharedPreferences.setMockInitialValues({});
+    Size size, double scale, GlobalKey boundary,
+    {AppUiPalette? palette,
+    bool reduceMotion = true,
+    DateTime Function()? clock,
+    bool resetPreferences = true}) async {
+  if (resetPreferences) SharedPreferences.setMockInitialValues({});
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
@@ -46,39 +55,49 @@ Future<AppLocalizations> pumpOnboarding(WidgetTester tester, Locale locale,
           ? 'FeedbackHindi'
           : 'FeedbackLatin';
   await tester.pumpWidget(ProviderScope(
+      overrides: [
+        appUiThemePaletteOverrideProvider.overrideWithValue(palette),
+        appUiThemeClockProvider
+            .overrideWithValue(clock ?? () => DateTime(2026, 10, 13, 12))
+      ],
       child: ScreenUtilInit(
-    designSize: const Size(360, 780),
-    minTextAdapt: true,
-    builder: (context, _) {
-      ScreenUtil.configure(
-          data: appContentMediaQuery(MediaQueryData.fromView(View.of(context))),
-          designSize: const Size(360, 780),
-          minTextAdapt: true,
-          splitScreenMode: true);
-      return RepaintBoundary(
-          key: boundary,
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            locale: locale,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            theme: capture
-                ? AppTheme.lightTheme.copyWith(
-                    textTheme:
-                        AppTheme.lightTheme.textTheme.apply(fontFamily: family),
-                    appBarTheme: AppTheme.lightTheme.appBarTheme.copyWith(
-                        titleTextStyle: AppTheme
-                            .lightTheme.appBarTheme.titleTextStyle
-                            ?.copyWith(fontFamily: family)))
-                : AppTheme.lightTheme,
-            builder: (context, child) => MediaQuery(
-                data: MediaQuery.of(context)
-                    .copyWith(textScaler: TextScaler.linear(scale)),
-                child: AppContentFrame(child: child!)),
-            home: const OnboardingScreen(),
-          ));
-    },
-  )));
+        designSize: const Size(360, 780),
+        minTextAdapt: true,
+        builder: (context, _) {
+          ScreenUtil.configure(
+              data: appContentMediaQuery(
+                  MediaQueryData.fromView(View.of(context))),
+              designSize: const Size(360, 780),
+              minTextAdapt: true,
+              splitScreenMode: true);
+          return RepaintBoundary(
+              key: boundary,
+              child: MaterialApp(
+                debugShowCheckedModeBanner: false,
+                locale: locale,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                theme: palette != null
+                    ? AppUiTheme.withPalette(AppTheme.lightTheme, palette)
+                    : capture
+                        ? AppTheme.lightTheme.copyWith(
+                            textTheme: AppTheme.lightTheme.textTheme
+                                .apply(fontFamily: family),
+                            appBarTheme: AppTheme.lightTheme.appBarTheme
+                                .copyWith(
+                                    titleTextStyle: AppTheme
+                                        .lightTheme.appBarTheme.titleTextStyle
+                                        ?.copyWith(fontFamily: family)))
+                        : AppTheme.lightTheme,
+                builder: (context, child) => MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                        textScaler: TextScaler.linear(scale),
+                        disableAnimations: reduceMotion),
+                    child: AppContentFrame(child: child!)),
+                home: const OnboardingScreen(),
+              ));
+        },
+      )));
   await tester.pumpAndSettle();
   return AppLocalizations.of(tester.element(find.byType(OnboardingScreen)));
 }
@@ -112,13 +131,25 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(Dialog), findsNothing);
       await snapshot(tester, key, '${code}_names');
-      await tester.tap(find.text(l.commonNext));
+      if (capture) {
+        await tester.ensureVisible(find.text(l.onboardingAddShiftName));
+        await tester.tap(find.text(l.onboardingAddShiftName));
+        await tester.pumpAndSettle();
+        tester.view.viewInsets = const FakeViewPadding(bottom: 240);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        await snapshot(tester, key, code + '_name_input_keyboard');
+        await tester.ensureVisible(find.text(l.commonCancel));
+        await tester.tap(find.text(l.commonCancel));
+        await tester.pumpAndSettle();
+        tester.view.resetViewInsets();
+        await tester.pumpAndSettle();
+      }
+
+      await tester.tap(find.text(l.onboardingNextPattern));
       await tester.pumpAndSettle();
-      final empty = find.descendant(
-          of: _preview, matching: find.text(l.onboardingNoPattern));
-      expect(empty.hitTestable(), findsOneWidget);
-      expect((tester.getCenter(empty).dy - tester.getCenter(_preview).dy).abs(),
-          lessThan(1));
+      expect(find.text(l.onboardingNoPattern), findsNothing);
+      expect(find.text(l.onboardingTodayPositionHint), findsNothing);
       await snapshot(tester, key, '${code}_pattern_empty');
       for (final name in [
         l.shiftDay,
@@ -138,13 +169,26 @@ void main() {
             findsOneWidget);
       }
       await snapshot(tester, key, '${code}_pattern_added');
+      if (capture) {
+        await tester.ensureVisible(find.text(l.onboardingCompletePattern));
+        await tester.tap(find.text(l.onboardingCompletePattern));
+        await tester.pumpAndSettle();
+        await tester
+            .tap(find.byKey(const ValueKey('onboarding-pattern-slot-1')));
+        await tester.pumpAndSettle();
+        await snapshot(tester, key, code + '_today_selected');
+        await tester.ensureVisible(find.text(l.onboardingEditPattern));
+        await tester.tap(find.text(l.onboardingEditPattern));
+        await tester.pumpAndSettle();
+      }
+
       expect(tester.takeException(), isNull);
       // Removal operates on the preview, while the input remains available.
-      await tester.tap(
-          find.descendant(of: _preview, matching: find.text(l.shiftNight)));
+      await tester.tap(find.byKey(const ValueKey('onboarding-pattern-slot-1')));
       await tester.pumpAndSettle();
       expect(find.descendant(of: _preview, matching: find.text(l.shiftNight)),
           findsNothing);
+      await tester.ensureVisible(find.text(l.onboardingIrregularChoiceTitle));
       await tester.tap(find.text(l.onboardingIrregularChoiceTitle));
       await tester.pumpAndSettle();
       expect(find.text('3 / 3'), findsOneWidget);
@@ -158,7 +202,7 @@ void main() {
     final key = GlobalKey();
     final l = await pumpOnboarding(
         tester, const Locale('de'), const Size(320, 568), 1.3, key);
-    await tester.tap(find.text(l.commonNext));
+    await tester.tap(find.text(l.onboardingNextPattern));
     await tester.pumpAndSettle();
     final choice =
         find.descendant(of: _choices, matching: find.text(l.shiftDay));
@@ -173,18 +217,20 @@ void main() {
               .hitTestable(),
           findsOneWidget);
     }
-    final inputChip = tester.widget<AppShiftChip>(
-        find.ancestor(of: choice, matching: find.byType(AppShiftChip)));
+    final inputChip = tester.widget<AppUiShiftChip>(
+        find.ancestor(of: choice, matching: find.byType(AppUiShiftChip)));
     expect(inputChip.enabled, isFalse);
-    expect(find.descendant(of: _preview, matching: find.text('40')),
+    expect(find.byKey(const ValueKey('onboarding-pattern-slot-39')),
         findsOneWidget);
+    expect(find.text('40 / 40'), findsNothing);
     await snapshot(tester, key, 'de_small_large_text_40_days');
-    await tester.tap(find.text(l.commonNext));
+    await tester.ensureVisible(find.text(l.onboardingCompletePattern));
+    await tester.tap(find.text(l.onboardingCompletePattern));
     await tester.pumpAndSettle();
-    expect(find.text('3 / 4'), findsOneWidget);
+    expect(find.text('2 / 3'), findsOneWidget);
     await tester.tap(find.byIcon(Icons.arrow_back));
     await tester.pumpAndSettle();
-    expect(find.text('2 / 4'), findsOneWidget);
+    expect(find.text('1 / 3'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

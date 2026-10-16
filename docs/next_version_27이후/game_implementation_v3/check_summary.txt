@@ -1,0 +1,175 @@
+Analyzing sync_path_core...
+No issues found!
+00:00 +0: loading test\collision_resolver_test.dart
+00:00 +0: test\collision_resolver_test.dart: C01_cross_same_time
+00:00 +1: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +2: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +3: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +4: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +5: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +6: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +7: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +8: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +9: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +10: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +11: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +12: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +13: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +14: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +15: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +16: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +17: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +18: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +19: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +20: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +21: test\rational_test.dart: E01 sign, gcd, zero, equality/hash and exact arithmetic
+00:00 +22: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +23: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +24: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +25: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +26: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +27: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +28: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +29: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +30: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +31: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +32: test\collision_resolver_test.dart: E15 multiple sites and three pairs are preserved and sorted
+00:01 +33: test\simulation_engine_test.dart: L01 witness succeeds deterministically regardless of Unit/route order
+00:01 +34: test\simulation_engine_test.dart: L02 witness succeeds deterministically regardless of Unit/route order
+00:01 +35: test\simulation_engine_test.dart: L02 failure matches exact earliest pair(s), time, position
+00:01 +36: test\simulation_engine_test.dart: L03 witness succeeds deterministically regardless of Unit/route order
+00:01 +37: test\simulation_engine_test.dart: L04 witness succeeds deterministically regardless of Unit/route order
+00:01 +38: test\simulation_engine_test.dart: L04 failure matches exact earliest pair(s), time, position
+00:01 +39: test\simulation_engine_test.dart: L05 witness succeeds deterministically regardless of Unit/route order
+00:01 +40: test\simulation_engine_test.dart: L05 failure matches exact earliest pair(s), time, position
+00:01 +41: test\simulation_engine_test.dart: L06 witness succeeds deterministically regardless of Unit/route order
+00:01 +42: test\simulation_engine_test.dart: L06 failure matches exact earliest pair(s), time, position
+00:01 +43: test\simulation_engine_test.dart: L07 witness succeeds deterministically regardless of Unit/route order
+00:01 +44: test\simulation_engine_test.dart: L07 failure matches exact earliest pair(s), time, position
+00:01 +45: test\simulation_engine_test.dart: L08 witness succeeds deterministically regardless of Unit/route order
+00:01 +46: test\simulation_engine_test.dart: L08 failure matches exact earliest pair(s), time, position
+00:01 +47: test\simulation_engine_test.dart: L09 witness succeeds deterministically regardless of Unit/route order
+00:01 +48: test\simulation_engine_test.dart: L09 failure matches exact earliest pair(s), time, position
+00:01 +49: test\simulation_engine_test.dart: L10 witness succeeds deterministically regardless of Unit/route order
+00:01 +50: test\simulation_engine_test.dart: L10 failure matches exact earliest pair(s), time, position
+00:01 +51: test\simulation_engine_test.dart: L11 witness succeeds deterministically regardless of Unit/route order
+00:01 +52: test\simulation_engine_test.dart: L11 failure matches exact earliest pair(s), time, position
+00:01 +53: test\simulation_engine_test.dart: L12 witness succeeds deterministically regardless of Unit/route order
+00:01 +54: test\simulation_engine_test.dart: L12 failure matches exact earliest pair(s), time, position
+00:01 +55: test\simulation_engine_test.dart: E11/E12 A arrives on Step 1, B on Step 3, no filler pieces
+00:02 +56: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +57: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +58: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +59: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +60: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +61: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +62: test\validation_test.dart: V01..V04 float width
+00:02 +63: test\validation_test.dart: V01..V04 string width
+00:02 +64: test\validation_test.dart: V01..V04 rows length
+00:02 +65: test\validation_test.dart: V01..V04 row character
+00:02 +66: test\validation_test.dart: V01..V04 row width
+00:02 +67: test\validation_test.dart: V01..V04 small board
+00:02 +68: test\validation_test.dart: V01..V04 schema
+00:02 +69: test\validation_test.dart: V01..V04 rule
+00:02 +70: test\validation_test.dart: V01..V04 mechanic
+00:02 +71: test\validation_test.dart: V01..V04 duplicate id
+00:02 +72: test\validation_test.dart: V01..V04 empty id
+00:02 +73: test\validation_test.dart: V01..V04 invalid id charset
+00:02 +74: test\validation_test.dart: V01..V04 duplicate start
+00:02 +75: test\validation_test.dart: V01..V04 start goal
+00:02 +76: test\validation_test.dart: V01..V04 blocked placement
+00:02 +77: test\validation_test.dart: V01..V04 coordinate range
+00:02 +78: test\validation_test.dart: V01..V04 negative coordinate
+00:02 +79: test\validation_test.dart: V01..V04 fraction coordinate
+00:02 +80: test\validation_test.dart: V01..V04 disconnected
+00:02 +81: test\validation_test.dart: V01..V04 unreachable within N
+00:02 +82: test\validation_test.dart: V01..V04 oversize units
+00:02 +83: test\validation_test.dart: V01..V04 oversize ID
+00:02 +84: test\validation_test.dart: V10 hostile JSON is bounded before decode, malformed/huge numeric tokens rejected
+00:02 +85: test\validation_test.dart: Goal participates in connectivity but stops rays and allows entry
+00:02 +86: test\validation_test.dart: V05..V08 diagonal
+00:02 +87: test\validation_test.dart: V05..V08 zero
+00:02 +88: test\validation_test.dart: V05..V08 outside
+00:02 +89: test\validation_test.dart: V05..V08 goal pass
+00:02 +90: test\validation_test.dart: V05..V08 after goal
+00:02 +91: test\validation_test.dart: V05..V08 too many
+00:02 +92: test\validation_test.dart: V05..V08 empty
+00:02 +93: test\validation_test.dart: V05..V08 incomplete
+00:02 +94: test\validation_test.dart: Mid-ray wall is rejected even with walkable endpoint
+00:02 +95: test\validation_test.dart: Exact Unit set: missing, extra, duplicate and drafts cannot execute
+00:02 +96: test\validation_test.dart: V09 stale identity/revision rejected and plan JSON round trip preserves binding
+00:02 +97: test\validation_test.dart: R10 split, reverse and revisiting commands are preserved
+00:02 +98: All tests passed!
+Analyzing sync_path_tools...
+No issues found!
+00:00 +0: loading test\constant_speed_oracle_test.dart
+00:00 +0: test\solver_test.dart: S01/S03/S04/S05/S06 all domains, 359 outcomes, 47 assignments and diagnostics match independent certificates
+00:00 +1: test\solver_test.dart: S01/S03/S04/S05/S06 all domains, 359 outcomes, 47 assignments and diagnostics match independent certificates
+00:01 +2: test\solver_test.dart: S01/S03/S04/S05/S06 all domains, 359 outcomes, 47 assignments and diagnostics match independent certificates
+00:01 +3: test\solver_test.dart: S01/S03/S04/S05/S06 all domains, 359 outcomes, 47 assignments and diagnostics match independent certificates
+00:01 +4: test\solver_test.dart: S01/S03/S04/S05/S06 all domains, 359 outcomes, 47 assignments and diagnostics match independent certificates
+00:01 +5: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +6: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +7: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +8: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +9: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:01 +10: test\solver_test.dart: S08 deterministic order, immutable results, cache-free equivalence
+00:02 +11: test\solver_test.dart: Budgets are bounded before allocating any search space
+00:02 +12: test\solver_test.dart: S01 certificate mismatch fails closed
+00:02 +13: All tests passed!
+L01 sat exact=1 domains=[1, 1]
+L02 sat exact=3 domains=[2, 2]
+L03 sat exact=1 domains=[1, 1]
+L04 sat exact=4 domains=[3, 7]
+L05 sat exact=3 domains=[2, 2]
+L06 sat exact=44 domains=[30, 30]
+L07 sat exact=8 domains=[7, 7]
+L08 sat exact=4 domains=[3, 2, 1]
+L09 sat exact=9 domains=[25, 23, 23]
+L10 sat exact=6 domains=[4, 3, 4]
+L11 sat exact=7 domains=[3, 1, 3]
+L12 sat exact=94 domains=[9, 8, 6]
+Analyzing sync_path_ui...                                       
+No issues found! (ran in 30.1s)
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/replay_geometry_consistency_test.dart: Planning endpoint markers never move the physical Units or jump back on Execute
+00:00 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Different distances share one Step; visual clock never changes position/progress
+00:00 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: All 12 new-rule traces render at constant velocity and exact collision anchors
+00:00 +3: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: All 12 new-rule traces render at constant velocity and exact collision anchors
+00:00 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: All 12 new-rule traces render at constant velocity and exact collision anchors
+00:00 +5: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: All 12 new-rule traces render at constant velocity and exact collision anchors
+00:00 +6: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Renderer/silhouette replacement leaves trace unchanged and releases resources
+00:00 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Renderer/silhouette replacement leaves trace unchanged and releases resources
+00:02 +8: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +9: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +10: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +11: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +12: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +13: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +14: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +15: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +16: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +17: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +18: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +19: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +20: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype assets / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:07 +21: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 320px planning/undo/success/back with no overflow and reachable controls
+00:08 +22: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 320px planning/undo/success/back with no overflow and reachable controls
+00:12 +23: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 360px planning/undo/success/back with no overflow and reachable controls
+00:13 +24: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 412px planning/undo/success/back with no overflow and reachable controls
+00:14 +25: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 736px planning/undo/success/back with no overflow and reachable controls
+00:14 +26: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U02 board taps another Unit start as a destination; drag does not add a command
+00:15 +27: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U04 failure edits preserve routes; replay slider never moves beyond exact stop
+00:15 +28: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U08 reduced motion remains paused without timers and permits manual scenes
+00:15 +29: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U09 lifecycle pauses replay; return does not start ticker automatically
+00:16 +30: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: Role palette, 6x6 cells, fixed text scaling and controls at 320px
+00:16 +31: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: Capture independent planning screens at narrow/wide and dark palette
+00:16 +32: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: (tearDownAll)
+00:16 +32: All tests passed!
+Analyzing sync_path_lab...                                      
+No issues found! (ran in 13.1s)
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/examples/sync_path_lab/test/lab_isolation_test.dart
+00:00 +0: Bundled prototype atlases decode and release in the independent host
+00:00 +1: only independent devDebug application ID and no app service dependencies
+00:00 +2: All tests passed!
+PASS: isolated DEV game checks. No release or device install performed.

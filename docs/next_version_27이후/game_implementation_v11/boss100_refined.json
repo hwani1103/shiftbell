@@ -1,0 +1,366 @@
+{
+  "level": {
+    "id": "L100",
+    "revision": 1,
+    "width": 8,
+    "height": 8,
+    "rows": [
+      "..#.....",
+      "#..#.#..",
+      ".#....#.",
+      ".#.##..#",
+      "..#...#.",
+      "#....#..",
+      "..#.#..#",
+      ".#....##"
+    ],
+    "goal": [
+      7,
+      4
+    ],
+    "units": [
+      {
+        "id": "A",
+        "start": [
+          3,
+          0
+        ]
+      },
+      {
+        "id": "B",
+        "start": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": "C",
+        "start": [
+          4,
+          0
+        ]
+      },
+      {
+        "id": "D",
+        "start": [
+          0,
+          2
+        ]
+      }
+    ],
+    "maxCommands": 14,
+    "requiredMechanics": [
+      "straight-motion",
+      "absorbing-shared-goal",
+      "timed-gates"
+    ],
+    "gates": [
+      {
+        "trigger": [
+          1,
+          5
+        ],
+        "door": [
+          5,
+          3
+        ],
+        "openFor": 3,
+        "id": "1"
+      },
+      {
+        "trigger": [
+          2,
+          2
+        ],
+        "door": [
+          4,
+          1
+        ],
+        "openFor": 3,
+        "id": "2"
+      }
+    ]
+  },
+  "design": {
+    "id": "L100",
+    "score": 55.06640445210994,
+    "canonicalDomains": [
+      50,
+      1,
+      157,
+      152
+    ],
+    "canonicalSolutions": 1,
+    "baseSolutions": 21494,
+    "minimumRequiredMaxCommands": 14,
+    "minimumTotalCommands": 56,
+    "minimumExtraDistance": 24,
+    "constraintBits": 20.186404452109937,
+    "conflictParticipation": [
+      3,
+      3,
+      3,
+      3
+    ],
+    "gateRemovalAdds": [
+      97,
+      1076
+    ],
+    "witness": [
+      {
+        "unitId": "A",
+        "endpoints": [
+          [
+            6,
+            0
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            5,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            3,
+            7
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            7,
+            5
+          ],
+          [
+            7,
+            4
+          ]
+        ]
+      },
+      {
+        "unitId": "B",
+        "endpoints": [
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            5,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            3,
+            7
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            7,
+            5
+          ],
+          [
+            7,
+            4
+          ]
+        ]
+      },
+      {
+        "unitId": "C",
+        "endpoints": [
+          [
+            7,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            4,
+            0
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            5,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            3,
+            7
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            7,
+            5
+          ],
+          [
+            7,
+            4
+          ]
+        ]
+      },
+      {
+        "unitId": "D",
+        "endpoints": [
+          [
+            0,
+            4
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            4,
+            5
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            3,
+            7
+          ],
+          [
+            5,
+            7
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            7,
+            5
+          ],
+          [
+            7,
+            4
+          ]
+        ]
+      }
+    ],
+    "seed": 69100007,
+    "attempts": 8,
+    "author": "boss100-gate-refinement-v8",
+    "gateProposals": 1255,
+    "gateCandidates": 466,
+    "selectionPriority": [
+      "minimumTotalCommands",
+      "minimumExtraDistance",
+      "constraintBits"
+    ]
+  }
+}

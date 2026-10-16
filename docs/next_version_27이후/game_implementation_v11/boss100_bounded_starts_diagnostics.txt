@@ -1,0 +1,9 @@
+{
+  "rejections": {
+    "too_few_deep_starts": 95,
+    "collision_or_participation": 1,
+    "too_few_bounded_starts": 13,
+    "bounded_search_limit": 11
+  },
+  "success": []
+}

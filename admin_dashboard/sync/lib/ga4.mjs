@@ -70,6 +70,16 @@ export class Ga4 {
     return JSON.parse(text);
   }
 
+  async runFunnelReport(body) {
+    const token = await this._token();
+    const res = await (this.fetch ?? fetch)(`https://analyticsdata.googleapis.com/v1alpha/properties/${this.propertyId}:runFunnelReport`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    const text = await res.text();
+    if (!res.ok) throw new Error(`GA4 funnel ${res.status}: ${text.slice(0, 400)}`);
+    return JSON.parse(text);
+  }
+
   /** 실패해도 대시보드 전체를 막지 않는 부가 리포트용(광고·리텐션 등). 실패하면 null. */
   async tryReport(label, body, log = console) {
     try {
@@ -156,7 +166,7 @@ export class Ga4 {
   breakdown(dimension, limit = 8) {
     return {
       dateRanges: [{ startDate: '28daysAgo', endDate: 'yesterday' }],
-      dimensions: [{ name: dimension }],
+      dimensions: (Array.isArray(dimension) ? dimension : [dimension]).map(name => ({ name })),
       metrics: [{ name: 'activeUsers' }],
       dimensionFilter: streamFilter(this.streamId),
       orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
@@ -175,19 +185,20 @@ export class Ga4 {
 
   segmentSummary(dimension, startDate, endDate) {
     return {
-      ...this.periodSummary(startDate, endDate), dimensions: [{ name: dimension }],
+      ...this.periodSummary(startDate, endDate), dimensions: (Array.isArray(dimension) ? dimension : [dimension]).map(name => ({ name })),
       orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }], limit: '300',
     };
   }
 
   segmentEvents(dimension, startDate, endDate) {
     return {
-      dateRanges: [{ startDate, endDate }], dimensions: [{ name: dimension }, { name: 'eventName' }],
+      dateRanges: [{ startDate, endDate }], dimensions: [...(Array.isArray(dimension) ? dimension : [dimension]).map(name => ({ name })), { name: 'eventName' }],
       metrics: [{ name: 'eventCount' }, { name: 'totalUsers' }],
       dimensionFilter: withStream(this.streamId, { filter: {
         fieldName: 'eventName', inListFilter: { values: [
           'first_open', 'app_remove', 'onboarding_complete', 'team_roster_created', 'all_shifts_opened',
           'shift_assigned', 'alarm_template_saved', 'alarm_dismissed', 'alarm_snoozed', 'alarm_no_response',
+          'ot_saved', 'work_hours_settings_saved', 'calendar_theme_changed', 'memo_saved', 'shift_name_changed',
           'alarm_schedule_ok', 'alarm_schedule_failed', 'alarm_fired', 'alarm_refresh_completed',
           'alarm_refresh_failed', 'device_boot_seen', 'ops_daily_ready', 'ops_daily_restricted',
           'ops_daily_unknown', 'ops_battery_restricted', 'ops_exact_denied', 'ops_notification_blocked',
@@ -198,10 +209,18 @@ export class Ga4 {
     };
   }
 
-  countryDaily(days = 100) {
+  // EmptyFilter combines GA4 '(not set)' and empty values before distinct-user aggregation.
+  unknownCountries(body) {
+    return {...body,dimensions:(body.dimensions ?? []).filter(d=>d.name!=='country'),
+      dimensionFilter:{andGroup:{expressions:[body.dimensionFilter,{filter:{fieldName:'country',emptyFilter:{}}}]}}};
+  }
+
+  countryDaily(days = 100) { return this.segmentDaily('country', days); }
+  countryLanguageDaily(days = 100) { return this.segmentDaily(['country', 'language'], days); }
+  segmentDaily(dimension, days = 100) {
     return {
       dateRanges: [{ startDate: String(days) + 'daysAgo', endDate: 'yesterday' }],
-      dimensions: [{ name: 'date' }, { name: 'country' }],
+      dimensions: [{ name: 'date' }, ...(Array.isArray(dimension) ? dimension : [dimension]).map(name => ({ name }))],
       metrics: [{ name: 'activeUsers' }, { name: 'newUsers' }, { name: 'sessions' }],
       dimensionFilter: streamFilter(this.streamId),
       orderBys: [{ dimension: { dimensionName: 'date' } }], limit: '100000',

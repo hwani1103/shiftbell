@@ -1,3 +1,4 @@
+import '../../utils/calendar_dates.dart';
 // lib/services/condition/sleep_history.dart
 //
 // ⭐ 2026-09-01 - "오늘의 컨디션 예측" 킬러 기능(컨디션매니저_설계.md 12장)의
@@ -110,7 +111,7 @@ List<SleepHistoryNight> collectRecentWorkNights({
 
   final result = <SleepHistoryNight>[];
   for (var i = daysBack - 1; i >= 0; i--) {
-    final day = referenceDate.subtract(Duration(days: i));
+    final day = shiftLocalCalendarDay(referenceDate, -i);
     final inst = analyzer.instanceForDate(day);
     final hasShiftInfo = inst.isWorkDay && inst.end != null && inst.durationMinutes != null;
 

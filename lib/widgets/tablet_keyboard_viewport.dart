@@ -16,10 +16,10 @@ Future<bool> isTabletLayoutDevice() async {
   }
 }
 
-/// Fixed schedule sheets keep their existing phone/fold geometry. On tablets,
-/// provide the keyboard-free viewport to the sheet's existing height calculation.
-class TabletKeyboardViewport extends StatelessWidget {
-  const TabletKeyboardViewport({
+/// Provide the keyboard-free viewport to a modal's existing height calculation.
+/// The fixed footer stays above the keyboard on phones, folds, and tablets.
+class KeyboardSafeViewport extends StatelessWidget {
+  const KeyboardSafeViewport({
     super.key,
     required this.enabled,
     required this.child,

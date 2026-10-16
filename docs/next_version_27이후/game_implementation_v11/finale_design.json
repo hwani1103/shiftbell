@@ -1,0 +1,5491 @@
+{
+  "levels": [
+    {
+      "id": "L71",
+      "score": 32.31606179577532,
+      "canonicalDomains": [
+        35,
+        17,
+        45,
+        17
+      ],
+      "canonicalSolutions": 4,
+      "baseSolutions": 2965,
+      "minimumRequiredMaxCommands": 6,
+      "minimumTotalCommands": 24,
+      "minimumExtraDistance": 11,
+      "constraintBits": 16.79606179577532,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        117,
+        37
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        }
+      ],
+      "attempts": 113,
+      "seed": 1059336,
+      "sourceId": "L75"
+    },
+    {
+      "id": "L72",
+      "score": 34.26113611327464,
+      "canonicalDomains": [
+        20,
+        12,
+        7,
+        60
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 10556,
+      "minimumRequiredMaxCommands": 6,
+      "minimumTotalCommands": 23,
+      "minimumExtraDistance": 14,
+      "constraintBits": 16.62113611327464,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        1191,
+        552
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              6
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              6
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        }
+      ],
+      "attempts": 522,
+      "seed": 1057023,
+      "sourceId": "L72"
+    },
+    {
+      "id": "L73",
+      "score": 41.097417645020855,
+      "canonicalDomains": [
+        225,
+        102,
+        5,
+        35
+      ],
+      "canonicalSolutions": 8,
+      "baseSolutions": 5202,
+      "minimumRequiredMaxCommands": 6,
+      "minimumTotalCommands": 22,
+      "minimumExtraDistance": 20,
+      "constraintBits": 18.93741764502086,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        906,
+        455
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              6
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              1,
+              6
+            ]
+          ]
+        }
+      ],
+      "attempts": 503,
+      "seed": 1058565,
+      "sourceId": "L74"
+    },
+    {
+      "id": "L74",
+      "score": 41.80298454910378,
+      "canonicalDomains": [
+        62,
+        11,
+        36,
+        11
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 7927,
+      "minimumRequiredMaxCommands": 6,
+      "minimumTotalCommands": 22,
+      "minimumExtraDistance": 22,
+      "constraintBits": 18.04298454910378,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        780,
+        5
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        }
+      ],
+      "attempts": 519,
+      "seed": 1056252,
+      "sourceId": "L71"
+    },
+    {
+      "id": "L75",
+      "score": 42.89517329722416,
+      "canonicalDomains": [
+        55,
+        63,
+        71,
+        77
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 4388,
+      "minimumRequiredMaxCommands": 6,
+      "minimumTotalCommands": 24,
+      "minimumExtraDistance": 15,
+      "constraintBits": 24.17517329722416,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        2,
+        1389
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        }
+      ],
+      "attempts": 537,
+      "seed": 1057794,
+      "sourceId": "L73"
+    },
+    {
+      "id": "L76",
+      "score": 28.390609655805754,
+      "canonicalDomains": [
+        19,
+        3,
+        63,
+        26
+      ],
+      "canonicalSolutions": 32,
+      "baseSolutions": 9612,
+      "minimumRequiredMaxCommands": 7,
+      "minimumTotalCommands": 26,
+      "minimumExtraDistance": 12,
+      "constraintBits": 11.51060965580575,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        533,
+        1694
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              1
+            ],
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              6
+            ]
+          ]
+        }
+      ],
+      "attempts": 106,
+      "seed": 1062420,
+      "sourceId": "L79"
+    },
+    {
+      "id": "L77",
+      "score": 32.317720315910265,
+      "canonicalDomains": [
+        7,
+        69,
+        5,
+        97
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 2847,
+      "minimumRequiredMaxCommands": 7,
+      "minimumTotalCommands": 26,
+      "minimumExtraDistance": 9,
+      "constraintBits": 17.837720315910264,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        255,
+        46
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              1
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              5
+            ]
+          ]
+        }
+      ],
+      "attempts": 177,
+      "seed": 1061649,
+      "sourceId": "L78"
+    },
+    {
+      "id": "L78",
+      "score": 35.13139677794443,
+      "canonicalDomains": [
+        21,
+        35,
+        33,
+        39
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 734,
+      "minimumRequiredMaxCommands": 7,
+      "minimumTotalCommands": 26,
+      "minimumExtraDistance": 10,
+      "constraintBits": 19.85139677794443,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        247,
+        1
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              1
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              5
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        }
+      ],
+      "attempts": 158,
+      "seed": 1060878,
+      "sourceId": "L77"
+    },
+    {
+      "id": "L79",
+      "score": 41.8610147515106,
+      "canonicalDomains": [
+        198,
+        44,
+        203,
+        30
+      ],
+      "canonicalSolutions": 4,
+      "baseSolutions": 159,
+      "minimumRequiredMaxCommands": 7,
+      "minimumTotalCommands": 25,
+      "minimumExtraDistance": 14,
+      "constraintBits": 23.661014751510603,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        40,
+        8
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              6
+            ]
+          ]
+        }
+      ],
+      "attempts": 120,
+      "seed": 1063191,
+      "sourceId": "L80"
+    },
+    {
+      "id": "L80",
+      "score": 51.88789804566155,
+      "canonicalDomains": [
+        385,
+        75,
+        96,
+        78
+      ],
+      "canonicalSolutions": 4,
+      "baseSolutions": 2562,
+      "minimumRequiredMaxCommands": 7,
+      "minimumTotalCommands": 25,
+      "minimumExtraDistance": 24,
+      "constraintBits": 25.687898045661548,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        161,
+        965
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        }
+      ],
+      "attempts": 112,
+      "seed": 1060107,
+      "sourceId": "L76"
+    },
+    {
+      "id": "L81",
+      "score": 34.21544581053739,
+      "canonicalDomains": [
+        33,
+        5,
+        24,
+        67
+      ],
+      "canonicalSolutions": 5,
+      "baseSolutions": 11045,
+      "minimumRequiredMaxCommands": 8,
+      "minimumTotalCommands": 29,
+      "minimumExtraDistance": 13,
+      "constraintBits": 15.695445810537382,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        2800,
+        66
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              5,
+              5
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              5
+            ]
+          ]
+        }
+      ],
+      "attempts": 129,
+      "seed": 1067046,
+      "sourceId": "L85"
+    },
+    {
+      "id": "L82",
+      "score": 35.36961810765854,
+      "canonicalDomains": [
+        4,
+        119,
+        194,
+        27
+      ],
+      "canonicalSolutions": 4,
+      "baseSolutions": 11321,
+      "minimumRequiredMaxCommands": 8,
+      "minimumTotalCommands": 29,
+      "minimumExtraDistance": 10,
+      "constraintBits": 19.249618107658538,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        1296,
+        287
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              1
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              5,
+              1
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        }
+      ],
+      "attempts": 127,
+      "seed": 1065504,
+      "sourceId": "L83"
+    },
+    {
+      "id": "L83",
+      "score": 35.59165813143099,
+      "canonicalDomains": [
+        22,
+        7,
+        58,
+        30
+      ],
+      "canonicalSolutions": 2,
+      "baseSolutions": 2215,
+      "minimumRequiredMaxCommands": 8,
+      "minimumTotalCommands": 32,
+      "minimumExtraDistance": 12,
+      "constraintBits": 17.03165813143099,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        572,
+        12
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              5
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        }
+      ],
+      "attempts": 232,
+      "seed": 1063962,
+      "sourceId": "L81"
+    },
+    {
+      "id": "L84",
+      "score": 37.816430453348055,
+      "canonicalDomains": [
+        46,
+        27,
+        29,
+        4
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 578,
+      "minimumRequiredMaxCommands": 8,
+      "minimumTotalCommands": 31,
+      "minimumExtraDistance": 15,
+      "constraintBits": 17.136430453348055,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        56,
+        3
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              5
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ]
+        }
+      ],
+      "attempts": 196,
+      "seed": 1066275,
+      "sourceId": "L84"
+    },
+    {
+      "id": "L85",
+      "score": 38.834105149060285,
+      "canonicalDomains": [
+        102,
+        43,
+        69,
+        15
+      ],
+      "canonicalSolutions": 2,
+      "baseSolutions": 192,
+      "minimumRequiredMaxCommands": 8,
+      "minimumTotalCommands": 29,
+      "minimumExtraDistance": 12,
+      "constraintBits": 21.114105149060283,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        38,
+        25
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              6
+            ],
+            [
+              3,
+              6
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              6
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ]
+        }
+      ],
+      "attempts": 117,
+      "seed": 1064733,
+      "sourceId": "L82"
+    },
+    {
+      "id": "L86",
+      "score": 28.330671046291656,
+      "canonicalDomains": [
+        5,
+        7,
+        103,
+        27
+      ],
+      "canonicalSolutions": 4,
+      "baseSolutions": 268,
+      "minimumRequiredMaxCommands": 9,
+      "minimumTotalCommands": 32,
+      "minimumExtraDistance": 6,
+      "constraintBits": 14.570671046291654,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        44,
+        14
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        }
+      ],
+      "attempts": 356,
+      "seed": 1069359,
+      "sourceId": "L88"
+    },
+    {
+      "id": "L87",
+      "score": 36.491134717851594,
+      "canonicalDomains": [
+        54,
+        18,
+        165,
+        8
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 241,
+      "minimumRequiredMaxCommands": 9,
+      "minimumTotalCommands": 35,
+      "minimumExtraDistance": 8,
+      "constraintBits": 20.291134717851598,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        15,
+        174
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        }
+      ],
+      "attempts": 266,
+      "seed": 1070130,
+      "sourceId": "L89"
+    },
+    {
+      "id": "L88",
+      "score": 37.39138305838335,
+      "canonicalDomains": [
+        54,
+        52,
+        47,
+        214
+      ],
+      "canonicalSolutions": 8,
+      "baseSolutions": 9618,
+      "minimumRequiredMaxCommands": 9,
+      "minimumTotalCommands": 33,
+      "minimumExtraDistance": 8,
+      "constraintBits": 21.751383058383347,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        747,
+        1449
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              5,
+              6
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              5
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        }
+      ],
+      "attempts": 236,
+      "seed": 1068588,
+      "sourceId": "L87"
+    },
+    {
+      "id": "L89",
+      "score": 38.763885992102935,
+      "canonicalDomains": [
+        25,
+        63,
+        50,
+        25
+      ],
+      "canonicalSolutions": 6,
+      "baseSolutions": 138,
+      "minimumRequiredMaxCommands": 9,
+      "minimumTotalCommands": 33,
+      "minimumExtraDistance": 14,
+      "constraintBits": 18.323885992102934,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        10,
+        32
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              3,
+              6
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              6
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              5,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        }
+      ],
+      "attempts": 359,
+      "seed": 1067817,
+      "sourceId": "L86"
+    },
+    {
+      "id": "L90",
+      "score": 39.50866179878642,
+      "canonicalDomains": [
+        49,
+        210,
+        170,
+        284
+      ],
+      "canonicalSolutions": 22,
+      "baseSolutions": 164,
+      "minimumRequiredMaxCommands": 9,
+      "minimumTotalCommands": 31,
+      "minimumExtraDistance": 8,
+      "constraintBits": 24.42866179878642,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        22,
+        39
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        }
+      ],
+      "attempts": 192,
+      "seed": 1070901,
+      "sourceId": "L90"
+    },
+    {
+      "id": "L91",
+      "score": 31.739183410079285,
+      "canonicalDomains": [
+        7,
+        5,
+        30,
+        117
+      ],
+      "canonicalSolutions": 14,
+      "baseSolutions": 5158,
+      "minimumRequiredMaxCommands": 10,
+      "minimumTotalCommands": 38,
+      "minimumExtraDistance": 10,
+      "constraintBits": 13.099183410079286,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        1220,
+        242
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              5,
+              6
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        }
+      ],
+      "attempts": 3526,
+      "seed": 1072443,
+      "sourceId": "L92"
+    },
+    {
+      "id": "L92",
+      "score": 36.4592118826664,
+      "canonicalDomains": [
+        4,
+        119,
+        132,
+        4
+      ],
+      "canonicalSolutions": 4,
+      "baseSolutions": 464,
+      "minimumRequiredMaxCommands": 10,
+      "minimumTotalCommands": 39,
+      "minimumExtraDistance": 12,
+      "constraintBits": 15.939211882666397,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        2,
+        205
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        }
+      ],
+      "attempts": 772,
+      "seed": 1073214,
+      "sourceId": "L93"
+    },
+    {
+      "id": "L93",
+      "score": 40.86360213774574,
+      "canonicalDomains": [
+        33,
+        128,
+        3,
+        105
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 5387,
+      "minimumRequiredMaxCommands": 10,
+      "minimumTotalCommands": 39,
+      "minimumExtraDistance": 12,
+      "constraintBits": 20.343602137745734,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        873,
+        77
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              5,
+              5
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              5
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              5,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        }
+      ],
+      "attempts": 695,
+      "seed": 1073985,
+      "sourceId": "L94"
+    },
+    {
+      "id": "L94",
+      "score": 43.887064807677916,
+      "canonicalDomains": [
+        29,
+        108,
+        31,
+        4
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 1410,
+      "minimumRequiredMaxCommands": 10,
+      "minimumTotalCommands": 39,
+      "minimumExtraDistance": 18,
+      "constraintBits": 18.567064807677916,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        1380,
+        3
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ]
+          ]
+        }
+      ],
+      "attempts": 236,
+      "seed": 1071672,
+      "sourceId": "L91"
+    },
+    {
+      "id": "L95",
+      "score": 54.99176095548918,
+      "canonicalDomains": [
+        43,
+        536,
+        180,
+        572
+      ],
+      "canonicalSolutions": 21,
+      "baseSolutions": 5872,
+      "minimumRequiredMaxCommands": 10,
+      "minimumTotalCommands": 38,
+      "minimumExtraDistance": 22,
+      "constraintBits": 26.751760955489175,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        19,
+        5197
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        }
+      ],
+      "seed": 28601123,
+      "attempts": 1124,
+      "author": "boss100-deep-goal-seeds-v4",
+      "sourceId": "L95"
+    },
+    {
+      "id": "L96",
+      "score": 57.02636729653407,
+      "canonicalDomains": [
+        99,
+        74,
+        77,
+        311
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 2269,
+      "minimumRequiredMaxCommands": 11,
+      "minimumTotalCommands": 43,
+      "minimumExtraDistance": 22,
+      "constraintBits": 27.386367296534065,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        5,
+        1445
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              6
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              6
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              5
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              0
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        }
+      ],
+      "seed": 58700968,
+      "attempts": 969,
+      "author": "boss100-wide-combinations-v6",
+      "sourceId": "L96"
+    },
+    {
+      "id": "L97",
+      "score": 62.5564443501656,
+      "canonicalDomains": [
+        230,
+        42,
+        230,
+        327
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 5261,
+      "minimumRequiredMaxCommands": 11,
+      "minimumTotalCommands": 44,
+      "minimumExtraDistance": 26,
+      "constraintBits": 29.436444350165594,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        1,
+        4841
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              5,
+              1
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        }
+      ],
+      "seed": 28800275,
+      "attempts": 276,
+      "author": "boss100-deep-goal-seeds-v4",
+      "sourceId": "L97"
+    },
+    {
+      "id": "L98",
+      "score": 53.95224438828577,
+      "canonicalDomains": [
+        772,
+        15,
+        13,
+        772
+      ],
+      "canonicalSolutions": 4,
+      "baseSolutions": 18030,
+      "minimumRequiredMaxCommands": 12,
+      "minimumTotalCommands": 47,
+      "minimumExtraDistance": 20,
+      "constraintBits": 24.79224438828577,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        36,
+        722
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              5,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              0,
+              6
+            ]
+          ]
+        }
+      ],
+      "seed": 59000159,
+      "attempts": 160,
+      "author": "boss100-wide-combinations-v6",
+      "sourceId": "L99"
+    },
+    {
+      "id": "L99",
+      "score": 55.86843384655207,
+      "canonicalDomains": [
+        569,
+        125,
+        6,
+        624
+      ],
+      "canonicalSolutions": 2,
+      "baseSolutions": 900,
+      "minimumRequiredMaxCommands": 12,
+      "minimumTotalCommands": 46,
+      "minimumExtraDistance": 20,
+      "constraintBits": 26.988433846552073,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        2,
+        532
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              3,
+              6
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              6,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              6,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              6,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              6,
+              4
+            ]
+          ]
+        }
+      ],
+      "seed": 58902389,
+      "attempts": 2390,
+      "author": "boss100-wide-combinations-v6",
+      "sourceId": "L98"
+    },
+    {
+      "id": "L100",
+      "score": 55.06640445210994,
+      "canonicalDomains": [
+        50,
+        1,
+        157,
+        152
+      ],
+      "canonicalSolutions": 1,
+      "baseSolutions": 21494,
+      "minimumRequiredMaxCommands": 14,
+      "minimumTotalCommands": 56,
+      "minimumExtraDistance": 24,
+      "constraintBits": 20.186404452109937,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "gateRemovalAdds": [
+        97,
+        1076
+      ],
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              7
+            ],
+            [
+              5,
+              7
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              7,
+              5
+            ],
+            [
+              7,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              7
+            ],
+            [
+              5,
+              7
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              7,
+              5
+            ],
+            [
+              7,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              7,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              7
+            ],
+            [
+              5,
+              7
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              7,
+              5
+            ],
+            [
+              7,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              6
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              7
+            ],
+            [
+              5,
+              7
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              7,
+              5
+            ],
+            [
+              7,
+              4
+            ]
+          ]
+        }
+      ],
+      "seed": 69100007,
+      "attempts": 8,
+      "author": "boss100-gate-refinement-v8",
+      "gateProposals": 1255,
+      "gateCandidates": 466,
+      "selectionPriority": [
+        "minimumTotalCommands",
+        "minimumExtraDistance",
+        "constraintBits"
+      ],
+      "sourceId": "L100"
+    }
+  ]
+}

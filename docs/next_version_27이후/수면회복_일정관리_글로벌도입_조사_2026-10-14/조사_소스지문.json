@@ -1,0 +1,122 @@
+[
+  {
+    "file": "lib/widgets/sleep_edit_dialog.dart",
+    "sha256": "0fd71c01fdcf76672e3c9925dd15e00e0a83ddd624b7b4a21ed6efdae156cc48"
+  },
+  {
+    "file": "lib/widgets/evidence_library_section.dart",
+    "sha256": "7a268814c6f1fc5ea9eabc9d9bf0f17814f66a8587c708214be86f690831d149"
+  },
+  {
+    "file": "lib/widgets/disable_tab_button.dart",
+    "sha256": "21514f12391b7a09a7eb9da742f8294ec191f81af2ecf98d3f894a6446ced1d3"
+  },
+  {
+    "file": "lib/utils/sleep_format_util.dart",
+    "sha256": "69d317482b614f6a5df37a1a593626e99e912efe23309ee86da974110ca81ab2"
+  },
+  {
+    "file": "lib/services/condition/sleep_stats.dart",
+    "sha256": "434bfa5d361aff44253c16cf6ef2d3806d9f760d6a237dedf376c03d12258501"
+  },
+  {
+    "file": "lib/services/condition/sleep_shift_relation.dart",
+    "sha256": "987f1536b55b2701f189bce6740caf9c4937d5599501db70cd86aaa2123c291a"
+  },
+  {
+    "file": "lib/services/condition/sleep_overlap.dart",
+    "sha256": "2a80b2219cf6abecd32083abd27623f3a2e70dc87e57355bb8a16628d480561c"
+  },
+  {
+    "file": "lib/services/condition/sleep_opportunity.dart",
+    "sha256": "87e879f49504dcc7df5133abb0b2fc21c29940bd33c0cd92676a989621917024"
+  },
+  {
+    "file": "lib/services/condition/sleep_history.dart",
+    "sha256": "6b12c5e89ee8d2b9baaefdba4bcb22505cd7dbd0bef8e1fc1c8a68f05517b499"
+  },
+  {
+    "file": "lib/services/condition/sleep_day_slots.dart",
+    "sha256": "eb0ca8114c0ca96c0e834fcafa2f14552745aa319426e19a3f1d120226cb36be"
+  },
+  {
+    "file": "lib/screens/sleep_calendar_full_screen.dart",
+    "sha256": "a56ffb93a6452be41164feb83f82ba31613d67f8b413083e6a941ed06426e9b6"
+  },
+  {
+    "file": "lib/services/condition/sleep_by_category_stats.dart",
+    "sha256": "005679a9c9f28ce6fa0f2c5ad193c919f8a5b501cef14a260b28de994cad2a39"
+  },
+  {
+    "file": "lib/services/condition/shift_time_category.dart",
+    "sha256": "9d37c4532301851b306bb5d1391e313fa180966351156ba5699b3ff258e0b0a8"
+  },
+  {
+    "file": "lib/screens/schedule_management_tab.dart",
+    "sha256": "de370df71215540487b6678725cee8c6ce75914a10e051ba4d34d1a936cb9a1b"
+  },
+  {
+    "file": "lib/providers/sleep_record_provider.dart",
+    "sha256": "8ab5f568c3eab9e8171479e7fbc8c64d7dfed1dda0dd73835c742b5d942a20e0"
+  },
+  {
+    "file": "lib/services/condition/shift_pattern_analyzer.dart",
+    "sha256": "16983c94c5996fc1303e6357a1d1d71d8cc31821fdbced661efb4ab98471f087"
+  },
+  {
+    "file": "lib/screens/condition_tab.dart",
+    "sha256": "2d1371b50049a4b4bec6dbf56e6c9040a2e3110019f3d129ab33e854262d2f26"
+  },
+  {
+    "file": "lib/providers/sleep_condition_provider.dart",
+    "sha256": "e38b053f76396fa7b9aa4ab9287d42a7adaeec858abffcad011e6d88b17afe46"
+  },
+  {
+    "file": "lib/services/condition/recovery_briefing_engine.dart",
+    "sha256": "7979ec7a330cd38d160584b8aabd699b1419ac4b173ad6c66bfe14f6e73307a6"
+  },
+  {
+    "file": "lib/services/condition/evidence_database.dart",
+    "sha256": "c688a92bc4199e68a224f90d0a6712cb6371d1332181476e1f85928fbaa98954"
+  },
+  {
+    "file": "lib/services/condition/english_sleep_copy.dart",
+    "sha256": "a2567e0405327c27ccda5d7e2ef36ffcb87e387c4239bc1ec5dc0292e169aed0"
+  },
+  {
+    "file": "lib/services/condition/english_recovery_summary.dart",
+    "sha256": "41eeed476ef2353ffa59cf766c6976587e3e59fce2e64e1f58979ecd2e8f4a88"
+  },
+  {
+    "file": "lib/services/condition/condition_rule_engine.dart",
+    "sha256": "0ecf66e55bf31fd2381ca8c1684332f0d519399e12fb5ca5e536c5c01c70cd75"
+  },
+  {
+    "file": "lib/providers/condition_shift_time_provider.dart",
+    "sha256": "b2e1d28371471c0e300360d87f70640e2302b3aeffdd5926ac7a5e79e56b69e7"
+  },
+  {
+    "file": "lib/providers/condition_provider.dart",
+    "sha256": "fde0fe2d2312d561b7511957bf92955a9b338280d3966746426733ec092393ee"
+  },
+  {
+    "file": "android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt",
+    "sha256": "6ba73aa5f8c54844063da29050be4c5eef3fb6a5c74e4e622e542483df2785a0"
+  },
+  {
+    "file": "android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt",
+    "sha256": "27cc8448bdc15e11dc575588e0b30858fdd2d12011c6d42a7798c72add6806ec"
+  },
+  {
+    "file": "android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepScheduleResolver.kt",
+    "sha256": "75afceca9f6331085ecfd23a1cff13246b7a08cfac534b7eb4fb82911a29d194"
+  },
+  {
+    "file": "android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionScheduler.kt",
+    "sha256": "36c5b900f96e82a749e31fd56b693607fcbdbe42d16752f15e78c457ce7e028a"
+  },
+  {
+    "file": "android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt",
+    "sha256": "5fb1bc59ded86e2e3ffb5205db985f611f436113935d5558b2c42f8ab0b72657"
+  }
+]

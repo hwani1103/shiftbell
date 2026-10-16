@@ -1,3 +1,5 @@
+import '../widgets/app_ui_feedback.dart';
+import '../theme/app_ui_theme.dart';
 import '../services/app_analytics.dart';
 import '../widgets/settings_appearance.dart';
 import '../widgets/team_assignment_grid.dart';
@@ -12,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/shift_schedule.dart';
 import '../l10n/l10n_extensions.dart';
-import '../theme/app_colors.dart';
 import '../widgets/app_shift_chip.dart';
 import '../widgets/app_second_button.dart';
 import '../widgets/app_button.dart';
@@ -163,7 +164,7 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
     final completed = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: AppUiPalette.of(context).surface,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
       builder: (_) => _RosterEditorSheet(
@@ -282,7 +283,7 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
       debugPrint('Team schedule save failed: $error');
       if (!mounted) return;
       setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(AppUiSnackBar(
           content: Text(context.l10n.settingsScheduleChangeFailedWithError(
               context.localizedErrorDetail(error)))));
     }
@@ -305,7 +306,9 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
   Widget _sectionLabel(String text, {required Color color}) => Text(
         text,
         style: TextStyle(
-            fontSize: 16.sp, fontWeight: FontWeight.w600, color: color),
+            fontSize: AppFontSize.section,
+            fontWeight: FontWeight.w600,
+            color: color),
       );
 
   @override
@@ -324,8 +327,8 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(context.l10n.statusFullTeamScheduleTitle),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: AppUiPalette.of(context).surface,
+        foregroundColor: AppUiPalette.of(context).text,
         elevation: 0,
       ),
       body: AdaptiveFormBody(
@@ -334,7 +337,7 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: EdgeInsets.all(20.w),
+                padding: EdgeInsets.all(AppUiMetrics.pagePadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -344,7 +347,7 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                         Expanded(
                           child: _sectionLabel(
                               context.l10n.allTeamsSetupRosterLabel,
-                              color: kAppMainAccent),
+                              color: AppUiPalette.of(context).primary),
                         ),
                         // ⭐ 2026-09-05(3차) - 눈에 잘 띄게 제대로 된 버튼으로
                         // (요청: "초록색이나 뭐 좀 눈에 보이게"). 초록(success)은
@@ -369,7 +372,7 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                     SizedBox(height: 4.h),
                     Text(context.l10n.allTeamsSetupRosterHint,
                         style: TextStyle(
-                            fontSize: 12.5.sp,
+                            fontSize: AppFontSize.body,
                             color: colorScheme.onSurfaceVariant)),
                     SizedBox(height: 10.h),
                     Wrap(
@@ -384,11 +387,11 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                     // ── 2단계: 내 조 ──
                     SizedBox(height: 28.h),
                     _sectionLabel(context.l10n.allTeamsSetupMyTeamLabel,
-                        color: kAppMainAccent),
+                        color: AppUiPalette.of(context).primary),
                     SizedBox(height: 4.h),
                     Text(context.l10n.allTeamsSetupMyTeamPickHint,
                         style: TextStyle(
-                            fontSize: 13.sp,
+                            fontSize: AppFontSize.body,
                             color: colorScheme.onSurfaceVariant)),
                     SizedBox(height: 10.h),
                     Wrap(
@@ -408,21 +411,21 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                     if (_myTeamEntry != null) ...[
                       SizedBox(height: 28.h),
                       _sectionLabel(context.l10n.teamSetupModeTitle,
-                          color: kAppMainAccent),
+                          color: AppUiPalette.of(context).primary),
                       SizedBox(height: 12.h),
                       for (final individual in [false, true])
                         Padding(
                           padding: EdgeInsets.only(bottom: 10.h),
                           child: Material(
                             color: _individual == individual
-                                ? kAppSurface
-                                : Colors.white,
+                                ? AppUiPalette.of(context).soft
+                                : AppUiPalette.of(context).surface,
                             clipBehavior: Clip.antiAlias,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14.r),
                               side: BorderSide(
                                 color: _individual == individual
-                                    ? kAppMainAccent
+                                    ? AppUiPalette.of(context).primary
                                     : colorScheme.outlineVariant,
                                 width: _individual == individual ? 1.5 : 1,
                               ),
@@ -448,7 +451,7 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                                   _individual == individual
                                       ? Icons.check_circle
                                       : Icons.radio_button_unchecked,
-                                  color: kAppMainAccent),
+                                  color: AppUiPalette.of(context).primary),
                               onTap: _saving
                                   ? null
                                   : () =>
@@ -463,11 +466,11 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                       SizedBox(height: 28.h),
                       _sectionLabel(
                           context.l10n.allTeamsSetupAssignSectionLabel,
-                          color: kAppMainAccent),
+                          color: AppUiPalette.of(context).primary),
                       SizedBox(height: 4.h),
                       Text(context.l10n.allTeamsSetupAssignHint,
                           style: TextStyle(
-                              fontSize: 13.sp,
+                              fontSize: AppFontSize.body,
                               color: colorScheme.onSurfaceVariant)),
                       if (unassignedOtherEntries.isNotEmpty) ...[
                         SizedBox(height: 10.h),
@@ -492,9 +495,9 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                           context.l10n
                               .statusPatternDayCycle(widget.pattern.length),
                           style: TextStyle(
-                              fontSize: 13.5.sp,
+                              fontSize: AppFontSize.body,
                               fontWeight: FontWeight.w700,
-                              color: kAppChipBorder)),
+                              color: AppUiPalette.of(context).text)),
                       SizedBox(height: 6.h),
                       TeamAssignmentGrid(
                         pattern: widget.pattern,
@@ -508,10 +511,10 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                     if (_myTeamEntry != null && _individual == true) ...[
                       const SizedBox(height: 24),
                       Text(context.l10n.teamRuleTitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                              color: kAppMainAccent)),
+                              fontSize: AppFontSize.section,
+                              color: AppUiPalette.of(context).primary)),
                       const SizedBox(height: 6),
                       Text(context.l10n.teamRuleOverlapHint,
                           style: const TextStyle(height: 1.5)),
@@ -586,7 +589,7 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
 
   void _showSnack(String message) {
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+        .showSnackBar(AppUiSnackBar(content: Text(message)));
   }
 
   void _add() {
@@ -637,8 +640,8 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
     return Container(
       padding: EdgeInsets.only(left: 12.w, right: 2.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F6FC),
-        borderRadius: BorderRadius.circular(20.r),
+        color: AppUiPalette.of(context).soft,
+        borderRadius: BorderRadius.circular(AppUiMetrics.cardRadius),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -652,7 +655,8 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
               textAlign: TextAlign.center,
               textCapitalization: TextCapitalization.characters,
               onChanged: (_) => setState(() {}),
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600, fontSize: AppFontSize.control),
               decoration: const InputDecoration(
                 counterText: '',
                 isCollapsed: true,
@@ -662,12 +666,12 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
             ),
           ),
           InkWell(
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(AppUiMetrics.cardRadius),
             onTap: () => _remove(entry),
             child: Padding(
               padding: EdgeInsets.all(7.w),
               child: Icon(Icons.close,
-                  size: 15.sp, color: const Color(0xFFD64545)),
+                  size: 15.sp, color: AppUiPalette.of(context).danger),
             ),
           ),
         ],
@@ -679,9 +683,10 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
     return Container(
       padding: EdgeInsets.only(left: 12.w, right: 2.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F6FC),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: kAppMainAccent.withValues(alpha: 0.4)),
+        color: AppUiPalette.of(context).soft,
+        borderRadius: BorderRadius.circular(AppUiMetrics.cardRadius),
+        border: Border.all(
+            color: AppUiPalette.of(context).primary.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -695,7 +700,8 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
               textCapitalization: TextCapitalization.characters,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _add(),
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp),
+              style: TextStyle(
+                  fontWeight: FontWeight.w600, fontSize: AppFontSize.control),
               decoration: const InputDecoration(
                 counterText: '',
                 isCollapsed: true,
@@ -705,11 +711,12 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
             ),
           ),
           InkWell(
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(AppUiMetrics.cardRadius),
             onTap: _add,
             child: Padding(
               padding: EdgeInsets.all(7.w),
-              child: Icon(Icons.add, size: 16.sp, color: kAppMainAccent),
+              child: Icon(Icons.add,
+                  size: 16.sp, color: AppUiPalette.of(context).primary),
             ),
           ),
         ],
@@ -742,7 +749,9 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
                   width: 40.w,
                   height: 4.h,
                   decoration: BoxDecoration(
-                    color: kAppChipBorder.withValues(alpha: 0.15),
+                    color: AppUiPalette.of(context)
+                        .chipBorder
+                        .withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
@@ -751,9 +760,9 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
               Text(
                 context.l10n.allTeamsSetupRosterLabel,
                 style: TextStyle(
-                    fontSize: 18.sp,
+                    fontSize: AppFontSize.toolbar,
                     fontWeight: FontWeight.w600,
-                    color: kAppChipBorder),
+                    color: AppUiPalette.of(context).text),
               ),
               SizedBox(height: 16.h),
               Wrap(

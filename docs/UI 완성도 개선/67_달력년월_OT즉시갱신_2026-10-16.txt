@@ -1,0 +1,33 @@
+UI67 달력 년월·OT 즉시 갱신 — 2026-10-16
+
+사용자 관찰과 지시
+스와이프는 부드러워졌지만 년월과 이번 달 OT가 늦게 바뀜. 년월은 조회할 필요가 없다는 지적 후, 전체근무표 두 줄 보기 복원과 함께 모두 수정·debug 빌드·설치 요청.
+
+원인
+UI60에서 수평 ScrollEnd 뒤의 부모 setState와 메모/OT 조회에 헤더·요약까지 묶어 이동 종료를 기다리게 했음. debug만의 문제가 아님. 처음 보는 달 OT는 그 뒤 범위 조회도 기다렸음.
+
+변경
+- 월 변경 시 작은 ValueListenableBuilder만 갱신: 공통 년월 헤더, 테마별 헤더, 메인 6행 OT 카드, 테마별 푸터. TableCalendar 부모 전체 갱신과 추가 DB 조회는 이동 종료 뒤로 유지.
+- _focusedDay 변경 진입점에서 같은 신호 사용: 스와이프·오늘·월 선택·날짜 선택. 연월이 같으면 중복 알림 없음. dispose에서 notifier 정리.
+- 유휴 시 현재 달과 이전·다음 달의 메모/OT를 미리 읽음. 메모는 이전 달 1일-7일~다다음 달 7일, OT는 급여 산정일 기준 이전 달 요약까지 포함하도록 2개월 전 1일~다다음 달 7일. 기존 동일 값 재조회 알림 생략과 삭제 값 제거 정책 유지.
+- DB 구조·저장 데이터·근무/OT 합계 공식·셀 배치는 변경 없음. onPageChanged 시점에 헤더와 캐시 기반 요약을 표시함. 아직 읽지 않은 먼 달의 데이터 조회까지 무조건 즉시 완료된다는 의미는 아님.
+
+검증
+- 수정 전 소프트카드 실제 드래그 중 손을 떼기 전 다음 년월 표시 검사 FAIL: before_test.log.
+- 수정 후 대표 3테마 PASS: 년월/OT가 손을 떼기 전 변경되고 TableCalendar 위젯 인스턴스는 유지.
+- 달력 검사 19(18 테마·언어 조합+선택기1), 재조회2, DST/OT11, 메모9: 총41 PASS(final_tests.log).
+- 오늘 복귀 후 재스와이프 보강 후 최종 달력19검사 진행. 최종 완료/기기 근거는 아래 추가.
+- 정적 분석 error/warning 0, 기존 info110. 전 앱 무경고로 확대하지 않음.
+- 전체근무표 ROSTER-04 복원 포함. 한 화면 보기는 ROSTER-03 상태를 보존했고 7팔레트 픽셀이 동일함.
+- 기존 UI64 필수 전체 검사 근거 보존. 이번 변경은 달력/전체근무표 표시 및 읽기 범위이며 P0·출시 언어 구조를 변경하지 않아 영향 대상 검사와 dev debug 빌드를 수행.
+
+증거
+artifacts/calendar_month_feedback_2026_10_16/
+artifacts/roster_timeline_restore_2026_10_16/
+
+최종 완료 추가 (2026-10-16)
+- 오늘 복귀 후 재스와이프 포함 최종 달력19검사 PASS. 합본 dev debug 빌드 성공 및 SM-S948N 업데이트 설치/설치 APK 해시 일치.
+- APK: artifacts/calendar_month_feedback_2026_10_16/ShiftBell_timeline_restore_month_feedback_dev_debug.apk
+- SHA256: 8a89135e671fcfc9a3fa6974b6061d107e7b8485f56ee94ce5f25b82e7ab7ee7
+- 실제 드래그 중 페이지가 걸쳐 있는 상태에서 2026년11월/이번 달 OT0분 표시 확인(기존10월2시간30분): device_month_feedback_during_drag.png. 두 줄 둥근 칩 복원 및 한 화면 표시 확인: device_roster_entry.png/device_roster_overview_preserved.png.
+- 설치 전후 및 검증 후 DB18테이블과 환경설정 동일. verification_data_comparison.json. 기존 UI66 메모 수정 포함, release/prod 변경 없음.

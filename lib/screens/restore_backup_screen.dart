@@ -1,3 +1,6 @@
+import '../widgets/app_ui_feedback.dart';
+import '../theme/app_ui_theme.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../widgets/adaptive_layout.dart';
 // lib/screens/restore_backup_screen.dart
@@ -29,7 +32,6 @@ import '../services/backup_validator.dart';
 import '../services/restore_coordinator.dart';
 import '../services/database_service.dart';
 import '../services/permission_service.dart';
-import '../theme/app_colors.dart';
 import '../widgets/app_button.dart';
 import 'onboarding_screen.dart';
 import 'permission_intro_screen.dart';
@@ -74,7 +76,7 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
         if (!mounted) return;
         setState(() => _restoring = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.backupRestoreEmptyToast)),
+          AppUiSnackBar(content: Text(context.l10n.backupRestoreEmptyToast)),
         );
         if (widget.onCancel != null) {
           widget.onCancel!();
@@ -98,12 +100,13 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
       // 이 화면을 또 띄우고, 사용자가 다시 [복구하기]를 눌러도 똑같은 빈 백업이라
       // 영원히 반복된다. 그래서 복구 직후 실제로 스케줄이 채워졌는지 직접
       // 확인하고, 비어있으면 루프를 끊고 곧장 온보딩으로 보낸다.
-      final restoredSchedule = await DatabaseService.instance.getShiftSchedule();
+      final restoredSchedule =
+          await DatabaseService.instance.getShiftSchedule();
       if (restoredSchedule == null) {
         if (!mounted) return;
         setState(() => _restoring = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.backupRestoreEmptyToast)),
+          AppUiSnackBar(content: Text(context.l10n.backupRestoreEmptyToast)),
         );
         if (widget.onCancel != null) {
           widget.onCancel!();
@@ -150,14 +153,16 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
       }
 
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: kCalendarTabIndex)), // 달력탭
+        MaterialPageRoute(
+            builder: (_) =>
+                const MainScreen(initialIndex: kCalendarTabIndex)), // 달력탭
         (route) => false,
       );
     } on BackupValidationException {
       if (!mounted) return;
       setState(() => _restoring = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.backupRestoreInvalidToast)),
+        AppUiSnackBar(content: Text(context.l10n.backupRestoreInvalidToast)),
       );
     } on RestoreIncompleteException {
       // 작업 기록이 남아 있음 - 이어서 완료 / 지금 데이터로 계속을 바로 묻는다
@@ -190,8 +195,21 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.backupRestoreFailedToast)),
+        AppUiSnackBar(content: Text(context.l10n.backupRestoreFailedToast)),
       );
+    }
+  }
+
+  void _leave() {
+    if (_restoring) return;
+    if (widget.onCancel != null) {
+      widget.onCancel!();
+    } else if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      // Startup replacement has no previous route. Leave the app without
+      // restoring, starting onboarding, or changing the backup decision.
+      SystemNavigator.pop();
     }
   }
 
@@ -207,7 +225,10 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
   }
 
   String _formatDate(DateTime dt) {
-    if (!context.usesKoreanFeatures) return DateFormat.yMMMd(Localizations.localeOf(context).toString()).add_Hm().format(dt);
+    if (!context.usesKoreanFeatures)
+      return DateFormat.yMMMd(Localizations.localeOf(context).toString())
+          .add_Hm()
+          .format(dt);
     final h = dt.hour.toString().padLeft(2, '0');
     final m = dt.minute.toString().padLeft(2, '0');
     return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')} $h:$m';
@@ -217,40 +238,63 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
   Widget build(BuildContext context) {
     // ⭐ 2026-09-14 (출시전 교차 검토 X-02) - 복원 중 뒤로가기로 화면을 벗어나 앱을 닫거나 다른 화면에서 데이터를 고치지 못하게 함
     return PopScope(
-      canPop: !_restoring,
+      canPop: !_restoring &&
+          widget.onCancel == null &&
+          Navigator.of(context).canPop(),
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) _leave();
+      },
       child: Scaffold(
-        backgroundColor: Colors.white,
-        body: AdaptiveFormBody(child: SafeArea(
+        backgroundColor: AppUiPalette.of(context).surface,
+        appBar: AppBar(
+          backgroundColor: AppUiPalette.of(context).surface,
+          elevation: 0,
+          leading: IconButton(
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            icon: const BackButtonIcon(),
+            onPressed: _restoring ? null : _leave,
+          ),
+        ),
+        body: AdaptiveFormBody(
+            child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.restore, size: 64, color: kAppMainAccent),
+                Icon(Icons.restore,
+                    size: 64, color: AppUiPalette.of(context).primary),
                 const SizedBox(height: 24),
                 Text(
                   context.l10n.backupRestoreFoundTitle,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  style: const TextStyle(
+                      fontSize: AppFontSize.toolbar,
+                      fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   context.l10n.backupRestoreFoundDesc,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  style: TextStyle(
+                      fontSize: AppFontSize.body,
+                      color: AppUiPalette.of(context).secondaryText),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  context.l10n.backupRestoreLastSavedAt(_formatDate(widget.payload.exportedAt)),
+                  context.l10n.backupRestoreLastSavedAt(
+                      _formatDate(widget.payload.exportedAt)),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12.5, color: Colors.black45),
+                  style: TextStyle(
+                      fontSize: AppFontSize.body,
+                      color: AppUiPalette.of(context).secondaryText),
                 ),
                 const SizedBox(height: 36),
                 if (_restoring)
                   Column(
                     children: [
-                      const CircularProgressIndicator(),
+                      const AppUiLoading(),
                       const SizedBox(height: 12),
                       Text(context.l10n.backupRestoreInProgress),
                     ],

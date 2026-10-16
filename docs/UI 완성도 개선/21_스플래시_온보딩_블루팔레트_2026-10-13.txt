@@ -1,0 +1,24 @@
+스플래시~온보딩 블루 팔레트 변경 — 2026-10-13
+상태: 공통 팔레트 변경·dev debug 빌드/업데이트 설치·연결 실행 완료
+
+사용자 범위
+- 파란 앱 아이콘과 진한 초록 배경의 이질감 해소.
+- 아주 연한 스카이블루 배경과 블루 버튼·강조·칩·텍스트·테두리·비활성 색을 공통 팔레트로 변경.
+- 적용 범위는 스플래시~권한 안내~온보딩 전체. 이후 기존 화면 전수 개선은 후속으로 진행. 앱 전체 중앙화 완료로 표현하지 않음.
+
+구현
+- AppUiPalette.blue: 배경#EEF6FD, primary#3D63B8, 카드 흰색, 보조 표면#E7F0FC, 제목/본문#263B54, 보조 글자#5C7086, 테두리#D7E4F1, 오늘 선택 강조#315FAE, 비활성#E4EBF3/#718096. 위험/오류 의미색 유지.
+- 화면별 색상을 개별 수정하지 않고 공통 팔레트를 교체. 기존 타이포/간격/크기/근무 선택 로직 및 2.4초 반복 유지.
+- Gradle generateAppUiPalette는 같은 Dart 기본 팔레트의 primary/background를 생성. splash alias는 primary 대신 background로 연결. 아이콘 유지.
+- 시스템 스플래시는 native resource라 핫 리로드만으로 적용되지 않음. 실행 중 Flutter attach session도 없어 dev debug로 빌드·업데이트 설치·실행 후 hot reload 연결. 기존 데이터 초기화하지 않음. prod 앱 설치/데이터 변경 없음.
+
+증거
+- 대상 검사: artifacts/onboarding_blue_tests.log 및 exit 파일.
+- APK/연결 실행/실제 리소스와 hot reload 결과는 아래 후속 기록.
+
+검증 후속
+- 대상60검사 PASS(native exit0). 이번 색상 교체에서는 권한 상태·복귀·알람 기능 코드 변경 없음.
+- dev debug assembleDevDebug127초/업데이트 설치14.3초/기기 SM S948N(R5KL20DHWAE) 연결 실행 완료. 데이터 초기화 없음.
+- 실제 생성 XML primary#FF3D63B8/background#FFEEF6FD/splash→background alias 확인.
+- 보조 글자 대비 보완 후 연결 세션에서 hot reload 실행. 모든 화면/권한 기능을 기기에서 전수 검증한 것은 아님.
+- main/prod/출시앱 및 웹 배포 없음.

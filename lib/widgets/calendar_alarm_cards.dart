@@ -1,3 +1,4 @@
+import '../theme/app_ui_theme.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -85,7 +86,7 @@ class CalendarAlarmCard extends StatelessWidget {
                   child: Text(time,
                       maxLines: 1,
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: AppFontSize.toolbar,
                         height: 1.15,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -.5,
@@ -103,7 +104,7 @@ class CalendarAlarmCard extends StatelessWidget {
               Expanded(
                 child: Text(label,
                     style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: AppFontSize.meta,
                         height: 1.3,
                         fontWeight: FontWeight.w500,
                         color: colors.onSurfaceVariant)),
@@ -118,7 +119,9 @@ class CalendarAlarmCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(detail!,
                 style: TextStyle(
-                    fontSize: 11, height: 1.3, color: colors.onSurfaceVariant)),
+                    fontSize: AppFontSize.meta,
+                    height: 1.3,
+                    color: colors.onSurfaceVariant)),
           ],
         ],
       ),

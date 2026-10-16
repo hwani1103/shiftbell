@@ -110,10 +110,10 @@ class SleepDetectionReceiver : BroadcastReceiver() {
         private const val MIN_AUTO_SLEEP_MINUTES = 300L
 
         private fun isoFormat(millis: Long): String =
-            SimpleDateFormat(ISO_FORMAT, Locale.US).format(Date(millis))
+            SleepTimestamp.format(millis)
 
         private fun parseIso(s: String): Long? = try {
-            SimpleDateFormat(ISO_FORMAT, Locale.US).parse(s)?.time
+            SleepTimestamp.parse(s)
         } catch (e: Exception) {
             null
         }
@@ -136,8 +136,8 @@ class SleepDetectionReceiver : BroadcastReceiver() {
         fun checkNow(context: Context) {
             // ⭐ G4 #19 / G3 연결 요청 #2 - 복원 중엔 수면 기록 쓰기·감지 재예약을 미룸(복원 완료 뒤 앱 재개·Guard에서 다시 판정)
             if (RestoreGate.shouldDefer(context, "sleepDetection")) return
-            // ⭐ 2026-09-22(영어화 P0-2) - 로케일이 한국어가 아니거나 탭이 꺼져 있으면 판정 자체를
-            // 건너뜀(SleepDetectionScheduler.ensureScheduled가 다음 예약도 취소함 - finally 참고).
+            // Respect the current language-specific opt-in and first-unlock gate.
+            // Disabled sleep must neither inspect nor schedule another sample.
             if (!SleepDetectionScheduler.isSleepDetectionEnabled(context)) {
                 SleepDetectionScheduler.cancel(context)
                 return
@@ -328,33 +328,18 @@ class SleepDetectionReceiver : BroadcastReceiver() {
             }
         }
 
-        private fun hasRecordCovering(db: SQLiteDatabase, atMillis: Long): Boolean {
-            val at = isoFormat(atMillis)
-            return try {
-                db.query(
-                    "sleep_records", arrayOf("id"),
-                    "start_time <= ? AND (end_time IS NULL OR end_time >= ?)",
-                    arrayOf(at, at), null, null, null, "1"
-                ).use { it.moveToFirst() }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ 겹침 기록 확인 실패", e)
-                false
-            }
+        private fun hasRecordCovering(db: SQLiteDatabase, atMillis: Long): Boolean = try {
+            SleepRecordQueries.hasCovering(db, atMillis)
+        } catch (e: Exception) {
+            Log.e(TAG, "Sleep overlap query failed", e)
+            false
         }
 
-        /** [startMillis, endMillis) 안에 start_time이 있는 sleep_records 행이 이미 있는가
-         * (source/status 무관 - 이 창에서 이미 뭔가 기록됐으면 그걸로 충분). */
-        private fun hasRecordStartingInWindow(db: SQLiteDatabase, startMillis: Long, endMillis: Long): Boolean {
-            return try {
-                db.query(
-                    "sleep_records", arrayOf("id"),
-                    "start_time >= ? AND start_time < ?",
-                    arrayOf(isoFormat(startMillis), isoFormat(endMillis)), null, null, null, "1"
-                ).use { it.moveToFirst() }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ 창 내 기존 기록 확인 실패", e)
-                false
-            }
+        private fun hasRecordStartingInWindow(db: SQLiteDatabase, startMillis: Long, endMillis: Long): Boolean = try {
+            SleepRecordQueries.hasStartingInWindow(db, startMillis, endMillis)
+        } catch (e: Exception) {
+            Log.e(TAG, "Sleep window query failed", e)
+            false
         }
 
         private fun isCharging(context: Context): Boolean {

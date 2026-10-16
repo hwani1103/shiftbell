@@ -1,0 +1,7 @@
+Resolving dependencies...
+Downloading packages...
+  meta 1.17.0 (1.19.0 available)
+  shared_preferences 2.5.3 (2.5.5 available)
+Got dependencies!
+2 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.

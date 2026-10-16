@@ -1,12 +1,16 @@
 name: shiftbell
 description: 교대근무자를 위한 자동 알람 관리 앱
 publish_to: 'none'
-version: 1.0.24+27
+version: 1.0.25+28
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
+  sync_path_core:
+    path: packages/sync_path_core
+  sync_path_ui:
+    path: packages/sync_path_ui
   flutter:
     sdk: flutter
 
@@ -122,6 +126,8 @@ flutter:
 
   # 앱 아이콘은 일정관리 화면의 미리보기에도 사용한다.
   assets:
+    - assets/sync_paths/levels.json
+    - assets/sync_paths/splash.webp
     # ⭐ 2026-09-14 (G0, 출시전_코드감사_검토결과_v4 #1) - DB 스키마 SQL 단일 원본.
     # Dart(rootBundle)와 Native(APK의 flutter_assets/assets/db/migrations.json)가 같이 읽음 -
     # 이 항목이 빠지면 Native 마이그레이션이 전부 실패하므로 절대 지우지 말 것.

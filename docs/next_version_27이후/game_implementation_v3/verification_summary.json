@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0+3",
+  "applicationId": "dev.shiftbell.experiments.sync_path_lab.dev",
+  "ruleSetId": "constant-cell-speed-v2",
+  "tests": {
+    "core": 98,
+    "tools": 13,
+    "ui": 32,
+    "lab": 2,
+    "total": 145
+  },
+  "exhaustiveLevelCombinations": 14700,
+  "safeSolutions": 184,
+  "seededTrajectories": 4000,
+  "analysis": "PASS (4 packages)",
+  "androidDevDebugBuild": "PASS",
+  "webDevDebugBuild": "PASS",
+  "javaScriptSmoke": "PASS",
+  "apkAssetEquality": {
+    "assets/flutter_assets/assets/pilot_levels.json": true,
+    "assets/flutter_assets/assets/pilot_copy.json": true,
+    "assets/flutter_assets/packages/sync_path_ui/assets/art/robots_v1.png": true,
+    "assets/flutter_assets/packages/sync_path_ui/assets/art/tiles_v1.png": true
+  },
+  "deviceInstallPerformed": false,
+  "newApkDevicePlayVerified": false
+}

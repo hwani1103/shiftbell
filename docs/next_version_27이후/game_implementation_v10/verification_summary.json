@@ -1,0 +1,15 @@
+{
+  "newLevels": 20,
+  "exactPairComparisons": 9930,
+  "portalContactPairs": 575,
+  "safeDistinctPlans": 103,
+  "safeRawCommandPlans": 322,
+  "basePlansGateChecked": 1319,
+  "tests": {
+    "core": 116,
+    "tools": 16,
+    "ui": 60,
+    "host": 2
+  },
+  "humanPlaytest": "NOT_TESTED"
+}

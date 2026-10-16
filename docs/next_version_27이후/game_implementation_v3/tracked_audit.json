@@ -1,0 +1,37 @@
+{
+  "trackedFilesCompared": 1427,
+  "note": "Tracked existing files changed by concurrent sessions; this game task writes only owned package/lab paths and new game/UI records.",
+  "baseline": "game_implementation_v2/tracked_baseline.json",
+  "changes": [
+    {
+      "after": "6717D6ACD0DFB0AA00E273C1B825C90322E22DA2FCFD1CF09B27D6BDB514922E",
+      "before": "2ACFBB8A5460D9BE2D30890C7EFD92FD32EE63832992ED460543E4FA0A99576F",
+      "path": "AGENTS.md"
+    },
+    {
+      "after": "6041FA06B38C60892568BBB9FB8CB9924E241FBFDBDE060160A1E78CDFC6B994",
+      "before": "FAE8F14739F9D29F8F07D97290C381F70A4EB38DAE3B6FA9D943E769977D9549",
+      "path": "lib/main.dart"
+    },
+    {
+      "after": "8CF360C8DC79DEA815682F5F70133C3E2309F116CB02B18A7F9686811AE9CA1A",
+      "before": "EF1AC3CF7E9337EA464943CB055D1940C82975710AB3615C5FAB678557BD45E8",
+      "path": "lib/screens/calendar_tab.dart"
+    },
+    {
+      "after": "245867A246C6A083CC667416A67C3B337BA73CF79FBFA02EBD89D292DE8FFFF1",
+      "before": "5CFCADDA818F43D2EC3F38FF6EAA292FCD376F2E6D7A0B3EEDFB511339C46A72",
+      "path": "lib/screens/onboarding_screen.dart"
+    },
+    {
+      "after": "5FA324DD1B922047AD2D106080ED7DBD6AADB20D20CEA6A87128CF9CE63D4958",
+      "before": "4CBA1658FC26F8FA25C000F32CD0A101ADA9EA62144E4E91E1980EAE00DC41B2",
+      "path": "lib/screens/settings_tab.dart"
+    },
+    {
+      "after": "168C175BA8514A8F7F420BBDB515DFCBF757501D9EC0660F76A62C1A7E9F274D",
+      "before": "237C9E0AF84927A79BBCBD199057BA968D29690BEF26B1704FEEEDB9F992BD3B",
+      "path": "lib/widgets/banner_ad_slot.dart"
+    }
+  ]
+}

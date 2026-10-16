@@ -1,0 +1,36 @@
+온보딩 밀도 · 오늘 선택 모드 후속
+2026-10-12 / dev 미커밋 UI / 08 원장은 당시 증거로 보존
+
+사용자 합의와 구현
+권한 시작 화면의 설정 버튼: 단색/역할 텍스트 유지, 최소 시각 높이32·가로12/세로6 패딩으로 축소. 시스템 권한 판정/복귀 기능 유지.
+온보딩 첫 화면과 패턴 화면 근무명 목록:4열, 최대2줄 높이.3번째 줄부터 목록 내부 스크롤. 패턴 카드는 목록 바로 아래에 배치.
+패턴 칩: 폭에 따라5~6열, compact36 높이/regular40/large48. 짧은 패턴은 칩 줄 수에 맞춰 카드가 커지고, 일반 화면4줄·높은 화면5줄 이후 패턴 내부 스크롤. 작은 화면·긴 번역에는 전체 본문 스크롤도 허용해 잘림 방지.
+공통 AppUiShiftChip: 근무명 세로 중앙, 인덱스 좌상단. 곡선 테두리 안쪽 좌상단은 높이비율 .4만큼 가로 inset, 세로2. 인덱스/오늘 배지는 역할별8폰트 템플릿. 이름은 기존 공통 측정/최대14·16·18/한줄/자동축소/시스템배율1 규칙 유지.
+삭제 안내: 패턴 제목 오른쪽 ‘근무명을 탭하면 지워져요.’ 고정.
+그 아래 ‘패턴에서 오늘의 근무를 선택해 주세요.’ 고정. 토글로 안내문구를 바꾸지 않는다.
+날짜: ‘오늘 : 10월12일’ 형식. 오늘 표시하기↔패턴 수정 버튼 유지.
+오늘 표시하기를 누르면 모든 패턴 칩에 palette.selectionOutline(파란색)2px 테두리. 이름/인덱스 배치는 변하지 않는다.
+오늘 위치를 탭한 뒤에도 선택 모드/패턴 수정 버튼이 유지된다. 다시 같은 칩을 눌러도 삭제되지 않고 오늘 위치만 선택한다.
+패턴 수정을 명시적으로 눌러야 탭 삭제 모드로 전환. 알람 단계에서 돌아와도 선택 모드 유지. Back은 단계 복귀이며 선택 모드를 임의로 해제하지 않는다.
+‘정해진 교대 패턴이 없나요?’는 패턴 입력 안내와 동일한 body14 텍스트 역할 적용.
+패턴 편집 시 오늘 위치 무효화 및 재지정, 동일근무 반복 인덱스 구분,40칸 제한, 저장/알람생성 데이터 의미 유지.
+
+검증
+기본 대상5파일110검사 PASS(권한 작은화면/큰글자·5언어/폴드·알람편집 포함).
+호스트캡처/밀도/인덱스/선택 대상63검사 PASS. 숫자 곡선 경계 보완 후 캡처/권한/편집/문구/크기 대상63검사 PASS.
+최종 선택모드/복귀13검사 및 명시재선택7검사 PASS. 같은칩 재탭/패턴 수정 전 미삭제, 파란border,4열2줄스크롤,6칸×4줄 무스크롤·25칸에서 내부스크롤 검증.
+정적분석 --no-fatal-infos analyzer_exit0. 새 오류/경고 없음, 기존 정보성 린트 보존.
+로그: artifacts/onboarding_round3_initial.log / onboarding_round3_layout_verified.log / onboarding_round3_final_tests.log / onboarding_round3_mode_verified.log / onboarding_round3_mode_final_verified.log / onboarding_round3_analyze.log.
+캡처: artifacts/onboarding_round3/final_host/. Flutter 호스트 결과이며 실기기 PASS 아님.
+필수 -Build/dev debug APK 결과는 완료 후 추가. release/설치/게시/앱UI커밋 없음.
+
+웹 별도 완료
+국가×언어 통합 표·한차트, 국가 전체활성규모순 그룹 정렬로 배포. main 대시보드만0b0e056, 버전5c7bc829e9b1f071.
+실제 미국한국어/미국영어/남아공영어 조회 확인. 웹 최신 원장은 docs/next_version/대시보드_국가언어_통합정정_2026-10-12.txt.
+
+최종 빌드 결과: tools/check_critical_release.ps1 -Build 종료코드0, P0 자동 검사 PASS. dev debug APK 및 웹 빌드 성공. 실기기 검증은 별도.
+APK: artifacts/onboarding_round3/ShiftBell_Onboarding_compact_dev_debug.apk
+SHA256: E704D737E0B4BBDA871EAB2B90288E219259A49B2C6D026FAA9F262CEFD97078
+로그: artifacts/onboarding_round3_critical_build.log
+
+다음 수정 요청(현재 추가 적용하지 않음): 첫 화면 기본 제공 근무명 영역을 두 번째 화면 제공 근무명 영역과 동일한 칩 크기·열 수·배치로 맞춘다. 코드상 양쪽 4열이지만 카드 유무와 내부 여백이 다르므로 카드 배경과 여백까지 통일한다. 사용자가 현재 APK 테스트 후 다음 수정에서 반영하도록 요청함. 이번 UI 작업에서 DB 버전 변경 없음(Flutter/Android 모두 기존29).

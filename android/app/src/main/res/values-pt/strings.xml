@@ -5,7 +5,7 @@
     <string name="alarm_type_vibration_short">vibração</string>
     <string name="alarm_type_silent_short">silencioso</string>
     <string name="snooze_collision_message">Já há outro alarme (%2$s) para %1$s. Este alarme foi encerrado sem adiar.</string>
-    <string name="calendar_widget_description">Turnos e notas da semana passada, desta semana e da próxima.</string>
+    <string name="calendar_widget_description">Ajuste de 3 a 6 semanas. Navegue pelos meses na visualização de 6 semanas.</string>
     <string name="app_widget_calendar_label">3 semanas — calendário</string>
     <string name="alarm_swipe_hint">Deslize para cima para desligar</string>
     <string name="alarm_snooze_label">Adiar 5 min</string>
@@ -60,4 +60,17 @@
     <string name="calendar_widget_week_description">Turnos e até três notas por dia nesta semana.</string>
     <string name="widget_daytime">Dia</string>
     <string name="widget_nighttime">Noite</string>
+    <string name="app_widget_sleep_label">Registro de sono</string>
+    <string name="sleep_widget_brand">ShiftBell</string>
+    <string name="sleep_widget_description">Registre quando dorme e acorda pelos botões.</string>
+    <string name="sleep_widget_no_shift">Sem turno</string>
+    <string name="sleep_widget_not_set">Não definido</string>
+    <string name="sleep_widget_sleep">Dormir</string>
+    <string name="sleep_widget_tab_off">Desativado</string>
+    <string name="sleep_widget_unknown">Sem informações</string>
+    <string name="sleep_widget_wake">Acordar</string>
+    <string name="sleep_widget_restore_busy">Um backup está sendo restaurado. Tente novamente em instantes.</string>
+    <string name="sleep_widget_too_short">Muito curto para salvar</string>
+    <string name="widget_previous_month">Mês anterior</string>
+    <string name="widget_next_month">Próximo mês</string>
 </resources>

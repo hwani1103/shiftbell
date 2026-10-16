@@ -1,0 +1,22 @@
+name: sync_path_lab
+description: Independent dev debug lab for the offline path puzzle.
+version: 0.9.0+11
+publish_to: none
+environment:
+  sdk: '>=3.11.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  sync_path_core:
+    path: ../../packages/sync_path_core
+  sync_path_ui:
+    path: ../../packages/sync_path_ui
+  shared_preferences: 2.5.3
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/pilot_levels.json
+    - assets/art/sync_paths_splash.webp

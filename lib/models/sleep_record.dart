@@ -1,3 +1,4 @@
+import '../utils/alarm_wall_time.dart';
 // lib/models/sleep_record.dart
 //
 // ⭐ 실제 수면 기록/자동 추정("C번 요구사항", 수면기록_자동추정_설계.md 1장) 전용
@@ -52,9 +53,11 @@ bool isAutoSleepCandidateExpired(DateTime start, DateTime now) =>
 String sleepDateTimeToDb(DateTime value) {
   final local = value.toLocal();
   String two(int number) => number.toString().padLeft(2, '0');
+  final offset = local.timeZoneOffset.inMinutes;
+  final suffix = '${offset < 0 ? '-' : '+'}${two(offset.abs() ~/ 60)}:${two(offset.abs() % 60)}';
   return '${local.year.toString().padLeft(4, '0')}-'
       '${two(local.month)}-${two(local.day)}T'
-      '${two(local.hour)}:${two(local.minute)}:${two(local.second)}';
+      '${two(local.hour)}:${two(local.minute)}:${two(local.second)}$suffix';
 }
 
 String sleepSourceToDb(SleepSource s) {
@@ -153,9 +156,9 @@ class SleepRecord {
 
   factory SleepRecord.fromMap(Map<String, dynamic> map) => SleepRecord(
         id: map['id'] as int?,
-        start: DateTime.parse(map['start_time'] as String),
+        start: parseAlarmDate(map['start_time'] as String),
         end: map['end_time'] != null
-            ? DateTime.parse(map['end_time'] as String)
+            ? parseAlarmDate(map['end_time'] as String)
             : null,
         source: sleepSourceFromDb(map['source'] as String),
         status: sleepStatusFromDb(map['status'] as String),

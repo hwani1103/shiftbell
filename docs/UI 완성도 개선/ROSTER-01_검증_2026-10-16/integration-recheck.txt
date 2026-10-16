@@ -1,0 +1,16 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: (setUpAll)
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\roster_screen_3fa9d7ce\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+00:01 +0: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen dawn: fixed buttons, saved choice and edge fill
+00:10 +1: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen morning: fixed buttons, saved choice and edge fill
+00:14 +2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen daytime: fixed buttons, saved choice and edge fill
+00:19 +3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen evening: fixed buttons, saved choice and edge fill
+00:23 +4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen night: fixed buttons, saved choice and edge fill
+00:27 +5: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen originalWhite: fixed buttons, saved choice and edge fill
+00:30 +6: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: (tearDownAll)
+00:30 +6: loading C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart
+00:34 +6: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Independent progress key round-trips without touching schedule preferences
+00:34 +7: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Host effects release on route disposal and ignore later plays
+00:34 +8: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games

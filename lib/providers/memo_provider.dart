@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 // providers/memo_provider.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,10 +20,29 @@ class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
   }
 
   // ⭐ 기간의 메모들 로드 (달력 표시용)
-  Future<void> loadMemosForDateRange(DateTime startDate, DateTime endDate) async {
+  Future<void> loadMemosForDateRange(
+      DateTime startDate, DateTime endDate) async {
     final memos = await _db.getMemosForDateRange(startDate, endDate);
-    state = {...state, ...memos};
+    final first = _dateKey(startDate);
+    final last = _dateKey(endDate);
+    final next = Map<String, List<DateMemo>>.from(state)
+      ..removeWhere(
+          (date, _) => date.compareTo(first) >= 0 && date.compareTo(last) <= 0)
+      ..addAll(memos);
+    final unchanged = next.length == state.length &&
+        next.entries.every((entry) {
+          final old = state[entry.key];
+          if (identical(old, entry.value)) return true;
+          return old != null &&
+              old.length == entry.value.length &&
+              Iterable<int>.generate(old.length).every(
+                  (i) => mapEquals(old[i].toMap(), entry.value[i].toMap()));
+        });
+    if (!unchanged) state = next;
   }
+
+  static String _dateKey(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   // ⭐ 메모 생성
   Future<bool> createMemo(String date, String memoText) async {
@@ -33,13 +53,13 @@ class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
 
     final id = await _db.createMemo(date, memoText.trim());
     if (id == null) {
-      return false;  // 최대 3개 초과
+      return false; // 최대 3개 초과
     }
     AppAnalytics.track(AnalyticsEvent.memoSaved);
 
     // 상태 갱신
     await loadMemosForDate(date);
-    WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신 (메모 표시)
+    WidgetRefreshService.refresh(); // ⭐ 홈 화면 위젯도 즉시 갱신 (메모 표시)
     return true;
   }
 
@@ -86,6 +106,7 @@ class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
 }
 
 // ⭐ Provider 인스턴스
-final memoProvider = StateNotifierProvider<MemoNotifier, Map<String, List<DateMemo>>>(
+final memoProvider =
+    StateNotifierProvider<MemoNotifier, Map<String, List<DateMemo>>>(
   (ref) => MemoNotifier(),
 );

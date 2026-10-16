@@ -1,3 +1,4 @@
+import 'package:shiftbell/theme/app_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,7 +11,9 @@ void main() {
   for (final width in [320.0, 360.0, 480.0, 600.0, 806.0, 1000.0]) {
     for (final language in ['ko', 'en', 'de', 'pt', 'hi']) {
       for (final scale in [1.0, 2.0]) {
-        testWidgets('default assignment names remain readable $width $language $scale', (tester) async {
+        testWidgets(
+            'default assignment names remain readable $width $language $scale',
+            (tester) async {
           tester.view.physicalSize = Size(width, 900);
           tester.view.devicePixelRatio = 1;
           addTearDown(tester.view.resetPhysicalSize);
@@ -20,7 +23,8 @@ void main() {
             designSize: const Size(360, 780),
             builder: (context, _) {
               ScreenUtil.configure(
-                data: appContentMediaQuery(MediaQueryData.fromView(View.of(context))),
+                data: appContentMediaQuery(
+                    MediaQueryData.fromView(View.of(context))),
                 designSize: const Size(360, 780),
               );
               return MaterialApp(
@@ -28,13 +32,21 @@ void main() {
                 supportedLocales: AppLocalizations.supportedLocales,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 builder: (context, child) => MediaQuery(
-                  data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scale)),
+                  data: MediaQuery.of(context)
+                      .copyWith(textScaler: TextScaler.linear(scale)),
                   child: child!,
                 ),
                 home: Scaffold(body: Builder(builder: (context) {
                   final l = AppLocalizations.of(context);
-                  shifts = [l.shiftDay, l.shiftNight, l.shiftDayOff, l.shiftMorning, l.shiftAfternoon];
-                  return SingleChildScrollView(child: Padding(
+                  shifts = [
+                    l.shiftDay,
+                    l.shiftNight,
+                    l.shiftDayOff,
+                    l.shiftMorning,
+                    l.shiftAfternoon
+                  ];
+                  return SingleChildScrollView(
+                      child: Padding(
                     padding: const EdgeInsets.all(20),
                     child: TeamAssignmentGrid(
                       pattern: shifts,
@@ -52,7 +64,8 @@ void main() {
             final text = find.text(shift);
             expect(text, findsOneWidget);
             final paragraph = tester.renderObject<RenderParagraph>(text);
-            expect(paragraph.didExceedMaxLines, isFalse, reason: '$shift at $width / $language / $scale');
+            expect(paragraph.didExceedMaxLines, isFalse,
+                reason: '$shift at $width / $language / $scale');
           }
           expect(tester.takeException(), isNull);
         });
@@ -142,8 +155,9 @@ void main() {
           expect(ink.right, lessThanOrEqualTo(cell.right + .01));
           expect(ink.top, greaterThanOrEqualTo(cell.top));
           expect(ink.bottom, lessThanOrEqualTo(cell.bottom + .01));
-          final shortText = tester.widget<Text>(find.text('Day'));
-          expect(text.style!.fontSize, shortText.style!.fontSize);
+          // Long names shrink only when their measured width exceeds the cell;
+          // the shared chip contract never changes the cell to fit a name.
+          expect(text.style!.fontSize, lessThanOrEqualTo(AppFontSize.section));
         }
         expect(tester.takeException(), isNull);
       });

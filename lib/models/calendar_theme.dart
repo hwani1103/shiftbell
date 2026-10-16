@@ -41,6 +41,9 @@ enum CalendarThemeId {
 }
 
 extension CalendarThemeIdX on CalendarThemeId {
+  // mainDark remains decodable for older backups; it is no longer a choice.
+  CalendarThemeId get canonical =>
+      this == CalendarThemeId.mainDark ? CalendarThemeId.mainWhite : this;
   // ⭐ "테마 번호 대신 각 테마에 어울리는 이름을 붙여달라"는 요청으로 실험
   // 단계 번호(1/2/4/5/8/9/10번)를 각 디자인 컨셉을 담은 이름으로 교체함.
   // ⭐ 영어 현지화: 기존 `label` getter(하드코딩 한국어)를 BuildContext를 받는
@@ -102,7 +105,6 @@ const kEnglishCalendarThemeIds = [
   CalendarThemeId.periwinkle,
   CalendarThemeId.softMosaic,
   CalendarThemeId.mainWhite,
-  CalendarThemeId.mainDark,
   CalendarThemeId.minimal,
   CalendarThemeId.materialCard,
   CalendarThemeId.boldGrid,
@@ -117,7 +119,9 @@ extension CalendarThemeLocale on BuildContext {
 
   // Keep the saved Korean choice intact when switching app languages.
   CalendarThemeId availableCalendarTheme(CalendarThemeId saved) =>
-      availableCalendarThemes.contains(saved) ? saved : defaultCalendarTheme;
+      availableCalendarThemes.contains(saved.canonical)
+          ? saved.canonical
+          : defaultCalendarTheme;
 }
 
 // ⭐ 캐러셀/위젯 등에서 순서대로 순회할 때 쓰는 고정 목록. 2026-09-05 이전엔
@@ -130,13 +134,12 @@ extension CalendarThemeLocale on BuildContext {
 // 같이 고칠 것(안 그러면 캐러셀 카드가 엉뚱한 테마를 보여줌).
 const kAllCalendarThemeIds = [
   CalendarThemeId.mainWhite,
-  CalendarThemeId.mainDark,
   CalendarThemeId.minimal,
   CalendarThemeId.materialCard,
-  CalendarThemeId.diary,
   CalendarThemeId.boldGrid,
-  CalendarThemeId.initialBadge,
   CalendarThemeId.eventChip,
+  CalendarThemeId.diary,
+  CalendarThemeId.initialBadge,
   CalendarThemeId.underline,
   CalendarThemeId.editorial,
 ];
@@ -240,7 +243,7 @@ List<String> mockShiftNames(BuildContext context) {
 const kMainRestColor = Color(0xFFEF5350); // 휴무 고정 - 라이트/다크 공통
 
 // Muted colours against Periwinkle's blue surface; neighbouring shift types
-// use distinct hues. Rest days and leave share a soft rose accent.
+// use distinct hues. The first recognized rest name gets the rose accent.
 const kPeriwinkleRestColor = Color(0xFFB9566D);
 const kPeriwinklePalette = [
   Color(0xFF5576B7), // Day: cornflower blue
@@ -455,24 +458,60 @@ Map<String, Color> _assignFromPalette(
     {Color restColor = kMainRestColor}) {
   final colors = <String, Color>{};
 
-  // ⭐ 영어 현지화: 이 함수가 실제 사용자 스케줄(assignShiftColors/
-  // assignShiftColorsForTheme 경유)의 색상을 배정하는 실사용 경로라, 여기서
-  // '휴' 하드코딩만 남겨두면 영어로 "Off"/"Day Off" 등으로 입력한 근무명이
-  // 고정 빨강을 못 받는 실제 버그가 됨 - isRestShiftName()으로 교체.
-  for (final shift in shiftTypes) {
-    if (isRestShiftName(shift)) colors[shift] = restColor;
-  }
-
-  final nonRestShifts = shiftTypes.where((s) => !isRestShiftName(s)).toList();
-  // ⭐ 팔레트 자체가 이미 "휴무 자리"에 고정 빨강을 끼워 넣은 12칸짜리
-  // 배열이라, 나머지 근무에 순서대로 배정할 땐 그 빨강 슬롯을 건너뛰어야 함 -
-  // 안 그러면 근무 하나가 우연히 빨강을 받을 수 있음. rotation은 이 11칸짜리
-  // 목록 안에서 시작 위치만 밀어주는 것 - 팔레트 자체(색상 구성)는 그대로.
-  final nonRestPalette = palette.where((c) => c != restColor).toList();
-  for (int i = 0; i < nonRestShifts.length; i++) {
-    colors[nonRestShifts[i]] =
+  // Reserve the special rest color only for the first recognized rest name.
+  // Additional rest/leave names join the same deterministic palette sequence.
+  final firstRest = shiftTypes.indexWhere(isRestShiftName);
+  final restName = firstRest < 0 ? null : shiftTypes[firstRest];
+  if (restName != null) colors[restName] = restColor;
+  final otherShifts =
+      shiftTypes.where((name) => name != restName).toSet().toList();
+  final nonRestPalette = palette.where((color) => color != restColor).toList();
+  for (var i = 0; i < otherShifts.length; i++) {
+    colors[otherShifts[i]] =
         nonRestPalette[(i + rotation) % nonRestPalette.length];
   }
 
   return colors;
 }
+
+/// Merging main-dark must not replace the previously displayed shift colours.
+/// Missing entries still receive defaults; explicit user colours win last.
+Map<String, Color> mainCalendarShiftColors(
+    List<String> names, Map<String, int>? saved, Map<String, int>? custom) {
+  final result = effectiveShiftColors(names, CalendarThemeId.mainWhite, null);
+  for (final name in names) {
+    final value = custom?[name] ?? saved?[name];
+    if (value != null) result[name] = Color(value);
+  }
+  // Old main-theme caches may contain red for every rest alias. Correct only
+  // those automatic repeats; preserve explicit choices and all other saved hues.
+  final firstRest = names.indexWhere(isRestShiftName);
+  for (var i = firstRest + 1; firstRest >= 0 && i < names.length; i++) {
+    final name = names[i];
+    if (!isRestShiftName(name) ||
+        custom?.containsKey(name) == true ||
+        result[name] != kMainRestColor) continue;
+    final used =
+        result.entries.where((e) => e.key != name).map((e) => e.value).toSet();
+    final available = kMainLightPalette
+        .where((color) => color != kMainRestColor && !used.contains(color));
+    result[name] = available.isNotEmpty
+        ? available.first
+        : assignShiftColorsForTheme(names, CalendarThemeId.mainWhite)[name]!;
+  }
+  return result;
+}
+
+/// Seven distinct additions from theme defaults, curated against the existing
+/// editor colors (greedy minimum CIE76 distance about 18.5). Keep legacy order.
+const kAdditionalEditorShiftColors = [
+  Color(0xFFA75489), // muted mauve
+  Color(0xFFA16B2A), // warm amber
+  Color(0xFF8B6F9E), // dusty plum
+  Color(0xFF486D61), // deep sage
+  Color(0xFFB9566D), // rose
+  Color(0xFF5F7F45), // olive green
+  Color(0xFF9B7653), // warm brown
+];
+List<Color> editableShiftColors(Iterable<Color> legacy) =>
+    List.unmodifiable({...legacy, ...kAdditionalEditorShiftColors});

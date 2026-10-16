@@ -1,0 +1,9 @@
+GAME-03 독립 게임50레벨 UI 후속 — 2026-10-14
+
+기존 ShiftBell/UI 원장은 보존했다. 게임만 공/블록으로 경량화했다.
+선택공 약1.22배/색상 링/표식/공ID 안내와 가능한 종점의 같은색 채움을 연결했다. 카드 범례도 공의 표면무늬와 일치한다.
+3D 표면회전은 UI trace 표현이고 거리/충돌은 그대로다.5가지 얕은 타일 디테일과 구간색은 새bitmap 없이 그린다.320px7×7 전체열이44px로 보이고,한글·영문/동작줄이기/화면복귀/리소스정리를 유지한다.
+UI42+호스트2 및 devdebug/웹 PASS. 실기기FPS/체감재미/전체ShiftBell테마 중앙화 PASS는 아니다.
+최종원장: docs/next_version_27이후/game_implementation_v6/01_50레벨_난이도곡선_절차형공타일_2026-10-14.txt
+화면: game_implementation_v6/ui_previews/campaign50-L30-320.png, campaign50-L50-320.png
+APK: examples/sync_path_lab/build/app/outputs/flutter-apk/app-dev-debug.apk /0.4.0+6

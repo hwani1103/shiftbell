@@ -1,0 +1,38 @@
+시스템 스플래시 배경·오늘 근무 안내 모션 — 2026-10-13
+상태: 구현·호스트 검사·dev debug 빌드 및 APK 리소스 확인 완료
+
+사용자 합의
+- 기존 시스템 스플래시 아이콘 유지, 온보딩 공통 핵심 색상을 배경으로 사용.
+- 최초에는 빌드 보류 지시를 따라 코드만 수정. 이후 오늘 선택 안내 수정까지 합쳐 dev debug 빌드 요청으로 재승인.
+- 오늘 선택 안내는 처음에만 깜빡이고 멈추지 않도록 느리게 계속 반복.
+
+스플래시
+- 단일 원본: lib/theme/app_ui_theme.dart의 AppUiPalette.sage.primary (#44685A).
+- Gradle generateAppUiPalette가 공통 Dart 팔레트에서 primary 값을 읽어 Android color resource를 빌드 시 생성.
+- app_ui_splash_background는 생성된 app_ui_primary를 참조. XML에 색상을 별도로 하드코딩하지 않음. 공통 primary 변경 시 다음 Android 빌드에도 반영.
+- Android12 이상 밝음/어두움 values-v31/values-night-v31 LaunchTheme.windowSplashScreenBackground 적용. 구버전 launch_background도 같은 resource 사용.
+- 아이콘/마스크/아이콘 배경은 기존 시스템 기본값 유지. 문구나 별도 스플래시 페이지/추가 대기 없음.
+- Android 시스템 스플래시는 Flutter 시작 전 native resource를 사용한다. 이는 현재 기본 팔레트의 빌드 시 연결이며 시간별 동적 시작 테마까지 구현한 것은 아님.
+
+안내 모션
+- 공통 AppUiMotion attentionCycle 2.4초. opacity1→0.65→1, 각 구간 easeInOut으로 부드럽게 연결.
+- AppUiAttention 컨트롤러 repeat로 오늘 선택 대기 중 지속. 크기/위치/영역 변경 없음.
+- 오늘 근무 선택 시 enabled false로 반복 즉시 중단하고 opacity1 고정. 패턴 수정으로 돌아가면 안내 widget이 제거되어 controller 해제.
+- disableAnimations/accessibleNavigation 요청 시 반복하지 않으며, 설정 변경 시에도 재조회하여 중단/재개.
+
+검증 진행
+- 모션/실제 선택 흐름/레이아웃 대상12검사 PASS. 이후 추가 알람 편집/접힘 레이아웃 검사와 APK 결과를 아래 연결.
+- 모션 대기 상태를 pumpAndSettle로 무한 대기하지 않도록 해당 레이아웃/흐름 검사는 제한된 시간 또는 동작 줄이기 조건을 사용. 별도 실제 모션 검사에서 반복 지속/선택 후 정지/레이아웃 불변 확인.
+- XML4파일 파싱 및 primary 추출 정적 확인 완료. 이 정적 확인은 Android 빌드/기기 표시 PASS가 아님.
+- 앱 main/prod/release 배포 없음.
+
+최종 결과
+- 대상 검사12+추가67=79 PASS. 느린 반복이6주기 후에도 지속되고 오늘 선택 후 멈춤, 동작 줄이기 시 정지, 영역 불변, 5언어/접힘·펼침/알람 편집 기존 흐름 포함.
+- dev debug assembleDevDebug 112.9초 완료, native exit0. release/웹 빌드 및 설치·배포 없음.
+- 실제 생성 파일 build/app/generated/res/appUiPalette/values/app_ui_palette.xml: #FF44685A 및 splash→primary alias 확인.
+- APK aapt 검사: com.hwani1103.shiftbell.dev / code27 / 1.0.24-dev / debuggable. 실제 compiled resource primary0xff44685a 및 splash alias 포함 확인.
+- APK: artifacts/onboarding_round9/ShiftBell_Splash_SlowGuide_dev_debug.apk
+- SHA256: 66204C0E2F4FFF1422878DFD401ADCFEE94ABC186EF81AB8801BF16F5D979E5B
+- 로그: artifacts/onboarding_round9_tests.log / onboarding_round9_layout_tests.log / onboarding_round9_build.log / onboarding_round9_build_exit.txt / onboarding_round9/android_resources.txt.
+- 앱 권한/알람/P0 기능·출시 언어 범위 변경 없음. 이번 범위는 배경 resource와 공통 안내 모션으로 대상 검사·dev debug 빌드 수행. 기존 필수 회귀 PASS를 이번 실기기 검증으로 확대하지 않음.
+- 실기기에서 실제 시스템 스플래시의 색상과 전환은 아직 미확인. 사용자가 APK로 확인 가능.

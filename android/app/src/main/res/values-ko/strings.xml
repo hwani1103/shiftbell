@@ -5,7 +5,7 @@
     <string name="alarm_type_silent_short">무음</string>
     <string name="snooze_collision_message">%1$s 알람(%2$s)이 있어 미루지 않고 종료했어요.</string>
     <!-- ⭐ 홈 화면 위젯 목록(길게 눌러 위젯 추가)에 노출되는 설명 문구 -->
-    <string name="calendar_widget_description">전주·이번 주·다음 주 근무와 메모를 표시합니다.</string>
+    <string name="calendar_widget_description">크기에 따라 3~6주를 표시하며, 6주에서는 월을 이동할 수 있습니다.</string>
     <!-- ⭐ 실제 수면 기록 위젯(캘린더 위젯과 별개) - 취침/기상 원터치 토글 -->
 
     <!-- Korean labels override the English default for Korean device locales. -->
@@ -79,4 +79,17 @@
     <string name="calendar_widget_week_description">이번 주 근무와 날짜별 메모를 최대 3개 표시합니다.</string>
     <string name="widget_daytime">낮</string>
     <string name="widget_nighttime">밤</string>
+    <string name="app_widget_sleep_label">수면 기록</string>
+    <string name="sleep_widget_brand">교대시계</string>
+    <string name="sleep_widget_description">버튼으로 취침/기상을 기록해요.</string>
+    <string name="sleep_widget_no_shift">근무없음</string>
+    <string name="sleep_widget_not_set">미설정</string>
+    <string name="sleep_widget_sleep">수면</string>
+    <string name="sleep_widget_tab_off">탭 꺼짐</string>
+    <string name="sleep_widget_unknown">정보 없음</string>
+    <string name="sleep_widget_wake">기상</string>
+    <string name="sleep_widget_restore_busy">백업 복원 중이에요. 잠시 후 다시 눌러주세요.</string>
+    <string name="sleep_widget_too_short">너무 짧아서 기록하지 않았어요</string>
+    <string name="widget_previous_month">이전 달</string>
+    <string name="widget_next_month">다음 달</string>
 </resources>

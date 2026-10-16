@@ -1,0 +1,664 @@
+{
+  "fixtureVersion": 1,
+  "ruleSetId": "shared-goal-v1",
+  "vectors": [
+    {
+      "id": "C01_cross_same_time",
+      "startA": [
+        0,
+        2
+      ],
+      "endA": [
+        4,
+        2
+      ],
+      "startB": [
+        2,
+        0
+      ],
+      "endB": [
+        2,
+        4
+      ],
+      "expected": {
+        "time": [
+          1,
+          2
+        ],
+        "position": [
+          [
+            2,
+            1
+          ],
+          [
+            2,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C02_cross_different_time",
+      "startA": [
+        0,
+        2
+      ],
+      "endA": [
+        4,
+        2
+      ],
+      "startB": [
+        2,
+        1
+      ],
+      "endB": [
+        2,
+        4
+      ],
+      "expected": null
+    },
+    {
+      "id": "C03_head_on_fraction",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        5,
+        0
+      ],
+      "startB": [
+        3,
+        0
+      ],
+      "endB": [
+        0,
+        0
+      ],
+      "expected": {
+        "time": [
+          3,
+          8
+        ],
+        "position": [
+          [
+            15,
+            8
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C04_overtake",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        4,
+        0
+      ],
+      "startB": [
+        1,
+        0
+      ],
+      "endB": [
+        2,
+        0
+      ],
+      "expected": {
+        "time": [
+          1,
+          3
+        ],
+        "position": [
+          [
+            4,
+            3
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C05_same_velocity",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        3,
+        0
+      ],
+      "startB": [
+        1,
+        0
+      ],
+      "endB": [
+        4,
+        0
+      ],
+      "expected": null
+    },
+    {
+      "id": "C06_swap_adjacent",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        1,
+        0
+      ],
+      "startB": [
+        1,
+        0
+      ],
+      "endB": [
+        0,
+        0
+      ],
+      "expected": {
+        "time": [
+          1,
+          2
+        ],
+        "position": [
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C07_meet_endpoint",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        2,
+        0
+      ],
+      "startB": [
+        2,
+        2
+      ],
+      "endB": [
+        2,
+        0
+      ],
+      "expected": {
+        "time": [
+          1,
+          1
+        ],
+        "position": [
+          [
+            2,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C08_same_start",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        1,
+        0
+      ],
+      "startB": [
+        0,
+        0
+      ],
+      "endB": [
+        0,
+        1
+      ],
+      "expected": {
+        "time": [
+          0,
+          1
+        ],
+        "position": [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      "scope": "geometry-only; not a legal playable command/initial state"
+    },
+    {
+      "id": "C09_stationary_hit",
+      "startA": [
+        2,
+        0
+      ],
+      "endA": [
+        2,
+        0
+      ],
+      "startB": [
+        0,
+        0
+      ],
+      "endB": [
+        4,
+        0
+      ],
+      "expected": {
+        "time": [
+          1,
+          2
+        ],
+        "position": [
+          [
+            2,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      "scope": "geometry-only; not a legal playable command/initial state"
+    },
+    {
+      "id": "C10_stationary_same",
+      "startA": [
+        2,
+        2
+      ],
+      "endA": [
+        2,
+        2
+      ],
+      "startB": [
+        2,
+        2
+      ],
+      "endB": [
+        2,
+        2
+      ],
+      "expected": {
+        "interval": true
+      },
+      "scope": "geometry-only; not a legal playable command/initial state"
+    },
+    {
+      "id": "C11_identical_motion",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        4,
+        0
+      ],
+      "startB": [
+        0,
+        0
+      ],
+      "endB": [
+        4,
+        0
+      ],
+      "expected": {
+        "interval": true
+      },
+      "scope": "geometry-only; not a legal playable command/initial state"
+    },
+    {
+      "id": "C12_stationary_separate",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        0,
+        0
+      ],
+      "startB": [
+        1,
+        0
+      ],
+      "endB": [
+        1,
+        0
+      ],
+      "expected": null,
+      "scope": "geometry-only; not a legal playable command/initial state"
+    },
+    {
+      "id": "C13_contact_after_step",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        1,
+        0
+      ],
+      "startB": [
+        3,
+        0
+      ],
+      "endB": [
+        2,
+        0
+      ],
+      "expected": null
+    },
+    {
+      "id": "C14_contact_before_step",
+      "startA": [
+        1,
+        0
+      ],
+      "endA": [
+        2,
+        0
+      ],
+      "startB": [
+        0,
+        0
+      ],
+      "endB": [
+        0,
+        0
+      ],
+      "expected": null,
+      "scope": "geometry-only; not a legal playable command/initial state"
+    },
+    {
+      "id": "C15_parallel_rows",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        4,
+        0
+      ],
+      "startB": [
+        0,
+        1
+      ],
+      "endB": [
+        4,
+        1
+      ],
+      "expected": null
+    },
+    {
+      "id": "C16_goal_endpoint",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        2,
+        0
+      ],
+      "startB": [
+        2,
+        2
+      ],
+      "endB": [
+        2,
+        0
+      ],
+      "expected": {
+        "time": [
+          1,
+          1
+        ],
+        "position": [
+          [
+            2,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      },
+      "goal": [
+        2,
+        0
+      ],
+      "policyExpectation": "safe-arrival"
+    },
+    {
+      "id": "C17_goal_interior_invalid_route",
+      "startA": [
+        0,
+        2
+      ],
+      "endA": [
+        4,
+        2
+      ],
+      "startB": [
+        2,
+        0
+      ],
+      "endB": [
+        2,
+        4
+      ],
+      "expected": {
+        "time": [
+          1,
+          2
+        ],
+        "position": [
+          [
+            2,
+            1
+          ],
+          [
+            2,
+            1
+          ]
+        ]
+      },
+      "goal": [
+        2,
+        2
+      ],
+      "policyExpectation": "invalid-route-goal-pass-through"
+    },
+    {
+      "id": "C18_coordinate_roots_disagree",
+      "startA": [
+        0,
+        1
+      ],
+      "endA": [
+        4,
+        1
+      ],
+      "startB": [
+        2,
+        0
+      ],
+      "endB": [
+        2,
+        4
+      ],
+      "expected": null
+    },
+    {
+      "id": "C19_follow_endpoint",
+      "startA": [
+        0,
+        0
+      ],
+      "endA": [
+        3,
+        0
+      ],
+      "startB": [
+        1,
+        0
+      ],
+      "endB": [
+        3,
+        0
+      ],
+      "expected": {
+        "time": [
+          1,
+          1
+        ],
+        "position": [
+          [
+            3,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "id": "C20_diverging",
+      "startA": [
+        1,
+        0
+      ],
+      "endA": [
+        0,
+        0
+      ],
+      "startB": [
+        2,
+        0
+      ],
+      "endB": [
+        3,
+        0
+      ],
+      "expected": null
+    }
+  ],
+  "earlyArrivalCase": {
+    "level": {
+      "id": "TEST-EARLY-1-3",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".....",
+        ".....",
+        ".....",
+        ".....",
+        "....."
+      ],
+      "goal": [
+        2,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    "routes": [
+      {
+        "unitId": "A",
+        "endpoints": [
+          [
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "unitId": "B",
+        "endpoints": [
+          [
+            0,
+            4
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            2,
+            2
+          ]
+        ]
+      }
+    ],
+    "expected": "success",
+    "arrivals": [
+      {
+        "unitId": "A",
+        "step": 1,
+        "time": [
+          1,
+          1
+        ]
+      },
+      {
+        "unitId": "B",
+        "step": 3,
+        "time": [
+          1,
+          1
+        ]
+      }
+    ]
+  }
+}
+

@@ -6,7 +6,7 @@
     <string name="snooze_collision_message">Another alarm (%2$s) is set for %1$s. This alarm was dismissed without snoozing.</string>
     <!-- Native fallback is English for every non-Korean device locale.
          Common keys match values-ko/strings.xml. Korean-only features use korean_only.xml. -->
-    <string name="calendar_widget_description">Your shifts and notes for last week, this week and next week.</string>
+    <string name="calendar_widget_description">Resize from 3 to 6 weeks. Browse months in the 6-week view.</string>
 
     <string name="app_widget_calendar_label">3-week calendar</string>
 
@@ -68,4 +68,17 @@
     <string name="calendar_widget_week_description">Your shifts and up to three notes per day for this week.</string>
     <string name="widget_daytime">Daytime</string>
     <string name="widget_nighttime">Nighttime</string>
+    <string name="app_widget_sleep_label">Sleep log</string>
+    <string name="sleep_widget_brand">ShiftBell</string>
+    <string name="sleep_widget_description">Record bedtime and wake-up with the buttons.</string>
+    <string name="sleep_widget_no_shift">No shift</string>
+    <string name="sleep_widget_not_set">Not set</string>
+    <string name="sleep_widget_sleep">Sleep</string>
+    <string name="sleep_widget_tab_off">Feature off</string>
+    <string name="sleep_widget_unknown">No information</string>
+    <string name="sleep_widget_wake">Wake up</string>
+    <string name="sleep_widget_restore_busy">A backup is being restored. Try again shortly.</string>
+    <string name="sleep_widget_too_short">Too short to save</string>
+    <string name="widget_previous_month">Previous month</string>
+    <string name="widget_next_month">Next month</string>
 </resources>

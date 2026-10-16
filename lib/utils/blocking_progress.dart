@@ -1,3 +1,4 @@
+import '../widgets/app_ui_feedback.dart';
 // lib/utils/blocking_progress.dart
 //
 // ⭐ 2026-09-15 (출시 적합성 재검토 AUD-01) - "로딩 스피너 다이얼로그를 띄우고 작업 → 끝나면 Navigator.pop(context)" 패턴 대체.
@@ -11,14 +12,15 @@ import 'package:flutter/material.dart';
 
 /// [task]가 끝날 때까지(성공·예외 모두) 뒤로가기로 닫히지 않는 진행 표시를 띄우고, 끝나면 그 진행 표시만 닫는다.
 /// [task]의 결과를 돌려주고 예외는 그대로 다시 던진다.
-Future<T> runWithBlockingProgress<T>(BuildContext context, Future<T> Function() task) async {
+Future<T> runWithBlockingProgress<T>(
+    BuildContext context, Future<T> Function() task) async {
   final navigator = Navigator.of(context, rootNavigator: true);
   final route = DialogRoute<void>(
     context: context,
     barrierDismissible: false,
     builder: (_) => const PopScope(
       canPop: false,
-      child: Center(child: CircularProgressIndicator()),
+      child: Center(child: AppUiLoading()),
     ),
   );
   unawaited(navigator.push(route));

@@ -1,3 +1,5 @@
+import '../widgets/app_ui_feedback.dart';
+import '../theme/app_ui_theme.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_second_button.dart';
 import '../widgets/settings_appearance.dart';
@@ -79,7 +81,8 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
         if (!context.usesKoreanFeatures) return const UnavailableFeature();
         return AlertDialog(
           title: Text(context.koOnly.friendAdd,
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  fontSize: AppFontSize.toolbar, fontWeight: FontWeight.w600)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -87,21 +90,22 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
               children: [
                 Text(
                     '${context.koOnly.friendName} ${context.koOnly.friendNameOptionalHint}',
-                    style: TextStyle(fontSize: 12.sp)),
+                    style: TextStyle(fontSize: AppFontSize.meta)),
                 SizedBox(height: 6.h),
                 TextField(
                   controller: nameController,
                   decoration: InputDecoration(
                     hintText: context.koOnly.friendNameHintExample,
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r)),
+                        borderRadius:
+                            BorderRadius.circular(AppUiMetrics.controlRadius)),
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                   ),
                 ),
                 SizedBox(height: 14.h),
                 Text(context.koOnly.friendShareCodeFromFriend,
-                    style: TextStyle(fontSize: 12.sp)),
+                    style: TextStyle(fontSize: AppFontSize.meta)),
                 SizedBox(height: 6.h),
                 TextField(
                   controller: codeController,
@@ -109,11 +113,13 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
                   decoration: InputDecoration(
                     hintText: 'SB2:...',
                     border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r)),
+                        borderRadius:
+                            BorderRadius.circular(AppUiMetrics.controlRadius)),
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                   ),
-                  style: TextStyle(fontSize: 11.sp, fontFamily: 'monospace'),
+                  style: TextStyle(
+                      fontSize: AppFontSize.meta, fontFamily: 'monospace'),
                 ),
               ],
             ),
@@ -131,7 +137,7 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    AppUiSnackBar(
                         content: Text(ok
                             ? context.koOnly.friendAddedToast
                             : context.koOnly.friendInvalidCodeOrDuplicate)),
@@ -178,7 +184,7 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(context.l10n.friendShareTitle,
-              style: TextStyle(fontSize: 18.sp)),
+              style: TextStyle(fontSize: AppFontSize.toolbar)),
           // ⭐ 상단 새로고침 버튼 삭제 - initState의 자동 새로고침 + 아래
           // RefreshIndicator(당겨서 새로고침)로 충분하고, 버튼이 있으면 사용자가
           // 습관적으로 눌러 불필요한 Firestore 읽기가 반복되기 쉬웠음.
@@ -215,7 +221,7 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
                           Text(
                             context.koOnly.friendShareChannelsExplainer,
                             style: TextStyle(
-                                fontSize: 12.5.sp,
+                                fontSize: AppFontSize.body,
                                 color: colorScheme.onSurfaceVariant),
                           ),
                           SizedBox(height: 16.h),
@@ -232,7 +238,7 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
                           Text(
                             context.koOnly.friendEnterShareCode,
                             style: TextStyle(
-                                fontSize: 12.5.sp,
+                                fontSize: AppFontSize.body,
                                 color: colorScheme.onSurfaceVariant),
                           ),
                         ],
@@ -247,7 +253,7 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
                       ? Center(
                           child: Text(context.koOnly.friendNoneAddedYet,
                               style: TextStyle(
-                                  fontSize: 14.sp,
+                                  fontSize: AppFontSize.body,
                                   color: colorScheme.onSurfaceVariant)),
                         )
                       : RefreshIndicator(
@@ -271,7 +277,7 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
                                   title: Text(
                                     context.l10n.friendScheduleOf(displayName),
                                     style: TextStyle(
-                                        fontSize: 15.sp,
+                                        fontSize: AppFontSize.control,
                                         fontWeight: FontWeight.w600),
                                   ),
                                   subtitle: friend.availability ==
@@ -283,7 +289,7 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
                                               : context.koOnly
                                                   .friendShowingCachedSchedule,
                                           style: TextStyle(
-                                              fontSize: 11.5.sp,
+                                              fontSize: AppFontSize.meta,
                                               color:
                                                   colorScheme.onSurfaceVariant),
                                         )
@@ -293,12 +299,12 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
                                               context.l10n
                                                   .friendLoadFailedDetailed,
                                               style: TextStyle(
-                                                  fontSize: 11.5.sp,
+                                                  fontSize: AppFontSize.meta,
                                                   color: colorScheme.error),
                                             )
                                           : null,
                                   trailing: IconButton(
-                                    icon: Icon(Icons.delete_outline,
+                                    icon: Icon(AppUiIcons.delete,
                                         color: colorScheme.error),
                                     onPressed: () async {
                                       final confirm = await showDialog<bool>(

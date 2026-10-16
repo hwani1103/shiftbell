@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 // 2026-09-22 - 권한 안내 첫 화면이 작은 화면·큰 글자에서 넘쳐 "허용" 버튼이 잘리던 문제의 회귀 테스트.
 // 본문과 버튼을 스크롤해서 접근할 수 있고, 후속 경고 팝업도 진행 가능해야 한다.
 
@@ -8,8 +9,27 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftbell/l10n/generated/app_localizations.dart';
 import 'package:shiftbell/screens/permission_intro_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shiftbell/constants/platform_channel.dart';
+import 'package:shiftbell/widgets/app_ui_components.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final messenger =
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+  setUp(() {
+    messenger.setMockMethodCallHandler(kAlarmChannel, (call) async {
+      if (call.method != 'permissionSnapshot') return null;
+      return {
+        'notification': 'denied',
+        'overlay': 'denied',
+        'exactAlarm': 'denied',
+        'fullScreen': 'denied',
+        'alarmChannel': 'granted',
+        'sdk': 34,
+      };
+    });
+  });
+  tearDown(() => messenger.setMockMethodCallHandler(kAlarmChannel, null));
   const sizes = [
     Size(320, 568),
     Size(360, 640),
@@ -57,7 +77,7 @@ void main() {
                       .copyWith(textScaler: TextScaler.linear(scale)),
                   child: child!,
                 ),
-                home: const PermissionIntroScreen(),
+                home: const ProviderScope(child: PermissionIntroScreen()),
               ),
             ),
           );
@@ -69,7 +89,7 @@ void main() {
           // The shared permission panel also has a troubleshooting TextButton.
           // Exercise the onboarding actions rather than counting every button.
           for (final button in [
-            find.widgetWithText(ElevatedButton, l.commonNext),
+            find.byKey(const ValueKey('permission-notification')),
             find.widgetWithText(TextButton, l.commonNotNow)
           ]) {
             expect(button, findsOneWidget);
@@ -87,7 +107,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.byType(AlertDialog), findsOneWidget);
           expect(tester.takeException(), isNull);
-          final next = find.widgetWithText(TextButton, l.commonContinue);
+          final next = find.widgetWithText(AppUiButton, l.commonContinue);
           await tester.ensureVisible(next);
           expect(next.hitTestable(), findsOneWidget);
         });

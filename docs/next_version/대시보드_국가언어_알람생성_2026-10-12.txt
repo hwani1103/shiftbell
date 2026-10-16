@@ -1,0 +1,36 @@
+관리자 대시보드 국가·언어·알람 생성 후속
+2026-10-12 KST
+
+사용자 승인: 성장 국가에 알람 생성 추가, 별도 언어 통계 추가, 즉시 웹 배포.
+앱 UI 작업은 dev 미커밋 상태로 유지. 운영 main에는 대시보드10파일만 분리 커밋 beccefa/푸시.
+게시 앱 소스 v1.0.24+27과 lib/android/assets/web/pubspec.yaml 변화0 확인.
+Auth·Firestore 규칙·친구 웹 호스팅·앱 Analytics 이벤트 신규 변경 없음.
+
+변경
+성장·국가·언어 탭에 국가 표의 알람 생성 열, 언어별 독립 표/정렬/선택/직전 대비/최근100일 활성 추이 추가.
+기간은7/30/100/365일이며 선택 기간 사용자 수는 기간 중복 제거 집계다.
+알람 생성 열은 현행 alarm_template_saved의 사용자 수(고정 알람 생성·수정 저장 포함). 새로운 알람 건수/신규 생성만의 전환율이라고 표시하지 않는다.
+언어는GA4 language 차원(기기/브라우저 언어) 기준이며 앱에서 직접 선택한 표시 언어와 다를 수 있다. 화면 안내 포함.
+근거: https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema
+조회 실패·미관측은0으로 바꾸지 않는다. prod Android15763725797 필터와 웹/개발 스트림 분리 유지.
+서버 언어별 기간·기능·직전·일별 조회 및 operations schema3 저장, 첫 운영 재집계 --force 실행.
+
+검증
+로컬 Node31검사 PASS. 원격 Actions31검사 PASS 및GA4→Firestore 성공.
+브라우저360/752/1440px: 국가/언어 선택·정렬 독립, 키보드Enter,7일 기간 전환, 각 차트 렌더, 문서 가로넘침0, JS오류0, light/dark 캡처.
+근거: artifacts/dashboard_language_tests.log / artifacts/dashboard_language_browser.log / artifacts/dashboard_language_2026_10_12/ui/.
+실제 operations 읽기: schema3, 2026-10-12T11:02:27.851Z 갱신, 모든4기간 languages2개·languageEvents available, languageDaily available.
+국가7일5개/나머지기간8개. 알람 저장 관측 국가1·언어1. 과거 임의 채움 없음.
+근거: artifacts/dashboard_language_2026_10_12/production-verification.json 및 production-operations.json.
+
+배포
+https://shiftbell-ops-29f31.web.app
+Firebase Hosting shiftbell-ops-29f31만 배포 성공. 버전a0b21ac5dbe80857, 공개build-info의14개파일해시 로컬빌드와 일치.
+원격 재집계: https://github.com/hwani1103/shiftbell/actions/runs/38240061552 (success).
+실제GA4:19일치/최신2026-10-11/DAU122/MAU352. 부가 언어 조회 실패 없음.
+근거: artifacts/dashboard_language_deploy.log / dashboard_language_sync_remote.log / dashboard_language_2026_10_12/deployment-verification.json.
+
+앞선 온보딩 APK
+artifacts/onboarding_ui_round2/ShiftBell_UI_dev_debug.apk. 상세는 docs/UI 완성도 개선/08_온보딩수정_공통근무칩_2026-10-12.txt.
+시스템 글자 배율 고정·재사용 칩 실측 자동 축소·권한 시작·온보딩 문구와 같은 화면 오늘 선택 적용.
+대상315 및 최종62검사, 필수 -Build PASS(dev debug+JS웹). release·설치·Play게시 없음.

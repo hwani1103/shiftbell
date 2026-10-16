@@ -1,0 +1,12 @@
+GAME-01 최신 후속 연결 — 2026-10-14
+
+현행 소스0.8.0+10: 기존50 유지 + 포탈51~70,60부터 문 협동 결합.
+최신 읽기 순서: game_implementation_v10/00_구현검증_읽기순서.txt
+전략/정답 증거: portal_design.json, portal_strategy_audit.json, portal_verification.json.
+UI 원장: docs/UI 완성도 개선/GAME-07_포탈70레벨_표시_경로_시간경계_2026-10-14.txt
+빌드 증거는 v10/android_dev_debug_build.txt, web_build.txt, build_artifact_verification.json.
+
+초기 설계의 동일 Step 이동 시간은 후속 사용자 합의에 따라 일정한 칸당 속도로 바뀌었다.
+현재는 긴 경로가 더 오래 걸리고 모든 공이 같은 속도로 이동한다. 포탈 전이 자체만 추가 시간이 없다.
+과거 문서/검증 원장은 당시 증거로 보존. 1회용 포탈은 검토 후 이번에는 제외하고 다회용 포탈의 경로/시각 선택을 완성.
+기존 ShiftBell dev/prod 및 루트 빌드는 수정하지 않고 독립 DEV 실험 앱만 빌드.

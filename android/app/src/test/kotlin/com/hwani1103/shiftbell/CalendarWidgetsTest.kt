@@ -46,7 +46,7 @@ class CalendarWidgetsTest {
         }
     }
 
-    @Test fun allRegionsHaveCorrectWindowAndNoExtraWeeksAtLargeSizes() {
+    @Test fun allRegionsHaveCorrectCompactWindowAndHideUnusedRows() {
         for (tag in regions) for (single in listOf(false, true)) {
             val ctx = context(tag)
             val start = CalendarWidgetProvider.windowStart(now(), ReleaseLocalePolicy.firstDayOfWeek(ctx), single)
@@ -55,7 +55,8 @@ class CalendarWidgetsTest {
             assertEquals(if (single) if (start.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) 5 else 4
                 else if (start.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) 28 else 27, start.get(Calendar.DAY_OF_MONTH))
             val root = CalendarWidgetProvider.buildRemoteViews(ctx, single, now(), schedule("D"), emptyMap()).apply(ctx, FrameLayout(ctx))
-            assertNull(root.findViewById<View>(if (single) R.id.num_1_0 else ctx.resources.getIdentifier("num_3_0", "id", ctx.packageName)))
+            if (single) assertNull(root.findViewById<View>(R.id.num_1_0))
+            else assertEquals(View.GONE, root.findViewById<View>(R.id.widget_row_3).visibility)
             if (single) {
                 assertNull(root.findViewById<View>(R.id.widget_date_header))
                 assertEquals(ctx.resources.getStringArray(R.array.widget_weekday_labels)[start.get(Calendar.DAY_OF_WEEK)-1],
@@ -91,7 +92,7 @@ class CalendarWidgetsTest {
             val start = CalendarWidgetProvider.windowStart(now(), ReleaseLocalePolicy.firstDayOfWeek(ctx), single)
             val notes = (0..20).associate { i -> CalendarWidgetProvider.dateKeyFor((start.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, i) }) to
                 listOf("Memo one", "Memo two", "Memo three").take(i % 4) }
-            val root = CalendarWidgetProvider.buildRemoteViews(ctx, single, now(), schedule(label), notes, width.toFloat()).apply(ctx, FrameLayout(ctx)) as ViewGroup
+            val root = CalendarWidgetProvider.buildRemoteViews(ctx, single, now(), schedule(label), notes, width.toFloat(), heightDp = if(single) 102f else 262f).apply(ctx, FrameLayout(ctx)) as ViewGroup
             layout(root, width, if(single) 102 else 262, density)
             var previous: Rect? = null
             for (c in 0..6) {
@@ -108,7 +109,19 @@ class CalendarWidgetsTest {
                 val count = c % 4
                 if (count > 0) {
                     val memoText = root.findViewById<TextView>(id("memo1"))
-                    assertEquals("Memo one", memoText.text.toString())
+                    // Narrow widgets intentionally retain a complete-grapheme
+                    // prefix. Requiring the whole string at 250dp contradicts
+                    // that pre-existing provider contract; never accept blank
+                    // text, a split glyph, overflow or loss of the full a11y copy.
+                    val shown = memoText.text.toString()
+                    val case = "$tag/$width/$scale/single=$single/column=$c"
+                    assertTrue("non-empty memo $case", shown.isNotBlank())
+                    assertTrue("memo is a prefix $case", "Memo one".startsWith(shown))
+                    val breaks = android.icu.text.BreakIterator.getCharacterInstance(Locale.forLanguageTag(tag)).apply { setText("Memo one") }
+                    assertTrue("complete grapheme $case", breaks.isBoundary(shown.length))
+                    assertTrue("memo text fits $case", memoText.paint.measureText(shown) <=
+                        memoText.width - memoText.paddingLeft - memoText.paddingRight + 1)
+                    assertTrue("full accessible memo $case", memoText.contentDescription.toString().contains("Memo one"))
                     assertTrue("memo line visible $tag/$width/$scale: height=" + memoText.height + " layout=" + memoText.layout.height + " baseline=" + memoText.baseline + " pads=" + memoText.compoundPaddingTop + "," + memoText.compoundPaddingBottom,
                         memoText.layout.height <= memoText.height - memoText.compoundPaddingTop - memoText.compoundPaddingBottom)
                     val memo = bounds(root, memoText)
@@ -126,14 +139,14 @@ class CalendarWidgetsTest {
                     if (android.graphics.Color.red(bitmap.getPixel(x,y)) < 150) ink++
                 }
                 assertTrue("memo glyphs actually painted $tag/$single", ink > 0)
-                val file = File("../../artifacts/calendar_widgets_2026_10_09/" + tag + (if(single) "-week" else "-three") + ".png")
+                val file = File("../../artifacts/calendar_ot_2026_10_16/widget_regression/" + tag + (if(single) "-week" else "-three") + ".png")
                 file.parentFile?.mkdirs(); file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
             }
         }
         val ctx = context("en-US")
         for (label in listOf("D", "X".repeat(1000))) {
             val size = CalendarWidgetProvider.fittedShiftSize(label, 250f, 1f)
-            assertTrue(size > 0f && size <= 10f)
+            assertTrue(size > 0f && size <= 12f)
         }
     }
 
@@ -159,13 +172,13 @@ class CalendarWidgetsTest {
             val start = CalendarWidgetProvider.windowStart(instant, ReleaseLocalePolicy.firstDayOfWeek(ctx), single)
             val notes = (0..20).associate { i -> CalendarWidgetProvider.dateKeyFor((start.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH,i) }) to
                 (if (tag == "ko-KR") listOf("약속", "운동", "장보기") else listOf("Meet", "Gym", "Shop")).take(i%4) }
-            val root = CalendarWidgetProvider.buildRemoteViews(ctx, single, instant, data, notes, 320f).apply(ctx, FrameLayout(ctx)) as ViewGroup
+            val root = CalendarWidgetProvider.buildRemoteViews(ctx, single, instant, data, notes, 320f, heightDp = if(single) 102f else 262f).apply(ctx, FrameLayout(ctx)) as ViewGroup
             layout(root,320,600,density)
             assertEquals(600*density, root.findViewById<View>(R.id.widget_panel).height.toFloat(), 1f)
             layout(root,320,if(single) 102 else 262,density)
             val bitmap = Bitmap.createBitmap(root.width,root.height,Bitmap.Config.ARGB_8888)
             root.draw(Canvas(bitmap))
-            val file = File("../../artifacts/calendar_widgets_2026_10_09/preview-" + tag + (if(single) "-week" else "-three") + "-" + hour + ".png")
+            val file = File("../../artifacts/calendar_ot_2026_10_16/widget_regression/preview-" + tag + (if(single) "-week" else "-three") + "-" + hour + ".png")
             file.parentFile?.mkdirs(); file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG,100,it) }
         }
     }

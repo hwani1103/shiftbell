@@ -1,0 +1,10 @@
+{
+  "rejections": {
+    "too_few_deep_starts": 103,
+    "bounded_search_limit": 12,
+    "collision_or_participation": 2,
+    "too_few_route_choices": 1,
+    "gate_cooperation_or_difficulty": 2
+  },
+  "success": []
+}

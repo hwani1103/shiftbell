@@ -1,3 +1,7 @@
+import '../widgets/app_ui_feedback.dart';
+import '../widgets/app_ui_components.dart';
+import '../theme/app_ui_theme.dart';
+import '../widgets/app_ui_theme_scope.dart';
 import '../widgets/permission_warning_banner.dart';
 import '../utils/alarm_clock_label.dart';
 import 'package:intl/intl.dart';
@@ -9,7 +13,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/alarm.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,19 +20,25 @@ import '../providers/alarm_provider.dart';
 import '../l10n/l10n_extensions.dart';
 import '../utils/weekday_util.dart';
 import '../constants/platform_channel.dart';
-import '../theme/app_colors.dart';
-import '../widgets/app_second_button.dart';
-import '../widgets/app_third_button.dart';
 import '../utils/alarm_dismiss_gate.dart';
 
-class NextAlarmTab extends ConsumerStatefulWidget {
+class NextAlarmTab extends StatelessWidget {
   const NextAlarmTab({super.key});
 
   @override
-  ConsumerState<NextAlarmTab> createState() => _NextAlarmTabState();
+  Widget build(BuildContext context) => AppUiThemeScope(
+      preserveTextGeometry: true, builder: (_) => const _NextAlarmContent());
 }
 
-class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
+// Keep the palette boundary inside this tab so other tabs retain their colors.
+class _NextAlarmContent extends ConsumerStatefulWidget {
+  const _NextAlarmContent();
+
+  @override
+  ConsumerState<_NextAlarmContent> createState() => _NextAlarmTabState();
+}
+
+class _NextAlarmTabState extends ConsumerState<_NextAlarmContent> {
   final _dismissGate = AlarmDismissGate();
   static const platform = kAlarmChannel;
 
@@ -53,14 +62,16 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
       }
 
       if (mounted) {
+        final p = AppUiPalette.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(deletion.reservationFailed
-                ? context.l10n.alarmRefreshUnconfirmed
-                : context.l10n.alarmCanceledToast),
+          AppUiSnackBar(
+            backgroundColor: p.text,
+            content: Text(
+                deletion.reservationFailed
+                    ? context.l10n.alarmRefreshUnconfirmed
+                    : context.l10n.alarmCanceledToast,
+                style: TextStyle(color: p.surface)),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.r)),
           ),
         );
       }
@@ -73,25 +84,11 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
 
     // ⭐ 2026-08-28 - 좌우 스와이프로 달력탭 이동하는 기능 제거(안 써서).
     return Scaffold(
-      // ⭐ 2026-08-25 - Colors.transparent → kAppWaveGradientFallback으로 변경.
-      // 화면이 불규칙하게 "하얗게 깜빡인다"는 재보고 - 원인은 위 _NextAlarmTabState의
-      // 중복 60초 전체 리빌드 타이머(제거함, initState 참고)로 보이지만, 그거랑
-      // 별개로 최소한의 안전장치를 걸어둠: Scaffold 배경이 투명이면 그 뒤 앱 루트의
-      // 흰 배경(main.dart)이 그대로 비치니, 무슨 이유로든 파도 배경이 그 프레임에
-      // 아직 안 그려진 경우 "하얀 화면"처럼 보일 수 있음. 파도 그라데이션과 톤이
-      // 비슷한 색을 기본값으로 깔아두면 최악의 경우에도 흰색이 아니라 비슷한
-      // 색만 살짝 비쳐서 훨씬 덜 튐.
-      backgroundColor: kAppWaveGradientFallback,
-      // ⭐ 2026-08-25 - 정적 그라데이션 대신 잠금화면/오버레이(WaveGradientView.kt)와
-      // 동일한 "각도가 계속 회전하는" 파도 애니메이션을 Flutter 쪽에도 이식.
-      // 네이티브는 커스텀 View.onDraw()에서 매 프레임 LinearGradient(Shader)를
-      // 다시 그리는 방식이지만, Flutter는 AnimationController + Alignment 회전으로
-      // 같은 효과를 냄(13초 주기, 대비를 높인 동일 팔레트 - kAppWaveGradientColors).
-      // SizedBox.expand로 명시적으로 꽉 채움 - 스크롤 콘텐츠가 화면보다 짧을 때
-      // 그 아래로 흰 배경(바깥 Scaffold 기본색)이 비쳐 보이던 문제 방지(광고
-      // 슬롯처럼 보였다는 피드백의 원인).
+      // A solid shared backdrop keeps loading and content on the same surface.
+      backgroundColor: AppUiPalette.of(context).background,
       body: SizedBox.expand(
-        child: _WaveGradientBackground(
+        child: ColoredBox(
+          color: AppUiPalette.of(context).background,
           child: SafeArea(
             child: Column(
               children: [
@@ -122,7 +119,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   }
 
   Widget _buildEmptyState() {
-    final colorScheme = Theme.of(context).colorScheme;
+    final p = AppUiPalette.of(context);
 
     return SafeArea(
       child: Center(
@@ -135,13 +132,13 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 width: 120.w,
                 height: 120.w,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant,
+                  color: p.soft,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.alarm_off_rounded,
                   size: 60.sp,
-                  color: colorScheme.outline,
+                  color: p.secondaryText,
                 ),
               ),
               SizedBox(height: 24.h),
@@ -150,7 +147,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurfaceVariant,
+                  color: p.secondaryText,
                 ),
               ),
               SizedBox(height: 8.h),
@@ -159,7 +156,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: colorScheme.onSurfaceVariant,
+                  color: p.secondaryText,
                 ),
               ),
             ],
@@ -182,6 +179,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -191,107 +189,117 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
           ref.read(alarmNotifierProvider.notifier).refresh();
         });
 
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.85,
-          expand: false,
-          builder: (context, scrollController) {
-            return Consumer(
-              builder: (context, ref, child) {
-                final alarmsAsync = ref.watch(alarmNotifierProvider);
-                final colorScheme = Theme.of(context).colorScheme;
+        return AppUiThemeScope(
+            builder: (context) => DraggableScrollableSheet(
+                  initialChildSize: 0.6,
+                  minChildSize: 0.4,
+                  maxChildSize: 0.85,
+                  expand: false,
+                  builder: (context, scrollController) {
+                    return Consumer(
+                      builder: (context, ref, child) {
+                        final alarmsAsync = ref.watch(alarmNotifierProvider);
+                        final p = AppUiPalette.of(context);
 
-                return Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 핸들
-                      Center(
-                        child: Container(
-                          width: 40.w,
-                          height: 4.h,
+                        return Container(
+                          key: const ValueKey('next-alarm-list-surface'),
                           decoration: BoxDecoration(
-                            color: colorScheme.outline,
-                            borderRadius: BorderRadius.circular(2.r),
+                            color: p.surface,
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20.r)),
                           ),
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-
-                      // 제목
-                      Text(
-                        context.l10n.alarmRegistered,
-                        style: TextStyle(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-
-                      // 알람 목록
-                      Expanded(
-                        child: alarmsAsync.when(
-                          loading: () =>
-                              Center(child: CircularProgressIndicator()),
-                          error: (_, __) => Center(
-                              child: Text(context.l10n.statusErrorOccurred)),
-                          data: (alarms) {
-                            final now = DateTime.now();
-                            final futureAlarms = alarms
-                                .where((a) =>
-                                    a.date != null && a.date!.isAfter(now))
-                                .toList()
-                              ..sort((a, b) => a.date!.compareTo(b.date!));
-
-                            if (futureAlarms.isEmpty) {
-                              return Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.alarm_off_rounded,
-                                      size: 48.sp,
-                                      color: colorScheme.outline,
-                                    ),
-                                    SizedBox(height: 12.h),
-                                    Text(
-                                      context.l10n.alarmNoneRegistered,
-                                      style: TextStyle(
-                                        fontSize: 15.sp,
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20.w, vertical: 16.h),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 핸들
+                              Center(
+                                child: Container(
+                                  width: 40.w,
+                                  height: 4.h,
+                                  decoration: BoxDecoration(
+                                    color: p.secondaryText,
+                                    borderRadius: BorderRadius.circular(2.r),
+                                  ),
                                 ),
-                              );
-                            }
+                              ),
+                              SizedBox(height: 16.h),
 
-                            return ListView.builder(
-                              controller: scrollController,
-                              itemCount: futureAlarms.length,
-                              itemBuilder: (itemContext, index) {
-                                final alarm = futureAlarms[index];
-                                // ⭐ 이 itemBuilder가 제공하는 자기 자신의 context를 씀
-                                // (바깥 State의 context가 아니라, 이 목록 항목 자체의
-                                // context - 항목이 화면에 남아있는 한 항상 유효함).
-                                return _buildAlarmListItem(
-                                    itemContext, alarm, index == 0);
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-        );
+                              // 제목
+                              Text(
+                                context.l10n.alarmRegistered,
+                                style: TextStyle(
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: p.text,
+                                ),
+                              ),
+                              SizedBox(height: 16.h),
+
+                              // 알람 목록
+                              Expanded(
+                                child: alarmsAsync.when(
+                                  loading: () => Center(child: AppUiLoading()),
+                                  error: (_, __) => Center(
+                                      child: Text(
+                                          context.l10n.statusErrorOccurred)),
+                                  data: (alarms) {
+                                    final now = DateTime.now();
+                                    final futureAlarms = alarms
+                                        .where((a) =>
+                                            a.date != null &&
+                                            a.date!.isAfter(now))
+                                        .toList()
+                                      ..sort(
+                                          (a, b) => a.date!.compareTo(b.date!));
+
+                                    if (futureAlarms.isEmpty) {
+                                      return Center(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.alarm_off_rounded,
+                                              size: 48.sp,
+                                              color: p.secondaryText,
+                                            ),
+                                            SizedBox(height: 12.h),
+                                            Text(
+                                              context.l10n.alarmNoneRegistered,
+                                              style: TextStyle(
+                                                fontSize: 15.sp,
+                                                color: p.secondaryText,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+
+                                    return ListView.builder(
+                                      controller: scrollController,
+                                      itemCount: futureAlarms.length,
+                                      itemBuilder: (itemContext, index) {
+                                        final alarm = futureAlarms[index];
+                                        // ⭐ 이 itemBuilder가 제공하는 자기 자신의 context를 씀
+                                        // (바깥 State의 context가 아니라, 이 목록 항목 자체의
+                                        // context - 항목이 화면에 남아있는 한 항상 유효함).
+                                        return _buildAlarmListItem(
+                                            itemContext, alarm, index == 0);
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ));
       },
     );
   }
@@ -303,7 +311,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
     }
 
     final date = alarm.date!;
-    final colorScheme = Theme.of(context).colorScheme;
+    final p = AppUiPalette.of(context);
     // ⭐ 영어 현지화 후속 수정: DateFormat.Md(locale)는 로케일에 따라 구분자가
     // 달라짐(예: ko → "8. 15.", en → "8/15") - 한국어 사용자에게 기존에 없던
     // 시각적 변화(점 구분자)가 새로 생기는 회귀였음. 순수 숫자 M/d 표기는 두
@@ -320,13 +328,10 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
       margin: EdgeInsets.only(bottom: 10.h),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color:
-            isNext ? colorScheme.primary.withOpacity(0.1) : colorScheme.surface,
+        color: isNext ? p.soft : p.surface,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
-          color: isNext
-              ? colorScheme.primary.withOpacity(0.3)
-              : colorScheme.outline.withOpacity(0.3),
+          color: isNext ? p.primary : p.border,
           width: isNext ? 1.5 : 1,
         ),
       ),
@@ -344,7 +349,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
               ].join('\n'),
               style: TextStyle(
                 fontSize: 13.sp,
-                color: colorScheme.onSurfaceVariant,
+                color: p.secondaryText,
               ),
             ),
           ),
@@ -358,7 +363,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
-                color: isNext ? colorScheme.primary : colorScheme.onSurface,
+                color: isNext ? p.primary : p.text,
               ),
             ),
           ),
@@ -376,33 +381,15 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 // 근무 타입
                 // ⭐ 2026-09-23 (1.0.24 B) - 커스텀 알람은 근무명이 없으므로 "커스텀 알람"으로 표시
                 if (alarm.shiftType != null)
-                  Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                    decoration: BoxDecoration(
-                      color: isNext
-                          ? colorScheme.primary.withOpacity(0.2)
-                          : colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Text(
-                      alarm.shiftType ?? context.l10n.alarmDefaultLabel,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        color: isNext
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
+                  AppUiShiftChip(
+                      name: alarm.shiftType!, size: AppChipSize.compact),
 
                 // 알람 타입 표시 (소리/진동/무음)
                 Container(
                   padding:
                       EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                   decoration: BoxDecoration(
-                    color: isNext ? colorScheme.primary : colorScheme.outline,
+                    color: isNext ? p.primary : p.soft,
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Row(
@@ -415,9 +402,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                                 ? Icons.vibration
                                 : Icons.volume_off,
                         size: 14.sp,
-                        color: isNext
-                            ? colorScheme.surface
-                            : colorScheme.onSurface,
+                        color: isNext ? p.onPrimary : p.text,
                       ),
                       SizedBox(width: 5.w),
                       Flexible(
@@ -430,9 +415,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
-                          color: isNext
-                              ? colorScheme.surface
-                              : colorScheme.onSurface,
+                          color: isNext ? p.onPrimary : p.text,
                         ),
                       )),
                     ],
@@ -590,7 +573,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
   @override
   Widget build(BuildContext context) {
     final alarm = widget.alarm;
-    final colorScheme = Theme.of(context).colorScheme;
+    final p = AppUiPalette.of(context);
     final timeStr = alarm.date != null
         ? '${alarm.date!.hour.toString().padLeft(2, '0')}:${alarm.date!.minute.toString().padLeft(2, '0')}'
         : alarm.time;
@@ -610,14 +593,9 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
       if (statusLabel.isNotEmpty) statusLabel
     ].join('\n');
 
-    // ⭐ 2026-08-25 4차 수정 - (1) 링 색은 "임박" 여부와 무관하게 항상
-    // kAppRingAccent 고정(전엔 임박 시 tertiary(주황)로 바뀌게 했는데, 이건
-    // 목업에 없던 임의 추가였음 - 목업의 링은 항상 고정색). "남은 시간" 카드의
-    // 아이콘/텍스트만 임박 시 강조색으로 바뀌는 건 실제 앱 원래 동작이라 유지.
-    // (2) 흰 여백을 아래로 밀어내려던 문제(SizedBox.expand로 해결, build()
-    // 상단 참고)로 확보된 공간에 맞춰 링/카드/버튼을 전체적으로 약 18% 키움.
+    // Imminence uses the common selection emphasis; alarm behavior is unchanged.
     final isImminent = timeData['isImminent'] as bool;
-    final onCardColor = isImminent ? colorScheme.tertiary : kAppChipBorder;
+    final onCardColor = isImminent ? p.selectionOutline : p.text;
     const typeIds = [1, 2, 3];
     final typeIcons = [
       Icons.volume_up_rounded,
@@ -638,31 +616,24 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
             : 238.w;
 
     return SafeArea(
-      // ⭐ 2026-08-25 3차 수정 - ScrollConfiguration(overscroll:false)로 Material3
-      // 스트레치 데코레이션은 없앴는데도 "여전히 아주 살짝 당겨진다"는 재보고를
-      // 받음. 남은 원인: 콘텐츠 실제 높이가 뷰포트보다 미세하게(기기별로 몇 px)
-      // 더 커서 physics 입장에선 "진짜 오버플로"라 ClampingScrollPhysics가 정상
-      // 동작한 것 - 눈에 안 보일 만큼 작은 여분이라 사용자한텐 "굳이 안 내려가도
-      // 되는데 내려가지는" 것처럼 느껴짐. _NoTinyOverflowScrollPhysics로 그
-      // maxScrollExtent가 아주 작을 때(_tinyOverflowThreshold 미만)는 드래그 자체를
-      // 씹어서 진짜 못 내려가게 하고, 그보다 큰 진짜 오버플로(작은 화면 기기 등)는
-      // 그대로 정상 스크롤되게 함 - 안전장치는 유지.
+      // The ring yields height before controls. A bounded phone column needs no scrolling.
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
         child: LayoutBuilder(
             builder: (context, viewport) => AdaptiveHeroViewport(
-                  physics: const _NoTinyOverflowScrollPhysics(),
                   padding: EdgeInsets.fromLTRB(
-                      24.w,
-                      AppLayout.of(context).isShortCover ? 12.h : 32.h,
-                      24.w,
-                      28.h),
+                      AppUiMetrics.pagePadding.w,
+                      AppUiMetrics.gap.h,
+                      AppUiMetrics.pagePadding.w,
+                      AppUiMetrics.gap.h),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
                         minHeight: layout.isWide
                             ? math.max(0, viewport.maxHeight - 60.h)
                             : 0),
                     child: AdaptiveHeroLayout(
+                      distributeVerticalSpace: true,
+                      flexibleIndex: 2,
                       splitIndex: (alarm.shiftType != null) ? 6 : 5,
                       children: [
                         Row(
@@ -671,10 +642,10 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                 style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w700,
-                                    color: kAppChipBorder)),
+                                    color: p.secondaryText)),
                           ],
                         ),
-                        SizedBox(height: 24.h),
+                        SizedBox(height: AppUiMetrics.compactCardPadding.h),
 
                         // ⭐ "UI 테마" 탭에서 확정한 카운트다운 링. 알람 12시간 전부터
                         // 채워지기 시작해서 알람 시각에 근접함(=임박 표시). 알람이 실제로
@@ -698,9 +669,8 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                     size: 238.w,
                                     strokeWidth: 14.w,
                                     alarmTime: alarm.date!,
-                                    color: kAppRingAccent,
-                                    trackColor:
-                                        kAppChipBorder.withOpacity(0.15),
+                                    color: p.primary,
+                                    trackColor: p.border,
                                   ),
                                   Container(
                                     width: 188.w,
@@ -708,14 +678,8 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.18),
-                                            blurRadius: 14,
-                                            offset: const Offset(0, 6))
-                                      ],
+                                      color: p.surface,
+                                      border: Border.all(color: p.border),
                                     ),
                                     child: FittedBox(
                                         fit: BoxFit.scaleDown,
@@ -727,8 +691,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                                   horizontal: 11.w,
                                                   vertical: 4.h),
                                               decoration: BoxDecoration(
-                                                  color: colorScheme.primary
-                                                      .withOpacity(0.12),
+                                                  color: p.soft,
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           20.r)),
@@ -736,8 +699,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                       fontSize: 12.sp,
-                                                      color:
-                                                          colorScheme.primary,
+                                                      color: p.primary,
                                                       fontWeight:
                                                           FontWeight.w700)),
                                             ),
@@ -746,8 +708,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                                 style: TextStyle(
                                                     fontSize: 33.sp,
                                                     fontWeight: FontWeight.w800,
-                                                    color:
-                                                        colorScheme.primary)),
+                                                    color: p.primary)),
                                           ],
                                         )),
                                   ),
@@ -758,22 +719,9 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                         SizedBox(height: 16.h),
 
                         if (alarm.shiftType != null)
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 14.w, vertical: 6.h),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20.r)),
-                            child: Text(
-                                alarm.shiftType ??
-                                    context.l10n.alarmDefaultLabel,
-                                style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: kAppChipBorder,
-                                    fontWeight: FontWeight.w600)),
-                          ),
+                          AppUiShiftChip(name: alarm.shiftType!),
 
-                        SizedBox(height: 28.h),
+                        SizedBox(height: AppUiMetrics.gap.h),
 
                         IntrinsicHeight(
                           child: Row(
@@ -784,7 +732,8 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                 child: Container(
                                   padding: EdgeInsets.all(16.w),
                                   decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: p.surface,
+                                      border: Border.all(color: p.border),
                                       borderRadius:
                                           BorderRadius.circular(20.r)),
                                   child: Column(
@@ -798,8 +747,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                       Text(context.l10n.alarmUntil,
                                           style: TextStyle(
                                               fontSize: 11.sp,
-                                              color: kAppChipBorder
-                                                  .withOpacity(0.6))),
+                                              color: p.secondaryText)),
                                       SizedBox(height: 2.h),
                                       Wrap(
                                         spacing: 4.w,
@@ -823,7 +771,8 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 12.w, vertical: 14.h),
                                   decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: p.surface,
+                                      border: Border.all(color: p.border),
                                       borderRadius:
                                           BorderRadius.circular(20.r)),
                                   child: Column(
@@ -846,15 +795,14 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                                 alignment: Alignment.center,
                                                 decoration: BoxDecoration(
                                                     color: selected
-                                                        ? colorScheme.primary
+                                                        ? p.primary
                                                         : Colors.transparent,
                                                     shape: BoxShape.circle),
                                                 child: Icon(typeIcons[i],
                                                     size: 14.sp,
                                                     color: selected
-                                                        ? Colors.white
-                                                        : kAppChipBorder
-                                                            .withOpacity(0.4)),
+                                                        ? p.onPrimary
+                                                        : p.secondaryText),
                                               ),
                                               SizedBox(width: 7.w),
                                               Expanded(
@@ -862,10 +810,9 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                                   typeLabels[i],
                                                   style: TextStyle(
                                                       fontSize: 11.sp,
-                                                      color: kAppChipBorder
-                                                          .withOpacity(selected
-                                                              ? 0.9
-                                                              : 0.5),
+                                                      color: selected
+                                                          ? p.text
+                                                          : p.secondaryText,
                                                       fontWeight: selected
                                                           ? FontWeight.w700
                                                           : FontWeight.w400),
@@ -883,43 +830,27 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                           ),
                         ),
 
-                        SizedBox(height: 26.h),
+                        SizedBox(height: AppUiMetrics.gap.h),
 
                         SizedBox(
                           width: double.infinity,
-                          child: AppThirdButton(
+                          child: AppUiButton(
+                            emphasized: true,
+                            action: AppUiAction.secondary,
                             onPressed: widget.onShowAllAlarms,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.list_rounded, size: 18),
-                                SizedBox(width: 7.w),
-                                Flexible(
-                                  child: Text(
-                                      context.l10n.alarmViewAllRegistered,
-                                      textAlign: TextAlign.center),
-                                ),
-                              ],
-                            ),
+                            icon: Icons.list_rounded,
+                            label: context.l10n.alarmViewAllRegistered,
                           ),
                         ),
-                        SizedBox(height: 12.h),
+                        SizedBox(height: AppUiMetrics.dialogActionGap.h),
                         SizedBox(
                           width: double.infinity,
-                          child: AppSecondButton(
-                            variant: AppSecondButtonVariant.danger,
+                          child: AppUiButton(
+                            emphasized: true,
+                            action: AppUiAction.danger,
                             onPressed: widget.onDismiss,
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.alarm_off_rounded, size: 18),
-                                SizedBox(width: 7.w),
-                                Flexible(
-                                  child: Text(context.l10n.alarmTurnOffThis,
-                                      textAlign: TextAlign.center),
-                                ),
-                              ],
-                            ),
+                            icon: Icons.alarm_off_rounded,
+                            label: context.l10n.alarmTurnOffThis,
                           ),
                         ),
                       ],
@@ -1063,91 +994,4 @@ class _RingPainter extends CustomPainter {
       oldDelegate.progress != progress ||
       oldDelegate.color != color ||
       oldDelegate.trackColor != trackColor;
-}
-
-// ⭐ 2026-08-25 추가 - 잠금화면/오버레이(WaveGradientView.kt)와 같은 "각도가
-// 계속 회전하는" 그라데이션 배경을 Flutter 쪽에 이식. 네이티브는 커스텀
-// View.onDraw()에서 매 프레임 LinearGradient(Shader)를 다시 만드는 방식이지만,
-// Flutter는 그런 저수준 API가 없으므로 AnimationController로 각도값만 계속
-// 갱신하고 Container의 LinearGradient(begin/end Alignment)를 매 프레임 다시
-// 계산해서 그림 - 시각적으로는 동일한 "천천히 회전하는 대각선 그라데이션" 효과.
-// AnimatedBuilder의 child(=실제 알람 콘텐츠)는 애니메이션 값과 무관하므로 매
-// 프레임 재사용됨(재빌드 안 됨) - 배경 그라데이션 Container만 매 프레임 다시 그림.
-class _WaveGradientBackground extends StatefulWidget {
-  final Widget child;
-  const _WaveGradientBackground({required this.child});
-
-  @override
-  State<_WaveGradientBackground> createState() =>
-      _WaveGradientBackgroundState();
-}
-
-class _WaveGradientBackgroundState extends State<_WaveGradientBackground>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    // 네이티브(WaveGradientView.kt)와 동일한 8초 회전 주기(2026-09-13 - "조금
-    // 더 빠르게" 피드백으로 13초 → 8초, 둘 다 같이 바꿈).
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 8))
-          ..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      child: widget.child,
-      builder: (context, child) {
-        // 시작 방향은 기존 정적 배경과 동일한 topLeft→bottomRight(=45°)에서
-        // 출발해서 한 바퀴(360°)씩 계속 회전.
-        final angle = math.pi / 4 + 2 * math.pi * _controller.value;
-        final dx = math.cos(angle);
-        final dy = math.sin(angle);
-        return Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment(-dx, -dy),
-              end: Alignment(dx, dy),
-              colors: kAppWaveGradientColors,
-            ),
-          ),
-          child: child,
-        );
-      },
-    );
-  }
-}
-
-// ⭐ 2026-08-25 추가 - "실제로는 몇 px 남는데 스크롤이 가능은 한" 미세 오버플로를
-// 아예 못 내려가게 막는 커스텀 physics. ClampingScrollPhysics 자체는 정상
-// 동작이지만(뷰포트보다 콘텐츠가 조금이라도 크면 스크롤을 허용하는 게 맞는
-// 동작), 그 "조금"이 사용자 눈엔 안 보일 만큼 작을 때도 그대로 허용되다 보니
-// "왜 굳이 내려가지?"로 느껴짐 - maxScrollExtent가 _tinyOverflowThreshold보다
-// 작으면 드래그 자체를 무시해서 그 미세한 여분을 진짜 오버플로가 아닌 것처럼
-// 처리함. 그보다 큰 진짜 오버플로(작은 화면 기기 등)는 평소처럼 정상 스크롤됨.
-const double _tinyOverflowThreshold = 24.0;
-
-class _NoTinyOverflowScrollPhysics extends ClampingScrollPhysics {
-  const _NoTinyOverflowScrollPhysics({super.parent});
-
-  @override
-  _NoTinyOverflowScrollPhysics applyTo(ScrollPhysics? ancestor) {
-    return _NoTinyOverflowScrollPhysics(parent: buildParent(ancestor));
-  }
-
-  @override
-  bool shouldAcceptUserOffset(ScrollMetrics position) {
-    if (position.maxScrollExtent <= _tinyOverflowThreshold) return false;
-    return super.shouldAcceptUserOffset(position);
-  }
 }

@@ -1,9 +1,10 @@
-import '../widgets/shift_editor_dialog.dart';
+import '../widgets/fixed_alarm_summary_card.dart';
+import '../widgets/app_ui_feedback.dart';
+import '../widgets/fixed_alarm_editor_dialog.dart';
+import '../widgets/app_ui_theme_scope.dart';
 import '../widgets/adaptive_layout.dart';
 import '../widgets/permission_warning_banner.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 import '../models/shift_schedule.dart';
 import '../models/calendar_theme.dart';
 import '../services/database_service.dart';
@@ -14,22 +15,14 @@ import '../providers/calendar_theme_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../main.dart'; // ⭐ MainScreen import
 import '../constants/alarm_limits.dart';
+import '../constants/layout_limits.dart';
 import '../constants/shift_name_limits.dart';
 import '../widgets/shift_name_text_field.dart';
 import '../l10n/l10n_extensions.dart';
-import '../theme/app_colors.dart';
-import '../widgets/app_shift_chip.dart';
-import '../widgets/word_safe_spans.dart';
-import '../widgets/app_button.dart';
-import '../widgets/app_second_button.dart';
-import '../widgets/app_third_button.dart';
-import '../widgets/alarm_time_editor.dart';
-import '../widgets/day_offset_chip.dart';
+import '../theme/app_ui_theme.dart';
+import '../widgets/app_ui_components.dart';
 import '../constants/alarm_day_offset.dart';
 import '../services/alarm_generation_service.dart';
-import '../models/backup_payload.dart';
-import '../services/backup_storage_service.dart';
-import 'restore_backup_screen.dart';
 import '../services/app_analytics.dart';
 
 // 알람 설정 (시간 + 타입 + 전날/당일/다음날)
@@ -67,6 +60,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   static const int _maxCustomShiftTypes = kMaxCustomShiftTypes;
 
   int _step = 0;
+  bool _choosingToday = false;
   // ⭐ 2026-08-24 - 예전엔 "고정적으로 순환하는 교대 근무인가요?" 선택 화면에서
   // 사용자가 예/아니오를 고르기 전까지 null(미정)이었음. 그 선택 화면을 없애고
   // "규칙적" 분기를 새 첫 화면으로 승격하면서, 기본값을 true로 바꿈 - "선택 안
@@ -87,6 +81,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   final _patternPreviewController = ScrollController();
+  final _lastPatternSlotKey = GlobalKey();
 
   @override
   void dispose() {
@@ -114,300 +109,118 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: _step == 0, // step 0에서만 앱 종료 허용
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) _goBack();
-      },
-      child: Scaffold(
-        // ⭐ 2026-08-24 - AppTheme.lightTheme.scaffoldBackgroundColor(현재 흰색)와
-        // 같은 값을 여기 인스턴스에도 직접 명시함 - 그건 static 필드라 hot
-        // reload로는 재평가 안 되므로(hot restart/재실행 때만 초기화), 개발 중
-        // 배경 톤을 바꿔가며 확인할 때 여기 명시해두면 build()가 다시 불릴
-        // 때마다 항상 최신 값으로 나옴.
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          // ⭐ 2026-08-24 - title을 Center()로 감쌌던 건 AppBarTheme에
-          // centerTitle이 없어서 안드로이드 기본값(false)이 적용되던 시절의
-          // 임시방편이었음 - leading 유무에 따라 타이틀 위치가 살짝 어긋나는
-          // 문제가 있었음(그 폭만큼 오른쪽으로 치우쳐 보임). 이제
-          // app_theme.dart의 AppBarTheme.centerTitle: true가 이걸 제대로
-          // 처리하므로(leading 폭과 무관하게 항상 화면 정중앙), 이 Center()는
-          // 더 이상 필요 없어 제거함 - 첫 화면(뒤로가기 없음)이든 그 이후
-          // 화면(뒤로가기 있음)이든 타이틀이 항상 같은 자리에 옴.
-          title: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(context.l10n.onboardingCreateSchedule),
-              SizedBox(height: 2.h),
-              Text(
-                '$_visibleStepNumber / $_totalSteps',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          leading: _step > 0
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: _goBack,
-                )
-              : null,
-        ),
-        body: AdaptiveFormBody(
-            child: SafeArea(
-          child: _buildStep(),
-        )),
-      ),
-    );
+    return AppUiThemeScope(builder: _buildSetupScreen);
   }
 
-  int get _totalSteps => _isRegular == false ? 3 : 4;
+  int get _totalSteps => 3;
+  int get _visibleStepNumber => _step + 1;
 
-  int get _visibleStepNumber {
-    if (_isRegular == false) return _step >= 2 ? 3 : _step + 1;
-    return _step + 1;
-  }
-
-  // ⭐ 2026-08-24 - "고정적으로 순환하는 교대 근무인가요?" 선택 화면(구 step 0)을
-  // 삭제하고, "예-규칙적"을 눌렀을 때 가던 화면(구 step 1의 규칙적 분기,
-  // _buildShiftTypeCreation)을 새 첫 화면으로 승격함. 이후 모든 스텝 번호를
-  // 1씩 당김(구 1→신 0, 구 2→신 1, ... 구 5→신 4) - _isRegular 기본값도
-  // null에서 true로.
-  //
-  // ⭐ 2026-08-24 재설계 - 불규칙 플로우 단순화. 근무명 지정(step0)은 규칙/불규칙
-  // 둘 다 똑같이 거치므로("어차피 불규칙으로 가도 근무명은 똑같이 설정해야
-  // 됨"), 둘째 화면("여기" 링크가 있는 _buildPatternInput, step1)에서 바로
-  // "근무별 고정 알람을 설정하세요"(_buildMainAlarmSetup, case2의 원래
-  // isRegular==false 슬롯)로 건너뛸 수 있게 함 - 옛 불규칙 전용 화면들
-  // (_buildShiftTypesInput, _buildSelectShiftsForAlarm)은 삭제함(더 이상 도달할
-  // 경로가 없었음).
-  //
-  // 동작 원리: "여기"를 누르면 isRegular=false + _selectedShifts=모든 근무명 +
-  // _step=2를 한 번에 설정함(_buildPatternInput() 참고) - case2가 원래부터
-  // isRegular==false일 때 _buildMainAlarmSetup()을 가리키므로 새 분기가 필요
-  // 없음. step0/1은 이제 isRegular와 무관하게 화면이 하나뿐이라 삼항을 없앰
-  // (이 경로들에서 isRegular가 false가 될 수 없어짐 - 아래 case 주석 참고).
-  // 뒤로가기(_goBack())는 "step1로 돌아오면 isRegular를 항상 true로 리셋"
-  // 하나의 규칙으로 전부 처리됨 - step2(알람설정, isRegular=false)에서 한 번
-  // 뒤로가면 여전히 그 화면을 다시 보여주고(자연스러운 "방금 그 화면"),
-  // 거기서 한 번 더 뒤로가야 step1(_buildPatternInput)에 도착하며 그 순간
-  // isRegular가 true로 리셋됨 - 근무명은 _allShiftTypes에 계속 그대로
-  // 남아있으므로(이 흐름 전체에서 건드리지 않음) 거기서 다시 규칙적 패턴을
-  // 이어서 만들 수도 있음.
-  Widget _buildStep() {
-    switch (_step) {
-      case 0:
-        // ⭐ step0에서 isRegular가 false일 수 있는 경로가 이제 없음("여기"는
-        // step1에서만 누를 수 있고, 그 즉시 step2로 건너뜀 - 아래 _buildStep()
-        // 클래스 주석과 _goBack() 참고) - 삼항 없이 이 화면 하나만.
-        return _buildShiftTypeCreation();
-      case 1:
-        // ⭐ 같은 이유로 step1도 isRegular와 무관하게 항상 이 화면 하나 -
-        // "여기"를 누르면 step이 곧장 2로 바뀌므로 step1에 머무른 채
-        // isRegular만 false가 되는 경우가 없음.
-        return _buildPatternInput();
-      case 2:
-        return _isRegular == true
-            ? _buildTodayIndexInput()
-            : _buildMainAlarmSetup();
-      case 3:
-        return _buildMainAlarmSetup();
-      default:
-        return Container();
-    }
-  }
-
-  // ⭐ 2026-08-24 - 뒤로가기 공통 처리(PopScope + AppBar 아이콘 둘 다 이걸 씀).
-  // step1(_buildPatternInput)로 "돌아오는" 모든 경로에서 isRegular를 true로
-  // 리셋함 - step1은 이제 항상 규칙적 화면 하나뿐이라, 거기 서 있는 동안은
-  // 항상 "다시 규칙 패턴을 이어 만들 수 있는" 상태여야 함(사용자 요구사항:
-  // "여기를 눌러 알람설정까지 갔다가 뒤로 나오면 다시 규칙 패턴으로 갈 수도
-  // 있어야 한다"). 그 뒤(step2/3)에서 알람설정 화면을 보고 있었다면(isRegular
-  // false) 그것도 이 리셋 한 번으로 자연스럽게 해소됨 - step2로 뒤로가면
-  // 여전히 isRegular==false라 case2가 알람설정 화면을 다시 보여주고(맞는
-  // 동작), 거기서 한 번 더 뒤로가면 step1에 도착하는 이 시점에 비로소 true로
-  // 리셋됨.
   void _goBack() {
     if (_step == 0) return;
     setState(() {
       _step--;
-      if (_step == 1) _isRegular = true;
+      if (_step == 1) {
+        _isRegular = true;
+      }
     });
   }
 
-  // ⭐ 2026-09-01 - "백업 데이터 불러오기" 온보딩 진입점. 원래
-  // permission_intro_screen.dart(권한 화면)에 있었는데, 근무 데이터를 실제로
-  // 입력하려는 이 시점(근무명 지정 화면)에서 물어보는 게 더 자연스럽다는
-  // 판단으로 옮김 - _buildShiftTypeCreation() 하단 UI 참고. 시스템 파일
-  // 선택기로 고른 파일이 유효한 백업이면 RestoreBackupScreen을 그대로 재사용
-  // (복구 로직/빈 백업 가드 전부 동일하게 적용됨).
-  Future<void> _pickBackupManually() async {
-    final json = await BackupStorageService.instance.pickAndRead();
-    if (json == null) return; // 선택기에서 취소함 - 조용히 무시
-
-    BackupPayload? payload;
-    try {
-      payload = BackupPayload.decode(json);
-    } catch (e) {
-      payload = null;
-    }
-
-    if (!mounted) return;
-    if (payload == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(context.l10n.backupRestoreManualPickInvalidToast)),
-      );
-      return;
-    }
-
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => RestoreBackupScreen(
-          payload: payload!,
-          // ⭐ 2026-09-01 - 백업_수면_컨디션_기능_검토_2026-09-01.md A1 수정.
-          // 이 진입 경로는 온보딩 1단계 도중(push)이라, 건너뛰기/빈 백업 실패
-          // 시 그냥 이 화면으로 되돌아가야(pop) 방금까지 입력해둔 근무명이
-          // 안 날아감 - RestoreBackupScreen 기본 동작(새 OnboardingScreen
-          // 생성)을 여기서만 덮어씀.
-          onCancel: () => Navigator.of(context).pop(),
-        ),
-      ),
-    );
-  }
-
-  // ⭐ 2026-08-24 - 온보딩 새 첫 화면(구 step1 규칙적 분기가 승격됨). 텍스트/칩
-  // 디자인/레이아웃을 전면 개편함:
-  // - 문구를 "내 교대 패턴에 해당되는 근무명 지정" + 부연설명 2줄 + "여기" 링크로
-  //   교체(onboardingShiftNameTitle/SubHint/SwitchToIrregular* - app_ko.arb 참고).
-  //   기존 글자수 제한 안내(onboardingShiftLimitHint)는 이 화면에서 더 이상
-  //   보여주지 않음 - _showAddCustomDialog()의 입력창 자체에 maxLength가 걸려
-  //   있어 실제 제약은 그대로 유지됨.
-  // - 근무명 태그를 ElevatedButton 대신 AppShiftChip으로 교체(app_shift_chip.dart) -
-  //   버튼과 시각적으로 구분되는 별도 디자인.
-  // - 레이아웃을 _buildPatternInput()과 동일한 구조(Expanded로 남는 공간을
-  //   스크롤 영역에 주고, "다음" 버튼은 그 아래 고정)로 바꿔서, 칩 개수가
-  //   적을 때도 "다음" 버튼이 항상 화면 맨 아래(다른 온보딩 화면과 같은 위치)에
-  //   오도록 함 - 예전엔 SingleChildScrollView 하나로 전체를 감싸서 콘텐츠
-  //   양에 따라 버튼 위치가 위아래로 들쭉날쭉했음.
-  Widget _buildImportOption(
-      IconData icon, String title, String description, VoidCallback onTap) {
-    final color = Theme.of(context).colorScheme.onSurfaceVariant;
-    return ListTile(
-      dense: true,
-      contentPadding: EdgeInsets.symmetric(horizontal: 4.w),
-      leading: Icon(icon, size: 19.sp, color: color),
-      minLeadingWidth: 20.w,
-      title: Text(title,
-          style: TextStyle(
-              fontSize: 12.sp, color: color, fontWeight: FontWeight.w600)),
-      subtitle:
-          Text(description, style: TextStyle(fontSize: 10.5.sp, color: color)),
-      trailing: Icon(Icons.chevron_right, size: 18.sp, color: color),
-      onTap: onTap,
-    );
-  }
-
-  Widget _buildShiftTypeCreation() {
-    return Padding(
-      padding: EdgeInsets.all(24.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.onboardingShiftNameTitle,
-                    style:
-                        TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text.rich(
-                    TextSpan(
-                      children: wordSafeSpans(
-                        context.l10n.onboardingShiftNameSubHint,
-                        TextStyle(
-                            fontSize: 14.sp,
-                            color: Theme.of(context).colorScheme.onSurface),
-                      ),
+  Widget _buildSetupScreen(BuildContext themeContext) => PopScope(
+        canPop: _step == 0,
+        onPopInvokedWithResult: (didPop, result) {
+          if (!didPop) _goBack();
+        },
+        child: Theme(
+          data: AppUiTheme.withPalette(
+              Theme.of(themeContext), AppUiPalette.of(themeContext)),
+          child: Builder(
+              builder: (uiContext) => Scaffold(
+                    backgroundColor: AppUiPalette.of(uiContext).background,
+                    appBar: AppBar(
+                      automaticallyImplyLeading: false,
+                      leading: _step > 0
+                          ? IconButton(
+                              onPressed: _goBack,
+                              icon: const Icon(Icons.arrow_back))
+                          : null,
+                      title: AppUiText(uiContext.l10n.onboardingStart,
+                          role: AppTextRole.toolbar),
+                      actions: [
+                        Padding(
+                            padding: const EdgeInsets.only(right: 20),
+                            child: Center(
+                                child: AppUiText(
+                                    '$_visibleStepNumber / $_totalSteps',
+                                    role: AppTextRole.progress,
+                                    tone: AppTextTone.secondary)))
+                      ],
                     ),
-                  ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    context.l10n.onboardingShortNamesHint,
-                    style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  ),
-                  SizedBox(height: 24.h),
-                  Wrap(
-                    spacing: 8.w,
-                    runSpacing: 8.h,
-                    children: [
-                      ..._allShiftTypes.map((name) => AppShiftChip(
-                            label: name,
-                            onDelete: () => _deleteShiftType(name),
-                          )),
-                      AppSecondButton(
-                        variant: AppSecondButtonVariant.neutral,
-                        onPressed:
-                            _customShiftTypes.length < _maxCustomShiftTypes
-                                ? _showAddCustomDialog
-                                : null,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.add, size: 16.sp),
-                            SizedBox(width: 0.3.w),
-                            Text(context.l10n.commonAdd),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12.h),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(top: 8.h),
-            child: Column(children: [
-              _buildImportOption(
-                  Icons.history,
-                  context.l10n.onboardingBackupTitle,
-                  context.l10n.onboardingBackupDesc,
-                  _pickBackupManually),
-            ]),
-          ),
-          SizedBox(height: 12.h),
+                    body: AdaptiveFormBody(
+                        child: SafeArea(
+                            top: false,
+                            child: _step == 0
+                                ? _buildShiftTypeCreation(uiContext)
+                                : _step == 1
+                                    ? _buildPatternInput(uiContext)
+                                    : _buildMainAlarmSetup(uiContext))),
+                  )),
+        ),
+      );
 
-          // ⭐ 2026-08-24 - 이 버튼만 로컬로 키웠던 걸 되돌림("너무 크다" +
-          // 전환 시 순간적으로 bottom overflow가 뜨던 원인이었던 것으로 보임 -
-          // 이 화면은 이미 제목+부연설명+칩 영역+버튼으로 꽉 찬 구조라 버튼이
-          // 커진 만큼 남는 공간을 넘어섰던 것). 버튼 글자 크기는 화면마다 따로
-          // 손대지 않고 app_theme.dart의 공통 ElevatedButtonTheme 하나로만
-          // 관리함 - 다른 "다음" 버튼들과 동일하게 스타일 없이 기본값을 씀.
-          SizedBox(
-            width: double.infinity,
-            child: AppButton(
-              onPressed: () {
-                setState(() => _step = 1);
-              },
-              child: Text(context.l10n.commonNext),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildShiftTypeCreation(BuildContext uiContext) => Padding(
+        padding: const EdgeInsets.all(AppUiMetrics.pagePadding),
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Expanded(
+              child: SingleChildScrollView(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              AppUiText(uiContext.l10n.onboardingShiftNameTitle,
+                  key: const ValueKey('onboarding-page-heading'),
+                  role: AppTextRole.title),
+              const SizedBox(height: 8),
+              AppUiText(uiContext.l10n.onboardingShiftNameSubHint,
+                  tone: AppTextTone.secondary),
+              const SizedBox(height: 16),
+              AppUiCard(
+                  padding:
+                      const EdgeInsets.all(AppUiMetrics.compactCardPadding),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppUiText(uiContext.l10n.onboardingProvidedShiftNames,
+                            role: AppTextRole.section),
+                        const SizedBox(height: AppUiMetrics.gap),
+                        _buildShiftNameGrid(uiContext),
+                        const SizedBox(height: AppUiMetrics.gap),
+                        AppUiButton(
+                            label: uiContext.l10n.onboardingAddShiftName,
+                            action: AppUiAction.secondary,
+                            icon: Icons.add,
+                            onPressed:
+                                _customShiftTypes.length < _maxCustomShiftTypes
+                                    ? () => _showAddCustomDialog(uiContext)
+                                    : null),
+                        const SizedBox(height: 12),
+                        AppUiText(
+                            uiContext.l10n.onboardingRemoveUnusedShiftNamesHint,
+                            role: AppTextRole.supporting,
+                            tone: AppTextTone.secondary),
+                      ])),
+              const SizedBox(height: AppUiMetrics.gap),
+              AppUiText(uiContext.l10n.onboardingShiftNamesReadyHint,
+                  tone: AppTextTone.secondary),
+              const SizedBox(height: 24),
+            ]),
+          )),
+          const SizedBox(height: AppUiMetrics.gap),
+          AppUiButton(
+              label: uiContext.l10n.onboardingNextPattern,
+              onPressed: _allShiftTypes.isNotEmpty
+                  ? () => setState(() => _step = 1)
+                  : null),
+        ]),
+      );
 
   // ⭐ 2026-08-24 - _buildShiftTypesInput()(불규칙용 근무명 지정 화면 복제본)과
   // _buildSelectShiftsForAlarm()(불규칙용 "실제 사용할 근무 선택" 화면)을
@@ -416,270 +229,372 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   // _step==1일 때뿐이라, _step==0이나 옛 case1의 그 위치에서 false가 되는
   // 경우가 구조적으로 없음 - _buildStep()의 클래스 주석 참고). 근무명 지정은
   // 이제 규칙/불규칙 상관없이 _buildShiftTypeCreation() 하나로 통일됨.
-  Widget _buildPatternInput() {
-    return Padding(
-      padding: EdgeInsets.all(24.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: LayoutBuilder(
-                builder: (context, box) => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Flexible(
-                          child: SingleChildScrollView(
-                            key: const ValueKey('onboarding-shift-choices'),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  context.l10n.onboardingTapToCompletePattern,
-                                  style: TextStyle(
-                                      fontSize: 20.sp,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(height: 6.h),
-                                Text(
-                                  context.l10n.onboardingPatternHowTo,
-                                  style: TextStyle(
-                                      fontSize: 14.sp,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant),
-                                ),
-                                SizedBox(height: 12.h),
-                                Wrap(
-                                  spacing: 8.w,
-                                  runSpacing: 8.h,
-                                  children: _allShiftTypes
-                                      .map((name) => AppShiftChip(
-                                            label: name,
-                                            enabled: _pattern.length < 40,
-                                            onTap: () => _addToPattern(name),
-                                          ))
-                                      .toList(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 12.h),
-                        Container(
-                          key: const ValueKey('onboarding-pattern-preview'),
-                          width: double.infinity,
-                          padding: EdgeInsets.all(8.w),
-                          decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerLow,
-                              borderRadius: BorderRadius.circular(10.r)),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                                minHeight: 36.h,
-                                maxHeight:
-                                    (box.maxHeight * .28).clamp(56.h, 140.h)),
-                            child: _pattern.isEmpty
-                                ? SizedBox(
-                                    height: 56.h,
-                                    child: _buildPatternGrid(
-                                        isSelectable: false, shrinkWrap: true),
-                                  )
-                                : SingleChildScrollView(
-                                    controller: _patternPreviewController,
-                                    child: _buildPatternGrid(
-                                        isSelectable: false, shrinkWrap: true),
-                                  ),
-                          ),
-                        ),
-                        SizedBox(height: 6.h),
-                        Text(
-                          context.l10n.onboardingPatternHint,
-                          style: TextStyle(
-                              fontSize: 12.sp,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant),
-                        ),
-                        SizedBox(height: 16.h),
-                        _buildIrregularChoiceLink(),
-                      ],
-                    )),
-          ),
-          SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            child: AppButton(
-              onPressed: _pattern.isEmpty
-                  ? null
-                  : () {
-                      setState(() => _step = 2);
-                    },
-              child: Text(context.l10n.commonNext),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildShiftNameGrid(BuildContext uiContext, {bool pattern = false}) =>
+      LayoutBuilder(builder: (context, box) {
+        const gap = 6.0;
+        final height = AppUiShiftChip.heightFor(AppChipSize.regular);
+        final visibleRows = ((_allShiftTypes.length + 3) ~/ 4).clamp(1, 2);
+        final width = (box.maxWidth - gap * 3) / 4;
+        return SizedBox(
+          key: ValueKey(
+              pattern ? 'onboarding-shift-choices' : 'onboarding-shift-names'),
+          height: visibleRows * height + (visibleRows - 1) * gap,
+          child: SingleChildScrollView(
+              primary: false,
+              child: Wrap(spacing: gap, runSpacing: gap, children: [
+                for (final name in _allShiftTypes)
+                  SizedBox(
+                      width: width,
+                      height: height,
+                      child: AppUiShiftChip(
+                          name: name,
+                          enabled: !pattern ||
+                              (_pattern.length < 40 && !_choosingToday),
+                          onTap: pattern
+                              ? () => _addToPattern(name)
+                              : () => _removeShiftType(name))),
+              ])),
+        );
+      });
 
-  Widget _buildIrregularChoiceLink() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(context.l10n.onboardingIrregularChoiceDescription,
-            style: TextStyle(
-                fontSize: 12.sp,
-                color: Theme.of(context).colorScheme.onSurfaceVariant)),
-        Semantics(
-          button: true,
-          label: context.l10n.onboardingIrregularChoiceTitle,
-          child: TextButton.icon(
-            style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 4.w),
-                foregroundColor: kAppMainAccent,
-                alignment: Alignment.centerLeft),
-            onPressed: () {
-              setState(() {
-                _isRegular = false;
-                _selectedShifts = List.from(_allShiftTypes);
-                _step = 2;
-              });
-            },
-            icon: Icon(Icons.calendar_month_outlined, size: 17.sp),
-            label: Text(context.l10n.onboardingIrregularChoiceTitle,
-                style: TextStyle(fontSize: 13.sp), softWrap: true),
-          ),
-        ),
-      ],
-    );
-  }
+  Widget _buildPatternInput(BuildContext uiContext) => Padding(
+      padding: const EdgeInsets.all(AppUiMetrics.pagePadding),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Expanded(child: LayoutBuilder(builder: (context, viewport) {
+          // Reserve the card before any pattern is entered. Small/landscape
+          // screens can scroll this region; the two bottom actions stay visible.
+          double textHeight(String text, AppTextRole role, double width) {
+            final painter = TextPainter(
+                text: TextSpan(
+                    text: text, style: AppTypography.style(uiContext, role)),
+                textDirection: Directionality.of(uiContext),
+                textScaler: TextScaler.noScaling)
+              ..layout(maxWidth: width);
+            final result = painter.height;
+            painter.dispose();
+            return result;
+          }
 
-  Widget _buildPatternGrid(
-      {required bool isSelectable, bool shrinkWrap = false}) {
-    if (_pattern.isEmpty) {
-      return Center(
-        child: Text(
-          context.l10n.onboardingNoPattern,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-              fontSize: 13.sp,
-              color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
-      );
-    }
+          final width = viewport.maxWidth;
+          final sourceRows = ((_allShiftTypes.length + 3) ~/ 4).clamp(1, 2);
+          final sourceHeight =
+              sourceRows * AppUiShiftChip.heightFor(AppChipSize.regular) +
+                  (sourceRows - 1) * 6;
+          double textWidth(String text, AppTextRole role) {
+            final painter = TextPainter(
+                text: TextSpan(
+                    text: text, style: AppTypography.style(uiContext, role)),
+                textDirection: Directionality.of(uiContext),
+                locale: Localizations.localeOf(uiContext),
+                textScaler: TextScaler.noScaling)
+              ..layout();
+            final result = painter.width;
+            painter.dispose();
+            return result;
+          }
 
-    return GridView.builder(
-      shrinkWrap: shrinkWrap,
-      physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 68.w,
-        crossAxisSpacing: 6.w, // ⭐ 간격 살짝 줄임 (8.w → 6.w)
-        mainAxisSpacing: 6.h, // ⭐ 간격 살짝 줄임 (8.h → 6.h)
-        childAspectRatio: 1.0, // ⭐ 거의 정사각형 (0.85 → 0.95)
-      ),
-      itemCount: _pattern.length,
-      itemBuilder: (context, index) {
-        final isSelected = isSelectable && _todayIndex == index;
-
-        return Column(children: [
-          Text('${index + 1}', style: TextStyle(fontSize: 10.sp)),
-          Expanded(
+          final cardInsets = AppUiMetrics.compactCardPadding * 2 + 2;
+          final cardWidth = width - cardInsets;
+          final patternLabelWidth = textWidth(
+              uiContext.l10n.onboardingPatternLabel, AppTextRole.section);
+          final hintHeight = textHeight(uiContext.l10n.onboardingPatternHint,
+              AppTextRole.supporting, cardWidth - patternLabelWidth - 8);
+          final labelHeight = textHeight(uiContext.l10n.onboardingPatternLabel,
+              AppTextRole.section, cardWidth);
+          final footerHeight = _patternFooterHeight(uiContext, cardWidth);
+          final minHeight =
+              (8 + 16 + AppUiMetrics.gap + cardInsets * 2 + 12 + 8 + 12) +
+                  sourceHeight +
+                  AppUiShiftChip.heightFor(AppChipSize.regular) +
+                  textHeight(uiContext.l10n.onboardingTapToCompletePattern,
+                      AppTextRole.title, width) +
+                  textHeight(uiContext.l10n.onboardingPatternHowTo,
+                      AppTextRole.body, width) +
+                  textHeight(uiContext.l10n.onboardingSelectedShiftNames,
+                      AppTextRole.section, cardWidth) +
+                  (hintHeight > labelHeight ? hintHeight : labelHeight) +
+                  footerHeight;
+          final height =
+              viewport.maxHeight < minHeight ? minHeight : viewport.maxHeight;
+          return SingleChildScrollView(
+              primary: false,
               child: SizedBox(
-                  width: double.infinity,
-                  child: AppShiftChip(
-                    label: _pattern[index],
-                    dense: true,
-                    selected: isSelected,
-                    strongSelected: true,
-                    cellTextStyle: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        color: isSelected
-                            ? Colors.white
-                            : Theme.of(context).colorScheme.onSurface),
-                    onTap: isSelectable
-                        ? () => setState(() => _todayIndex = index)
-                        : () => _removeFromPattern(index),
-                  ))),
-        ]);
-      },
-    );
+                  height: height,
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AppUiText(uiContext.l10n.onboardingTapToCompletePattern,
+                            key: const ValueKey('onboarding-page-heading'),
+                            role: AppTextRole.title),
+                        const SizedBox(height: 8),
+                        AppUiText(uiContext.l10n.onboardingPatternHowTo,
+                            tone: AppTextTone.secondary),
+                        const SizedBox(height: 16),
+                        AppUiCard(
+                            padding: const EdgeInsets.all(
+                                AppUiMetrics.compactCardPadding),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  AppUiText(
+                                      uiContext
+                                          .l10n.onboardingSelectedShiftNames,
+                                      role: AppTextRole.section),
+                                  const SizedBox(height: AppUiMetrics.gap),
+                                  _buildShiftNameGrid(uiContext, pattern: true),
+                                ])),
+                        const SizedBox(height: 12),
+                        Expanded(child: _buildPatternCard(uiContext)),
+                      ])));
+        })),
+        const SizedBox(height: 8),
+        Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              AppUiText(uiContext.l10n.onboardingIrregularChoiceDescription,
+                  tone: AppTextTone.secondary),
+              AppUiButton(
+                  label: uiContext.l10n.onboardingIrregularChoiceTitle,
+                  compact: true,
+                  action: AppUiAction.secondary,
+                  onPressed: () => setState(() {
+                        _isRegular = false;
+                        _selectedShifts = List.from(_allShiftTypes);
+                        _step = 2;
+                      })),
+            ]),
+        const SizedBox(height: 8),
+        AppUiButton(
+            label: uiContext.l10n.onboardingNextAlarms,
+            onPressed:
+                !_choosingToday || _pattern.length < 2 || _todayIndex == null
+                    ? null
+                    : () => setState(() {
+                          _isRegular = true;
+                          _step = 2;
+                        })),
+      ]));
+
+  double _patternFooterHeight(BuildContext context, double width) {
+    double height(String text, AppTextRole role, double maxWidth) {
+      final painter = TextPainter(
+          text: TextSpan(text: text, style: AppTypography.style(context, role)),
+          textDirection: Directionality.of(context),
+          locale: Localizations.localeOf(context),
+          textScaler: TextScaler.noScaling)
+        ..layout(maxWidth: maxWidth);
+      final result = painter.height;
+      painter.dispose();
+      return result;
+    }
+
+    final editHeight = height(context.l10n.onboardingEditPattern,
+            AppTextRole.button, width / 2 - 24) +
+        16;
+    final finishHeight = height(context.l10n.onboardingCompletePattern,
+            AppTextRole.button, width - 40) +
+        24;
+    final selectionHeight = height(context.l10n.onboardingTodayPositionHint,
+            AppTextRole.section, width) +
+        8 +
+        (editHeight > 48 ? editHeight : 48);
+    return selectionHeight > finishHeight ? selectionHeight : finishHeight;
   }
 
-  // ⭐ 기본 카드(주간/야간/오전/오후/휴무)도 커스텀 카드와 동일하게 삭제 가능하도록
-  // 일반화함. 카드가 0개가 되면 다음 단계(패턴 구성/근무 선택) 자체가 불가능해지므로
-  // 최소 1개는 남기게 막음. 이 단계는 패턴 구성 전이라 보통 _pattern이 비어있지만,
-  // 혹시 몰라 방어적으로 같이 정리함.
-  void _deleteShiftType(String name) {
-    if (_allShiftTypes.length <= 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.onboardingNeedAtLeastOneShift)),
-      );
-      return;
-    }
+  Widget _buildPatternCard(BuildContext uiContext) => AppUiCard(
+      key: const ValueKey('onboarding-pattern-card'),
+      padding: const EdgeInsets.all(AppUiMetrics.compactCardPadding),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          AppUiText(uiContext.l10n.onboardingPatternLabel,
+              role: AppTextRole.section),
+          const SizedBox(width: 8),
+          Expanded(
+              child: Visibility(
+                  visible: !_choosingToday,
+                  maintainSize: true,
+                  maintainState: true,
+                  maintainAnimation: true,
+                  child: AppUiText(uiContext.l10n.onboardingPatternHint,
+                      role: AppTextRole.supporting,
+                      tone: AppTextTone.secondary,
+                      textAlign: TextAlign.right))),
+        ]),
+        const SizedBox(height: 8),
+        Expanded(child: LayoutBuilder(builder: (context, box) {
+          const columns = 4;
+          const gap = 4.0;
+          final width = (box.maxWidth - (columns - 1) * gap) / columns;
+          final height = AppUiShiftChip.heightFor(AppChipSize.regular);
+          return SizedBox(
+              key: const ValueKey('onboarding-pattern-preview'),
+              child: SingleChildScrollView(
+                  controller: _patternPreviewController,
+                  child: Wrap(spacing: gap, runSpacing: gap, children: [
+                    for (var i = 0; i < _pattern.length; i++)
+                      SizedBox(
+                          key: i == _pattern.length - 1
+                              ? _lastPatternSlotKey
+                              : null,
+                          width: width,
+                          height: height,
+                          child: AppUiShiftChip(
+                              key: ValueKey(
+                                  'onboarding-pattern-slot-' + i.toString()),
+                              name: _pattern[i],
+                              index: i + 1,
+                              size: AppChipSize.regular,
+                              selected: _todayIndex == i,
+                              selectionMode: _choosingToday,
+                              badge: _todayIndex == i
+                                  ? uiContext.l10n.onboardingTodayMarker
+                                  : null,
+                              onTap: () {
+                                if (_choosingToday) {
+                                  setState(() => _todayIndex = i);
+                                } else {
+                                  _removeFromPattern(i);
+                                }
+                              })),
+                  ])));
+        })),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+            builder: (context, box) => SizedBox(
+                key: const ValueKey('onboarding-pattern-action-area'),
+                height: _patternFooterHeight(uiContext, box.maxWidth),
+                child: Stack(children: [
+                  Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: AnimatedSwitcher(
+                          duration: Duration(
+                              milliseconds:
+                                  MediaQuery.disableAnimationsOf(uiContext)
+                                      ? 0
+                                      : 220),
+                          switchInCurve:
+                              const Interval(.6, 1, curve: Curves.easeOut),
+                          child: _choosingToday
+                              ? AppUiAttention(
+                                  enabled: _todayIndex == null,
+                                  child: AppUiText(
+                                      uiContext
+                                          .l10n.onboardingTodayPositionHint,
+                                      key: const ValueKey(
+                                          'onboarding-today-guide'),
+                                      role: AppTextRole.section,
+                                      tone: AppTextTone.selection,
+                                      textAlign: TextAlign.center))
+                              : const SizedBox.shrink())),
+                  AnimatedAlign(
+                    duration: AppUiMotion.transitionDuration(uiContext),
+                    curve: Curves.easeOutCubic,
+                    alignment: _choosingToday
+                        ? Alignment.bottomRight
+                        : Alignment.center,
+                    child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                            maxWidth: _choosingToday
+                                ? box.maxWidth / 2
+                                : box.maxWidth),
+                        child: AppUiButton(
+                            key: const ValueKey('onboarding-pattern-complete'),
+                            label: _choosingToday
+                                ? uiContext.l10n.onboardingEditPattern
+                                : uiContext.l10n.onboardingCompletePattern,
+                            compact: _choosingToday,
+                            action: _choosingToday
+                                ? AppUiAction.secondary
+                                : AppUiAction.primary,
+                            onPressed: _pattern.length < 2
+                                ? null
+                                : () => setState(() {
+                                      _choosingToday = !_choosingToday;
+                                      _todayIndex = null;
+                                      if (_choosingToday &&
+                                          _patternPreviewController.hasClients)
+                                        _patternPreviewController.jumpTo(0);
+                                    }))),
+                  ),
+                ]))),
+      ]));
+
+  Future<void> _showAddCustomDialog(BuildContext uiContext) async {
+    final controller = TextEditingController();
+    String? error;
+    await showAppUiDialog<void>(
+      context: uiContext,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AppUiDialog(
+          title: dialogContext.l10n.onboardingAddShiftName,
+          content: SizedBox(
+              width: AppLayout.of(dialogContext).dialogWidth,
+              child: ShiftNameTextField(
+                controller: controller,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: dialogContext.l10n.shiftName,
+                  helperText: dialogContext.l10n.onboardingShortNamesHint,
+                  errorText: error,
+                ),
+              )),
+          actions: [
+            AppUiButton(
+                label: dialogContext.l10n.commonCancel,
+                action: AppUiAction.secondary,
+                onPressed: () => Navigator.of(dialogContext).pop()),
+            AppUiButton(
+                label: dialogContext.l10n.commonAdd,
+                onPressed: () {
+                  final text = controller.text.trim();
+                  final issue =
+                      validateShiftName(text, otherNames: _allShiftTypes);
+                  if (issue != null) {
+                    setDialogState(() => error =
+                        _shiftNameIssueMessage(dialogContext, issue, text));
+                    return;
+                  }
+                  setState(() => _customShiftTypes.add(text));
+                  Navigator.of(dialogContext).pop();
+                }),
+          ],
+        ),
+      ),
+    );
+    // The route reverse animation may still paint its text field after pop.
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    controller.dispose();
+  }
+
+  void _removeShiftType(String name) {
     setState(() {
       _baseShiftTypes.remove(name);
       _customShiftTypes.remove(name);
-      _pattern.removeWhere((shift) => shift == name);
+      if (_pattern.contains(name)) {
+        _pattern.removeWhere((shift) => shift == name);
+        _todayIndex = null;
+        _choosingToday = false;
+      }
+      _shiftAlarms.remove(name);
       _selectedShifts.remove(name);
     });
   }
 
-  void _showAddCustomDialog() {
-    final controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => ShiftEditorDialog(
-        title: Text(context.l10n.onboardingAddShiftName),
-        content: SingleChildScrollView(
-          child: ShiftNameTextField(
-            controller: controller,
-            autofocus: true,
-            decoration: InputDecoration(
-              labelText: context.l10n.shiftName,
-            ),
-          ),
-        ),
-        actions: [
-          AppSecondButton(
-            variant: AppSecondButtonVariant.neutral,
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.commonCancel),
-          ),
-          AppSecondButton(
-            variant: AppSecondButtonVariant.success,
-            onPressed: () {
-              final text = controller.text.trim();
-              // ⭐ 2026-09-14 (출시전 감사 #11) - 빈 이름·길이·중복에 더해 쉼표·예약어("미설정" 등) 차단
-              final issue = validateShiftName(text, otherNames: _allShiftTypes);
-              if (issue != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content:
-                          Text(_shiftNameIssueMessage(context, issue, text))),
-                );
-                return;
-              }
-
-              setState(() {
-                _customShiftTypes.add(text);
-              });
-              Navigator.pop(context);
-            },
-            // ⭐ 2026-08-25 - "추가"가 아니라 "확인"으로 - 요청 반영.
-            child: Text(context.l10n.commonOk),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _addToPattern(String shift) {
     if (_pattern.length < 40) {
-      setState(() => _pattern.add(shift));
+      setState(() {
+        _pattern.add(shift);
+        _todayIndex = null;
+      });
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _lastPatternSlotKey.currentContext != null) {
+          Scrollable.ensureVisible(_lastPatternSlotKey.currentContext!,
+              alignment: .8, duration: const Duration(milliseconds: 160));
+        }
         if (mounted && _patternPreviewController.hasClients) {
           _patternPreviewController.animateTo(
               _patternPreviewController.position.maxScrollExtent,
@@ -693,242 +608,80 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _removeFromPattern(int index) {
     setState(() {
       _pattern.removeAt(index);
+      _todayIndex = null;
     });
   }
 
-  Widget _buildMainAlarmSetup() {
-    // 반복 패턴에 실제 포함된 근무만 먼저 보여준다. 패턴 밖의 근무는 나중에
-    // 설정에서 알람을 추가할 수 있어, 처음 설정하는 사람에게 불필요한 카드가
-    // 늘어나지 않는다.
-    final shiftsToSetup = _isRegular == true ? _uniqueShifts : _selectedShifts;
-
+  Widget _buildMainAlarmSetup(BuildContext uiContext) {
+    final shifts = _isRegular == true ? _uniqueShifts : _selectedShifts;
     return Padding(
-      padding: EdgeInsets.all(24.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        padding: const EdgeInsets.all(AppUiMetrics.pagePadding),
+        child:
+            Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
           Expanded(
               child: SingleChildScrollView(
+                  key: const ValueKey('onboarding-alarm-list'),
                   child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                Text.rich(TextSpan(
-                    children: wordSafeSpans(
-                  context.l10n.onboardingSetFixedAlarmPerShift,
-                  TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                ))),
-                // ⭐ 2026-08-24 - 근무명 지정 화면(_buildShiftTypeCreation)의 부연설명을
-                // 이 화면 스타일에 맞추면서 같이 적용한 wordSafeSpans()를 여기도 동일하게
-                // 적용 - 이 화면이 스타일 기준이 됐으니 줄바꿈 안전성도 같이 맞춤.
-                Text.rich(
-                  TextSpan(
-                    children: wordSafeSpans(
-                      context.l10n.onboardingMaxAlarmsPerShift(
-                          kMaxAlarmTemplatesPerShift),
-                      TextStyle(
-                          fontSize: 14.sp,
-                          color: Theme.of(context).colorScheme.onSurface),
-                    ),
-                  ),
-                ),
-                Text.rich(
-                  TextSpan(
-                    children: wordSafeSpans(
-                      context.l10n.onboardingCanChangeInSettings,
-                      TextStyle(
-                          fontSize: 14.sp,
-                          color: Theme.of(context).colorScheme.onSurface),
-                    ),
-                  ),
-                ),
-                // ⭐ 2026-09-15 (사용자 요청) - 위 설명 문구와 구분이 안 된다는 피드백: 강조색 안내 박스로 분리
-                SizedBox(height: 12.h),
-                Container(
-                  width: double.infinity,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                  decoration: BoxDecoration(
-                    color: kAppMainAccent.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(10.r),
-                    border: Border.all(color: kAppMainAccent.withOpacity(0.35)),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.info_outline_rounded,
-                          color: kAppMainAccent, size: 20.sp),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: Text.rich(
-                          TextSpan(
-                            children: wordSafeSpans(
-                              context.l10n.onboardingAlarmOptional,
-                              TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: kAppMainAccent,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20.h),
-
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 120.w *
-                        (MediaQuery.textScalerOf(context).scale(16) / 16)
-                            .clamp(1.0, 2.0),
-                    crossAxisSpacing: 12.w,
-                    mainAxisSpacing: 12.h,
-                    childAspectRatio: 0.70,
-                  ),
-                  itemCount: shiftsToSetup.length,
-                  itemBuilder: (context, index) {
-                    final shift = shiftsToSetup[index];
-                    final alarms = _shiftAlarms[shift] ?? [];
-
-                    return _buildShiftAlarmCard(shift, alarms);
-                  },
-                ),
-              ]))),
+                        AppUiText(
+                            uiContext.l10n.onboardingSetFixedAlarmPerShift,
+                            role: AppTextRole.title),
+                        const SizedBox(height: 8),
+                        AppUiText(
+                            uiContext.l10n.onboardingMaxAlarmsPerShift(
+                                kMaxAlarmTemplatesPerShift),
+                            tone: AppTextTone.secondary),
+                        const SizedBox(height: 12),
+                        AppUiCard(
+                            padding: const EdgeInsets.all(
+                                AppUiMetrics.compactCardPadding),
+                            child: Row(children: [
+                              const Icon(Icons.notifications_none_rounded,
+                                  size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                  child: AppUiText(
+                                      uiContext.l10n.onboardingAlarmOptional,
+                                      role: AppTextRole.supporting)),
+                            ])),
+                        const SizedBox(height: 16),
+                        for (final shift in shifts) ...[
+                          _buildShiftAlarmCard(
+                              uiContext, shift, _shiftAlarms[shift] ?? []),
+                          const SizedBox(height: 12),
+                        ],
+                        AppUiText(uiContext.l10n.onboardingCanChangeInSettings,
+                            role: AppTextRole.supporting,
+                            tone: AppTextTone.secondary),
+                      ]))),
           const PermissionWarningBanner(),
-          SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            child: AppButton(
-              onPressed: _finishing ? null : _saveAndFinish,
-              child: _finishing
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          width: 18.w,
-                          height: 18.w,
-                          child: const CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        ),
-                        SizedBox(width: 10.w),
-                        Text(context.l10n.onboardingSaving),
-                      ],
-                    )
-                  : Text(context.l10n.onboardingFinishSetup),
-            ),
-          ),
-        ],
-      ),
-    );
+          const SizedBox(height: 12),
+          AppUiButton(
+              label: _finishing
+                  ? uiContext.l10n.onboardingSaving
+                  : uiContext.l10n.onboardingFinishSetup,
+              onPressed: _finishing ? null : _saveAndFinish),
+        ]));
   }
 
-  Widget _buildShiftAlarmCard(String shift, List<AlarmSetting> alarms) {
-    return InkWell(
-      onTap: () => _showAlarmTimeDialog(shift),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: alarms.isEmpty
-                ? Theme.of(context).colorScheme.outline
-                : kAppMainAccent,
-            width: alarms.isEmpty ? 1 : 2,
-          ),
-        ),
-        padding: EdgeInsets.all(12.w),
-        child: Column(
-          children: [
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                shift,
-                maxLines: 1,
-                softWrap: false,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            SizedBox(height: 12.h),
-            Expanded(
-              // ⭐ 근무당 알람이 kMaxAlarmTemplatesPerShift(5)개까지 늘어나면서 이
-              // 카드는 GridView 셀이라 높이가 고정인데 Center+Column(비스크롤)이라
-              // 4~5개부턴 세로로 넘쳐서 렌더 오류가 났음(RenderFlex overflowed) -
-              // 스크롤 가능하게 바꿔서 몇 개든 안전하게 다 보이게 함.
-              child: alarms.isEmpty
-                  ? Center(
-                      child: Text(
-                        context.l10n.onboardingTapToSet,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: alarms
-                            .map((alarm) => Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 2.h),
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Wrap(
-                                      alignment: WrapAlignment.center,
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      spacing: 4.w,
-                                      children: [
-                                        Text(
-                                          _getAlarmTypeEmoji(alarm.alarmTypeId),
-                                          style: TextStyle(fontSize: 12.sp),
-                                        ),
-                                        Text(
-                                          _formatTime(alarm.time),
-                                          style: TextStyle(
-                                            fontSize: 13.sp,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ))
-                            .toList(),
-                      ),
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildShiftAlarmCard(
+          BuildContext uiContext, String shift, List<AlarmSetting> alarms) =>
+      FixedAlarmSummaryCard(
+          key: ValueKey('onboarding-alarm-card-' + shift),
+          editKey: ValueKey('onboarding-alarm-edit-' + shift),
+          shift: shift,
+          alarms: alarms,
+          onEdit: () => _showAlarmTimeDialog(uiContext, shift));
 
   String _formatTime(TimeOfDay time) {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
-  String _getAlarmTypeEmoji(int alarmTypeId) {
-    switch (alarmTypeId) {
-      case 1:
-        return '🔔'; // 소리+진동
-      case 2:
-        return '📳'; // 진동
-      case 3:
-        return '🔇'; // 무음
-      default:
-        return '🔔';
-    }
-  }
-
-  void _showAlarmTimeDialog(String shift) {
-    showDialog(
-      context: context,
-      builder: (context) => _AlarmTimeDialog(
+  void _showAlarmTimeDialog(BuildContext uiContext, String shift) {
+    showAppUiDialog(
+      context: uiContext,
+      builder: (context) => FixedAlarmEditorDialog(
         shift: shift,
         initialAlarms: _shiftAlarms[shift] ?? [],
         onSave: (alarms) {
@@ -936,41 +689,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             _shiftAlarms[shift] = alarms;
           });
         },
-      ),
-    );
-  }
-
-  Widget _buildTodayIndexInput() {
-    final today = DateTime.now();
-    final locale = Localizations.localeOf(context).toString();
-    final dateText = DateFormat.MMMd(locale).format(today);
-
-    return Padding(
-      padding: EdgeInsets.all(24.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.onboardingTodayShiftQuestion(dateText),
-            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 24.h),
-          Expanded(
-            child: _buildPatternGrid(isSelectable: true),
-          ),
-          SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            child: AppButton(
-              onPressed: _todayIndex == null
-                  ? null
-                  : () {
-                      setState(() => _step = 3);
-                    },
-              child: Text(context.l10n.commonNext),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1026,7 +744,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (mounted) {
         setState(() => _finishing = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.onboardingSaveFailed)),
+          AppUiSnackBar(content: Text(context.l10n.onboardingSaveFailed)),
         );
       }
     }
@@ -1133,339 +851,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 }
 
 // 알람 시간 설정 다이얼로그
-class _AlarmTimeDialog extends StatefulWidget {
-  final String shift;
-  final List<AlarmSetting> initialAlarms;
-  final Function(List<AlarmSetting>) onSave;
-
-  const _AlarmTimeDialog({
-    required this.shift,
-    required this.initialAlarms,
-    required this.onSave,
-  });
-
-  @override
-  State<_AlarmTimeDialog> createState() => _AlarmTimeDialogState();
-}
-
-class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
-  late List<AlarmSetting> _alarms;
-
-  @override
-  void initState() {
-    super.initState();
-    _alarms = List.from(widget.initialAlarms);
-  }
-
-  // ⭐ 2026-08-25 - 알람 카드 한 장의 대략적인 높이(마진 포함) - 아래
-  // _listMaxHeight()가 "몇 개까지는 스크롤 없이 자라다가" 판단할 때 씀.
-  static const double _cardHeightEstimate = 118;
-
-  double _listMaxHeight() => (_cardHeightEstimate * 3).h;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(context.l10n.onboardingFixedAlarmDialogTitle(widget.shift)),
-      // ⭐ 2026-08-25 - 예전엔 (힌트+목록+버튼) 전체를 하나의 SingleChildScrollView로
-      // 감싸서, 알람이 늘어나 다이얼로그가 화면 최대 높이에 닿으면 스크롤이 버튼까지
-      // 끌고 내려가 "취소/저장이 안 보이는" 문제가 있었음. 이제 목록 부분만
-      // ConstrainedBox(maxHeight)+SingleChildScrollView(shrinkWrap:true)로 감싸서:
-      // 알람이 적을 땐(~3개까지) 목록이 자기 크기만큼만 차지해 다이얼로그가 자연스럽게
-      // 자라고, 그 이상으로 늘어나면 목록 부분의 높이가 거기서 고정되며 그 안에서만
-      // 스크롤됨 - 버튼(추가/취소/저장)은 항상 그 아래, 항상 보이는 자리에 남음.
-      content: SizedBox(
-        width: double.maxFinite,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              context.l10n
-                  .onboardingFixedAlarmMaxHint(kMaxAlarmTemplatesPerShift),
-              style: TextStyle(
-                  fontSize: 13.sp,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant),
-            ),
-            SizedBox(height: 16.h),
-
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: _listMaxHeight()),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: _alarms.asMap().entries.map((entry) {
-                    final alarm = entry.value;
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 12.h),
-                      padding: EdgeInsets.all(12.w),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceVariant,
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                            color: Theme.of(context).colorScheme.outline),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // 시간 + 삭제 버튼
-                          Row(
-                            children: [
-                              // ⭐ 시간 영역 탭하면 시간 수정 - 전날/당일/다음날 Chip을 시계
-                              // 아이콘 대신 놓아서("당일 09:00" 형태) 언제 울리는지 한눈에 보임.
-                              InkWell(
-                                onTap: () => _editAlarmTime(entry.key),
-                                borderRadius: BorderRadius.circular(8.r),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 4.h, horizontal: 4.w),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      DayOffsetBadge(
-                                          dayOffset: alarm.dayOffset),
-                                      SizedBox(width: 8.w),
-                                      Text(
-                                        '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
-                                        style: TextStyle(
-                                            fontSize: 18.sp,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Spacer(),
-                              IconButton(
-                                icon: Icon(Icons.delete,
-                                    color: Theme.of(context).colorScheme.error,
-                                    size: 20.sp),
-                                onPressed: () {
-                                  setState(() {
-                                    _alarms.removeAt(entry.key);
-                                  });
-                                },
-                                constraints: BoxConstraints(),
-                                padding: EdgeInsets.zero,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8.h),
-                          // 알람 타입 선택 버튼들
-                          Row(
-                            children: [
-                              _buildTypeButton(entry.key, 1, '🔔',
-                                  context.l10n.alarmSoundVibration),
-                              SizedBox(width: 8.w),
-                              _buildTypeButton(entry.key, 2, '📳',
-                                  context.l10n.alarmVibration),
-                              SizedBox(width: 8.w),
-                              _buildTypeButton(
-                                  entry.key, 3, '🔇', context.l10n.alarmSilent),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-
-            // ⭐ 목록/버튼 사이 여백 - 너무 붙어 보인다는 피드백으로 8h→16h.
-            SizedBox(height: 16.h),
-
-            // ⭐ 2026-08-25 - "알람 추가"는 다시 원래 크기(내용물만큼)로, 가운데
-            // 정렬로 되돌림(취소/저장 폭에 맞춰 늘렸던 이전 버전은 "디자인적으로
-            // 애매하다"는 피드백). 메인 버튼(AppButton)/second button 둘 다 이
-            // 자리엔 과해서, 더 담백한 세 번째 스타일(AppThirdButton)을 새로 만들어 씀.
-            // ⭐ 최대 개수(5개)에 도달해도 버튼을 숨기지 않고 비활성 상태로 계속
-            // 보여줌 - "몇 개까지 되면 더 못 만드는지" 자체가 눈에 보이는 게
-            // 나음(사라지면 "왜 없어졌지" 헷갈릴 수 있음).
-            Center(
-              child: AppThirdButton(
-                onPressed: _alarms.length < kMaxAlarmTemplatesPerShift
-                    ? _addAlarm
-                    : null,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.add, size: 16.sp),
-                    SizedBox(width: 4.w),
-                    Flexible(
-                        child: Text(context.l10n.alarmAdd,
-                            textAlign: TextAlign.center)),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 8.h),
-            OverflowBar(
-              alignment: MainAxisAlignment.end,
-              overflowAlignment: OverflowBarAlignment.end,
-              spacing: 8.w,
-              overflowSpacing: 8.h,
-              children: [
-                AppSecondButton(
-                  variant: AppSecondButtonVariant.neutral,
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(context.l10n.commonCancel),
-                ),
-                AppSecondButton(
-                  variant: AppSecondButtonVariant.success,
-                  // ⭐ 2026-08-24 버그 수정 - 예전엔 _alarms.isEmpty일 때
-                  // 저장 버튼이 비활성화됐음. 알람을 3개→2개→1개→0개
-                  // 순으로 지우다가 0개가 되는 순간 저장이 막혀서 "알람
-                  // 없음"으로 저장할 방법이 없었음(사용자 확인 재현: 저장
-                  // 후 재진입해서 전부 삭제하려는 경우).
-                  // settings_tab.dart의 동일한 다이얼로그(고정 알람 수정)는
-                  // 애초에 이 가드가 없어서 항상 저장 가능했음 - 여기만
-                  // 어긋나 있던 것이라 그쪽과 동일하게 무조건 저장
-                  // 가능하도록 가드를 제거함.
-                  onPressed: () {
-                    _alarms.sort((a, b) {
-                      final aMinutes = a.time.hour * 60 + a.time.minute;
-                      final bMinutes = b.time.hour * 60 + b.time.minute;
-                      return aMinutes.compareTo(bMinutes);
-                    });
-
-                    widget.onSave(_alarms);
-                    Navigator.pop(context);
-                  },
-                  child: Text(context.l10n.commonSave),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 알람 타입 선택 버튼
-  Widget _buildTypeButton(int index, int typeId, String emoji, String label) {
-    return AlarmTypeButton(
-        value: _alarms[index].alarmTypeId,
-        typeId: typeId,
-        emoji: emoji,
-        label: label,
-        onChanged: (value) => setState(() {
-              _alarms[index] = _alarms[index].copyWith(alarmTypeId: value);
-            }));
-  }
-
-  // ⭐ 알람 시간 수정
-  Future<void> _editAlarmTime(int index) async {
-    final currentAlarm = _alarms[index];
-    await showDialog(
-      context: context,
-      builder: (context) => AlarmTimePicker(
-        shiftName: widget.shift,
-        initialTime: currentAlarm.time,
-        initialDayOffset: currentAlarm.dayOffset,
-        onTimeSelected: (time, dayOffset) async {
-          // ⭐ 중복 체크 (자기 자신 제외) - 같은 시각이어도 전날/당일/다음날이 다르면
-          // 서로 다른 실제 날짜에 울리는 별개의 알람이라 중복이 아님.
-          final isDuplicate = _alarms.asMap().entries.any((entry) {
-            return entry.key != index &&
-                entry.value.time.hour == time.hour &&
-                entry.value.time.minute == time.minute &&
-                entry.value.dayOffset == dayOffset;
-          });
-
-          if (isDuplicate) {
-            await showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Row(
-                  children: [
-                    Icon(Icons.warning_amber_rounded,
-                        color: Theme.of(context).colorScheme.tertiary,
-                        size: 28),
-                    SizedBox(width: 8),
-                    Text(context.l10n.alarmDuplicate),
-                  ],
-                ),
-                content: Text(
-                  context.l10n.alarmAlreadyExistsAtTime(
-                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
-                  ),
-                  style: TextStyle(fontSize: 16),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(context.l10n.commonOk,
-                        style: TextStyle(fontSize: 16)),
-                  ),
-                ],
-              ),
-            );
-            return;
-          }
-
-          setState(() {
-            _alarms[index] =
-                currentAlarm.copyWith(time: time, dayOffset: dayOffset);
-          });
-        },
-      ),
-    );
-  }
-
-  Future<void> _addAlarm() async {
-    await showDialog(
-      context: context,
-      builder: (context) => AlarmTimePicker(
-        shiftName: widget.shift,
-        onTimeSelected: (time, dayOffset) async {
-          // ⭐ 중복 체크 (시각 + 전날/당일/다음날이 모두 같을 때만 중복)
-          final isDuplicate = _alarms.any((alarm) =>
-              alarm.time.hour == time.hour &&
-              alarm.time.minute == time.minute &&
-              alarm.dayOffset == dayOffset);
-
-          if (isDuplicate) {
-            await showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Row(
-                  children: [
-                    Icon(Icons.warning_amber_rounded,
-                        color: Theme.of(context).colorScheme.tertiary,
-                        size: 28),
-                    SizedBox(width: 8),
-                    Text(context.l10n.alarmDuplicate),
-                  ],
-                ),
-                content: Text(
-                  context.l10n.alarmAlreadyExistsAtTime(
-                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
-                  ),
-                  style: TextStyle(fontSize: 16),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(context.l10n.commonOk,
-                        style: TextStyle(fontSize: 16)),
-                  ),
-                ],
-              ),
-            );
-            return;
-          }
-
-          setState(() {
-            // 기본값: 소리 (alarmTypeId = 1)
-            _alarms.add(
-                AlarmSetting(time: time, alarmTypeId: 1, dayOffset: dayOffset));
-          });
-        },
-      ),
-    );
-  }
-}
 
 String _shiftNameIssueMessage(
     BuildContext context, ShiftNameIssue issue, String name) {

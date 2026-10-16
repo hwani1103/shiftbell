@@ -1,10 +1,10 @@
-# 관리자 대시보드용 GA4 -> Firestore 동기화 (한국 시간 00:17부터 3시간 간격, 12:17 포함).
+# 관리자 대시보드용 GA4 -> Firestore 동기화 (매시간 17분에 확인하고, 성공한 3시간 구간은 재수집하지 않는다).
 # 설정 방법은 admin_dashboard/README.md 의 "1회 설정" 참고. 시크릿 이름: GA4_SERVICE_ACCOUNT_JSON
 name: dashboard-sync
 
 on:
   schedule:
-    - cron: '17 */3 * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
     inputs:
       force:

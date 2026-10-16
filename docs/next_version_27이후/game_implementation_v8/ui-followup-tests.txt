@@ -1,0 +1,13 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: (setUpAll)
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: Fifty levels preserve first thirty and all twenty gate hints succeed
+00:01 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: Gate failure, seek, editing and narrow-board rendering
+00:05 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: (tearDownAll)
+00:06 +2: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart
+00:07 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: (setUpAll)
+00:07 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Thirty safe puzzles respect tutorial, unit introduction and board contracts
+00:09 +3: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Board stays anchored when starting, pausing and editing
+00:13 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Selected ball guide and highlighted legal cells follow the chosen route
+00:14 +5: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Every map fits 320px without hiding a column; selected chapter screens render
+00:24 +6: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: (tearDownAll)
+00:24 +6: All tests passed!

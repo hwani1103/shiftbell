@@ -1,3 +1,5 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +13,10 @@ void main() {
       bool dark = false,
       required Future<void> Function(String) save,
       required Future<void> Function() delete}) async {
-    await tester.pumpWidget(ScreenUtilInit(
+    SharedPreferences.setMockInitialValues(
+        {'app_ui_preview_theme': dark ? 'night' : 'daytime'});
+    await tester.pumpWidget(ProviderScope(
+        child: ScreenUtilInit(
       designSize: const Size(360, 780),
       builder: (_, __) => MaterialApp(
         theme: dark ? ThemeData.dark() : ThemeData.light(),
@@ -30,7 +35,7 @@ void main() {
                       child: const Text('open'),
                     ))),
       ),
-    ));
+    )));
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
   }

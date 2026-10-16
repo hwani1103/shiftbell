@@ -1,3 +1,4 @@
+import '../widgets/app_ui_feedback.dart';
 import 'package:flutter/material.dart';
 import '../constants/shift_name_limits.dart';
 import '../models/shift_schedule.dart';
@@ -103,7 +104,7 @@ class _ShiftNamesDialogState extends State<ShiftNamesDialog> {
                 tooltip: locked
                     ? context.l10n.shiftNameInUse
                     : context.l10n.commonDelete,
-                icon: Icon(locked ? Icons.lock_outline : Icons.delete_outline),
+                icon: Icon(locked ? Icons.lock_outline : AppUiIcons.delete),
                 onPressed: locked || count <= 1
                     ? null
                     : () => setState(() {

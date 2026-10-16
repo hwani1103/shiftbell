@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/calendar_theme.dart';
 import '../l10n/release_locale.dart';
 import '../services/app_analytics.dart';
+import '../services/calendar_theme_migration.dart';
 
 class CalendarThemeNotifier extends StateNotifier<CalendarThemeId> {
   CalendarThemeNotifier() : super(_deviceDefault());
@@ -23,6 +24,7 @@ class CalendarThemeNotifier extends StateNotifier<CalendarThemeId> {
           releaseSupportedLocales));
 
   Future<void> setTheme(CalendarThemeId id) async {
+    id = id.canonical;
     if (state != id)
       AppAnalytics.track(AnalyticsEvent.calendarThemeChanged,
           params: {'theme': id.name});
@@ -41,12 +43,20 @@ class CalendarThemeNotifier extends StateNotifier<CalendarThemeId> {
   static Future<CalendarThemeId> loadInitial() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      try {
+        await CalendarThemeMigration.apply(prefs,
+            defaultTheme: _deviceDefault().name);
+      } catch (e) {
+        debugPrint('Calendar appearance persistence will retry: $e');
+      }
       final saved = prefs.getString(_prefsKey);
       if (saved == null) return _deviceDefault();
-      return CalendarThemeId.values.firstWhere(
-        (e) => e.name == saved,
-        orElse: _deviceDefault,
-      );
+      return CalendarThemeId.values
+          .firstWhere(
+            (e) => e.name == saved,
+            orElse: _deviceDefault,
+          )
+          .canonical;
     } catch (e) {
       print('❌ 달력 테마 로드 실패: $e');
       return _deviceDefault();

@@ -1,3 +1,4 @@
+import '../widgets/app_ui_feedback.dart';
 // lib/utils/friend_open_util.dart
 //
 // ⭐ 2026-09-05 - "친구 한 명을 탭했을 때 최신 스케줄을 다시 받아와서 그 친구
@@ -35,7 +36,7 @@ Future<void> openFriendCalendar(
 
   if (refreshResult == FriendRefreshResult.serverRemoved) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.friendLoadFailedDetailed)),
+      AppUiSnackBar(content: Text(context.l10n.friendLoadFailedDetailed)),
     );
     return;
   }
@@ -44,13 +45,13 @@ Future<void> openFriendCalendar(
   final latest = updatedList.isEmpty ? friend : updatedList.first;
   if (latest.data == null) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.koOnly.friendLoadFailedCheckNetwork)),
+      AppUiSnackBar(content: Text(context.koOnly.friendLoadFailedCheckNetwork)),
     );
     return;
   }
   if (refreshResult != FriendRefreshResult.refreshed) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.koOnly.friendShowingCachedSchedule)),
+      AppUiSnackBar(content: Text(context.koOnly.friendShowingCachedSchedule)),
     );
   }
   if (!context.mounted || !context.usesKoreanFeatures) return;

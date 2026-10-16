@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/services/app_analytics.dart';
 import 'package:shiftbell/services/backup_policy.dart';
+import 'package:shiftbell/providers/work_hours_settings_provider.dart';
 
 /// 대시보드(admin_dashboard)가 보여 주는 이벤트 목록과 앱이 실제로 보내는 이벤트 목록이
 /// 어긋나면(이름 변경·추가 후 한쪽만 고침) 대시보드에 "이름 없는 이벤트"가 뜨거나 항목이 비어 있게 된다.
@@ -23,6 +24,27 @@ Map<String, Object?> _row(int id, String type, DateTime ring) => {
     };
 
 void main() {
+  test('work hours loading is silent and saved settings send no private values', () async {
+    SharedPreferences.setMockInitialValues({});
+    final sent = <String>[];
+    AppAnalytics.debugSink = (name, params) {
+      sent.add(name);
+      expect(params, isNull);
+    };
+    final notifier = WorkHoursSettingsNotifier();
+    try {
+      await Future<void>.delayed(Duration.zero);
+      expect(sent, isEmpty);
+      await notifier.setPeriodMode(MonthlyPeriodMode.payday);
+      await notifier.setPaydayCutoffDay(20);
+      await notifier.setCutoffAnchor(PaydayCutoffAnchor.periodStart);
+      await notifier.setShiftChangeCountsAsOt(true);
+      expect(sent, List.filled(4, AnalyticsEvent.workHoursSettingsSaved));
+    } finally {
+      notifier.dispose();
+      AppAnalytics.debugSink = null;
+    }
+  });
   group('이벤트 이름', () {
     test('GA4 규칙(소문자 시작·영문 소문자/숫자/밑줄·40자 이하, 예약 접두어 금지)', () {
       final valid = RegExp(r'^[a-z][a-z0-9_]{0,39}$');

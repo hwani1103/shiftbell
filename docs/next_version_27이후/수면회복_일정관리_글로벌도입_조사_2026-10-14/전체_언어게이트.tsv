@@ -1,0 +1,242 @@
+﻿file	line	source
+lib/widgets/wide_calendar_cell.dart	49	final korean = context.usesKoreanFeatures;
+lib/widgets/sleep_edit_dialog.dart	47	if (!context.usesKoreanFeatures) return null;
+lib/widgets/sleep_edit_dialog.dart	74	if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
+lib/widgets/sleep_edit_dialog.dart	77	if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
+lib/widgets/sleep_edit_dialog.dart	251	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/widgets/schedule_change_dialog.dart	72	.usesKoreanFeatures
+lib/widgets/onboarding_info_popups.dart	35	bool koreanOnly = false,
+lib/widgets/onboarding_info_popups.dart	37	if (koreanOnly && !context.usesKoreanFeatures) return;
+lib/widgets/onboarding_info_popups.dart	44	if (koreanOnly && !context.usesKoreanFeatures) return;
+lib/widgets/onboarding_info_popups.dart	56	builder: (dialogContext) => koreanOnly && !dialogContext.usesKoreanFeatures
+lib/widgets/onboarding_info_popups.dart	94	koreanOnly: true,
+lib/widgets/onboarding_info_popups.dart	107	koreanOnly: true,
+lib/widgets/friend_web_calendar.dart	395	final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+lib/widgets/evidence_library_section.dart	33	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/widgets/disable_tab_button.dart	21	if (!context.usesKoreanFeatures) return false;
+lib/widgets/disable_tab_button.dart	26	if (context.mounted && context.usesKoreanFeatures) {
+lib/widgets/disable_tab_button.dart	70	builder: (context) => !context.usesKoreanFeatures ? const UnavailableFeature() : AlertDialog(
+lib/widgets/disable_tab_button.dart	106	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/widgets/calendar_header_actions.dart	98	context.usesKoreanFeatures
+lib/widgets/calendar_header_actions.dart	104	context.usesKoreanFeatures) ...[
+lib/widgets/calendar_header_actions.dart	111	context.usesKoreanFeatures
+lib/widgets/calendar_footer_actions.dart	19	if (!context.usesKoreanFeatures) {
+lib/widgets/alarm_mode_label.dart	13	if (context.usesKoreanFeatures) {
+lib/utils/weekday_util.dart	33	if (language == 'ko') return kWeekdayKo[index];
+lib/utils/weekday_util.dart	52	Localizations.localeOf(context).languageCode == 'ko'
+lib/utils/weekday_util.dart	58	final code = locale.languageCode == 'ko' ? 'en' : locale.toString();
+lib/utils/friend_open_util.dart	25	if (!context.usesKoreanFeatures) return;
+lib/utils/friend_open_util.dart	34	if (!context.mounted || !context.usesKoreanFeatures) return;
+lib/utils/friend_open_util.dart	56	if (!context.mounted || !context.usesKoreanFeatures) return;
+lib/theme/calendar_reading_palette.dart	133	context.usesKoreanFeatures &&
+lib/services/holiday_sync_service.dart	33	bool get _koreanLanguage => WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'ko';
+lib/services/friend_sync_service.dart	117	WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'ko';
+lib/l10n/release_locale.dart	14	if (device.languageCode == 'ko') return const Locale('ko');
+lib/l10n/l10n_extensions.dart	18	bool get usesKoreanFeatures => Localizations.localeOf(this).languageCode == 'ko';
+lib/l10n/l10n_extensions.dart	23	usesKoreanFeatures ? error.toString() : l10n.statusErrorOccurred;
+lib/screens/next_alarm_tab.dart	314	final dateStr = context.usesKoreanFeatures
+lib/screens/next_alarm_tab.dart	567	return context.usesKoreanFeatures
+lib/screens/my_share_code_screen.dart	35	Widget build(BuildContext context) => context.usesKoreanFeatures
+lib/screens/my_share_code_screen.dart	73	if (!mounted || !context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	76	if (!mounted || !context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	79	if (!mounted || !context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	101	if (!context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	110	if (!mounted || !context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	131	if (!context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	158	if (!mounted || !context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	167	if (!mounted || !context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	180	if (!context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	183	builder: (context) => !context.usesKoreanFeatures
+lib/screens/my_share_code_screen.dart	207	if (!mounted || !context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	220	if (!context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	226	if (!mounted || !context.usesKoreanFeatures) return;
+lib/screens/my_share_code_screen.dart	320	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/my_share_code_screen.dart	321	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/my_share_code_screen.dart	505	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/memo_list_view.dart	78	final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+lib/screens/memo_list_view.dart	85	final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+lib/screens/help_screen.dart	28	final bool koreanOnly;
+lib/screens/help_screen.dart	32	this.koreanOnly = false,
+lib/screens/help_screen.dart	44	final bool koreanOnly;
+lib/screens/help_screen.dart	49	this.koreanOnly = false,
+lib/screens/help_screen.dart	146	koreanOnly: true,
+lib/screens/help_screen.dart	160	koreanOnly: true,
+lib/screens/help_screen.dart	167	koreanOnly: true,
+lib/screens/help_screen.dart	188	koreanOnly: true,
+lib/screens/help_screen.dart	207	koreanOnly: true,
+lib/screens/help_screen.dart	251	koreanOnly: true,
+lib/screens/help_screen.dart	282	koreanOnly: true,
+lib/screens/help_screen.dart	312	// ⭐ 2026-09-22(영어화 P0-2) - koreanOnly 섹션(수면·회복/수면 기록)은 한국어
+lib/screens/help_screen.dart	314	final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+lib/screens/help_screen.dart	318	.where((s) => !s.koreanOnly)
+lib/screens/help_screen.dart	322	topics: s.topics.where((t) => !t.koreanOnly).toList(),
+lib/screens/help_screen.dart	336	koreanOnly: s.koreanOnly, topics: matched);
+lib/screens/help_screen.dart	442	_TopicTile(topic: section.topics[i], koreanOnly: section.koreanOnly),
+lib/screens/help_screen.dart	454	final bool koreanOnly;
+lib/screens/help_screen.dart	455	const _TopicTile({required this.topic, required this.koreanOnly});
+lib/screens/help_screen.dart	463	topic: topic, koreanOnly: koreanOnly || topic.koreanOnly)),
+lib/screens/help_screen.dart	487	final bool koreanOnly;
+lib/screens/help_screen.dart	488	const HelpDetailScreen({super.key, required this.topic, this.koreanOnly = false});
+lib/screens/help_screen.dart	493	if ((koreanOnly || topic.koreanOnly) && !context.usesKoreanFeatures) {
+lib/screens/friend_list_screen.dart	34	Widget build(BuildContext context) => context.usesKoreanFeatures
+lib/screens/friend_list_screen.dart	67	if (!mounted || !context.usesKoreanFeatures) return;
+lib/screens/friend_list_screen.dart	79	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/friend_list_screen.dart	162	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/friend_list_screen.dart	163	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/friend_list_screen.dart	307	.usesKoreanFeatures
+lib/screens/friend_calendar_view.dart	33	Widget build(BuildContext context) => !publicWebViewer && !context.usesKoreanFeatures
+lib/screens/condition_tab.dart	60	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	91	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	145	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	237	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	290	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	396	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	423	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	438	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	474	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	512	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	528	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	563	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	605	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	657	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	751	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	824	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	951	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	993	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	1062	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	1136	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	1203	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/condition_tab.dart	1231	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/all_shifts_view.dart	335	child: !context.usesKoreanFeatures
+lib/screens/calendar_theme_lab_screen.dart	110	final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+lib/screens/calendar_theme_lab_screen.dart	136	context.usesKoreanFeatures && (_isSunday(d) || _isHoliday(d));
+lib/screens/calendar_theme_lab_screen.dart	293	if (!context.usesKoreanFeatures &&
+lib/screens/calendar_theme_lab_screen.dart	404	_thinTextButton(context.usesKoreanFeatures ? 'Today' : context.l10n.commonToday, _tapToday),
+lib/screens/calendar_theme_lab_screen.dart	419	color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500,
+lib/screens/calendar_theme_lab_screen.dart	606	child: Text(weekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade700)),
+lib/screens/calendar_theme_lab_screen.dart	782	Text(context.usesKoreanFeatures ? '2026-08' : '${calendarMonthName(context, DateTime(2026, 8))} 2026', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'monospace')),
+lib/screens/calendar_theme_lab_screen.dart	786	_gridHeaderBtn(context.usesKoreanFeatures ? 'TODAY' : context.l10n.commonToday.toUpperCase(), _tapToday),
+lib/screens/calendar_theme_lab_screen.dart	795	child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.redAccent.shade100 : Colors.white70))),
+lib/screens/calendar_theme_lab_screen.dart	936	child: Center(child: Text(weekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
+lib/screens/calendar_theme_lab_screen.dart	1067	child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i), narrow: true), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade400))),
+lib/screens/calendar_theme_lab_screen.dart	1238	child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
+lib/screens/calendar_theme_lab_screen.dart	1371	color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade50 : (context.usesKoreanFeatures && i == 6 ? Colors.blue.shade50 : Colors.grey.shade100),
+lib/screens/calendar_theme_lab_screen.dart	1373	child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade600)),
+lib/screens/calendar_theme_lab_screen.dart	1797	final isRedSunday = context.usesKoreanFeatures && day.weekday == DateTime.sunday;
+lib/screens/calendar_theme_lab_screen.dart	1916	_diaryHeaderBtn(context.usesKoreanFeatures ? 'Today' : context.l10n.commonToday, _tapToday),
+lib/screens/calendar_theme_lab_screen.dart	1928	style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? const Color(0xFFD9534F) : const Color(0xFF8A6F5C)),
+lib/screens/all_alarms_history_view.dart	151	if (!context.usesKoreanFeatures) {
+lib/screens/calendar_tab.dart	69	isKorean: Localizations.localeOf(context).languageCode == 'ko',
+lib/screens/calendar_tab.dart	128	final day = context.usesKoreanFeatures ? '주간' : context.l10n.shiftDay;
+lib/screens/calendar_tab.dart	129	final night = context.usesKoreanFeatures ? '야간' : context.l10n.shiftNight;
+lib/screens/calendar_tab.dart	130	final off = context.usesKoreanFeatures ? '휴무' : context.l10n.shiftOff;
+lib/screens/calendar_tab.dart	272	if (!context.usesKoreanFeatures) {}
+lib/screens/calendar_tab.dart	337	final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+lib/screens/calendar_tab.dart	493	preview: widget.preview, includeLegend: context.usesKoreanFeatures);
+lib/screens/calendar_tab.dart	1053	flex: context.usesKoreanFeatures
+lib/screens/calendar_tab.dart	1093	if (context.usesKoreanFeatures)
+lib/screens/calendar_tab.dart	1239	final month = locale.languageCode == 'ko'
+lib/screens/calendar_tab.dart	1285	isKorean: context.usesKoreanFeatures,
+lib/screens/calendar_tab.dart	1289	onFriends: context.usesKoreanFeatures
+lib/screens/calendar_tab.dart	1324	includeLegend: context.usesKoreanFeatures)) {
+lib/screens/calendar_tab.dart	1333	flex: context.usesKoreanFeatures ? 2 : 3,
+lib/screens/calendar_tab.dart	1343	if (context.usesKoreanFeatures)
+lib/screens/calendar_tab.dart	1495	flex: context.usesKoreanFeatures ? 2 : 3,
+lib/screens/calendar_tab.dart	1512	if (context.usesKoreanFeatures)
+lib/screens/calendar_tab.dart	1613	isKorean: Localizations.localeOf(context).languageCode == 'ko');
+lib/screens/calendar_tab.dart	2338	return context.usesKoreanFeatures || includeAllShiftsCol;
+lib/screens/calendar_tab.dart	2340	return context.usesKoreanFeatures && includeAllShiftsCol;
+lib/screens/calendar_tab.dart	2404	if (!context.usesKoreanFeatures ||
+lib/screens/calendar_tab.dart	2435	if (!context.usesKoreanFeatures) return;
+lib/screens/calendar_tab.dart	2500	final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+lib/screens/calendar_tab.dart	2734	isKorean: context.usesKoreanFeatures,
+lib/screens/calendar_tab.dart	2737	onFriends: context.usesKoreanFeatures ? _openFriendShare : null,
+lib/screens/calendar_tab.dart	2852	preview: widget.preview, includeLegend: context.usesKoreanFeatures)) {
+lib/screens/calendar_tab.dart	3010	final redSunday = context.usesKoreanFeatures && i == 0;
+lib/screens/calendar_tab.dart	3095	: (context.usesKoreanFeatures && i == 6
+lib/screens/calendar_tab.dart	3147	preview: widget.preview, includeLegend: context.usesKoreanFeatures)
+lib/screens/calendar_tab.dart	3167	if (context.usesKoreanFeatures &&
+lib/screens/calendar_tab.dart	3375	maxLines: context.usesKoreanFeatures ? null : 1,
+lib/screens/calendar_tab.dart	3376	softWrap: context.usesKoreanFeatures,
+lib/screens/calendar_tab.dart	3721	context.usesKoreanFeatures && _isFoldCalendar && !_usesWideCalendarCells;
+lib/screens/calendar_tab.dart	3724	!context.usesKoreanFeatures && _isFoldCalendar && !_usesWideCalendarCells;
+lib/screens/calendar_tab.dart	3745	final samples = context.usesKoreanFeatures
+lib/screens/calendar_tab.dart	3908	double red(double size, [double? height]) => !context.usesKoreanFeatures
+lib/screens/calendar_tab.dart	4059	(context.usesKoreanFeatures && day.weekday == DateTime.sunday) ||
+lib/screens/calendar_tab.dart	4065	// 동일한 기준(languageCode == 'ko')으로 맞춤.
+lib/screens/calendar_tab.dart	4068	Localizations.localeOf(context).languageCode == 'ko') {
+lib/screens/calendar_tab.dart	4086	holidayName: context.usesKoreanFeatures ? holidayName : null,
+lib/screens/calendar_tab.dart	4151	if (!context.usesKoreanFeatures &&
+lib/screens/calendar_tab.dart	4187	if (!context.usesKoreanFeatures) {
+lib/screens/calendar_tab.dart	4246	(!context.usesKoreanFeatures && !_isFoldCalendar ? 0.93 : 1.0);
+lib/screens/calendar_tab.dart	4389	!context.usesKoreanFeatures && !_isFoldCalendar ? 1.5.w : 2.w),
+lib/screens/calendar_tab.dart	4650	vertical: !context.usesKoreanFeatures && !_isFoldCalendar
+lib/screens/calendar_tab.dart	4748	context.usesKoreanFeatures ? 15 : 14),
+lib/screens/calendar_tab.dart	4750	context.usesKoreanFeatures ? 15 : 14),
+lib/screens/calendar_tab.dart	4766	context.usesKoreanFeatures ? 15 : 14)),
+lib/screens/calendar_tab.dart	4787	fontSize: (context.usesKoreanFeatures ? 8 : 7.5).sp,
+lib/screens/calendar_tab.dart	4803	fontSize: (context.usesKoreanFeatures ? 8 : 7.5).sp,
+lib/screens/calendar_tab.dart	4993	if (context.usesKoreanFeatures) {
+lib/screens/calendar_tab.dart	5306	if (!context.usesKoreanFeatures) {
+lib/screens/calendar_tab.dart	5770	context.usesKoreanFeatures && day.weekday == DateTime.sunday;
+lib/screens/calendar_tab.dart	5917	// 🔧 빨간날(공휴일) 이름 - 위치: 셀 맨 위 고정(top: context.usesKoreanFeatures ? 1.2.h : 0, 날짜
+lib/screens/calendar_tab.dart	5924	if (context.usesKoreanFeatures &&
+lib/screens/calendar_tab.dart	5927	top: context.usesKoreanFeatures ? 1.2.h : 0,
+lib/screens/calendar_tab.dart	5963	top: context.usesKoreanFeatures ? 1.2.h : 0,
+lib/screens/calendar_tab.dart	6273	if (!context.usesKoreanFeatures &&
+lib/screens/settings_tab.dart	183	if (!context.usesKoreanFeatures)
+lib/screens/settings_tab.dart	340	if (!sharingStopSaved && context.usesKoreanFeatures) {
+lib/screens/settings_tab.dart	343	builder: (context) => context.usesKoreanFeatures
+lib/screens/settings_tab.dart	1037	if (context.usesKoreanFeatures &&
+lib/screens/settings_tab.dart	1054	if (Localizations.localeOf(context).languageCode == 'ko' &&
+lib/screens/settings_tab.dart	1691	if (type.isSound && context.usesKoreanFeatures)
+lib/screens/schedule_management_tab.dart	154	Widget build(BuildContext context) => context.usesKoreanFeatures
+lib/screens/schedule_management_tab.dart	346	Localizations.localeOf(context).languageCode == 'ko' ? 'ko_KR' : 'en_US';
+lib/screens/schedule_management_tab.dart	350	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/schedule_management_tab.dart	666	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/schedule_management_tab.dart	689	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/schedule_management_tab.dart	2020	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/schedule_management_tab.dart	2375	if (!context.usesKoreanFeatures)
+lib/screens/schedule_management_tab.dart	2556	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/schedule_management_tab.dart	3616	if (!mounted || !context.usesKoreanFeatures) return;
+lib/screens/schedule_management_tab.dart	3680	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/schedule_management_tab.dart	4083	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/schedule_management_tab.dart	4157	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/schedule_management_tab.dart	4228	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/schedule_management_tab.dart	4262	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/restore_backup_screen.dart	210	if (!context.usesKoreanFeatures) return DateFormat.yMMMd(Localizations.localeOf(context).toString()).add_Hm().format(dt);
+lib/screens/sleep_calendar_full_screen.dart	34	Widget build(BuildContext context) => context.usesKoreanFeatures
+lib/screens/sleep_calendar_full_screen.dart	77	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/sleep_calendar_full_screen.dart	142	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/sleep_calendar_full_screen.dart	204	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/sleep_calendar_full_screen.dart	242	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/sleep_calendar_full_screen.dart	347	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/sleep_calendar_full_screen.dart	383	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/team_schedule_edit_screen.dart	41	bool get _ko => Localizations.localeOf(context).languageCode == 'ko';
+lib/main.dart	587	context.usesKoreanFeatures
+lib/main.dart	609	context.usesKoreanFeatures
+lib/main.dart	651	if (context.usesKoreanFeatures) {
+lib/main.dart	680	if (context.usesKoreanFeatures) {
+lib/main.dart	723	if (!mounted || !context.usesKoreanFeatures) return;
+lib/main.dart	786	final conditionVisible = context.usesKoreanFeatures &&
+lib/main.dart	818	context.usesKoreanFeatures && ref.watch(scheduleTabEnabledProvider);
+lib/main.dart	820	context.usesKoreanFeatures && ref.watch(conditionTabEnabledProvider);
+lib/main.dart	850	label: Localizations.localeOf(context).languageCode == 'ko'
+lib/main.dart	896	includeLegend: context.usesKoreanFeatures);
+lib/main.dart	1177	if (!context.usesKoreanFeatures) return const UnavailableFeature();
+lib/screens/work_hours_settings_screen.dart	297	if (needsClockTimeMigration && context.usesKoreanFeatures) ...[
+lib/providers/friend_provider.dart	41	bool get _koreanLanguage => WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'ko';
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ReleaseLocalePolicy.kt	14	fun koreanFeatures(context: Context): Boolean = locale(context).language == "ko"
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ReleaseLocalePolicy.kt	30	if (koreanFeatures(context)) {
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ReleaseLocalePolicy.kt	54	val target = if (koreanFeatures(context)) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ReleaseLocalePolicy.kt	58	if (!koreanFeatures(context)) SleepWidgetProvider.requestUpdate(context)
+lib/models/calendar_theme.dart	50	if (!context.usesKoreanFeatures &&
+lib/models/calendar_theme.dart	97	locale.languageCode == 'ko'
+lib/models/calendar_theme.dart	116	usesKoreanFeatures ? kAllCalendarThemeIds : kEnglishCalendarThemeIds;
+lib/models/calendar_theme.dart	159	final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionScheduler.kt	41	if (!ReleaseLocalePolicy.koreanFeatures(context)) return false
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ScheduleNotificationScheduler.kt	58	ReleaseLocalePolicy.koreanFeatures(context) && prefs(context).getBoolean(KEY_TAB_ENABLED, true)
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ScheduleNotificationScheduler.kt	63	.putBoolean(KEY_LAST_EFFECTIVE, ReleaseLocalePolicy.koreanFeatures(context) && enabled)
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt	99	if (!ReleaseLocalePolicy.koreanFeatures(context)) {
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt	186	if (!ReleaseLocalePolicy.koreanFeatures(context)) return false
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt	59	if (!ReleaseLocalePolicy.koreanFeatures(context)) return

@@ -1,0 +1,28 @@
+{
+  "apk": "C:\\Users\\Administrator\\Desktop\\shiftbell\\examples\\sync_path_lab\\artifacts\\finale100\\app-dev-debug.apk",
+  "bytes": 147214031,
+  "sha256": "72ca87836e168cb14c8ce0b970ae2ac4df24247d240a1705481c353379627ef2",
+  "assetMatchesSource": {
+    "assets/pilot_levels.json": true,
+    "assets/pilot_copy.json": true,
+    "packages/sync_path_ui/assets/fonts/GameSansSubset.ttf": true
+  },
+  "levels": 100,
+  "applicationId": "dev.shiftbell.experiments.sync_path_lab.dev",
+  "versionName": "0.9.0",
+  "versionCode": 11,
+  "buildType": "dev debug",
+  "installedOnDevice": false,
+  "web": {
+    "build": "debug",
+    "assetsMatchSource": {
+      "assets/pilot_levels.json": true,
+      "assets/pilot_copy.json": true,
+      "packages/sync_path_ui/assets/fonts/GameSansSubset.ttf": true
+    },
+    "mainDartJsBytes": 8541494,
+    "mainDartJsSha256": "6f17d17095a850e370746dfbe65b49767c322169198dfd50009d1ee01f7f6a89"
+  },
+  "previous70ApkPreserved": true,
+  "protectedExistingFilesUnchanged": 1165
+}

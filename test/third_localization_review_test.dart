@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/l10n/korean_only_copy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -40,17 +41,24 @@ void main() {
   });
 
   for (final locale in locales) {
-    testWidgets('$locale never opens sleep or personal-event tutorials', (tester) async {
+    testWidgets('$locale offers sleep tutorial but blocks personal-event tutorial', (tester) async {
       late BuildContext appContext;
       await tester.pumpWidget(harness(locale, Builder(builder: (context) {
         appContext = context;
         return const SizedBox.shrink();
       })));
-      await maybeShowConditionTabTutorial(appContext);
+      SharedPreferences.setMockInitialValues({});
       await maybeShowScheduleTabTutorial(appContext);
       await tester.pump(kInfoPopupDelay);
       expect(find.byType(Dialog), findsNothing);
-      expect(find.byType(AlertDialog), findsNothing);
+      final shown = maybeShowConditionTabTutorial(appContext);
+      await tester.pump();
+      await tester.pump(kInfoPopupDelay);
+      await tester.pumpAndSettle();
+      expect(find.byType(Dialog), findsOneWidget);
+      Navigator.of(appContext).pop();
+      await tester.pumpAndSettle();
+      await shown;
     });
 
     test('$locale public copy describes only available features', () async {
@@ -62,7 +70,7 @@ void main() {
         l.settingsResetScheduleConfirm, l.settingsAllAlarmsWillBeDeleted,
         l.settingsScheduleChangeWarning].join('\n');
       expect(publicCopy, isNot(matches(RegExp(
-        r'Korean|coreano|koreanisch|कोरियाई|sleep|sono|Schlaf|नींद|one.tap|Schnellwecker|alarme rápido|एक टैप|friend|amigos|Freund|दोस्त',
+        r'Korean|coreano|koreanisch|कोरियाई|one.tap|Schnellwecker|alarme rápido|एक टैप|friend|amigos|Freund|दोस्त',
         caseSensitive: false))));
       expect(l.privacyFirebaseBody, contains('Google Play'));
       expect(l.privacyDataRetentionBody, contains('Download/ShiftBell'));
@@ -72,8 +80,7 @@ void main() {
       await tester.pumpWidget(harness(locale, const HelpScreen()));
       await tester.pumpAndSettle();
       final l = await AppLocalizations.delegate.load(locale);
-      for (final title in [KoreanOnlyCopy.forLocale('ko').helpConditionWhatIsItTitle, KoreanOnlyCopy.forLocale('ko').helpSleepWidgetTitle,
-        KoreanOnlyCopy.forLocale('ko').helpScheduleTabWhatIsItTitle, KoreanOnlyCopy.forLocale('ko').helpFriendWhatIsItTitle,
+      for (final title in [KoreanOnlyCopy.forLocale('ko').helpScheduleTabWhatIsItTitle, KoreanOnlyCopy.forLocale('ko').helpFriendWhatIsItTitle,
         KoreanOnlyCopy.forLocale('ko').helpTroubleshootFriendDisconnectedTitle]) {
         await tester.enterText(find.byType(TextField), title);
         await tester.pump();
@@ -89,15 +96,15 @@ void main() {
         valueListenable: language,
         builder: (_, locale, __) => harness(locale, HelpDetailScreen(
           koreanOnly: true,
-          topic: HelpTopic(titleKey: (l) => KoreanOnlyCopy.forLocale('ko').helpSleepWidgetTitle,
-            bodyKey: (l) => KoreanOnlyCopy.forLocale('ko').helpSleepWidgetBody),
+          topic: HelpTopic(titleKey: (l) => KoreanOnlyCopy.forLocale('ko').helpScheduleTabWhatIsItTitle,
+            bodyKey: (l) => KoreanOnlyCopy.forLocale('ko').helpScheduleTabWhatIsItBody),
         )),
       ));
       await tester.pumpAndSettle();
-      expect(find.text(KoreanOnlyCopy.forLocale('ko').helpSleepWidgetBody), findsOneWidget);
+      expect(find.text(KoreanOnlyCopy.forLocale('ko').helpScheduleTabWhatIsItBody), findsOneWidget);
       language.value = locale;
       await tester.pumpAndSettle();
-      expect(find.text(KoreanOnlyCopy.forLocale('ko').helpSleepWidgetBody), findsNothing);
+      expect(find.text(KoreanOnlyCopy.forLocale('ko').helpScheduleTabWhatIsItBody), findsNothing);
       expect(find.byType(HelpScreen), findsOneWidget);
     });
 
@@ -109,14 +116,14 @@ void main() {
         builder: (_, locale, __) => harness(locale, const HelpScreen()),
       ));
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), KoreanOnlyCopy.forLocale('ko').helpSleepWidgetTitle);
+      await tester.enterText(find.byType(TextField), KoreanOnlyCopy.forLocale('ko').helpScheduleTabWhatIsItTitle);
       await tester.pump();
-      await tester.tap(find.text(KoreanOnlyCopy.forLocale('ko').helpSleepWidgetTitle).last);
+      await tester.tap(find.text(KoreanOnlyCopy.forLocale('ko').helpScheduleTabWhatIsItTitle).last);
       await tester.pumpAndSettle();
-      expect(find.text(KoreanOnlyCopy.forLocale('ko').helpSleepWidgetBody), findsOneWidget);
+      expect(find.text(KoreanOnlyCopy.forLocale('ko').helpScheduleTabWhatIsItBody), findsOneWidget);
       language.value = locale;
       await tester.pumpAndSettle();
-      expect(find.text(KoreanOnlyCopy.forLocale('ko').helpSleepWidgetBody), findsNothing);
+      expect(find.text(KoreanOnlyCopy.forLocale('ko').helpScheduleTabWhatIsItBody), findsNothing);
     });
 
     testWidgets('$locale limits themes without replacing stored Korean choices', (tester) async {
@@ -128,7 +135,8 @@ void main() {
         return const SizedBox.shrink();
       })));
       await tester.pumpAndSettle();
-      expect(available, hasLength(7));
+      expect(available, hasLength(6));
+      expect(available, isNot(contains(CalendarThemeId.mainDark)));
       expect(available.take(2), [CalendarThemeId.periwinkle, CalendarThemeId.softMosaic]);
       expect(available, isNot(contains(CalendarThemeId.diary)));
       expect(available, isNot(contains(CalendarThemeId.editorial)));

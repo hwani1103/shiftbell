@@ -1,0 +1,32 @@
+일정관리 본체 조사 보충
+2026-10-14 / 기능 변경 없음
+
+1. 메모/근무표/친구 공유와 분리
+DateSchedule은 날짜, 내용, 시작분, 선택적 지속분,색상,iconIndex,styleIndex,fontIndex,predictedCategory,isUserCorrected,알림ON/OFF,사전알림분,생성/수정시각을 date_schedules에 저장한다. 달력의 하루 메모(DateMemo)나 근무표(ShiftSchedule),친구 일정공유와 다른 데이터다.
+computeSlotMinutes는 정각이면 해당 시,그 밖의 분이면 해당 시+30분 위치로 배치한다. 실제 startMinutes를 반올림해 저장하는 것이 아니므로 화면 위치와 정확한 시작/알림시각을 혼동하지 않는다. 생성은5분 미세조정값을 사용하며 수정은 원래 startMinutes를 유지하는 경로다.
+현재 저장 기본 styleIndex=3, fontIndex=5(주아체),아이콘은 내용 자동분류.수동 아이콘 정정 UI는 없으며 isUserCorrected=false다.글꼴/숫자/시각형식과 아이콘 배열 순서를 글로벌화 중 보존/분리할 필요가 있다.
+
+2. 저장/수정/삭제
+DateScheduleNotifier.create:DB 먼저 저장→앱 상태 반영→native 알림 동기화. 반환은 saved와 notifyScheduled를 분리하므로 예약 실패가 일정 저장 실패를 의미하지 않는다.
+update:DB 수정→기존 날짜 캐시에서 같은 ID 제거/새 날짜에 반영→알림 취소 후 재예약. delete:DB 삭제→캐시 제거→알림 취소.
+날짜별 캐시는 loadForDate에서 이미 있으면 재사용,forceReloadForDate는 DB를 다시 읽는다.앱복귀/알림에서 해당 날짜 포커스/복원 후 캐시 무효화 동작도 제공 범위 변경 때 검사.
+_handleSave는700ms 터치 차폐를 유지해 저장 뒤 같은 위치의 두 번째 터치가 다른 탭으로 새는 것을 막는다.원문이 비어 있으면 저장 불가.분류 실패는 기타도형으로 저장하도록 fallback.현재 외국어는 저장 함수 시작에서return하므로 이 장벽도 수정해야 한다.
+
+3. 알림 예약과 표시
+ScheduleNotificationService:항상 같은 ID의 기존 예약을 취소하고,알림ON 및 미래시각일 때 예약한다.트리거=날짜자정+startMinutes-notifyOffsetMinutes.지난 시각은 예약하지 않고 UI가 경고하며 데이터 자체는 남길 수 있다.
+기상 알람과 달리 지속 벨소리/전체화면/스누즈가 없는 일반 알림1건.별도 channel_schedule_notify 채널의 소리·진동 설정을 따른다.시간 헤드라인과 일정 본문을 표시하므로 잠금화면의 OS 알림 공개설정도 따른다.
+native는 기기보호영역의 탭 enabled와 한국어 locale를 둘 다 확인한다.예약 API에서 탭이 OFF면 실제 예약 없이 true를 반환할 수 있다.따라서 notifyScheduled=true는 '기기에서 실제 알림을 받았다'는 증거가 아니다.
+수신 시 DB를 다시 조회하여 행존재/알림ON/탭ON/예약 당시시각==현재 DB시각을 확인한다.삭제·OFF·옛예약이면 표시하지 않는다.시각이 바뀌었고 미래라면 새 시각에 재예약.조회불가도 표시하지 않는 fail-closed 동작.
+재부팅·업데이트·앱 시작·언어전환에서 DB 기반 재예약/취소.탭 숨기기는 예약과 이미 표시된 알림을 취소하되 DB notify_enabled를 지우지 않아 다시 켜면 미래 알림을 복구할 수 있다.과거 알림을 새로 울리도록 되살리지는 않는다.
+
+4. 글로벌 이슈
+- 같은 locale guard를 Flutter/native 양쪽에서 두 기능 전용 capability로 분리.영어에서 화면은 보이지만 저장/알림은 계속 차단되는 반쪽 도입 방지.
+- 알림예약 실패 문구는 정확한 알람 권한만 원인인 것처럼 단정하지 않는 후속 개선 후보.앱 알림/채널 차단은 예약 API 성공과 별개.
+- 날짜자정+Duration(minutes)/Calendar.add(MINUTE) 경로가 남아 있다.DST 전환일의 현지 약속시각과 elapsed minutes의 차이를 확인해야 한다.수면뿐 아니라 일정알림도 지역시간 테스트 필요.
+- en_US 단일 날짜 fallback,주아체/힌디어,24시간 이후 종료/자정넘김,사전알림이전날로넘김,12/24시표시를 분리 검증.
+- 취소 예외를 로그로만 처리하는 경로는 남아 있으나 수신 시 DB 재검증이 stale 알림을 막는 장치다.이번에는 기존 권한/예약 정책을 수정하지 않았다.
+- 저장된 iconIndex의 배열 인덱스 계약 보존.언어별로 배열을 재정렬하거나 일부 카테고리를 삭제하면 과거 아이콘 의미가 바뀔 수 있다.
+- 단순 도형 출시라면 자동 의미분류 도움말은 그에 맞춰 변경.새 의미분류모델을 넣는다면 한국어/외국어의 입력언어 혼용과 무의미/애매한 텍스트 fallback을 검증.
+
+5. 기존검사 연결
+test/release_audit/g1/g1_schedule_tab_sync_test.dart와 schedule 저장실패/연속터치/locale 관련 검사는 구현 단계의 필수 범위다.이번144검사는 수면·아이콘·선택형 기본값을 중심으로 실행한 것이며 일정알림 native 전체 회귀나 실기기 성공을 주장하지 않는다.이번 추가17사례도 수면 날짜 귀속의 호스트 검사다.

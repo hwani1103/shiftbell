@@ -1,0 +1,26 @@
+스케줄 변경 창 빈 모달 — 공통 칩/사전 측정 충돌 회귀 (2026-10-15)
+
+사용자 관찰
+- 설정 → 편집 → 스케줄 변경에서 검정 반투명 배경만 뜨고 창이 나타나지 않음. 예전에는 정상.
+
+원인
+- 최근 공통 AppShiftChip이 단순 Text/FittedBox 경로에서 ShiftChipLabel로 변경됨. 새 라벨은 자동 글자 축소를 위해 LayoutBuilder에서 실제 칸 크기를 사용함.
+- 기존 ShiftEditorDialog는 AlertDialog의 intrinsic/dry layout으로 Wrap/칩 크기를 미리 측정하려 하므로 이 경로와 충돌함.
+- 실기기 로그: The _RenderLayoutBuilder class does not support dry layout, ShiftEditorDialog의 AlertDialog:19, 이후 RenderBox was not laid out 연쇄 오류. 배경 barrier만 보이는 원인임.
+- 새 외국어 이름이나 문자열 손상이 원인이 아니라 공통 UI 개선의 기존 편집 창 호환성 회귀. 이 호환성을 이전 검사에서 놓쳤음을 사용자에게 설명함.
+
+수정
+- 공통 ShiftEditorDialog를 실제 제한 너비로 바로 배치하는 Dialog로 변경. 제목/내용을 Flexible+SingleChildScrollView에 두고 저장/취소는 별도 OverflowBar로 유지.
+- intrinsic/dry layout을 요구하지 않아 반응형 칩이 실제 크기로 정상 배치됨. 작은 화면/키보드에서도 내용 스크롤 및 버튼 접근 유지.
+- 기존 SettingsAppearance의 색/제목/본문 역할 유지. 대화상자 간격/반경은 공통 AppUiMetrics 토큰으로 정의.
+- 일정 계산/조 변경 적용/근무명 저장/알람 로직은 수정하지 않음. 같은 공통 틀을 쓰는 이름/색 편집 창에도 적용되는 구조 변경임.
+
+검증과 인계
+- 핫리로드 48/2161 라이브러리,2622ms 성공(compile1262/reload765/reassemble173).
+- 새 mixed-language UI3검사 및 기존 team_schedule_change_test11검사 합계14 PASS.
+- 400x850 기본 글자,360x480 글자2배,800x600 글자2배+키보드200에서 열기/선택/저장 확인. 기존 ko/en 작은폰/넓은화면 조 변경 확인·취소·재저장 흐름도 PASS.
+- artifacts/schedule_change_dialog_2026_10_15/tests.log 및 수정 전 소스 보존.
+- after.png는 당시 사용자가 보고 있던 별도 게임 화면이며 편집 창 시각적 PASS로 사용하지 않음.
+- 사용자가 “이제보인다”라고 창 복귀 확인. 새 패턴 유지한 채 다음 근무명/칩 크기 조정으로 진행하기로 함.
+- 핫리로드 후 attach 연결 종료가 있었으나 dev 앱 프로세스는 살아 있었음. 이후 dev로 다시 attach하여 연결 완료. 이후 핫리로드 세션 유지.
+- 알람/권한/출시 언어 범위·리소스 구조 변경 없음. 별도 APK/웹/release 빌드 및 P0 전수 재검사 없음.

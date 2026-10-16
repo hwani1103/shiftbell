@@ -1,0 +1,15 @@
+국가·언어 통합 정정 / 2026-10-12
+사용자 정정: 별도 언어 표·차트 대신 기존 국가 표·차트에서 국가별 사용 언어를 함께 본다.
+국가×언어 실제 공동 차원 조회로 schema4 집계. 국가 바로 옆 언어 열, 같은 국가의 언어별 별도 행, 기존 한 차트에서 조합 선택. 별도 언어 카드·차트·선택 메뉴 제거. 알람 생성 열 유지.
+main 대시보드9파일만 155cb98 커밋·푸시. 앱 게시27 소스와 dev 미커밋 UI 보존.
+로컬/원격31검사PASS, 브라우저360/752/1440px 단일표·미국한국어/영어·남아공영어·키보드·정렬·기간/차트·가로넘침0/JS오류0.
+Firebase Hosting배포 버전08414964882007c5. https://shiftbell-ops-29f31.web.app
+실제집계 https://github.com/hwani1103/shiftbell/actions/runs/38241379756 success. 2026-10-12T11:14:48.870Z schema4 확인.
+7일국가언어조합6개, 나머지기간11개. 실제30일 미국영어2명/미국한국어1명/남아공영어1명 확인. 언어는GA4기기언어이며 앱내선택표시언어와 다를 수 있다는 화면 안내 유지.
+근거 artifacts/dashboard_country_language_tests.log / dashboard_country_language_browser.log / dashboard_country_language_deploy.log / dashboard_country_language_sync_remote.log / dashboard_country_language_2026_10_12/production-verification.json.
+기존 별도언어 배포 원장은 당시 이력으로 보존하고 이 문서가 최신 정정 기준이다.
+
+국가 그룹 정렬 추가(최신)
+국가 전체 활성 사용자 수로 그룹 순위를 정하고, 국가 안에서 언어별 사용자 수로 언어 행을 정렬. 대한민국-한국어/대한민국-영어를 연속 배치, 미국-영어의 수가 대한민국-영어보다 많아도 그룹을 흩뜨리지 않는다. 국가 규모는 별도 country 단독 조회의 중복 제거 사용자 수로 판단; 언어 값을 단순 합산하지 않는다.
+main 0b0e056 / 대시보드5파일만 / 배포버전5c7bc829e9b1f071. 로컬32검사PASS, 360/752/1440px 연속국가그룹·단일표/차트·키보드·정렬·기간·JS오류0/가로넘침0.
+근거 artifacts/dashboard_country_group_tests.log / dashboard_country_group_browser.log / dashboard_country_group_deploy.log. 집계는 schema4 실제 자료 그대로이며 이 변경은 표시 정렬만이다.

@@ -1,0 +1,66 @@
+{
+  "errors": [],
+  "languages": {
+    "en": {
+      "arb_messages": 780,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": []
+    },
+    "pt": {
+      "arb_messages": 780,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "sleepText077",
+        "commonPm",
+        "commonOk",
+        "commonAm",
+        "sleepText076",
+        "commonPrevious",
+        "sleepText075",
+        "appTitle",
+        "sleepText053",
+        "uiThemeAutomatic",
+        "splashTitle",
+        "calendarOtTotal",
+        "alarmVolume",
+        "defaultSnoozeMinutes",
+        "themeLabPreviewSheetTitle",
+        "alarmDurationMinutes"
+      ]
+    },
+    "de": {
+      "arb_messages": 780,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "commonPm",
+        "commonOk",
+        "commonAm",
+        "appTitle",
+        "sleepText053",
+        "uiThemeAutomatic",
+        "splashTitle",
+        "alarmVibration",
+        "themeLabPreviewSheetTitle"
+      ]
+    },
+    "hi": {
+      "arb_messages": 780,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "commonPm",
+        "commonAm",
+        "appTitle",
+        "sleepText053",
+        "splashTitle",
+        "themeLabPreviewSheetTitle"
+      ]
+    }
+  },
+  "limits": "Structure only. ICU generation, semantic review and device layout review are separate.",
+  "korean_preserved_scoped_messages": 170,
+  "native_korean_only_messages": 1
+}

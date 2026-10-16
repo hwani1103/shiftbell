@@ -1,0 +1,62 @@
+{
+  "buildType": "devDebug (not a release size measurement)",
+  "bundle": "examples\\sync_path_lab\\build\\app\\outputs\\bundle\\devDebug\\app-dev-debug.aab",
+  "apkSha256": "f1772563cf7405a33fb326158fe35171a4c3570a34e601064521d701c87492ad",
+  "gameAssetsRawBytes": 467461,
+  "gameAssetsStoredBytes": 185240,
+  "soundRawBytes": 109418,
+  "soundStoredBytes": 92896,
+  "excluded": "Shared Flutter engine/framework, Material icons, AOT code, native DEX and bundle metadata. Release AOT delta requires integrated before/after release builds.",
+  "assets": [
+    {
+      "path": "base/assets/flutter_assets/assets/art/sync_paths_splash.webp",
+      "rawBytes": 20584,
+      "storedBytes": 20594
+    },
+    {
+      "path": "base/assets/flutter_assets/assets/pilot_copy.json",
+      "rawBytes": 121619,
+      "storedBytes": 7995
+    },
+    {
+      "path": "base/assets/flutter_assets/assets/pilot_levels.json",
+      "rawBytes": 117312,
+      "storedBytes": 5555
+    },
+    {
+      "path": "base/assets/flutter_assets/packages/sync_path_ui/assets/fonts/GameSansSubset.ttf",
+      "rawBytes": 98528,
+      "storedBytes": 58200
+    },
+    {
+      "path": "base/assets/sync_paths_audio/clear.wav",
+      "rawBytes": 40176,
+      "storedBytes": 33738
+    },
+    {
+      "path": "base/assets/sync_paths_audio/failure.wav",
+      "rawBytes": 21654,
+      "storedBytes": 18171
+    },
+    {
+      "path": "base/assets/sync_paths_audio/route.wav",
+      "rawBytes": 6220,
+      "storedBytes": 5392
+    },
+    {
+      "path": "base/assets/sync_paths_audio/select.wav",
+      "rawBytes": 8204,
+      "storedBytes": 7085
+    },
+    {
+      "path": "base/assets/sync_paths_audio/start.wav",
+      "rawBytes": 21212,
+      "storedBytes": 18198
+    },
+    {
+      "path": "base/assets/sync_paths_audio/undo.wav",
+      "rawBytes": 11952,
+      "storedBytes": 10312
+    }
+  ]
+}

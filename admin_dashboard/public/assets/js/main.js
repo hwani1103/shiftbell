@@ -6,11 +6,16 @@ import {
   adsCard, behaviorCard, distCard, footerNote, skeleton, mountCharts, eventSheet, mountEventChart,
 } from './views.js';
 import * as auth from './auth.js';
+import { pulseHero, featureComparison, newcomerCard } from './pulse.js';
+import { dayShift } from './pulse-model.js';
+import { rememberDisclosures, restoreDisclosures } from './disclosures.js';
 import { loadDocs } from './store.js';
 import { esc, relTime, fmtLong, dataCutoffLabel } from './format.js';
+import { growthCard, acquisitionCard, activationCard, growthCountries, campaignCard, asoCard, disclosure, mountAcquisition, validStoreComparison, asoComparison } from './growth.js';
 
 const root = document.getElementById('app');
 const layer = document.getElementById('layer');
+const disclosureStates = new Map();
 const params = new URLSearchParams(location.search);
 const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
 /** 로컬에서 ?demo 로 열 때만 모의 데이터(운영 주소에서는 절대 동작하지 않는다). */
@@ -26,7 +31,10 @@ const ui = {
   visible: { dau: true, mau: false },
   section: 'overview', country: null, marketSort: 'activeUsers', dailyDate: null,
   dist: 'appVersion', evGroup: 'all', evSystem: false, evExpanded: false,
+  traffic: 'all', asoDate: store.get('aso-published-date', ''), storeComparison: null,
+  featureAll: false, newcomerDate: null,
 };
+try { ui.storeComparison = JSON.parse(store.get('aso-store-comparison', 'null')); } catch { /* malformed old local record */ }
 let dailyChart = null; let docs = null; let user = null; let charts = []; let loading = false; let error = null; let loadedAt = 0; let sheetChart = null;
 
 // ───────────────────────── 테마 ─────────────────────────
@@ -95,14 +103,14 @@ function destroyCharts() { charts.forEach((c) => c.destroy()); charts = []; dail
 
 function headerHtml(view) {
   const s = docs?.summary;
-  const stale = s ? Date.now() - Date.parse(s.updatedAt) > 36 * 3600 * 1000 : false;
+  const stale = s ? Date.now() - Date.parse(s.updatedAt) > 6 * 3600 * 1000 : false;
   const latest = s?.latest ? fmtLong(s.latest) : '-';
   return `<header class="topbar"><div class="wrap">
-    <div class="bar1">${brandMark}<div class="titles"><b>교대시계 운영</b><small>Play 출시 버전 · ${esc(latest)}까지 집계 · ${dataCutoffLabel(s?.latest)}</small></div>
+    <div class="bar1">${brandMark}<div class="titles"><b>교대시계 운영</b><small>Play 출시 버전 · 기본 지표 ${esc(latest)}까지 · ${docs?.pulse ? '기능 비교는 그제·어제 기준' : dataCutoffLabel(s?.latest)}</small></div>
       <button class="icon-btn${loading ? ' spinning' : ''}" data-action="refresh" aria-label="새로고침">${ICONS.refresh}</button>
       <button class="avatar" data-action="menu" aria-label="계정 메뉴">${esc(initialOf(user?.email))}</button></div>
     <div class="bar2"><div class="seg" role="group" aria-label="조회 기간">${RANGES.map((r) => `<button data-action="range" data-key="${r}" aria-pressed="${ui.range === r}">${r}일</button>`).join('')}</div>
-      <span class="pill${stale ? ' warn' : ''}" title="마지막 동기화"><span class="dot"></span>${s ? esc(relTime(s.updatedAt)) : '-'}</span></div>
+      <span class="pill${stale ? ' warn' : ''}" title="${stale ? '서버 집계가 6시간 이상 갱신되지 않았습니다' : '마지막 동기화'}"><span class="dot"></span>${stale ? '집계 지연 · ' : ''}${s ? esc(relTime(s.updatedAt)) : '-'}</span></div>
     <nav class="ops-nav" aria-label="운영 영역">${SECTIONS.map(([key, label]) => `<button data-action="section" data-key="${key}" aria-pressed="${ui.section === key}">${label}</button>`).join('')}</nav>
   </div></header>`;
 }
@@ -112,6 +120,7 @@ function emptyState(icon, title, body, action = '') {
 }
 
 function renderApp() {
+  rememberDisclosures(root, disclosureStates);
   destroyCharts();
   if (error) {
     const denied = error.code === 'permission-denied';
@@ -133,11 +142,11 @@ function renderApp() {
   const section = ui.section;
   let body = '';
   const recent = dailyView(docs, undefined, ui.range);
-  if (section === 'overview') body = dailyOverviewCard(docs, recent, ui) + businessKpis(docs, view) + installsCard(view, 'span-12') + adoptionCard(docs, view) + reliabilityCard(docs, view) + revenueCard(docs, view) + collectionCard(docs, view);
-  if (section === 'growth') body = businessKpis(docs, view) + countryCard(docs, view, ui) + usersCard(view, ui.visible) + installsCard(view) + retentionCard(docs) + engagementCard(view);
-  if (section === 'product') body = adoptionCard(docs, view) + behaviorCard(docs, view, ui) + distCard(docs, ui, 'span-12') + revenueCard(docs, view);
-  if (section === 'quality') body = reliabilityCard(docs, view) + manufacturerCard(docs, view) + permissionCard(docs, view) + distCard(docs, ui, 'span-12') + collectionCard(docs, view);
+  if (section === 'overview') body = dailyOverviewCard(docs, recent, ui) + pulseHero(docs, ui) + featureComparison(docs, ui) + newcomerCard(docs, ui) + adoptionCard(docs, view, 5) + revenueCard(docs, view);
+  if (section === 'growth') body = growthCard(docs, ui) + acquisitionCard(docs, ui) + activationCard(docs, ui) + growthCountries(docs, ui) + asoCard(docs, ui) + disclosure('Google Ads 캠페인 보기', campaignCard(docs, ui)) + disclosure('국가·언어별 기능 사용 상세', countryCard(docs, view, ui));
+  if (section === 'quality') body = disclosure('기능 사용 전체', adoptionCard(docs, view) + behaviorCard(docs, view, ui)) + reliabilityCard(docs, view) + disclosure('제조사·권한 상세', manufacturerCard(docs, view) + permissionCard(docs, view)) + disclosure('버전·기기 분포', distCard(docs, ui, 'span-12')) + disclosure('데이터 수집 상태', collectionCard(docs, view));
   root.innerHTML = headerHtml(view) + '<main class="wrap ops-layout">' + body + footerNote(docs) + '</main>';
+  restoreDisclosures(root, disclosureStates, section);
   const onDailySelect = (date) => {
     ui.dailyDate = date;
     const readout = root.querySelector('#daily-readout');
@@ -154,6 +163,8 @@ function renderApp() {
   }
   const countryChart = mountCountryChart(root, docs, view, ui);
   if (countryChart) charts.push(countryChart);
+  const acquisition = mountAcquisition(root, docs, ui);
+  if (acquisition) charts.push(acquisition);
   window.scrollTo(0, y);
 }
 
@@ -219,6 +230,15 @@ function openPassword() {
 // ───────────────────────── 이벤트 위임 ─────────────────────────
 function handle(action, el) {
   switch (action) {
+    case 'newcomer-day': {
+      const date = el.dataset.date, p = docs?.pulse;
+      if (!el.disabled && p && date >= p.from && date <= dayShift(p.today, -1)) {
+        ui.newcomerDate = date; renderApp();
+      }
+      break;
+    }
+    case 'feature-all': ui.featureAll = !ui.featureAll; renderApp(); break;
+    case 'traffic': ui.traffic = el.dataset.key; renderApp(); break;
     case 'section': ui.section = el.dataset.key; renderApp(); window.scrollTo(0, 0); break;
     case 'country': ui.country = el.dataset.key; renderApp(); break;
     case 'market-sort': ui.marketSort = el.dataset.key; renderApp(); break;
@@ -257,6 +277,19 @@ function onActivate(e) {
   handle(el.dataset.action, el);
 }
 root.addEventListener('click', onActivate);
+root.addEventListener('submit', (e) => {
+  if (!['aso-date', 'aso-store'].includes(e.target.id)) return;
+  e.preventDefault();
+  const values = Object.fromEntries(new FormData(e.target));
+  if (e.target.id === 'aso-date') {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(values.date)) return;
+    ui.asoDate = values.date; store.set('aso-published-date', values.date); renderApp(); toast('게시일을 이 브라우저에 기록했어요');
+  } else {
+    if (asoComparison(docs.growth, ui.asoDate).status !== 'ready') { root.querySelector('#aso-form-message').textContent = '실제 게시일을 기록하고 게시 후 7일 집계가 끝난 뒤 입력하세요.'; return; }
+    if (!validStoreComparison(values) || !values.scope?.trim()) { root.querySelector('#aso-form-message').textContent = '방문자·획득은 0 이상의 정수이며, 획득 수가 방문자 수보다 많을 수 없습니다. 비교 범위도 입력하세요.'; return; }
+    ui.storeComparison = { ...values, date: ui.asoDate }; store.set('aso-store-comparison', JSON.stringify(ui.storeComparison)); renderApp(); toast('스토어 전환 수치를 기록했어요');
+  }
+});
 layer.addEventListener('click', onActivate);
 root.addEventListener('keydown', (e) => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-action="event"], [data-action="country"]')) { e.preventDefault(); onActivate(e); }

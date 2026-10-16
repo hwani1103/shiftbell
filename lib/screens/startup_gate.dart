@@ -1,3 +1,5 @@
+import '../theme/app_ui_theme.dart';
+import '../widgets/app_ui_feedback.dart';
 // lib/screens/startup_gate.dart
 //
 // ⭐ 2026-09-14 (G0, 출시전_코드감사_검토결과_v4 V4 + #8) - 앱 시작 초기화 게이트.
@@ -92,7 +94,8 @@ class _StartupGateState<T> extends State<StartupGate<T>> {
       if (mounted &&
           attempt == _attempt &&
           (_phase == StartupPhase.running || _phase == StartupPhase.slow)) {
-        debugPrint('⚠️ 앱 시작 초기화가 ${widget.stallThreshold.inSeconds}초 넘게 끝나지 않음 - 다시 시도 허용');
+        debugPrint(
+            '⚠️ 앱 시작 초기화가 ${widget.stallThreshold.inSeconds}초 넘게 끝나지 않음 - 다시 시도 허용');
         setState(() => _phase = StartupPhase.stalled);
       }
     });
@@ -135,7 +138,7 @@ class _StartupGateState<T> extends State<StartupGate<T>> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       builder: (context, child) => AppTextScale(child: child!),
-      theme: AppTheme.lightTheme,
+      theme: AppUiTheme.withPalette(AppTheme.lightTheme, AppUiPalette.blue),
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -169,29 +172,35 @@ class StartupStatusScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppUiPalette.of(context).background,
       body: SafeArea(
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: switch (phase) {
               // 런치 화면과 같은 빈 흰 화면 (짧게 끝나는 정상 시작에서 깜빡임 방지).
-              StartupPhase.running || StartupPhase.done => const SizedBox.shrink(),
+              StartupPhase.running ||
+              StartupPhase.done =>
+                const SizedBox.shrink(),
               StartupPhase.slow => Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const CircularProgressIndicator(),
+                    const AppUiLoading(),
                     const SizedBox(height: 16),
-                    Text(context.l10n.startupSlowMessage, textAlign: TextAlign.center),
+                    Text(context.l10n.startupSlowMessage,
+                        textAlign: TextAlign.center),
                   ],
                 ),
               StartupPhase.stalled => SingleChildScrollView(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.hourglass_bottom, size: 48, color: Colors.grey.shade600),
+                      Icon(Icons.hourglass_bottom,
+                          size: 48,
+                          color: AppUiPalette.of(context).secondaryText),
                       const SizedBox(height: 16),
-                      Text(context.l10n.startupStalledMessage, textAlign: TextAlign.center),
+                      Text(context.l10n.startupStalledMessage,
+                          textAlign: TextAlign.center),
                       const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: onRetry,
@@ -204,21 +213,29 @@ class StartupStatusScreen extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline, size: 48, color: Colors.grey.shade600),
+                      Icon(Icons.error_outline,
+                          size: 48,
+                          color: AppUiPalette.of(context).secondaryText),
                       const SizedBox(height: 16),
                       Text(
                         context.l10n.startupFailedTitle,
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      Text(context.l10n.startupFailedBody, textAlign: TextAlign.center),
+                      Text(context.l10n.startupFailedBody,
+                          textAlign: TextAlign.center),
                       if (errorDetail != null) ...[
                         const SizedBox(height: 12),
                         SelectableText(
                           errorDetail!,
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                          style: TextStyle(
+                              fontSize: AppFontSize.meta,
+                              color: AppUiPalette.of(context).secondaryText),
                         ),
                       ],
                       const SizedBox(height: 24),

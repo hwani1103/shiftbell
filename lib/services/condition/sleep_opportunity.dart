@@ -1,3 +1,4 @@
+import '../../utils/calendar_dates.dart';
 // lib/services/condition/sleep_opportunity.dart
 //
 // ⭐ Sleep Opportunity Detection(수면기록_자동추정_설계.md 3장, 2026-09-01 후속3
@@ -146,7 +147,7 @@ SleepOpportunityWindow? sleepOpportunityWindowFor(
 
   // (a) 야간 근무 회복창 - 종료 1시간 전부터
   for (var offset = 0; offset <= 2; offset++) {
-    final d = today.subtract(Duration(days: offset));
+    final d = shiftLocalCalendarDay(today, -offset);
     final inst = analyzer.instanceForDate(d);
     if (inst.isWorkDay && inst.category == ShiftTimeCategory.night && inst.end != null) {
       final windowStart = inst.end!.subtract(const Duration(minutes: kNightShiftPreEndMinutes));
@@ -159,7 +160,7 @@ SleepOpportunityWindow? sleepOpportunityWindowFor(
 
   // (b) 야간 출근 전 낮잠창(2026-09-21 신설)
   for (var offset = -1; offset <= 1; offset++) {
-    final w = preShiftNapWindowFor(analyzer, today.add(Duration(days: offset)));
+    final w = preShiftNapWindowFor(analyzer, shiftLocalCalendarDay(today, offset));
     if (w != null) candidates.add(w);
   }
 
@@ -203,7 +204,7 @@ SleepOpportunityWindow? preShiftNapWindowFor(ShiftPatternAnalyzer analyzer, Date
   if (!inst.isWorkDay || inst.category != ShiftTimeCategory.night || inst.start == null) return null;
 
   var start = inst.start!.subtract(const Duration(hours: kPreShiftNapLeadHours));
-  final prevDay = day.subtract(const Duration(days: 1));
+  final prevDay = shiftLocalCalendarDay(day, -1);
   final prev = analyzer.instanceForDate(prevDay);
   if (prev.isWorkDay && prev.category == ShiftTimeCategory.night && prev.end != null) {
     final prevStart = prev.end!.subtract(const Duration(minutes: kNightShiftPreEndMinutes));
@@ -226,7 +227,7 @@ SleepOpportunityWindow? _flatWindow(ShiftPatternAnalyzer analyzer, DateTime now,
   //    어젯밤 21시가 앵커, 그 외(06시~21시, 21시~자정)면 오늘 21시가 앵커 -
   //    이렇게 하면 자정을 넘긴 새벽 시각도, 아직 오늘 밤을 기다리는 낮 시각도,
   //    이미 시작된 오늘 밤 21시 이후도 전부 올바르게 계산된다.
-  final anchorDay = now.hour < 6 ? today.subtract(const Duration(days: 1)) : today;
+  final anchorDay = now.hour < 6 ? shiftLocalCalendarDay(today, -1) : today;
   final anchorInstEarly = analyzer.instanceForDate(anchorDay);
   // ⭐ 2026-09-21 - 앵커 날짜가 야간 근무일이면 플랫창을 아예 만들지 않는다.
   // 예전엔 플랫창이 "야간 후보가 하나도 없을 때만" 쓰이는 폴백이라 이 경우가
@@ -264,7 +265,7 @@ DateTime _cappedEnd(ShiftPatternAnalyzer analyzer, {required DateTime afterDate,
 
 DateTime? _findNextWorkStart(ShiftPatternAnalyzer analyzer, DateTime afterDate, {int lookaheadDays = 14}) {
   for (var i = 1; i <= lookaheadDays; i++) {
-    final inst = analyzer.instanceForDate(afterDate.add(Duration(days: i)));
+    final inst = analyzer.instanceForDate(shiftLocalCalendarDay(afterDate, i));
     if (inst.isWorkDay && inst.start != null) return inst.start;
   }
   return null;

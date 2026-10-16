@@ -1,0 +1,12 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart
+00:00 +0: (setUpAll)
+00:00 +0: Existing fifty gameplay levels and progress identity preserved; v11 removes titles
+00:00 +1: Every portal witness is editable, reaches all goals, fixed velocity and undo from exit
+00:01 +2: Replay jumps exactly at transfer with no midpoint and identical frame schedules
+00:01 +3: Simultaneous entry and exit contacts keep the transferring ball at IN
+00:01 +4: Portal lesson appears once and persists separately from gate lesson
+00:03 +5: Paused replay can restart from the game menu
+00:04 +6: Portal collision stays on the contact, failure supports fresh restart
+00:04 +7: Portal and mixed maps render at 320x600 with stable board, light/dark/reduced motion
+00:05 +8: (tearDownAll)
+00:06 +8: All tests passed!

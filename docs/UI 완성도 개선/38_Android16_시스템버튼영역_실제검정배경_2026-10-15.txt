@@ -1,0 +1,26 @@
+Android16 시스템 버튼 영역 — 실제 검정 배경 보완 및 사용자 확인 (UI38)
+작성: 2026-10-15
+
+사용자 피드백
+UI37 핫리로드 이후에도 밝은 화면 색상 뒤의 고정 흰 시스템 버튼이 안 보인다고 보고. 사용 중 앱은 교대시계 테스트 앱이라고 확인함.
+
+원인과 수정
+- dev VM PID3907과 패키지 PID3907 일치를 재확인. 단순히 다른 프로세스에 리로드한 문제로 처리하지 않음.
+- Android16/API36의 edge-to-edge에서는 systemNavigationBarColor 지정만으로 시스템 버튼 뒤 실제 배경이 검정으로 바뀐다고 보장할 수 없음. UI37의 색상/아이콘 설정만으로는 부족했음.
+- MaterialApp.builder가 항상 사용하는 AppContentFrame에 Android용 공통 배경 레이어 추가. MediaQuery.viewPadding.bottom의 실제 시스템 안전 영역만 검정으로 그림.
+- 이 레이어에 시스템 버튼 밝음/검정 배경/contrast scrim 비활성 스타일을 함께 지정. 다른 페이지/AppBar의 스타일과 섞여도 버튼 뒤 영역의 대비가 유지되도록 함.
+- IgnorePointer/ExcludeSemantics로 장식 레이어가 앱 터치/접근성 탐색을 가로채지 않음. 기존 child는 같은 전체 창 제약으로 유지하며 새 고정 패딩/행 높이를 더하지 않음.
+- Android에서 하단 안전 영역이 있을 때만 적용. 웹/다른 플랫폼과 상태표시줄은 이 레이어 대상이 아님.
+- 달력 디자인/화면 색상/근무색/DB/알람/권한 상태·설정 복귀 로직/언어 기능 범위·리소스 구조 변경 없음. Android native 코드나 기기 시스템 설정을 바꾸지 않음.
+
+검증/사용자 인계
+- 기존 flutter run/attach 세션에 r 전달. 핫리로드 성공: Reloaded6 of2160 libraries in43,997ms (compile1142ms,reload234ms,reassemble97ms).
+- 사용자 실제 기기 관찰: "어 됐다", "이제 된거같은데"로 해결 확인.
+- 이번 범위의 사용자 시각 확인이며 P0 잠금알람/설정 복귀/모든 기기·회전·분할/키보드/제조사 전체 검증으로 확대하지 않음.
+- UI37의 기존5검사는 색상 속성/테마 경계/저장을 확인한 것이며, API36의 실제 배경 미반영을 잡지 못했다는 한계를 보존. 이번 수정은 실제 그리는 레이어로 보완.
+- 후속 캡처 중 대상 앱이 아닌 화면도 관측되어 그 이미지의 하단 픽셀을 앱의 검정 배경 PASS 근거로 쓰지 않음. 최종 시각 확인 근거는 사용자 관찰.
+- 수정 직전 소스/해시: artifacts/system_navigation_backdrop_2026_10_15/app_content_frame.before.dart 및 before_manifest.json.
+- APK/웹/release 재빌드·prod 배포 없음. UI 배경 라이브 수정이므로 기존 P0 전수 재실행하지 않음. attach 세션은 후속 수정용으로 유지.
+
+공식 참조
+https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge

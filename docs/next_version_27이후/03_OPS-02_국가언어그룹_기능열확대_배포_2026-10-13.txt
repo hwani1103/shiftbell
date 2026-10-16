@@ -1,0 +1,37 @@
+03. OPS-02 국가·언어 셀 묶음 / 기능 열 확대 (2026-10-13)
+
+요청/구현
+- 미제공/확인 불가 국가를 한 확인 불가 그룹으로 통일한다.
+- 국가명은 rowspan으로 언어 행 전체에 한 번만 표시한다.
+- 국가 전체의 실제 기간 사용자 규모로 정렬하고 국가 안에서 언어 행을 유지한다.
+- 빈 국가와 (not set)는 사용자 중복 가능성이 있어 단순 합산하지 않는다.
+  GA4 EmptyFilter(country)로 두 값을 동시에 조회한 union 사용자 수를 사용한다.
+  언어/일자 축을 유지하고 API 제한·threshold/누락 메타데이터를 보존한다.
+- 알람 끄기를 국가 표에서 제외. 다른 알람 분석의 기존 수집은 유지한다.
+- OT·특근 기록, 근무시간 설정, 테마 변경, 근무 지정·변경, 메모 저장, 근무명 변경 추가.
+- 신규 사용자는 GA4 newUsers이며 Play 설치 수와 다르다. 시작 완료는 온보딩 완료.
+- 언어는 GA4 기기 언어로 앱 표시 언어와 다를 수 있다.
+- 알람 생성은 기존 alarm_template_saved(생성/수정 저장), 테마 변경은 달력 테마 이벤트 기준.
+- 근무시간 설정에는 기존 수집 이벤트가 없어 dev에서 work_hours_settings_saved를 새로 연결했다.
+  월 기준/급여일/OT 계산 설정 및 실제 출퇴근 시각 저장·초기화 성공 때만 기록한다.
+  사용자 입력 시간/근무명은 전송하지 않는다. 조회·취소는 기록하지 않는다.
+  새 앱 출시 후부터 수집되며 과거 소급 집계 불가. dev Analytics 수집 차단 유지.
+
+배포/검증
+- dashboard Node 41/41 PASS. build version 3eb751bcc27502a7.
+- main dashboard 한정 커밋 0f421f3 / origin main push 완료.
+- 강제 동기화: https://github.com/hwani1103/shiftbell/actions/runs/38342575043 success.
+  20일치/DAU181/MAU371, 7064ms. 신규 unknown union 쿼리 실패 없음.
+- Firebase hosting shiftbell-ops-29f31 배포 완료 / 원격 build-info 동일 버전 확인.
+- 인증 실데이터 브라우저: 대한민국·확인 불가·미국 각각 국가 셀 rowspan2,
+  미제공 없음, 확인 불가 영어9/한국어3으로 언어별 표시 확인.
+- 14열/가로 스크롤(표1219px, 화면 내693px), 언어 행 선택 추이 갱신 확인.
+- 증거: artifacts/dashboard_country_groups_sync.log,
+  artifacts/dashboard_country_groups_deployed.png, artifacts/dashboard_country_groups.patch.
+- 앱 analytics 계약/근무시간 설정 기록 성공 관련 검사 포함 최종68검사 PASS.
+- 관리자 hosting/집계 코드만 main에 반영. 앱 dev 작업 전체 및 production 앱 배포 없음.
+
+후속
+- 근무시간 설정 열은 계측 앱 출시 전 미관측(—)이 정상이며 0명 사용으로 해석하지 않는다.
+- 기존 AD-01 광고 로드 실패 재시도는 문서만 유지, 이번 범위에서 수정하지 않았다.
+- 기존 OPS-01 동기화 복구·원장 및 UI 원장 보존. 앱 UI 결과는 UI24번에 별도 기록한다.

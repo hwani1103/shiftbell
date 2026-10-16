@@ -1,3 +1,6 @@
+import 'package:flutter/widgets.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../utils/calendar_dates.dart';
 // lib/providers/sleep_condition_provider.dart
 //
 // ⭐ 실제 수면 기록을 근무 일정(ShiftPatternAnalyzer, condition_provider.dart)과
@@ -33,7 +36,7 @@ final recentSleepDaySlotsProvider = Provider<List<SleepDaySlots>>((ref) {
   final today = ref.watch(currentDateProvider);
   return buildSleepDaySlots(
     records: records,
-    from: today.subtract(const Duration(days: kSleepMiniCalendarDays - 1)),
+    from: shiftLocalCalendarDay(today, -(kSleepMiniCalendarDays - 1)),
     to: today,
     analyzer: analyzer,
   );
@@ -87,7 +90,13 @@ final sleepCategoryAveragesProvider =
 
 /// "오늘의 컨디션" - 확인된 사실 / 추천 행동 / 판단 범위(recovery_briefing_engine.dart).
 /// 근무시간이 하나도 없거나 스케줄이 없으면 null(화면은 설정 안내를 보여줌).
-final recoveryBriefingProvider = Provider.autoDispose<RecoveryBriefing?>((ref) {
+final recoveryBriefingProvider = Provider.autoDispose<RecoveryBriefing?>((ref) =>
+    _recoveryBriefing(ref, lookupAppLocalizations(const Locale('ko'))));
+
+final localizedRecoveryBriefingProvider = Provider.autoDispose.family<RecoveryBriefing?, String>((ref, language) =>
+    _recoveryBriefing(ref, lookupAppLocalizations(Locale(language))));
+
+RecoveryBriefing? _recoveryBriefing(Ref ref, AppLocalizations copy) {
   final analyzer = ref.watch(conditionAnalyzerProvider);
   final base = ref.watch(todayConditionResultProvider);
   if (analyzer == null || base == null) return null;
@@ -103,5 +112,6 @@ final recoveryBriefingProvider = Provider.autoDispose<RecoveryBriefing?>((ref) {
     now: now,
     otMinutesByDate: otMinutes,
     pendingCount: pendingCount,
+    localizations: copy,
   );
-});
+}

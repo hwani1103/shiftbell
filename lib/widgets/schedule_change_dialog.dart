@@ -1,3 +1,4 @@
+import '../theme/app_ui_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -57,8 +58,8 @@ class _ScheduleChangeDialogState extends State<ScheduleChangeDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final style =
-        TextStyle(fontSize: 13.sp, height: 1.15, fontWeight: FontWeight.w600);
+    final style = TextStyle(
+        fontSize: AppFontSize.body, height: 1.15, fontWeight: FontWeight.w600);
     final metrics = ShiftCellMetrics.forNames(
         widget.pattern, style, MediaQuery.textScalerOf(context),
         minWidth: 40.w, minHeight: 36.h);
@@ -98,7 +99,7 @@ class _ScheduleChangeDialogState extends State<ScheduleChangeDialog> {
                                     strongSelected: true,
                                     cellTextStyle: style.copyWith(
                                         color: _index == i
-                                            ? Colors.white
+                                            ? AppUiPalette.of(context).onPrimary
                                             : Theme.of(context)
                                                 .colorScheme
                                                 .onSurface),

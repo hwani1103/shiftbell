@@ -1,0 +1,40 @@
+GROWTH-02 성장 대시보드 구현·배포 — 2026-10-15
+선행: 14_GROWTH-01_웹대시보드_성장광고실용성검토_2026-10-15.txt
+사용자 승인: 핵심 위주 확장 및 즉시 배포.
+
+완료
+- 운영 요약 / 유입·성장 / 상세 진단 3개 영역. 요약 기능 상위 5개, 나머지 상세 접기.
+- GA4 첫 유입 출처 Google Ads / Organic Search / 기타 광고 / 직접·출처 불명 / 기타 분리.
+- 7/30/100/365일 신규 유입, 최대 100일 추이, 국가별 출처, Ads 캠페인 집계.
+- 폐쇄형 첫 실행→24시간 이내 onboarding_complete 전환. 최종 첫 실행일 다음 24시간 관측.
+- 최근 성숙한 7일 첫 세션 집단의 D1/D7. 조회 기간과 다른 집단의 날짜·분모 명시.
+- 실제 게시일 전후 각 7일 비교, 게시 당일 제외. Play 방문/획득 수동 입력 비교.
+- 직접 유입은 자연유입에 합산하지 않으며 미연결 비용은 0원/ROI로 표현하지 않음.
+
+실데이터 검증
+- 2026-10-14까지 최근 7일 신규 59 = 검색 자연 30 + 직접/불명 29, Google Ads 0.
+- 첫 실행 41명 중 24시간 설정 완료 17명, 41.5%.
+- D1 6/50=12%, D7 11/44=25% (D7 첫 세션 10/1~10/7).
+- 해외 정식 출시 이후 코호트 D7을 의미하지 않음. 국가별 D7은 아직 없음.
+- API funnel 중복 metricHeaders가 빈 값으로 덮던 오류 수정, 실제 응답 형태 회귀 검사 추가.
+- cohort 첫 행을 D1로 오인하지 않도록 day 0부터 조회 후 cohortNthDay 명시 선택.
+
+검증·배포
+- Node 검사 49/49 PASS, 웹 JS 구문 검사 및 build PASS.
+- 실서비스 기간/출처 필터, ASO/Ads 상세 접기, 데이터 렌더링 확인.
+- 390px, 320px 및 기본 데스크톱 폭에서 문서 가로 넘침 없음. viewport 원복.
+- 성장 화면 콘솔 error 없음. 앱 Android 변경/빌드 없음.
+- main backend/frontend commits: cb8b799,2d25775,7e2b157,da4cf84,b1d5c40.
+- 실데이터 최종 sync SUCCESS: https://github.com/hwani1103/shiftbell/actions/runs/38692027478
+- Firebase Hosting deploy SUCCESS: https://shiftbell-ops-29f31.web.app/
+- 최종 build version: 8f8f656f341bc1bb
+- 증거: artifacts/growth_dashboard_2026_10_15/deployed-growth.png
+
+판단 범위/후속
+- GA4 Organic Search는 Play Console 검색·탐색 전체가 아님. Play 방문/획득은 현재 수동 기록이며 자동 연동 아님.
+- 게시일 및 Play 수동 기록은 해당 브라우저 localStorage에만 저장. 기기간 공유 안 됨.
+- ASO는 아직 심사 중으로 확인되어 실제 게시일을 임의 입력하지 않음. 게시 후 7일 경과해야 전후 비교.
+- Google Ads 비용/전환 API 연결은 미구현. Ads 출처가 정상 전달되는 경우 캠페인 유입은 자동 수집.
+- 설정 완료는 첫 알람 실울림/핵심 기능 지속 사용을 뜻하지 않음. 기존 알람 저장 집계는 온보딩 기본 알람 제외.
+- GA4 관측 이전/소표본/국가·출처 구성 변화에 따른 한계 유지. ASO 인과 효과 확정으로 표현하지 않음.
+- 기존 dirty dev 및 이전 원장 보존. 별도 main worktree에서 대시보드 변경만 배포.

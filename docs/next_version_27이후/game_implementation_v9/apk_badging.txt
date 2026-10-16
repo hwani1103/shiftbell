@@ -1,0 +1,4 @@
+
+package: name='dev.shiftbell.experiments.sync_path_lab.dev' versionCode='9' versionName='0.7.0' platformBuildVersionName='16' platformBuildVersionCode='36' compileSdkVersion='36' compileSdkVersionCodename='16'
+application-label:'Sync Path Lab DEV'
+

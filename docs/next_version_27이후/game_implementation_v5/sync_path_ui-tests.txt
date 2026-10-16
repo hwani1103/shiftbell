@@ -1,0 +1,42 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Different distances share one Step; visual clock never changes position/progress
+00:00 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 30 levels preserve safe witnesses, unique identities and six chapter targets
+00:00 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 30 levels preserve safe witnesses, unique identities and six chapter targets
+00:00 +3: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 30 levels preserve safe witnesses, unique identities and six chapter targets
+00:00 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 30 levels preserve safe witnesses, unique identities and six chapter targets
+00:01 +5: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 30 levels preserve safe witnesses, unique identities and six chapter targets
+00:01 +6: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Renderer/silhouette replacement leaves trace unchanged and releases resources
+00:01 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Renderer/silhouette replacement leaves trace unchanged and releases resources
+00:01 +8: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Renderer/silhouette replacement leaves trace unchanged and releases resources
+00:01 +9: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Renderer/silhouette replacement leaves trace unchanged and releases resources
+00:03 +10: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Renderer/silhouette replacement leaves trace unchanged and releases resources
+00:03 +11: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +12: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:03 +13: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:05 +14: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:05 +15: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:05 +16: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:05 +17: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:05 +18: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:05 +19: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:06 +20: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:06 +21: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:06 +22: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:06 +23: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:06 +24: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:06 +25: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:06 +26: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:10 +27: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 320px planning/undo/success/back with no overflow and reachable controls
+00:10 +28: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 320px planning/undo/success/back with no overflow and reachable controls
+00:11 +29: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 320px planning/undo/success/back with no overflow and reachable controls
+00:12 +30: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 360px planning/undo/success/back with no overflow and reachable controls
+00:13 +31: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 412px planning/undo/success/back with no overflow and reachable controls
+00:13 +32: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 736px planning/undo/success/back with no overflow and reachable controls
+00:14 +33: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U02 board taps another Unit start as a destination; drag does not add a command
+00:14 +34: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U04 failure edits preserve routes; replay slider never moves beyond exact stop
+00:15 +35: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U08 reduced motion remains paused without timers and permits manual scenes
+00:15 +36: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U09 lifecycle pauses replay; return does not start ticker automatically
+00:15 +37: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: Role palette, 6x6 cells, fixed text scaling and controls at 320px
+00:15 +38: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: Capture independent planning screens at narrow/wide and dark palette
+00:17 +39: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: (tearDownAll)
+00:17 +39: All tests passed!

@@ -1,0 +1,46 @@
+24. 온보딩 시간별 5개 팔레트 / 자동·고정 미리보기 (2026-10-13)
+
+사용자 요청
+- 현재 블루를 활동량이 많은 주간 시간대에 두고 5개 테마를 우선 만든다.
+- 기기 시간 기준 자동 전환 또는 사용자 선택 1개 고정. 선택은 화면 왕복·앱 재시작 뒤 유지.
+- 온보딩 1/3에 검토용 선택기를 배치한다. 적용 범위는 권한 안내~온보딩 전체와 관련 팝업.
+- 시스템 스플래시는 #EEF6FD 고정, 아이콘 유지. 기존 달력 테마와 이후 화면 확장은 별도.
+
+구현
+- AppUiTimeTheme / AppUiTimePalettes에 역할별 색상을 중앙 관리한다.
+- 새벽 05~08: 라벤더, 아침 08~11: 청록, 주간 11~17: 기존 블루,
+  저녁 17~21: 어두운 보라, 밤 21~05: 어두운 네이비. 시간 구간·색상은 검토 가능한 초안.
+- AppUiThemeScope가 기기 로컬 시간을 1분마다 확인하며 앱 복귀 시 즉시 갱신한다.
+- app_ui_preview_theme: 자동 또는 고정 enum 저장. 연속 탭은 저장 큐로 순서 보장.
+- 저장값 로딩 중 다른 색의 온보딩 내용을 먼저 표시하지 않는다.
+- 공통 팝업도 동일 provider/시간을 구독한다. 다크 팔레트에서는 텍스트·버튼 위 글자·Material 역할·시스템 바 대비를 함께 바꾼다.
+- 주간의 갈색 선택 강조를 보라로 교체. 새벽/저녁/밤은 청록·민트 강조 역할을 사용한다.
+- 1/3 미리보기 선택기는 debug에서만 노출. 하나 누르면 고정, 자동 누르면 시간 전환.
+- 기존 공통 타이포/간격/칩/모션과 동작 줄이기 계약 유지. 선택 변경으로 패턴을 초기화하지 않는다.
+
+검증
+- 초기 관련 17검사 PASS: 5개 대비, 자동 시간 경계, 연속 저장·재시작 복원,
+  1~3단계·알람 팝업/선택기, 권한 초기 스냅샷/복귀, 다크 계약, 오늘 안내 지속 모션.
+- 최종 추가 68검사 PASS: 5개 팔레트/계측 목록/근무시간 설정 이벤트,
+  기존 접힘·펼침 및 다국어 레이아웃/긴 패턴 검사 포함.
+- tools/check_critical_release.ps1 -Build exit0: Flutter 343검사, native 기능/DB,
+  dev debug APK 및 JS 웹 빌드. 실기기 잠금 알람 PASS로 확대하지 않는다.
+- host의 저녁 캡처에서 초기 paint 1프레임 지연을 확인했으며 추가 frame 후 모든 swatch 이름/색 표시 확인.
+- 연결 기기 R5KL20DHWAE: dev APK 설치/실행, 1/3의 5개 선택기 노출 및 밤 선택 저장 확인.
+- 증거: artifacts/onboarding_five_theme_critical_build.log,
+  artifacts/onboarding_five_theme_tests.log, artifacts/onboarding_five_theme_final_tests.log,
+  artifacts/onboarding_five_theme_analysis.log, artifacts/onboarding_five_theme_final_build.log,
+  artifacts/onboarding_five_themes/host/, device_night_selected.png.
+- 최종 설치 APK/재실행 복원 증거는 아래 후속 항목에 추가한다.
+
+범위 한계
+- 5개 색상은 사용자 검토 초안이며 앱 전반 중앙화·실기기 모든 화면/언어 최종 시각 승인과 다르다.
+- production 앱/release 빌드/DB 버전 변경 없음. 기존 원장은 당시 기록으로 보존.
+- 20~23번의 자동 테마 미구현·생성 스플래시·앰버 강조 설명은 당시 단계 기록이며 현행은 이 원장을 따른다.
+최종 완료 증거
+- 최종 dev debug APK SHA256: FE05E58D7E2BB2D591631996CFC670186D32D8E1FD2CF597EE245786B3D8F580.
+- artifacts/onboarding_five_themes/ShiftBell_FiveThemes_dev_debug.apk.
+- 연결 기기 업데이트 설치 Success 후 dev 프로세스 종료/재실행. 1/3에서 밤 선택 상태 복원 확인(device_night_restarted.xml/png).
+- 마지막으로 자동을 선택해 현재 기기 시간의 주간 블루로 두었다. 1/3에서 바로 5개 색상을 비교할 수 있다.
+- 현재 package com.hwani1103.shiftbell.dev / 1.0.24-dev / versionCode27. 앱 데이터 삭제 없음.
+- 좁은 분석7대상 issues0, 최종 assembleDevDebug exit0. release/prod 앱 수정·배포 없음.

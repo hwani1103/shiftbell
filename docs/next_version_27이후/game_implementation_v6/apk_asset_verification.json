@@ -1,0 +1,34 @@
+{
+  "version": "0.4.0+6",
+  "apkBytes": 147142099,
+  "apkMiB": 140.32564067840576,
+  "sha256": "a19198b7c191aeca869a636f016d7e431fd11ebc47bca84e63ab4f6a5629cc1c",
+  "fullFontIncluded": false,
+  "atlasEntries": [],
+  "packId": "dev-campaign-50",
+  "levels": 50,
+  "assets": [
+    {
+      "entry": "assets/flutter_assets/assets/pilot_levels.json",
+      "bytes": 39753,
+      "compressedBytes": 3370,
+      "sha256": "c52e9f795aec2b0ed1cb7447774faa343301bac4cc471a5a5fe646a395fc6ef8"
+    },
+    {
+      "entry": "assets/flutter_assets/assets/pilot_copy.json",
+      "bytes": 46567,
+      "compressedBytes": 6197,
+      "sha256": "b70ddc978d032c6074c7e41df25e788826f7e63fc513aeb7a7e3fed1580451e2"
+    },
+    {
+      "entry": "assets/flutter_assets/packages/sync_path_ui/assets/fonts/GameSansSubset.ttf",
+      "bytes": 84472,
+      "compressedBytes": 51908,
+      "sha256": "92e51f6897a0b9f667c254e52b540dc4dd881a0871ed578c538dce803c79c5db"
+    }
+  ],
+  "assetBytes": 170792,
+  "assetCompressedBytes": 61475,
+  "compiledGameCodeMeasured": false,
+  "productionIntegrationMeasured": false
+}

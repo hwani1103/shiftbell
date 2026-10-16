@@ -1,0 +1,27 @@
+전체근무표 두 줄 보기 복원 — ROSTER-04 (2026-10-16)
+
+사용자 지시
+두줄 보기를 방금 전이 아닌 두 보기 선택 기능 추가 직전 상태로 복원. 한 화면 보기 변경 금지. 최초 빌드까지만→후속 설치까지 승인, 최종적으로 달력 년월/OT 응답 개선도 합쳐 빌드·설치 요청.
+
+복원 기준
+docs/UI 완성도 개선/ROSTER-01_검증_2026-10-16/before/all_shifts_view.dart. 더 과거 cf7ed6d의3구역 표는 대상 아님.
+
+구현
+- 당시 MonthShiftTable/State의 카드 측정·오늘 근처 초기 스크롤·폰과 Wide 분기·가로 스냅·블록 모양·일/요일/팀 배치를 복원. 두줄 바깥가로8.w, 블록안4.w 여백 복원.
+- 당시 AppShiftChip(dense:true, wrapLabel:true, cellTextStyle) 호출 복원. 모서리10.r/테두리1.6/내부패딩3과 공통 칩 글자맞춤. ROSTER-03의 신규10/9칸 및74%/84% 정책 제거.
+- 현재 팔레트 역할(선택 조 primary/onPrimary, 일반 surfaceContainerHighest)은 유지. 조별 근무계산/DB 미변경.
+- 한 화면 보기의 클래스·칩 구현은 복원 직전과 동일. 글자77%/87%, 월스와이프/화살표제거, 날짜·요일×1.06, 조열26dp/우측2dp, 선택저장 유지.
+- ROSTER-03 두단계 전용 검사는 artifacts/roster_timeline_restore_2026_10_16/에 보존 후 활성 검사에서 제거. 당시 자료/원장 보존.
+
+검증
+- 기존영향55검사 PASS(20폭/이름·28팔레트/날짜/저장·7화면제스처). 추가 둥근모서리/테두리 조건 포함 최종28검사 PASS. 수정5파일 정적분석 No issues found.
+- 한 화면 보기 7팔레트 PNG 비교 전체 픽셀 동일: overview_pixel_comparison.json.
+- 단독 복원 debug 빌드 exit0이나 사용자 후속 달력 지연 개선을 합친 최종본을 설치할 예정. 중간본 설치 안 함.
+- 증거 artifacts/roster_timeline_restore_2026_10_16/. 최종 빌드/설치는 UI67 후속에 연결.
+
+최종 완료 추가 (2026-10-16)
+- 오늘 복귀 후 재스와이프 포함 최종 달력19검사 PASS. 합본 dev debug 빌드 성공 및 SM-S948N 업데이트 설치/설치 APK 해시 일치.
+- APK: artifacts/calendar_month_feedback_2026_10_16/ShiftBell_timeline_restore_month_feedback_dev_debug.apk
+- SHA256: 8a89135e671fcfc9a3fa6974b6061d107e7b8485f56ee94ce5f25b82e7ab7ee7
+- 실제 드래그 중 페이지가 걸쳐 있는 상태에서 2026년11월/이번 달 OT0분 표시 확인(기존10월2시간30분): device_month_feedback_during_drag.png. 두 줄 둥근 칩 복원 및 한 화면 표시 확인: device_roster_entry.png/device_roster_overview_preserved.png.
+- 설치 전후 및 검증 후 DB18테이블과 환경설정 동일. verification_data_comparison.json. 기존 UI66 메모 수정 포함, release/prod 변경 없음.

@@ -1,0 +1,36 @@
+BACKUP-01 — 초기 백업 복구 제안 화면과 뒤로가기 (2026-10-16)
+
+사용자 신고
+- 실기기 테스트 뒤 간혹 '새로 시작하기'/'복구하기' 두 버튼만 있는 화면에서 뒤로 나갈 수 없었음. 일반 백업 화면과 다른 화면인지, 실사용자 노출 여부 조사 요청.
+
+확인한 실제 화면/진입 조건
+- RestoreBackupScreen: '이 백업으로 복구할까요?' / '새로 시작하기'. 테스트 전용 화면 아님.
+- InitialRouter: permissions_requested가 이미 true이고 getShiftSchedule()==null일 때 BackupStorageService.read()로 읽은 JSON을 BackupPayload.decode할 수 있으면 pushReplacement로 열림.
+- PermissionIntroScreen: 권한 안내를 통과한 뒤 근무표가 없고 읽을 수 있는 백업이 있으면 동일 화면으로 pushReplacement.
+- 일반 설정에서 수동 백업을 고르는 흐름과 별개. 재설치/앱 데이터 초기화/근무표 없음 + 접근 가능한 백업이 남는 경우 실사용자에게도 표시 가능. 모든 재설치에서 무조건 표시된다는 뜻은 아님.
+- 과거 테스트 중 구체적으로 어느 초기화/설치 조작이 이 경로를 만들었는지는 이번 조사만으로 확정하지 않음.
+- 현재 온보딩에는 이 화면 직접 호출이 없음. 소스의 과거 onCancel 설명은 당시 이력이며 현행 실제 호출부는 위2곳.
+
+뒤로가기 수정
+- 기존 PopScope는 복구 중이 아닐 때 canPop=true지만 초기 진입은 이전 라우트를 교체하므로 앱 내부 돌아갈 화면이 없다. 화면에 명시적 뒤로가기 동작도 없었다.
+- 상단 공통 BackButtonIcon+시스템 로케일 tooltip의 버튼 추가.
+- 이전 라우트가 있으면 pop, onCancel이 있으면 그 콜백, 최초 루트 진입이면 SystemNavigator.pop으로 앱 이탈.
+- 뒤로가기는 '새로 시작하기'로 취급하지 않으며 복원/DB/설정/백업 파일을 변경하지 않는다. 다음 진입에서 사용자가 다시 복구 여부를 결정할 수 있음.
+- _restoring 동안 시스템 back과 화면 back 모두 차단. 기존 복원 코디네이터/권한 확인/불완료 복원 처리 변경 없음.
+
+검증
+- 호스트4검사 통과: 최초 루트의 화면 버튼·시스템 Back, push 진입 뒤 원래 화면 복귀, onCancel 콜백.
+- 실제 사용자 데이터 초기화나 복원 덮어쓰기로 이 화면을 강제로 재현하지 않는다. 실기기에서 새 복구 화면을 실행하는 별도 확인 여부는 최종 증거에 구분.
+- 수정은 dev 브랜치. release/prod 배포 없음. 최종 검사·APK는 UI60 원장과 artifacts/calendar_swipe_2026_10_16/에 연결.
+
+기존 설치본 실기기 추가 확인
+- 실제 데이터/백업을 건드리지 않고 VM에서 메모리상의 빈 시험 payload로 화면만 열어 확인. 복구 버튼/새로 시작하기는 누르지 않음.
+- before_restore_prompt.png로 사용자 설명과 같은 두 버튼 화면 확인. 일반 라우트 교체 조건에서는 Back으로 이전 달력 화면이 보였음.
+- 최초 진입과 같이 루트의 이전 라우트를 모두 제거한 조건(before_root_*)에서는 Android 시스템 Back 후 삼성 런처로 이탈 확인. 따라서 기존 설치본의 '복원 전 시스템 Back이 항상 막힘'은 재현되지 않음. 사용자 관찰 당시 경로/상태는 미확정으로 남김.
+- 이번 수정은 명시적 화면 Back 추가 및 루트 이탈/이전 화면 복귀/복원 중 차단을 명확히 하는 보강이다. 원래 코드의 canPop=true 자체가 무조건 작동하지 않았다고 단정하지 않음.
+
+최종 자동 검증
+- restore_backup_navigation_test.dart4개 PASS: 최초진입 toolbar/system back, 기존 route 복귀 및 명시 onCancel. 대상 전체22검사 PASS 로그는 artifacts/calendar_swipe_2026_10_16/targeted_final_retry.log.
+- 필수 -Build exit0, dev debug APK 설치 완료. 복구 버튼·새로 시작 버튼은 실기기에서 누르지 않았고 원본 백업/DB로 복구하는 테스트도 하지 않았다. 기존 실제 초기 화면의 간헐적 뒤로가기 차단 원인은 미재현이며 전체상황 재현 해결로 확대하지 않는다.
+
+- 수정 APK 실제 root 제안 화면(인메모리 빈 payload, 저장/복구 실행 없음)에서 뒤로가기 버튼 표시와 Android Back→런처 이탈 확인: after_root_restore_prompt.png 및 after_root_restore_back_result.json. 이후 정상 dev 재실행 완료. 원본 설치본의 간헐 차단 재현은 여전히 미확정.

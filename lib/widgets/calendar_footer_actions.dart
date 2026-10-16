@@ -9,10 +9,18 @@ class CalendarFooterActions extends StatelessWidget {
       required this.weekly,
       required this.onMonthly,
       required this.onWeekly,
-      this.minimumHeight = 48});
+      this.minimumHeight = 48,
+      this.actionDecoration,
+      this.actionPadding = EdgeInsets.zero,
+      this.weeklyAlignment = Alignment.centerRight,
+      this.gap = 16});
   final Widget monthly, weekly;
   final VoidCallback onMonthly, onWeekly;
   final double minimumHeight;
+  final BoxDecoration? actionDecoration;
+  final EdgeInsetsGeometry actionPadding;
+  final Alignment weeklyAlignment;
+  final double gap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +31,9 @@ class CalendarFooterActions extends StatelessWidget {
           child: DefaultTextStyle.merge(
               maxLines: 1, softWrap: false, child: child));
       return Table(
-        columnWidths: const {
+        columnWidths: {
           0: _ShrinkableIntrinsicColumnWidth(),
-          1: FixedColumnWidth(16),
+          1: FixedColumnWidth(gap),
           2: _ShrinkableIntrinsicColumnWidth(),
         },
         defaultVerticalAlignment: TableCellVerticalAlignment.middle,
@@ -33,8 +41,8 @@ class CalendarFooterActions extends StatelessWidget {
           TableRow(children: [
             _action('calendar-monthly-summary', Alignment.centerLeft,
                 singleLine(monthly, Alignment.centerLeft), onMonthly),
-            const SizedBox(width: 16),
-            _action('calendar-weekly-summary', Alignment.centerRight,
+            SizedBox(width: gap),
+            _action('calendar-weekly-summary', weeklyAlignment,
                 singleLine(weekly, Alignment.centerRight), onWeekly),
           ])
         ],
@@ -44,10 +52,10 @@ class CalendarFooterActions extends StatelessWidget {
       Expanded(
           child: _action('calendar-monthly-summary', Alignment.centerLeft,
               monthly, onMonthly)),
-      const SizedBox(width: 16),
+      SizedBox(width: gap),
       Expanded(
-          child: _action('calendar-weekly-summary', Alignment.centerRight,
-              weekly, onWeekly)),
+          child: _action(
+              'calendar-weekly-summary', weeklyAlignment, weekly, onWeekly)),
     ]);
   }
 
@@ -61,7 +69,11 @@ class CalendarFooterActions extends StatelessWidget {
             onTap: onTap,
             child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: minimumHeight),
-                child: Align(alignment: alignment, child: label)),
+                child: DecoratedBox(
+                    decoration: actionDecoration ?? const BoxDecoration(),
+                    child: Padding(
+                        padding: actionPadding,
+                        child: Align(alignment: alignment, child: label)))),
           ));
 }
 

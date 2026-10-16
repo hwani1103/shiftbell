@@ -1,0 +1,100 @@
+00:00 +0: loading test\collision_resolver_test.dart
+00:00 +0: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +1: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +2: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +3: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +4: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +5: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +6: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +7: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +8: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +9: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +10: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +11: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +12: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +13: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +14: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +15: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +16: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +17: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +18: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +19: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +20: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +21: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +22: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +23: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +24: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +25: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +26: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +27: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +28: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +29: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +30: test\constant_speed_test.dart: Straight splitting cannot change timing or collision
+00:00 +31: test\collision_resolver_test.dart: E15 multiple sites and three pairs are preserved and sorted
+00:00 +32: test\collision_resolver_test.dart: E15 multiple sites and three pairs are preserved and sorted
+00:01 +33: test\simulation_engine_test.dart: L01 witness succeeds deterministically regardless of Unit/route order
+00:01 +34: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +35: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +36: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +37: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +38: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +39: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +40: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +41: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +42: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +43: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +44: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +45: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +46: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +47: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +48: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +49: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:01 +50: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +51: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +52: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +53: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +54: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +55: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +56: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +57: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +58: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +59: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +60: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +61: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +62: test\validation_test.dart: V01..V04 float width
+00:02 +63: test\validation_test.dart: V01..V04 string width
+00:02 +64: test\validation_test.dart: V01..V04 rows length
+00:02 +65: test\validation_test.dart: V01..V04 row character
+00:02 +66: test\validation_test.dart: V01..V04 row width
+00:02 +67: test\validation_test.dart: V01..V04 small board
+00:02 +68: test\validation_test.dart: V01..V04 schema
+00:02 +69: test\validation_test.dart: V01..V04 rule
+00:02 +70: test\validation_test.dart: V01..V04 mechanic
+00:02 +71: test\validation_test.dart: V01..V04 duplicate id
+00:02 +72: test\validation_test.dart: V01..V04 empty id
+00:02 +73: test\validation_test.dart: V01..V04 invalid id charset
+00:02 +74: test\validation_test.dart: V01..V04 duplicate start
+00:02 +75: test\validation_test.dart: V01..V04 start goal
+00:02 +76: test\validation_test.dart: V01..V04 blocked placement
+00:02 +77: test\validation_test.dart: V01..V04 coordinate range
+00:02 +78: test\validation_test.dart: V01..V04 negative coordinate
+00:02 +79: test\validation_test.dart: V01..V04 fraction coordinate
+00:02 +80: test\validation_test.dart: V01..V04 disconnected
+00:02 +81: test\validation_test.dart: V01..V04 unreachable within N
+00:02 +82: test\validation_test.dart: V01..V04 oversize units
+00:02 +83: test\validation_test.dart: V01..V04 oversize ID
+00:02 +84: test\validation_test.dart: V10 hostile JSON is bounded before decode, malformed/huge numeric tokens rejected
+00:02 +85: test\validation_test.dart: Goal participates in connectivity but stops rays and allows entry
+00:02 +86: test\validation_test.dart: V05..V08 diagonal
+00:02 +87: test\validation_test.dart: V05..V08 zero
+00:02 +88: test\validation_test.dart: V05..V08 outside
+00:02 +89: test\validation_test.dart: V05..V08 goal pass
+00:02 +90: test\validation_test.dart: V05..V08 after goal
+00:02 +91: test\validation_test.dart: V05..V08 too many
+00:02 +92: test\validation_test.dart: V05..V08 empty
+00:02 +93: test\validation_test.dart: V05..V08 incomplete
+00:02 +94: test\validation_test.dart: Mid-ray wall is rejected even with walkable endpoint
+00:02 +95: test\validation_test.dart: Exact Unit set: missing, extra, duplicate and drafts cannot execute
+00:02 +96: test\validation_test.dart: V09 stale identity/revision rejected and plan JSON round trip preserves binding
+00:02 +97: test\validation_test.dart: R10 split, reverse and revisiting commands are preserved
+00:02 +98: All tests passed!

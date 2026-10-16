@@ -1,0 +1,1653 @@
+﻿Sync Paths — Solutions for LV1–LV100
+Each level is organized as Approach → Hint → Solution.
+Each solution is one safe plan. Set each ball's route in the listed order.
+
+============================================================
+LV 1
+============================================================
+
+[Approach]
+Follow the separate corridors.
+
+[Hint]
+Adjust the blue dotted ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 down → 2 right
+red striped ball: 2 down → 2 left
+
+============================================================
+LV 2
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the blue dotted ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 right → 2 down
+red striped ball: 2 down → 2 left
+
+============================================================
+LV 3
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the red striped ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 3 right
+red striped ball: 1 left → 2 down → 3 right
+
+============================================================
+LV 4
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the blue dotted ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 1 left → 4 right
+red striped ball: 2 down → 2 right
+
+============================================================
+LV 5
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the red striped ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 1 left → 3 down
+red striped ball: 1 right → 3 left → 3 down
+
+============================================================
+LV 6
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the red striped ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 3 right → 1 down
+red striped ball: 1 up → 2 down → 2 right → 1 down
+
+============================================================
+LV 7
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the red striped ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 1 up → 1 right → 3 up
+red striped ball: 1 down → 2 up → 4 right → 1 up
+purple cross ball: 4 right → 1 up → 1 right
+
+============================================================
+LV 8
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the blue dotted ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 1 up → 1 left → 3 up
+red striped ball: 1 left → 1 up → 2 left
+purple cross ball: 1 right → 3 up
+
+============================================================
+LV 9
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the purple cross ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 up → 2 right → 1 down
+red striped ball: 2 up → 2 left → 1 up
+purple cross ball: 1 right → 1 left → 4 right → 1 down
+
+============================================================
+LV 10
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the red striped ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 3 right → 3 down
+red striped ball: 1 right → 3 up → 2 right → 3 down
+purple cross ball: 2 right → 3 down
+
+============================================================
+LV 11
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the blue dotted ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 3 up → 4 right → 6 down → 2 left
+red striped ball: 3 right → 6 down → 2 left
+purple cross ball: 1 up → 4 right → 6 down → 2 left
+
+============================================================
+LV 12
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the purple cross ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 4 down → 1 right → 1 down
+red striped ball: 1 up → 1 left → 4 down → 1 right → 1 down
+purple cross ball: 2 up → 2 left → 4 down → 1 right → 1 down
+
+============================================================
+LV 13
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the blue dotted ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 left → 3 up → 2 left → 3 down
+red striped ball: 1 right → 1 down → 2 left → 3 down
+purple cross ball: 2 left → 3 down
+
+============================================================
+LV 14
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the blue dotted ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 2 down → 4 up → 1 left
+red striped ball: 1 up → 1 right → 1 up → 3 left
+purple cross ball: 1 up → 3 left
+
+============================================================
+LV 15
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the blue dotted ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 3 left → 2 right → 3 up → 1 right
+red striped ball: 1 right → 1 left → 4 up → 1 right
+purple cross ball: 1 up → 1 right → 2 up → 1 right
+
+============================================================
+LV 16
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the red striped ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 3 right → 1 down → 1 right
+red striped ball: 1 down → 2 up → 3 right → 1 up
+purple cross ball: 1 down → 3 right → 1 up
+green diamond ball: 2 up → 3 right → 1 down → 1 right
+
+============================================================
+LV 17
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the blue dotted ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 left → 1 right → 3 down → 1 left
+red striped ball: 1 left → 2 down → 1 left
+purple cross ball: 1 right → 4 left → 1 up
+green diamond ball: 1 up → 2 left → 1 up
+
+============================================================
+LV 18
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the green diamond ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 6 right → 2 up
+red striped ball: 3 left → 4 up → 4 right → 2 up
+purple cross ball: 1 down → 2 up → 6 right → 2 up
+green diamond ball: 3 left → 4 up → 6 right → 2 up
+
+============================================================
+LV 19
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the green diamond ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 5 left → 2 up → 1 right
+red striped ball: 3 up → 3 left → 3 down
+purple cross ball: 1 down → 1 right → 3 up → 3 left → 3 down
+green diamond ball: 2 up → 2 down → 2 up → 4 left → 3 down
+
+============================================================
+LV 20
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the green diamond ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 right → 5 up
+red striped ball: 1 right → 2 down → 2 right → 5 up
+purple cross ball: 2 left → 5 right → 5 up
+green diamond ball: 1 left → 2 down → 6 right → 5 up
+
+============================================================
+LV 21
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the red striped ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 1 left → 3 right → 4 up
+red striped ball: 1 right → 4 down → 2 right → 4 up
+purple cross ball: 2 right → 1 left → 4 up
+green diamond ball: 1 down → 2 left → 2 up
+
+============================================================
+LV 22
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the green diamond ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 up → 4 right → 2 down → 1 left
+red striped ball: 2 down → 3 up → 2 left → 4 down → 1 left
+purple cross ball: 1 down → 2 left → 4 down → 1 left
+green diamond ball: 3 up → 4 down → 4 right → 2 down → 1 left
+
+============================================================
+LV 23
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the purple cross ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 3 right → 4 down
+red striped ball: 1 right → 4 up → 2 right → 4 down
+purple cross ball: 1 down → 6 up → 2 right → 4 down
+green diamond ball: 1 up → 4 right → 4 down
+
+============================================================
+LV 24
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the green diamond ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 4 up → 2 left → 2 up
+red striped ball: 1 right → 4 down → 2 up → 2 right → 4 up
+purple cross ball: 3 right → 4 up → 2 left → 2 up
+green diamond ball: 4 right → 3 left → 2 up → 2 right → 4 up
+
+============================================================
+LV 25
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the green diamond ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 3 up
+red striped ball: 1 right → 3 left → 1 right → 3 up
+purple cross ball: 1 right → 4 left → 1 up
+green diamond ball: 4 up → 3 down → 2 left → 1 up
+
+============================================================
+LV 26
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the blue dotted ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 up → 6 left → 2 right → 3 up
+red striped ball: 1 right → 2 left → 4 up → 2 right → 1 up
+purple cross ball: 1 left → 2 right → 2 up → 4 left → 3 up
+green diamond ball: 1 down → 4 left → 3 up
+
+============================================================
+LV 27
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the purple cross ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 2 up → 1 left → 1 up → 2 left
+red striped ball: 1 up → 1 left → 1 up → 2 left
+purple cross ball: 1 up → 3 right → 3 left → 3 up → 1 left
+green diamond ball: 2 right → 2 down → 4 up → 1 left
+
+============================================================
+LV 28
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the purple cross ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 2 left → 4 right → 1 up → 1 right
+red striped ball: 1 right → 1 up → 2 left → 2 up → 1 right
+purple cross ball: 4 left → 3 right → 1 left → 2 up → 1 right
+green diamond ball: 2 up → 1 right → 1 up → 1 right
+
+============================================================
+LV 29
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the purple cross ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 2 right → 1 down → 3 right
+red striped ball: 3 up → 3 right → 1 left → 1 down → 3 right
+purple cross ball: 2 up → 5 down → 2 right → 1 up → 3 right
+green diamond ball: 1 up → 1 down → 3 right → 1 up → 3 right
+
+============================================================
+LV 30
+============================================================
+
+[Approach]
+Count the cells traveled before the paths join. A detour can create room.
+
+[Hint]
+Adjust the green diamond ball first, then fit the other routes around it.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 down → 1 right → 2 down → 2 left
+red striped ball: 3 left → 2 right → 1 left → 3 down → 2 left
+purple cross ball: 1 up → 3 down → 1 left → 2 down → 2 left
+green diamond ball: 2 left → 3 right → 4 left → 2 down → 2 left
+
+============================================================
+LV 31
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 2 left → 2 right → 3 up
+red striped ball: 1 left → 1 up → 6 right → 3 up
+
+============================================================
+LV 32
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 1 left → 2 right → 2 up
+red striped ball: 2 down → 1 up → 3 right → 2 up
+
+============================================================
+LV 33
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 right → 2 up → 3 left
+red striped ball: 2 up → 3 left
+
+============================================================
+LV 34
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 1 down → 1 up → 5 down
+red striped ball: 1 down → 4 right → 1 up
+purple cross ball: 1 right → 2 down → 2 right → 1 down
+
+============================================================
+LV 35
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 right → 2 down → 1 right
+red striped ball: 2 down → 2 up → 3 down → 3 left
+purple cross ball: 1 down → 4 right → 2 up → 1 left
+
+============================================================
+LV 36
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 down → 1 left → 1 down → 1 left
+red striped ball: 2 up → 1 down → 2 right → 2 down
+purple cross ball: 2 down → 1 right → 2 down
+
+============================================================
+LV 37
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 2 left → 2 up → 6 right → 2 down
+red striped ball: 1 up → 2 right → 2 down → 2 right → 4 up
+purple cross ball: 1 left → 4 right → 2 down → 2 right → 4 up
+
+============================================================
+LV 38
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 right → 4 up → 2 left
+red striped ball: 2 right → 4 up → 2 right
+purple cross ball: 2 up → 6 right → 2 down → 2 left
+
+============================================================
+LV 39
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 left → 3 down → 1 right → 1 down
+red striped ball: 1 left → 2 right → 4 down → 1 right
+purple cross ball: 2 right → 2 up → 2 right
+
+============================================================
+LV 40
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 1 up → 5 left → 1 up
+red striped ball: 2 left → 1 up → 2 left → 1 down
+purple cross ball: 1 left → 1 up → 3 left → 1 up
+
+============================================================
+LV 41
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 left → 2 down → 1 right
+red striped ball: 1 right → 1 left → 2 down → 3 right
+purple cross ball: 4 right → 2 left → 2 up → 1 right
+
+============================================================
+LV 42
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 4 down → 4 right → 1 up
+red striped ball: 1 up → 4 down → 6 right → 1 up
+purple cross ball: 1 down → 4 up → 2 right → 5 down
+green diamond ball: 1 right → 2 up → 2 right → 5 down
+
+============================================================
+LV 43
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 right → 4 up → 2 left
+red striped ball: 1 down → 6 up → 4 right
+purple cross ball: 1 left → 2 right → 6 up → 2 left
+green diamond ball: 1 left → 4 up → 4 right
+
+============================================================
+LV 44
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 6 up → 1 right
+red striped ball: 1 down → 2 left → 6 up → 1 right
+purple cross ball: 1 up → 2 left → 2 up → 1 left
+green diamond ball: 1 right → 2 left → 4 up → 1 left
+
+============================================================
+LV 45
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 2 down → 2 right
+red striped ball: 1 right → 2 down → 2 left
+purple cross ball: 2 right → 3 left → 2 down → 2 right
+green diamond ball: 1 up → 4 down → 2 right
+
+============================================================
+LV 46
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 1 up → 2 right → 3 up
+red striped ball: 5 up → 2 down → 2 left → 2 up
+purple cross ball: 1 up → 3 right → 2 up → 1 right
+green diamond ball: 1 down → 3 up → 2 right → 3 up
+
+============================================================
+LV 47
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 4 left → 6 up → 2 right
+red striped ball: 1 up → 2 down → 4 left → 2 up
+purple cross ball: 1 left → 2 right → 4 left → 4 up
+green diamond ball: 1 left → 2 down → 2 left → 2 up
+
+============================================================
+LV 48
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 left → 1 up → 4 down → 1 right
+red striped ball: 3 left → 4 right → 4 down → 1 right
+purple cross ball: 1 up → 3 right → 1 down → 1 right
+green diamond ball: 3 left → 2 right → 4 down → 1 right
+
+============================================================
+LV 49
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 down → 2 up → 4 right → 1 up
+red striped ball: 2 up → 2 right → 1 up
+purple cross ball: 1 up → 3 left → 6 right → 1 up
+green diamond ball: 1 right → 1 left → 1 right → 4 up
+
+============================================================
+LV 50
+============================================================
+
+[Approach]
+Cross a key to open its matching gate. The dots on the right show time remaining.
+
+[Hint]
+Plan when one ball crosses the key so another can pass through.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 1 down → 2 up → 5 right
+red striped ball: 2 left → 4 down → 1 right
+purple cross ball: 3 right → 3 left → 2 down → 5 right
+green diamond ball: 2 left → 2 right → 4 down → 3 right
+
+============================================================
+LV 51
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Leave the exit clear when the next ball arrives.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 4 down (portal) → 1 left → 2 down → 2 right
+red striped ball: 1 down (portal) → 1 left → 1 down → 1 down → 2 right
+
+============================================================
+LV 52
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Leave the exit clear when the next ball arrives.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down (portal) → 1 right → 1 right → 1 up
+red striped ball: 1 left → 2 left (portal) → 2 right → 1 up
+
+============================================================
+LV 53
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Leave the exit clear when the next ball arrives.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right (portal) → 1 right → 1 right
+red striped ball: 1 right → 2 left (portal) → 2 right
+
+============================================================
+LV 54
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Leave the exit clear when the next ball arrives.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down (portal) → 1 right → 1 right
+red striped ball: 1 right → 4 up → 1 left
+purple cross ball: 1 right → 2 left (portal) → 2 right
+
+============================================================
+LV 55
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Leave the exit clear when the next ball arrives.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 3 down → 2 left
+red striped ball: 1 left → 1 up → 2 left
+purple cross ball: 1 left (portal) → 1 left → 1 left
+
+============================================================
+LV 56
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Leave the exit clear when the next ball arrives.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 down → 4 right → 1 up
+red striped ball: 1 down → 2 up (portal) → 2 up
+purple cross ball: 1 down (portal) → 1 up → 1 up
+
+============================================================
+LV 57
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Leave the exit clear when the next ball arrives.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 left → 1 left → 1 left → 3 down
+red striped ball: 1 up → 1 left → 2 left (portal) → 3 down
+purple cross ball: 1 right → 1 down → 3 left → 3 down
+
+============================================================
+LV 58
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Leave the exit clear when the next ball arrives.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 1 down → 4 right → 1 up
+red striped ball: 2 up (portal) → 1 down → 4 right → 1 up
+purple cross ball: 1 up → 1 right → 2 right → 1 up
+
+============================================================
+LV 59
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Leave the exit clear when the next ball arrives.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 left → 2 right → 3 down → 3 left
+red striped ball: 1 up → 1 right → 1 right (portal) → 3 left
+purple cross ball: 1 left → 1 up → 3 down → 3 left
+
+============================================================
+LV 60
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 left → 1 down (portal) → 1 down → 2 down
+red striped ball: 1 up → 2 down → 4 left → 1 up
+purple cross ball: 1 up → 1 down → 2 down (portal) → 3 down
+
+============================================================
+LV 61
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 down → 1 up → 4 left
+red striped ball: 1 right → 2 up → 4 down → 3 left
+purple cross ball: 1 up → 4 left (portal) → 1 down → 1 left
+
+============================================================
+LV 62
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 3 left → 2 up → 2 left → 3 down
+red striped ball: 1 up → 2 left (portal) → 3 left → 1 up
+purple cross ball: 1 left → 2 up → 2 left → 3 down
+
+============================================================
+LV 63
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 right (portal) → 1 left → 2 up
+red striped ball: 3 left → 2 down → 4 right → 2 down
+purple cross ball: 2 up → 5 down → 2 left → 2 up
+green diamond ball: 1 left → 2 down → 4 right → 2 down
+
+============================================================
+LV 64
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 3 up → 4 down → 2 right (portal) → 2 down
+red striped ball: 1 right → 1 down → 1 down (portal) → 2 down
+purple cross ball: 1 down → 2 up → 2 right (portal) → 2 down
+green diamond ball: 1 up → 2 right → 4 down (portal) → 2 down
+
+============================================================
+LV 65
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 3 up → 2 down → 2 right → 2 down → 3 right
+red striped ball: 1 down → 2 down → 2 left → 2 down → 1 right
+purple cross ball: 3 up → 4 down → 2 right → 2 down → 3 right
+green diamond ball: 1 up (portal) → 1 left → 1 left → 2 down → 1 right
+
+============================================================
+LV 66
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 1 right → 1 up → 2 right
+red striped ball: 2 down → 1 left → 4 up → 2 right
+purple cross ball: 1 down → 1 up → 3 up → 2 right
+green diamond ball: 1 up → 1 left → 2 down (portal) → 2 right
+
+============================================================
+LV 67
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 4 up → 2 right → 2 up → 1 left
+red striped ball: 1 right → 2 up → 2 down → 6 up → 1 left
+purple cross ball: 1 up → 2 left → 1 down (portal) → 4 up → 1 left
+green diamond ball: 1 right → 2 up → 2 right → 2 up → 1 left
+
+============================================================
+LV 68
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 5 left → 2 right → 1 down (portal) → 2 right
+red striped ball: 3 right → 2 left → 1 up (portal) → 2 right
+purple cross ball: 2 up → 2 right → 2 up → 3 right
+green diamond ball: 1 up → 1 left (portal) → 1 left → 3 right
+
+============================================================
+LV 69
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up (portal) → 1 up → 1 up → 2 down → 2 right
+red striped ball: 1 up → 4 down → 2 right → 2 down → 2 left
+purple cross ball: 1 right → 2 left → 2 right → 2 up (portal) → 2 right
+green diamond ball: 1 right → 2 down → 2 right → 2 down → 2 left
+
+============================================================
+LV 70
+============================================================
+
+[Approach]
+End a move on the entrance to transfer instantly to the exit. Merely crossing the entrance does not transfer.
+
+[Hint]
+Use the shortcut to open a gate in time for another ball.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 5 right → 3 left → 1 down
+red striped ball: 1 left → 1 up → 1 left → 1 left
+purple cross ball: 3 down → 2 right → 1 down (portal) → 2 left
+green diamond ball: 2 left → 1 right → 1 down → 2 left
+
+============================================================
+LV 71
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 1 up → 2 left → 2 up → 1 left → 2 up
+red striped ball: 1 left → 1 up → 2 left → 3 up → 1 right → 2 up
+purple cross ball: 1 up → 2 left → 1 down → 4 up → 1 right → 2 up
+green diamond ball: 1 down → 1 right (portal) → 1 down → 2 up → 1 left → 2 up
+
+============================================================
+LV 72
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 left → 2 down → 2 up → 1 left → 1 up → 3 left
+red striped ball: 1 up → 3 left → 2 right → 2 left → 1 up → 3 left
+purple cross ball: 1 up → 3 left → 2 down → 2 left (portal) → 1 left
+green diamond ball: 1 up → 2 down → 1 left → 2 right → 3 left (portal) → 1 left
+
+============================================================
+LV 73
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 up → 2 right → 6 left → 4 down → 1 right
+red striped ball: 3 left → 3 right → 2 down → 4 left → 4 down → 1 right
+purple cross ball: 1 left → 2 up → 5 left → 2 down → 1 right
+green diamond ball: 1 up → 1 right → 2 up → 4 left → 4 down → 1 right
+
+============================================================
+LV 74
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 1 left → 2 right → 1 down
+red striped ball: 1 up → 6 right → 4 down → 2 left → 1 up → 1 left
+purple cross ball: 2 down → 4 right → 4 down → 2 left → 1 up → 1 left
+green diamond ball: 1 up → 2 right → 4 down → 2 left → 1 up → 1 left
+
+============================================================
+LV 75
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 1 up → 1 right (portal) → 1 up → 4 right → 1 down
+red striped ball: 2 left → 2 up → 1 right (portal) → 1 up → 4 right → 1 down
+purple cross ball: 1 left → 2 up → 1 right (portal) → 1 up → 4 right → 1 down
+green diamond ball: 1 up → 1 down → 1 right → 2 down → 1 right → 1 down
+
+============================================================
+LV 76
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 left → 2 right → 5 down → 2 left → 1 up → 4 left → 1 down
+red striped ball: 1 right → 1 up → 4 down → 2 left → 1 up → 4 left → 1 down
+purple cross ball: 2 down → 1 left → 2 down → 1 right → 2 left → 1 down
+green diamond ball: 1 up → 2 down → 2 left → 1 up → 4 left → 1 down
+
+============================================================
+LV 77
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 1 down → 2 right → 1 down → 3 right → 1 down
+red striped ball: 2 left → 2 right → 1 left → 1 up (portal) → 3 down → 3 right → 1 down
+purple cross ball: 2 left → 3 up → 2 right → 1 down → 3 right → 1 down
+green diamond ball: 1 left → 1 down → 1 up → 2 right → 1 down → 3 right → 1 down
+
+============================================================
+LV 78
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 left → 1 down → 4 left → 1 up
+red striped ball: 1 up → 2 left → 1 right → 2 up → 1 right → 4 left → 1 up
+purple cross ball: 1 down (portal) → 2 left → 1 right → 1 left → 2 up → 3 left → 1 up
+green diamond ball: 1 right → 2 left (portal) → 1 right → 3 left → 2 up → 3 left → 1 up
+
+============================================================
+LV 79
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 1 up → 3 down → 3 up → 2 down → 5 right → 4 down
+red striped ball: 2 up → 2 down → 2 up → 1 right → 1 up → 5 right → 4 down
+purple cross ball: 1 right → 1 up → 2 right (portal) → 1 right → 6 down
+green diamond ball: 1 down → 2 up → 1 right → 2 up (portal) → 1 right → 6 down
+
+============================================================
+LV 80
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 4 down → 1 right → 2 down → 3 left → 4 right
+red striped ball: 1 right → 2 left → 4 down → 3 right → 2 down → 1 left
+purple cross ball: 1 right → 2 left → 3 right → 3 down → 1 right → 2 down → 1 right
+green diamond ball: 1 left → 2 down → 3 right → 3 up → 5 down → 1 left
+
+============================================================
+LV 81
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 1 down (portal) → 1 left (portal) → 2 up → 2 left → 1 down
+red striped ball: 1 down → 1 right → 1 down → 2 right → 1 left → 2 down → 1 left → 1 down
+purple cross ball: 1 right → 1 down → 2 right → 2 up → 1 left (portal) → 2 up → 2 left → 1 down
+green diamond ball: 1 up → 2 left → 3 right → 3 left → 1 up → 2 left → 1 down
+
+============================================================
+LV 82
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 1 left (portal) → 3 down → 1 left → 2 down → 2 right → 1 down
+red striped ball: 2 down → 1 left → 1 down → 1 up → 2 down → 2 right → 1 down
+purple cross ball: 1 down → 1 up → 4 down → 2 up → 2 left → 1 down → 1 left → 1 down
+green diamond ball: 1 left (portal) → 3 down → 1 right → 2 left → 2 down → 2 right → 1 down
+
+============================================================
+LV 83
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 1 left (portal) → 1 right → 1 down → 3 up → 1 left → 2 up → 1 right
+red striped ball: 1 right → 2 left → 1 down → 3 left → 1 up → 1 left → 2 up → 1 right
+purple cross ball: 1 left (portal) → 1 right → 2 up → 1 left → 1 right → 1 left → 2 up → 1 right
+green diamond ball: 3 up → 3 down → 1 up → 3 left → 1 up → 1 left → 2 up → 1 right
+
+============================================================
+LV 84
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 2 up → 1 right → 1 left → 1 right → 3 left → 1 down → 1 left
+red striped ball: 1 down → 4 up → 1 left → 2 up → 2 left → 1 down → 1 left
+purple cross ball: 1 down → 3 up → 2 left → 1 right → 2 up → 2 left → 1 down → 1 left
+green diamond ball: 2 down → 1 left (portal) → 4 up → 1 left → 2 up → 2 left → 1 down → 1 left
+
+============================================================
+LV 85
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 3 left → 1 up → 1 left → 2 up → 1 left
+red striped ball: 1 up → 2 down → 1 right → 3 left → 1 up → 1 left → 2 up → 1 left
+purple cross ball: 1 right → 2 left → 2 up → 2 down → 3 up → 1 left → 2 up → 1 left
+green diamond ball: 1 right → 1 left → 2 up → 1 right → 1 up → 1 right → 2 up → 1 left
+
+============================================================
+LV 86
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 1 right → 1 up → 2 right → 1 down → 2 right → 2 up → 1 right
+red striped ball: 1 left → 2 up → 1 down → 1 left (portal) → 2 right → 1 down → 2 right → 2 up → 1 right
+purple cross ball: 1 up → 2 right → 1 down → 2 right → 2 up → 1 right
+green diamond ball: 1 right → 1 up → 2 right → 1 down → 2 right → 2 down → 3 up → 1 right → 1 up
+
+============================================================
+LV 87
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 4 up → 1 right (portal) → 2 down → 1 left → 1 down → 2 left → 2 up → 1 right
+red striped ball: 1 down → 1 right (portal) → 2 down → 1 left → 1 down → 2 left → 2 up → 1 right
+purple cross ball: 1 down → 2 right → 2 left → 4 right → 1 left → 2 up → 2 left → 2 up → 1 right
+green diamond ball: 1 left → 2 up → 1 right (portal) → 2 down → 1 left → 1 down → 2 left → 2 up → 1 right
+
+============================================================
+LV 88
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 left → 1 up → 1 left → 1 up → 3 left → 3 up → 2 right → 1 up
+red striped ball: 1 up → 1 right → 2 left → 1 up → 3 left → 3 up → 2 right → 1 up
+purple cross ball: 2 down → 1 up → 2 left → 1 up → 3 left → 3 up → 2 right → 1 up
+green diamond ball: 1 left → 2 up → 1 right → 1 up → 1 right → 2 up → 2 down → 2 up → 3 left
+
+============================================================
+LV 89
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 1 left → 1 down → 2 left → 1 up → 2 left → 2 down → 1 left → 2 down
+red striped ball: 1 right → 2 left → 2 right → 3 left → 3 up → 1 left → 1 up → 2 left → 2 down
+purple cross ball: 1 right → 2 up → 3 down → 3 up → 1 left → 1 up → 2 left → 2 down
+green diamond ball: 1 up → 2 left → 1 up → 2 left → 2 down → 1 left → 2 down
+
+============================================================
+LV 90
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 2 up → 2 down → 2 up → 2 right → 3 down → 1 left → 1 down → 1 left
+red striped ball: 1 up → 1 down → 1 up → 2 left → 3 down → 1 left → 1 down → 1 left
+purple cross ball: 1 up → 1 right → 1 left → 4 right → 3 down → 1 left → 1 down → 1 left
+green diamond ball: 1 up → 2 right → 3 down → 1 left → 1 down → 1 left
+
+============================================================
+LV 91
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 left → 1 up → 1 left → 2 up → 1 left → 2 up → 1 right → 1 up → 1 right
+red striped ball: 2 left → 1 down → 1 left → 3 down → 1 up → 3 left → 2 up → 1 right → 1 up → 1 right
+purple cross ball: 1 up → 2 left → 1 right → 2 up → 1 right → 2 left → 2 up → 1 right → 1 up → 1 right
+green diamond ball: 1 left → 2 up → 2 down → 3 up → 5 left → 2 up → 1 right → 1 up → 1 right
+
+============================================================
+LV 92
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 up → 2 right → 1 down → 1 right → 1 down → 2 right → 1 up → 1 right → 1 up
+red striped ball: 1 down → 2 right → 2 left → 3 right → 1 left → 2 up → 1 right → 1 up → 1 right → 1 up
+purple cross ball: 1 left → 1 right → 1 left → 1 up → 4 right → 2 up → 1 right → 1 up → 1 right → 1 up
+green diamond ball: 1 down → 2 right → 1 down → 1 right → 1 down → 2 right → 1 up → 1 right → 1 up
+
+============================================================
+LV 93
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 left → 1 down → 3 left → 3 up → 1 right → 2 up → 1 right → 1 up → 2 right → 1 down
+red striped ball: 1 down → 2 right → 3 up → 1 right → 2 up → 1 right → 1 up → 2 right → 1 down
+purple cross ball: 1 down → 1 left → 1 down → 4 left → 1 right → 3 up → 3 right → 1 up → 1 right → 1 up
+green diamond ball: 1 down → 5 left → 1 up → 1 down → 2 right → 3 up → 3 right → 1 up → 1 right → 1 up
+
+============================================================
+LV 94
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 2 down → 1 right → 1 down → 1 right → 2 down → 1 up → 2 right → 3 up → 1 left
+red striped ball: 1 right → 1 down → 1 right → 1 down → 4 right → 4 up → 2 down → 2 left → 1 up → 1 left
+purple cross ball: 1 down → 1 right → 1 down → 1 right → 1 down → 4 right → 2 up → 2 left → 1 up → 1 left
+green diamond ball: 1 left → 2 down → 1 right → 1 down → 1 right → 1 down → 4 right → 2 left → 3 up → 1 left
+
+============================================================
+LV 95
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 2 down → 1 right → 2 down → 1 up → 2 right → 2 down → 1 left → 1 down → 2 left
+red striped ball: 1 left → 1 right → 1 down → 2 right → 2 down → 1 left → 1 down → 2 left
+purple cross ball: 1 left → 2 down → 2 up → 3 right → 1 up → 2 right → 2 down → 1 left → 1 down → 2 left
+green diamond ball: 1 up → 3 right → 3 up → 3 down → 1 up → 1 left → 3 down → 1 left → 1 down → 2 left
+
+============================================================
+LV 96
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 up → 1 down → 2 right → 2 up → 1 left → 2 up → 1 down → 2 left → 1 up → 2 left → 1 up
+red striped ball: 3 right → 2 up → 1 left → 2 up → 2 right → 2 left → 1 down → 2 left → 1 up → 2 left → 1 up
+purple cross ball: 1 left → 1 up → 1 left → 2 up → 1 right → 2 up (portal) → 2 right → 2 up → 2 left → 1 up
+green diamond ball: 1 left → 1 right → 2 up → 1 left → 2 up → 1 right → 2 up (portal) → 2 right → 2 up → 2 left → 1 up
+
+============================================================
+LV 97
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 right → 1 down → 4 right → 2 down → 2 up → 3 left → 2 down → 1 right → 1 down → 1 right
+red striped ball: 1 down → 1 up → 1 left → 2 up → 2 right → 1 down → 1 right → 2 down → 1 right → 1 down → 1 right
+purple cross ball: 1 down → 4 up → 2 down → 2 right → 1 up → 2 down → 1 right → 2 down → 1 right → 1 down → 1 right
+green diamond ball: 1 left → 2 down → 1 right → 1 left → 2 up → 2 down → 2 left → 2 down → 1 right → 1 down → 1 right
+
+============================================================
+LV 98
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 down → 2 left → 1 down → 2 up → 2 left → 2 down → 1 left → 2 down → 1 right → 2 down → 1 left
+red striped ball: 1 left → 1 down → 2 up → 1 left → 3 up → 2 left → 2 down → 1 left → 2 down → 1 right → 2 down → 1 left
+purple cross ball: 1 right → 2 left → 3 up → 1 left → 3 up → 2 left → 2 down → 1 left → 2 down → 1 right → 2 down → 1 left
+green diamond ball: 2 up → 2 down → 2 up → 2 down → 2 up → 5 left → 1 down → 1 left → 2 down → 1 right → 2 down → 1 left
+
+============================================================
+LV 99
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 1 right → 2 down → 1 left → 3 down → 1 right → 1 down → 2 right → 1 up → 3 right → 1 up
+red striped ball: 1 right → 1 left → 1 up → 2 left → 2 down → 1 left → 2 right → 2 down → 1 right → 1 down → 3 right → 1 up
+purple cross ball: 1 down → 3 left → 1 up → 3 left → 1 right → 2 down → 1 right → 2 down → 1 right → 1 down → 3 right → 1 up
+green diamond ball: 1 right → 2 left → 2 down → 1 left → 3 down → 3 up → 2 right → 2 down → 1 right → 1 down → 3 right → 1 up
+
+============================================================
+LV 100
+============================================================
+
+[Approach]
+Pair both keys with their doors. Plan who opens each door and who crosses it.
+
+[Hint]
+Shortest paths cannot solve this room. Use returns and detours to create time, then check the next crossing too.
+
+[Solution]
+One safe complete plan:
+blue dotted ball: 3 right → 2 left → 2 down → 2 left → 3 right → 2 down → 2 left → 3 down → 2 right → 1 up → 1 right → 1 up → 1 right → 1 up
+red striped ball: 1 right → 1 down → 1 right → 1 down → 3 right → 2 down → 2 left → 3 down → 2 right → 1 up → 1 right → 1 up → 1 right → 1 up
+purple cross ball: 3 right → 4 left → 1 right → 2 down → 1 right → 2 down → 2 left → 3 down → 2 right → 1 up → 1 right → 1 up → 1 right → 1 up
+green diamond ball: 2 down → 1 right → 2 down → 1 up → 3 right → 3 left → 2 right → 2 down → 2 right → 1 up → 1 right → 1 up → 1 right → 1 up

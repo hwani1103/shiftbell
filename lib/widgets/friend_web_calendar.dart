@@ -1,3 +1,4 @@
+import 'shift_chip_label.dart';
 import 'dart:math' as math;
 import 'semantics_table_boundary.dart';
 
@@ -271,13 +272,15 @@ class _FriendWebCalendarState extends State<FriendWebCalendar> {
               height: calendarHeight,
               child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: SemanticsTableBoundary(child: TableCalendar(
+                  child: SemanticsTableBoundary(
+                      child: TableCalendar(
                     firstDay: DateTime(_today.year - 3),
                     lastDay: DateTime(_today.year + 3, 12, 31),
                     focusedDay: _focusedDay,
                     locale: Localizations.localeOf(context).toString(),
                     startingDayOfWeek:
-                        MaterialLocalizations.of(context).firstDayOfWeekIndex == 1
+                        MaterialLocalizations.of(context).firstDayOfWeekIndex ==
+                                1
                             ? StartingDayOfWeek.monday
                             : StartingDayOfWeek.sunday,
                     headerVisible: false,
@@ -390,12 +393,13 @@ class _FriendWebCalendarState extends State<FriendWebCalendar> {
     final pattern = widget.data.getPatternShiftForDate(day);
     final modified = hasShift && pattern.isNotEmpty && pattern != shift;
     final isKorean = Localizations.localeOf(context).languageCode == 'ko';
-    final countryHoliday = getHolidayName(day, isKorean: isKorean,
+    final countryHoliday = getHolidayName(day,
+        isKorean: isKorean,
         countryCode: deviceHolidayCountry(),
         languageCode: Localizations.localeOf(context).languageCode);
     final holiday = isKorean ? countryHoliday : null;
-    final red = countryHoliday != null ||
-        (isKorean && day.weekday == DateTime.sunday);
+    final red =
+        countryHoliday != null || (isKorean && day.weekday == DateTime.sunday);
     final ink = red ? Colors.red.shade600 : const Color(0xFF202124);
     final shiftColor = Color(widget.data.shiftColors[shift] ?? 0xFFE0E0E0);
     final key = DateFormat('yyyy-MM-dd').format(day);
@@ -404,99 +408,104 @@ class _FriendWebCalendarState extends State<FriendWebCalendar> {
     final horizontal =
         shortCover || (window.width > 500 && window.aspectRatio >= 1.25);
     return InkWell(
-      onTap: !isKorean && countryHoliday != null ? () => showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(day)),
-          content: Text(countryHoliday),
-          actions: [TextButton(onPressed: () => Navigator.pop(context),
-            child: Text(MaterialLocalizations.of(context).closeButtonLabel))],
-        ),
-      ) : null,
-      child: Padding(
-      key: ValueKey('friend-cell-$key'),
-      padding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-        Container(
-          key: ValueKey('friend-shift-band-$key'),
-          height: bandHeight,
-          alignment: Alignment.center,
-          padding: const EdgeInsets.symmetric(horizontal: 2),
-          decoration: hasShift
-              ? BoxDecoration(
-                  color: shiftColor,
-                  borderRadius: BorderRadius.circular(3),
-                  border: modified
-                      ? const Border(left: BorderSide(width: 3))
-                      : null)
-              : null,
-          child: hasShift
-              ? FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(shift,
-                      key: ValueKey('friend-shift-$key'),
-                      maxLines: 1,
-                      softWrap: false,
-                      style: shiftStyle.copyWith(
-                          color: ShiftSchedule.getTextColor(shiftColor))),
+        onTap: !isKorean && countryHoliday != null
+            ? () => showDialog<void>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(DateFormat.yMMMd(
+                            Localizations.localeOf(context).toString())
+                        .format(day)),
+                    content: Text(countryHoliday),
+                    actions: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(MaterialLocalizations.of(context)
+                              .closeButtonLabel))
+                    ],
+                  ),
                 )
-              : null,
-        ),
-        Expanded(
-            child: Stack(children: [
-          if (holiday != null)
-            Positioned(
-                top: 0,
-                bottom: horizontal ? 0 : null,
-                left: horizontal ? (window.width - 12) / 7 * .38 : 0,
-                right: 0,
-                child: Center(
-                    child: SizedBox(
-                        height: annotationHeight,
-                        child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              holiday,
-                              key: ValueKey('friend-holiday-$key'),
-                              textScaler: TextScaler.noScaling,
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              style: holidayStyle.copyWith(
-                                  color: outside
-                                      ? holidayStyle.color!
-                                          .withValues(alpha: .65)
-                                      : holidayStyle.color),
-                            ))))),
-          Align(
-              alignment: horizontal ? Alignment.centerLeft : Alignment.center,
-              child: FractionallySizedBox(
-                  widthFactor: horizontal ? .38 : 1,
-                  child: Center(
-                      child: Container(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: horizontal ? 2 : 6 * unit, vertical: 2),
-                    decoration: today
-                        ? BoxDecoration(
-                            color: red
-                                ? Colors.lime.shade200
-                                : const Color(0xFF5061A6),
-                            borderRadius: BorderRadius.circular(4))
-                        : null,
-                    child: Text('${day.day}',
-                        key: ValueKey('friend-date-$key'),
-                        textScaler: window.width > 500 || shortCover
-                            ? TextScaler.noScaling
+            : null,
+        child: Padding(
+          key: ValueKey('friend-cell-$key'),
+          padding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Container(
+              key: ValueKey('friend-shift-band-$key'),
+              height: bandHeight,
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 2),
+              decoration: hasShift
+                  ? BoxDecoration(
+                      color: shiftColor,
+                      borderRadius: BorderRadius.circular(3),
+                      border: modified
+                          ? const Border(left: BorderSide(width: 3))
+                          : null)
+                  : null,
+              child: hasShift
+                  ? ShiftChipLabel(
+                      label: shift,
+                      textKey: ValueKey('friend-shift-$key'),
+                      color: ShiftSchedule.getTextColor(shiftColor))
+                  : null,
+            ),
+            Expanded(
+                child: Stack(children: [
+              if (holiday != null)
+                Positioned(
+                    top: 0,
+                    bottom: horizontal ? 0 : null,
+                    left: horizontal ? (window.width - 12) / 7 * .38 : 0,
+                    right: 0,
+                    child: Center(
+                        child: SizedBox(
+                            height: annotationHeight,
+                            child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  holiday,
+                                  key: ValueKey('friend-holiday-$key'),
+                                  textScaler: TextScaler.noScaling,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  style: holidayStyle.copyWith(
+                                      color: outside
+                                          ? holidayStyle.color!
+                                              .withValues(alpha: .65)
+                                          : holidayStyle.color),
+                                ))))),
+              Align(
+                  alignment:
+                      horizontal ? Alignment.centerLeft : Alignment.center,
+                  child: FractionallySizedBox(
+                      widthFactor: horizontal ? .38 : 1,
+                      child: Center(
+                          child: Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: horizontal ? 2 : 6 * unit, vertical: 2),
+                        decoration: today
+                            ? BoxDecoration(
+                                color: red
+                                    ? Colors.lime.shade200
+                                    : const Color(0xFF5061A6),
+                                borderRadius: BorderRadius.circular(4))
                             : null,
-                        maxLines: 1,
-                        style: dateStyle.copyWith(
-                            color: today && !red
-                                ? Colors.white
-                                : outside
-                                    ? ink.withValues(alpha: .55)
-                                    : ink)),
-                  )))),
-        ])),
-      ]),
-    ));
+                        child: Text('${day.day}',
+                            key: ValueKey('friend-date-$key'),
+                            textScaler: window.width > 500 || shortCover
+                                ? TextScaler.noScaling
+                                : null,
+                            maxLines: 1,
+                            style: dateStyle.copyWith(
+                                color: today && !red
+                                    ? Colors.white
+                                    : outside
+                                        ? ink.withValues(alpha: .55)
+                                        : ink)),
+                      )))),
+            ])),
+          ]),
+        ));
   }
 }

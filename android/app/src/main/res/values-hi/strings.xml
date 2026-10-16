@@ -4,7 +4,7 @@
     <string name="alarm_type_vibration_short">वाइब्रेशन</string>
     <string name="alarm_type_silent_short">साइलेंट</string>
     <string name="snooze_collision_message">%1$s पर दूसरा अलार्म (%2$s) है। यह अलार्म स्नूज़ किए बिना बंद कर दिया गया।</string>
-    <string name="calendar_widget_description">पिछले, इस और अगले हफ़्ते की शिफ्ट और नोट देखें।</string>
+    <string name="calendar_widget_description">आकार के अनुसार 3 से 6 सप्ताह। 6 सप्ताह वाले दृश्य में महीने बदलें।</string>
     <string name="app_widget_calendar_label">3 हफ़्तों का कैलेंडर</string>
     <string name="alarm_swipe_hint">बंद करने के लिए ऊपर स्वाइप करें</string>
     <string name="alarm_snooze_label">5 मिनट बाद</string>
@@ -59,4 +59,17 @@
     <string name="calendar_widget_week_description">इस हफ़्ते की शिफ्ट और हर दिन के अधिकतम तीन नोट देखें।</string>
     <string name="widget_daytime">दिन</string>
     <string name="widget_nighttime">रात</string>
+    <string name="app_widget_sleep_label">नींद रिकॉर्ड</string>
+    <string name="sleep_widget_brand">ShiftBell</string>
+    <string name="sleep_widget_description">बटन से सोने और जागने का समय दर्ज करें।</string>
+    <string name="sleep_widget_no_shift">शिफ़्ट नहीं</string>
+    <string name="sleep_widget_not_set">तय नहीं</string>
+    <string name="sleep_widget_sleep">सोना</string>
+    <string name="sleep_widget_tab_off">सुविधा बंद</string>
+    <string name="sleep_widget_unknown">जानकारी नहीं</string>
+    <string name="sleep_widget_wake">जागना</string>
+    <string name="sleep_widget_restore_busy">बैकअप बहाल हो रहा है। थोड़ी देर बाद फिर कोशिश करें।</string>
+    <string name="sleep_widget_too_short">बहुत छोटा होने के कारण सेव नहीं हुआ</string>
+    <string name="widget_previous_month">पिछला महीना</string>
+    <string name="widget_next_month">अगला महीना</string>
 </resources>

@@ -1,3 +1,4 @@
+import '../widgets/app_ui_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/platform_channel.dart';
@@ -21,13 +22,13 @@ Future<bool> applyScheduleChange(
   // 로딩 표시
   if (context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      AppUiSnackBar(
         content: Row(
           children: [
             SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(
+              child: AppUiLoading(
                   strokeWidth: 2, color: Theme.of(context).colorScheme.surface),
             ),
             const SizedBox(width: 12),
@@ -40,10 +41,13 @@ Future<bool> applyScheduleChange(
   }
 
   try {
-    if (selection.team != null && (teams == null || !teams.names.contains(selection.team))) {
+    if (selection.team != null &&
+        (teams == null || !teams.names.contains(selection.team))) {
       throw StateError('Unknown team');
     }
-    if (selection.team == null && (selection.index < 0 || selection.index >= (schedule.pattern?.length ?? 0))) {
+    if (selection.team == null &&
+        (selection.index < 0 ||
+            selection.index >= (schedule.pattern?.length ?? 0))) {
       throw StateError('Invalid pattern position');
     }
     final target = selection.team == null
@@ -116,7 +120,7 @@ Future<bool> applyScheduleChange(
     if (context.mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        AppUiSnackBar(
           content: Text(
             !refreshCompleted
                 ? context.l10n.scheduleRefreshUnconfirmed
@@ -134,7 +138,7 @@ Future<bool> applyScheduleChange(
     if (context.mounted) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        AppUiSnackBar(
           content: Text(
               '❌ ${context.l10n.settingsScheduleChangeFailedWithError(context.localizedErrorDetail(e))}'),
           backgroundColor: Colors.red,

@@ -1,0 +1,502 @@
+{
+  "schemaVersion": 1,
+  "ruleSetId": "shared-goal-v1",
+  "packId": "dev-pilot-12",
+  "revision": 1,
+  "levels": [
+    {
+      "id": "L01",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".###.",
+        ".###.",
+        ".....",
+        "#####",
+        "#####"
+      ],
+      "goal": [
+        2,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 2,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L02",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".....",
+        ".....",
+        ".....",
+        ".....",
+        "....."
+      ],
+      "goal": [
+        2,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 2,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L03",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        "#####",
+        "##.##",
+        ".....",
+        "##.#.",
+        "##..."
+      ],
+      "goal": [
+        4,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 2,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L04",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        "#####",
+        "#...#",
+        "...##",
+        "##..#",
+        "#####"
+      ],
+      "goal": [
+        0,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L05",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        "##.##",
+        "...##",
+        "...##",
+        ".#.##",
+        "#####"
+      ],
+      "goal": [
+        0,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L06",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        "##.##",
+        "##.##",
+        ".....",
+        "##.#.",
+        "##..."
+      ],
+      "goal": [
+        4,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L07",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".....",
+        "##.##",
+        "##.##",
+        "##.##",
+        "##.##"
+      ],
+      "goal": [
+        2,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L08",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".....",
+        "###..",
+        "#....",
+        "..#..",
+        "....."
+      ],
+      "goal": [
+        2,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L09",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".....",
+        "#..##",
+        "#.###",
+        "#####",
+        "#####"
+      ],
+      "goal": [
+        1,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            4,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L10",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        "####.",
+        "##...",
+        "####.",
+        "###..",
+        "#####"
+      ],
+      "goal": [
+        4,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L11",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "######",
+        "......",
+        ".#.##.",
+        "##....",
+        "##....",
+        "##.##."
+      ],
+      "goal": [
+        5,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L12",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "######",
+        "###.##",
+        "......",
+        "...###",
+        "######",
+        "######"
+      ],
+      "goal": [
+        1,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    }
+  ]
+}
+

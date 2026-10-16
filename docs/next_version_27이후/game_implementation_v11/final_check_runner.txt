@@ -1,0 +1,386 @@
+{
+  "sourceBytes": 10414588,
+  "fontBytes": 99508,
+  "requiredCodepoints": 347,
+  "missingCodepoints": [],
+  "existingFallbackCodepoints": [],
+  "fontAxes": [
+    {
+      "tag": "wght",
+      "minimum": 100.0,
+      "maximum": 900.0
+    }
+  ],
+  "assetBytes": 338259,
+  "assetBudgetBytes": 500000,
+  "compiledCodeIncluded": false,
+  "assets": [
+    {
+      "path": "packages\\sync_path_ui\\assets\\fonts\\GameSansSubset.ttf",
+      "bytes": 99508
+    },
+    {
+      "path": "examples\\sync_path_lab\\assets\\pilot_copy.json",
+      "bytes": 121439
+    },
+    {
+      "path": "examples\\sync_path_lab\\assets\\pilot_levels.json",
+      "bytes": 117312
+    }
+  ],
+  "fontSha256": "8acd9e555c8344b9f88ec5e5bc154e830595f06ffc204b0547def0ad772d48c4"
+}
+Analyzing sync_path_core...
+No issues found!
+00:00 +0: loading test\collision_resolver_test.dart
+00:00 +0: test\collision_resolver_test.dart: C01_cross_same_time
+00:00 +1: test\collision_resolver_test.dart: C02_cross_different_time
+00:00 +2: test\collision_resolver_test.dart: C03_head_on_fraction
+00:00 +3: test\collision_resolver_test.dart: C04_overtake
+00:00 +4: test\collision_resolver_test.dart: C05_same_velocity
+00:00 +5: test\collision_resolver_test.dart: C06_swap_adjacent
+00:00 +6: test\collision_resolver_test.dart: C07_meet_endpoint
+00:00 +7: test\collision_resolver_test.dart: C08_same_start
+00:00 +8: test\collision_resolver_test.dart: C09_stationary_hit
+00:00 +9: test\collision_resolver_test.dart: C10_stationary_same
+00:00 +10: test\collision_resolver_test.dart: C11_identical_motion
+00:00 +11: test\collision_resolver_test.dart: C12_stationary_separate
+00:00 +12: test\collision_resolver_test.dart: C13_contact_after_step
+00:00 +13: test\collision_resolver_test.dart: C14_contact_before_step
+00:00 +14: test\collision_resolver_test.dart: C15_parallel_rows
+00:00 +15: test\collision_resolver_test.dart: C16_goal_endpoint
+00:00 +16: test\collision_resolver_test.dart: C17_goal_interior_invalid_route
+00:00 +17: test\collision_resolver_test.dart: C18_coordinate_roots_disagree
+00:00 +18: test\collision_resolver_test.dart: C19_follow_endpoint
+00:00 +19: test\collision_resolver_test.dart: C20_diverging
+00:00 +20: test\collision_resolver_test.dart: 20,000 bounded segment pairs vs independent exhaustive oracle (seed 20261013)
+00:00 +21: test\collision_resolver_test.dart: E15 multiple sites and three pairs are preserved and sorted
+00:00 +22: loading test\constant_speed_test.dart
+00:00 +22: test\constant_speed_test.dart: New runtime pack binds constant speed identity; old rule remains historical
+00:00 +23: test\constant_speed_test.dart: Device L07: long downward moves keep one cell per logical time
+00:00 +24: test\constant_speed_test.dart: Device L08: paths of 6,8,3 cells arrive at 6,8,3, never simultaneously
+00:00 +25: test\constant_speed_test.dart: Different command ordinals collide on a shared absolute clock
+00:00 +26: test\constant_speed_test.dart: Head-on contact between cells is detected at exact half time
+00:00 +27: test\constant_speed_test.dart: Crossing at different times has no contact; past arrivals disappear
+00:00 +28: test\constant_speed_test.dart: Simultaneous Goal is allowed, simultaneous non-Goal is not
+00:00 +29: test\constant_speed_test.dart: Straight splitting cannot change timing or collision
+00:00 +30: test\constant_speed_test.dart: Boundary contacts deduplicate pairs and retain every pair
+00:00 +31: loading test\finale_limits_test.dart
+00:00 +31: test\finale_limits_test.dart: Sixteen commands round-trip through parser, validator and constant-speed engine
+00:01 +32: test\finale_limits_test.dart: Above sixteen commands remains bounded at both JSON boundaries
+00:01 +33: loading test\portals_test.dart
+00:01 +33: test\portals_test.dart: transfer costs no extra move or time; every traveled cell costs one time
+00:01 +34: test\portals_test.dart: crossing IN without ending there does not transfer
+00:01 +35: test\portals_test.dart: exact entry contact blocks transfer at the same instant
+00:01 +36: test\portals_test.dart: exact exit contact is detected without a moving bridge
+00:01 +37: test\portals_test.dart: there is no collision along the space between IN and OUT
+00:01 +38: test\portals_test.dart: reusable portal can be used twice by the same ball
+00:01 +39: test\portals_test.dart: portal shortcut opens another balls gate at exact constant speed
+00:01 +40: test\portals_test.dart: portal placement rejects overlapping devices, starts, goals, pairs
+00:01 +41: test\portals_test.dart: bounded parser preserves portal and rejects malformed portal
+00:01 +42: test\portals_test.dart: editor validates next endpoint from exit, even when not aligned to entry
+00:01 +43: loading test\rational_test.dart
+00:01 +43: test\rational_test.dart: E01 sign, gcd, zero, equality/hash and exact arithmetic
+00:01 +44: test\rational_test.dart: E01 exact order remains transitive across bounded fractions
+00:01 +45: loading test\simulation_engine_test.dart
+00:01 +45: test\simulation_engine_test.dart: L01 witness succeeds deterministically regardless of Unit/route order
+00:02 +46: test\simulation_engine_test.dart: L02 witness succeeds deterministically regardless of Unit/route order
+00:02 +47: test\simulation_engine_test.dart: L02 failure matches exact earliest pair(s), time, position
+00:02 +48: test\simulation_engine_test.dart: L03 witness succeeds deterministically regardless of Unit/route order
+00:02 +49: test\simulation_engine_test.dart: L04 witness succeeds deterministically regardless of Unit/route order
+00:02 +50: test\simulation_engine_test.dart: L04 failure matches exact earliest pair(s), time, position
+00:02 +51: test\simulation_engine_test.dart: L05 witness succeeds deterministically regardless of Unit/route order
+00:02 +52: test\simulation_engine_test.dart: L05 failure matches exact earliest pair(s), time, position
+00:02 +53: test\simulation_engine_test.dart: L06 witness succeeds deterministically regardless of Unit/route order
+00:02 +54: test\simulation_engine_test.dart: L06 failure matches exact earliest pair(s), time, position
+00:02 +55: test\simulation_engine_test.dart: L07 witness succeeds deterministically regardless of Unit/route order
+00:02 +56: test\simulation_engine_test.dart: L07 failure matches exact earliest pair(s), time, position
+00:02 +57: test\simulation_engine_test.dart: L08 witness succeeds deterministically regardless of Unit/route order
+00:02 +58: test\simulation_engine_test.dart: L08 failure matches exact earliest pair(s), time, position
+00:02 +59: test\simulation_engine_test.dart: L09 witness succeeds deterministically regardless of Unit/route order
+00:02 +60: test\simulation_engine_test.dart: L09 failure matches exact earliest pair(s), time, position
+00:02 +61: test\simulation_engine_test.dart: L10 witness succeeds deterministically regardless of Unit/route order
+00:02 +62: test\simulation_engine_test.dart: L10 failure matches exact earliest pair(s), time, position
+00:02 +63: test\simulation_engine_test.dart: L11 witness succeeds deterministically regardless of Unit/route order
+00:02 +64: test\simulation_engine_test.dart: L11 failure matches exact earliest pair(s), time, position
+00:02 +65: test\simulation_engine_test.dart: L12 witness succeeds deterministically regardless of Unit/route order
+00:02 +66: test\simulation_engine_test.dart: L12 failure matches exact earliest pair(s), time, position
+00:02 +67: test\simulation_engine_test.dart: E11/E12 A arrives on Step 1, B on Step 3, no filler pieces
+00:02 +68: test\simulation_engine_test.dart: E10/E13 shared Goal endpoint is safe; everyone finishes before N
+00:02 +69: test\simulation_engine_test.dart: E16 Goal arrival at forbidden collision time is recorded but cannot win
+00:02 +70: test\simulation_engine_test.dart: E17 boundary collision belongs to previous Step once; future arrival suppressed
+00:02 +71: test\simulation_engine_test.dart: E19 input list mutation cannot change a plan snapshot
+00:02 +72: test\simulation_engine_test.dart: Splitting changes time, so geometry-equivalent paths may change outcome
+00:02 +73: loading test\timed_gates_test.dart
+00:02 +73: test\timed_gates_test.dart: Earlier collision wins; earlier door wins; simultaneous events retained
+00:02 +74: test\timed_gates_test.dart: Other ball opens gate, duration does not alter speed
+00:02 +75: test\timed_gates_test.dart: Expiry is exclusive and stops all playback at exact door time
+00:02 +76: test\timed_gates_test.dart: Simultaneous trigger is applied before gate check
+00:02 +77: test\timed_gates_test.dart: Straight command splitting cannot double-activate or change timer
+00:02 +78: test\timed_gates_test.dart: Repeated crossing refreshes and independent gates stay isolated
+00:02 +79: test\timed_gates_test.dart: Future triggers cannot unlock an earlier visit
+00:02 +80: test\timed_gates_test.dart: Parser rejects invalid gate contracts
+00:02 +81: loading test\validation_test.dart
+00:02 +81: test\validation_test.dart: W01 all pilot levels and witnesses load and validate
+00:02 +82: test\validation_test.dart: V01..V04 float width
+00:02 +83: test\validation_test.dart: V01..V04 string width
+00:02 +84: test\validation_test.dart: V01..V04 rows length
+00:02 +85: test\validation_test.dart: V01..V04 row character
+00:02 +86: test\validation_test.dart: V01..V04 row width
+00:02 +87: test\validation_test.dart: V01..V04 small board
+00:02 +88: test\validation_test.dart: V01..V04 schema
+00:02 +89: test\validation_test.dart: V01..V04 rule
+00:02 +90: test\validation_test.dart: V01..V04 mechanic
+00:02 +91: test\validation_test.dart: V01..V04 duplicate id
+00:02 +92: test\validation_test.dart: V01..V04 empty id
+00:02 +93: test\validation_test.dart: V01..V04 invalid id charset
+00:02 +94: test\validation_test.dart: V01..V04 duplicate start
+00:02 +95: test\validation_test.dart: V01..V04 start goal
+00:02 +96: test\validation_test.dart: V01..V04 blocked placement
+00:02 +97: test\validation_test.dart: V01..V04 coordinate range
+00:02 +98: test\validation_test.dart: V01..V04 negative coordinate
+00:02 +99: test\validation_test.dart: V01..V04 fraction coordinate
+00:02 +100: test\validation_test.dart: V01..V04 disconnected
+00:02 +101: test\validation_test.dart: V01..V04 unreachable within N
+00:02 +102: test\validation_test.dart: V01..V04 oversize units
+00:02 +103: test\validation_test.dart: V01..V04 oversize ID
+00:02 +104: test\validation_test.dart: V10 hostile JSON is bounded before decode, malformed/huge numeric tokens rejected
+00:02 +105: test\validation_test.dart: Goal participates in connectivity but stops rays and allows entry
+00:02 +106: test\validation_test.dart: V05..V08 diagonal
+00:02 +107: test\validation_test.dart: V05..V08 zero
+00:02 +108: test\validation_test.dart: V05..V08 outside
+00:02 +109: test\validation_test.dart: V05..V08 goal pass
+00:02 +110: test\validation_test.dart: V05..V08 after goal
+00:02 +111: test\validation_test.dart: V05..V08 too many
+00:02 +112: test\validation_test.dart: V05..V08 empty
+00:02 +113: test\validation_test.dart: V05..V08 incomplete
+00:02 +114: test\validation_test.dart: Mid-ray wall is rejected even with walkable endpoint
+00:02 +115: test\validation_test.dart: Exact Unit set: missing, extra, duplicate and drafts cannot execute
+00:02 +116: test\validation_test.dart: V09 stale identity/revision rejected and plan JSON round trip preserves binding
+00:02 +117: test\validation_test.dart: R10 split, reverse and revisiting commands are preserved
+00:02 +118: All tests passed!
+Analyzing sync_path_tools...
+No issues found!
+00:00 +0: loading test\constant_speed_oracle_test.dart
+00:00 +0: test\constant_speed_oracle_test.dart: 4000 seeded v2 trajectories: exact whole-segment contacts equal independent cell-edge oracle
+00:00 +1: loading test\gate_export_test.dart
+00:00 +1: test\gate_export_test.dart: Generator/export retain gate positions, duration and safe witness
+00:01 +2: loading test\generator_test.dart
+00:01 +2: test\generator_test.dart: S07/S08 deterministic seeded mutation preserves witness, revision and export verification
+00:01 +3: test\generator_test.dart: S09 preserved every traversed seed cell, even cells between endpoints
+00:01 +4: test\generator_test.dart: UNKNOWN budget never exports verified candidate
+00:01 +5: test\generator_test.dart: S10 early arrival preserved; invalid seed witness and bounds refused
+00:01 +6: loading test\portal_tools_test.dart
+00:01 +6: test\portal_tools_test.dart: Portal solver domain equals unpruned enumeration and independent exact oracle
+00:02 +7: test\portal_tools_test.dart: Portal export round trips and generator preserves both portal cells
+00:02 +8: loading test\solver_test.dart
+00:02 +8: test\solver_test.dart: S01/S03/S04/S05/S06 all domains, 359 outcomes, 47 assignments and diagnostics match independent certificates
+00:03 +9: test\solver_test.dart: S02 budget exhaustion is UNKNOWN, never UNSAT or zero exactCount
+00:03 +10: test\solver_test.dart: S02 solution cap means SAT/lowerBound/truncated, not unique/exact
+00:03 +11: test\solver_test.dart: S02 domain memory budget reports UNKNOWN
+00:03 +12: test\solver_test.dart: Exhaustive no-solution level is UNSAT despite individual reachability
+00:03 +13: test\solver_test.dart: S08 deterministic order, immutable results, cache-free equivalence
+00:03 +14: test\solver_test.dart: Budgets are bounded before allocating any search space
+00:03 +15: test\solver_test.dart: S01 certificate mismatch fails closed
+00:03 +16: All tests passed!
+L31 PASS safe=15 raw=125 checked=42
+L32 PASS safe=16 raw=67 checked=20
+L33 PASS safe=1 raw=35 checked=3
+L34 PASS safe=18 raw=158 checked=44
+L35 PASS safe=9 raw=14 checked=28
+L36 PASS safe=20 raw=118 checked=71
+L37 PASS safe=20 raw=277 checked=81
+L38 PASS safe=2 raw=42 checked=6
+L39 PASS safe=20 raw=41 checked=64
+L40 PASS safe=8 raw=28 checked=24
+L41 PASS safe=17 raw=125 checked=43
+L42 PASS safe=1 raw=1 checked=6
+L43 PASS safe=1 raw=63 checked=9
+L44 PASS safe=7 raw=18 checked=57
+L45 PASS safe=5 raw=405 checked=40
+L46 PASS safe=1 raw=1 checked=6
+L47 PASS safe=2 raw=2 checked=15
+L48 PASS safe=1 raw=1 checked=4
+L49 PASS safe=14 raw=42 checked=121
+L50 PASS safe=5 raw=25 checked=42
+L51 PASS safe=7 raw=9 pairChecks=10 portalContacts=0
+L52 PASS safe=6 raw=17 pairChecks=18 portalContacts=9
+L53 PASS safe=1 raw=2 pairChecks=9 portalContacts=6
+L54 PASS safe=20 raw=30 pairChecks=71 portalContacts=13
+L55 PASS safe=13 raw=38 pairChecks=101 portalContacts=40
+L56 PASS safe=1 raw=2 pairChecks=32 portalContacts=18
+L57 PASS safe=7 raw=110 pairChecks=231 portalContacts=14
+L58 PASS safe=3 raw=5 pairChecks=211 portalContacts=1
+L59 PASS safe=2 raw=8 pairChecks=185 portalContacts=17
+L60 PASS safe=1 raw=15 pairChecks=204 portalContacts=21
+L61 PASS safe=9 raw=14 pairChecks=956 portalContacts=0
+L62 PASS safe=1 raw=1 pairChecks=207 portalContacts=56
+L63 PASS safe=5 raw=5 pairChecks=108 portalContacts=4
+L64 PASS safe=12 raw=22 pairChecks=432 portalContacts=84
+L65 PASS safe=3 raw=23 pairChecks=313 portalContacts=6
+L66 PASS safe=2 raw=6 pairChecks=573 portalContacts=5
+L67 PASS safe=1 raw=1 pairChecks=1181 portalContacts=57
+L68 PASS safe=6 raw=6 pairChecks=1014 portalContacts=147
+L69 PASS safe=1 raw=4 pairChecks=2166 portalContacts=68
+L70 PASS safe=2 raw=4 pairChecks=1908 portalContacts=9
+L71 PASS canonical=4 minMax=6 minSum=24 extra=11 pairs=4584
+L72 PASS canonical=1 minMax=6 minSum=23 extra=14 pairs=2804
+L73 PASS canonical=8 minMax=6 minSum=22 extra=20 pairs=36205
+L74 PASS canonical=1 minMax=6 minSum=22 extra=22 pairs=4509
+L75 PASS canonical=1 minMax=6 minSum=24 extra=15 pairs=26396
+L76 PASS canonical=32 minMax=7 minSum=26 extra=12 pairs=3653
+L77 PASS canonical=1 minMax=7 minSum=26 extra=9 pairs=8720
+L78 PASS canonical=1 minMax=7 minSum=26 extra=10 pairs=6054
+L79 PASS canonical=4 minMax=7 minSum=25 extra=14 pairs=71188
+L80 PASS canonical=4 minMax=7 minSum=25 extra=24 pairs=116403
+L81 PASS canonical=5 minMax=8 minSum=29 extra=13 pairs=5231
+L82 PASS canonical=4 minMax=8 minSum=29 extra=10 pairs=32897
+L83 PASS canonical=2 minMax=8 minSum=32 extra=12 pairs=4446
+L84 PASS canonical=1 minMax=8 minSum=31 extra=15 pairs=3767
+L85 PASS canonical=2 minMax=8 minSum=29 extra=12 pairs=17601
+L86 PASS canonical=4 minMax=9 minSum=32 extra=6 pairs=4376
+L87 PASS canonical=1 minMax=9 minSum=35 extra=8 pairs=14748
+L88 PASS canonical=8 minMax=9 minSum=33 extra=8 pairs=40532
+L89 PASS canonical=6 minMax=9 minSum=33 extra=14 pairs=9425
+L90 PASS canonical=22 minMax=9 minSum=31 extra=8 pairs=176156
+L91 PASS canonical=14 minMax=10 minSum=38 extra=10 pairs=5309
+L92 PASS canonical=4 minMax=10 minSum=39 extra=12 pairs=17732
+L93 PASS canonical=1 minMax=10 minSum=39 extra=12 pairs=21927
+L94 PASS canonical=1 minMax=10 minSum=39 extra=18 pairs=8051
+L95 PASS canonical=21 minMax=10 minSum=38 extra=22 pairs=561416
+L96 PASS canonical=1 minMax=11 minSum=43 extra=22 pairs=98397
+L97 PASS canonical=1 minMax=11 minSum=44 extra=26 pairs=236374
+L98 PASS canonical=4 minMax=12 minSum=47 extra=20 pairs=639411
+L99 PASS canonical=2 minMax=12 minSum=46 extra=20 pairs=512089
+L100 PASS canonical=1 minMax=14 minSum=56 extra=24 pairs=39673
+Resolving dependencies...
+Downloading packages...
+  meta 1.17.0 (1.19.0 available)
+Got dependencies!
+1 package has newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing sync_path_ui...                                       
+No issues found! (ran in 5.9s)
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: (setUpAll)
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Thirty safe puzzles respect tutorial, unit introduction and board contracts
+00:00 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Board stays anchored when starting, pausing and editing
+00:02 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Selected ball guide and highlighted legal cells follow the chosen route
+00:03 +3: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Every map fits 320px without hiding a column; selected chapter screens render
+00:06 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: (tearDownAll)
+00:06 +4: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart
+00:07 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart: (setUpAll)
+00:07 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart: Fifty safe puzzles respect tutorial, unit introduction and board contracts
+00:08 +5: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart: Selected ball guide and highlighted legal cells follow the chosen route
+00:10 +6: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart: Every map fits 320px without hiding a column; selected chapter screens render
+00:15 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart: (tearDownAll)
+00:15 +7: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart
+00:16 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 30 levels preserve safe witnesses, unique identities and six chapter targets
+00:17 +8: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 1.5x applies one common clock; every trajectory, arrival and collision is unchanged
+00:17 +9: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:19 +10: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Late chapters render 4/5 characters and 8-column boards at 320/412 px
+00:21 +11: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart
+00:22 +11: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:25 +12: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Last non-goal endpoint shows red counter and undo restores it
+00:25 +13: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Failure prioritizes fresh restart; partial edit remains in menu
+00:25 +14: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: First rules and first gates lessons persist independently
+00:26 +15: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_campaign_test.dart
+00:28 +15: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_campaign_test.dart: One hundred stages preserve all seventy gameplay identities and maps
+00:28 +16: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_campaign_test.dart: Every final-stage certified solution is editable, persisted and runs to success
+00:29 +17: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart
+00:29 +17: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: Lifecycle while loading never overwrites the existing saved game
+00:29 +18: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: No initial selection, no automatic next ball, restart clears selection
+00:29 +19: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: Only exhaustion starts recovery; foreground and background credit combine
+00:30 +20: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: Per-level pools persist, lock toggle is temporary and cannot refill hearts
+00:30 +21: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: Leaving a level does not clear its hearts, completion or saved location
+00:30 +22: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_session_test.dart: Repeated and shared stops keep all owners and visit multiplicity
+00:30 +23: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart
+00:31 +23: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: (setUpAll)
+00:31 +23: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: Mounting while already inactive uses the slow heart clock
+00:33 +24: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: Every level card chooses readable ink, final red grows darker
+00:33 +25: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: Saved location is visible on first hub and after Android back; test lock stays reachable
+00:35 +26: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: Shared revisited endpoints show four flags; empty hearts refill visibly
+00:35 +27: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: Final board remains usable at 320px; campaign stops at its last level
+00:37 +28: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/finale_ui_test.dart: (tearDownAll)
+00:37 +28: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart
+00:38 +28: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: (setUpAll)
+00:38 +28: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: Fifty levels preserve first thirty and all twenty gate hints succeed
+00:40 +29: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: Gate failure, seek, editing and narrow-board rendering
+00:43 +30: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: (tearDownAll)
+00:43 +30: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart
+00:44 +30: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: (setUpAll)
+00:44 +30: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Existing fifty gameplay levels and progress identity preserved; v11 removes titles
+00:44 +31: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Every portal witness is editable, reaches all goals, fixed velocity and undo from exit
+00:45 +32: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Replay jumps exactly at transfer with no midpoint and identical frame schedules
+00:46 +33: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Simultaneous entry and exit contacts keep the transferring ball at IN
+00:46 +34: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal lesson appears once and persists separately from gate lesson
+00:47 +35: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Paused replay can restart from the game menu
+00:48 +36: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal collision stays on the contact, failure supports fresh restart
+00:48 +37: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal and mixed maps render at 320x600 with stable board, light/dark/reduced motion
+00:49 +38: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: (tearDownAll)
+00:49 +38: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart
+00:50 +38: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Different distances share one Step; visual clock never changes position/progress
+00:50 +39: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Collision pose/cue uses exact engine event, even between tiles
+00:50 +40: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Route snapshot is reused across frames, invalidated only by path changes
+00:50 +41: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Renderer/silhouette replacement leaves trace unchanged and releases resources
+00:52 +42: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart
+00:53 +42: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: (setUpAll)
+00:53 +42: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: All 12 new-rule traces render at constant velocity and exact collision anchors
+00:53 +43: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Selection and motion poses are visual only; reduced motion has a static pose
+00:53 +44: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+00:56 +45: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype respects reduced motion and manual cell-time replay
+00:56 +46: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: (tearDownAll)
+00:56 +46: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/replay_geometry_consistency_test.dart
+00:57 +46: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/replay_geometry_consistency_test.dart: Planning endpoint markers never move the physical Units or jump back on Execute
+00:57 +47: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/replay_geometry_consistency_test.dart: Every pilot success/failure render cursor matches exact core motion including all collision pairs
+00:58 +48: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/rolling_ball_test.dart
+00:58 +48: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/rolling_ball_test.dart: Ball uses both rolling axes, keeps turn orientation, and reverses exactly
+00:59 +49: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/rolling_ball_test.dart: Absolute-time rotation is stable for seeking and unit-length at all samples
+00:59 +50: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/rolling_ball_test.dart: Five procedural surface patterns render across horizontal and vertical roll
+00:59 +51: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart
+01:00 +51: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U01/U02/U03 explicit selection, complete gating and selected route undo
+01:00 +52: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U02 invalid taps preserve plan; split, reverse and revisit remain legal
+01:00 +53: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U04/U05 failure stops exactly, all three pairs preserved, edit keeps old paths
+01:00 +54: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U06/U12 early removal, no filler, repeat success unlocks exactly once
+01:00 +55: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U09 pause/background/leave/resume needs explicit continuation and retains draft
+01:00 +56: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U08 reduced motion uses manual scenes and exact collision endpoint
+01:00 +57: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U10 process restart restores validated draft to planning, not autoplay
+01:00 +58: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U10 corrupt/stale draft is isolated; progress reset never deletes another store
+01:00 +59: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U11 delayed save is serialized and latest snapshot wins
+01:00 +60: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U10 saving failure remains retryable and does not discard paths
+01:00 +61: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U12 disposed asynchronous load never updates state
+01:00 +62: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: 30/60/120 FPS cursors and large jumps share the exact stop cursor
+01:00 +63: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart
+01:01 +63: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: (setUpAll)
+01:01 +63: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 320px planning/undo/success/back with no overflow and reachable controls
+01:04 +64: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 360px planning/undo/success/back with no overflow and reachable controls
+01:05 +65: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 412px planning/undo/success/back with no overflow and reachable controls
+01:06 +66: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 736px planning/undo/success/back with no overflow and reachable controls
+01:06 +67: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U02 board taps another Unit start as a destination; drag does not add a command
+01:06 +68: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U04 menu path edits preserve routes after failure
+01:07 +69: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U08 reduced motion remains paused without timers and permits manual scenes
+01:07 +70: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U09 lifecycle pauses replay; return does not start ticker automatically
+01:07 +71: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: Role palette, 6x6 cells, fixed text scaling and controls at 320px
+01:07 +72: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: Capture independent planning screens at narrow/wide and dark palette
+01:08 +73: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: (tearDownAll)
+01:08 +73: All tests passed!
+Resolving dependencies...
+Downloading packages...
+  meta 1.17.0 (1.19.0 available)
+  shared_preferences 2.5.3 (2.5.5 available)
+Got dependencies!
+2 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing sync_path_lab...                                      
+No issues found! (ran in 5.5s)
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/examples/sync_path_lab/test/lab_isolation_test.dart
+00:00 +0: Procedural host starts without atlas assets or the full font
+00:00 +1: only independent devDebug application ID and no app service dependencies
+00:00 +2: All tests passed!
+BUILD GUARD: no active Flutter/Gradle build
+Running Gradle task 'assembleDevDebug'...                          98.7s
+√ Built build\app\outputs\flutter-apk\app-dev-debug.apk
+BUILD GUARD: no active Flutter/Gradle build
+Compiling lib\main.dart for the Web...                             59.6s
+√ Built build\web
+PASS: one hundred levels, isolated DEV debug only; no install.

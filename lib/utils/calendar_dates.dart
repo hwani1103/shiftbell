@@ -18,3 +18,7 @@ Iterable<DateTime> calendarDaysInclusive(DateTime start, DateTime end) sync* {
 /// into a different local calendar date.
 DateTime localCalendarDate(DateTime fields) =>
     DateTime(fields.year, fields.month, fields.day);
+
+/// Move by civil dates, preserving midnight across 23/25-hour DST days.
+DateTime shiftLocalCalendarDay(DateTime value, int days) =>
+    DateTime(value.year, value.month, value.day + days);

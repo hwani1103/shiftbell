@@ -1,0 +1,11 @@
+name: sync_path_tools
+description: Bounded local puzzle solver and certificate verification tools.
+version: 0.1.0
+publish_to: none
+environment:
+  sdk: '>=3.11.0 <4.0.0'
+dependencies:
+  sync_path_core:
+    path: ../sync_path_core
+dev_dependencies:
+  test: ^1.26.0

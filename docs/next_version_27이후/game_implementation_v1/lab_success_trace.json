@@ -1,0 +1,84 @@
+{
+  "outcome": "success",
+  "motions": [
+    {
+      "unitId": "A",
+      "step": 1,
+      "start": [
+        0,
+        0
+      ],
+      "end": [
+        0,
+        2
+      ]
+    },
+    {
+      "unitId": "B",
+      "step": 1,
+      "start": [
+        4,
+        0
+      ],
+      "end": [
+        4,
+        2
+      ]
+    },
+    {
+      "unitId": "A",
+      "step": 2,
+      "start": [
+        0,
+        2
+      ],
+      "end": [
+        2,
+        2
+      ]
+    },
+    {
+      "unitId": "B",
+      "step": 2,
+      "start": [
+        4,
+        2
+      ],
+      "end": [
+        2,
+        2
+      ]
+    }
+  ],
+  "arrivals": [
+    {
+      "unitId": "A",
+      "step": 2,
+      "globalTime": [
+        2,
+        1
+      ]
+    },
+    {
+      "unitId": "B",
+      "step": 2,
+      "globalTime": [
+        2,
+        1
+      ]
+    }
+  ],
+  "earliestCollisions": [],
+  "durationInSteps": [
+    2,
+    1
+  ],
+  "levelIdentity": {
+    "packId": "dev-pilot-12",
+    "levelId": "L01",
+    "revision": 1,
+    "ruleSetId": "shared-goal-v1"
+  },
+  "routeRevision": 1,
+  "ruleSetId": "shared-goal-v1"
+}

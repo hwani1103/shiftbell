@@ -1,0 +1,41 @@
+{
+  "distinctUnderRotationReflectionTranslation": 30,
+  "chapters": [
+    {
+      "levels": "1-5",
+      "target": "2-3",
+      "meanHeuristic": null,
+      "notHumanCalibrated": true
+    },
+    {
+      "levels": "6-10",
+      "target": "3-4",
+      "meanHeuristic": 6.414609954215164,
+      "notHumanCalibrated": true
+    },
+    {
+      "levels": "11-15",
+      "target": "4-5",
+      "meanHeuristic": 8.24680302999466,
+      "notHumanCalibrated": true
+    },
+    {
+      "levels": "16-20",
+      "target": "5-6",
+      "meanHeuristic": 10.527759734862801,
+      "notHumanCalibrated": true
+    },
+    {
+      "levels": "21-25",
+      "target": "6-7",
+      "meanHeuristic": 13.292627009282473,
+      "notHumanCalibrated": true
+    },
+    {
+      "levels": "26-30",
+      "target": "7-8",
+      "meanHeuristic": 17.064426435354573,
+      "notHumanCalibrated": true
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: (setUpAll)
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Thirty safe puzzles respect tutorial, unit introduction and board contracts
+00:02 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Board stays anchored when starting, pausing and editing
+00:11 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Selected ball guide and highlighted legal cells follow the chosen route
+00:12 +3: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: Every map fits 320px without hiding a column; selected chapter screens render
+00:22 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign30_condensed_test.dart: (tearDownAll)
+00:22 +4: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart
+00:25 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart: (setUpAll)
+00:26 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart: Fifty safe puzzles respect tutorial, unit introduction and board contracts
+00:29 +5: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart: Selected ball guide and highlighted legal cells follow the chosen route
+00:35 +6: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart: Every map fits 320px without hiding a column; selected chapter screens render
+00:46 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign50_test.dart: (tearDownAll)
+00:46 +7: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart
+00:50 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 30 levels preserve safe witnesses, unique identities and six chapter targets
+00:52 +8: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: 1.5x applies one common clock; every trajectory, arrival and collision is unchanged
+00:52 +9: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Start opens tutorial even with all 30 unlocked; chapter navigation reaches 30
+00:57 +10: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/campaign_test.dart: Late chapters render 4/5 characters and 8-column boards at 320/412 px
+01:02 +11: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart
+01:06 +11: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+01:10 +12: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Last non-goal endpoint shows red counter and undo restores it
+01:10 +13: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Failure prioritizes fresh restart; partial edit remains in menu
+01:11 +14: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: First rules and first gates lessons persist independently
+01:12 +15: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart
+01:15 +15: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: (setUpAll)
+01:15 +15: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: Fifty levels preserve first thirty and all twenty gate hints succeed
+01:17 +16: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: Gate failure, seek, editing and narrow-board rendering
+01:22 +17: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/gates_campaign_test.dart: (tearDownAll)
+01:22 +17: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart
+01:24 +17: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Different distances share one Step; visual clock never changes position/progress
+01:25 +18: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Collision pose/cue uses exact engine event, even between tiles
+01:25 +19: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Route snapshot is reused across frames, invalidated only by path changes
+01:25 +20: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/presentation_test.dart: Renderer/silhouette replacement leaves trace unchanged and releases resources
+01:27 +21: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart
+01:28 +21: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: (setUpAll)
+01:28 +21: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: All 12 new-rule traces render at constant velocity and exact collision anchors
+01:28 +22: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Selection and motion poses are visual only; reduced motion has a static pose
+01:28 +23: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Rolling balls / selection / direction / reactions / pause / background / disposal, 320 and 412 px
+01:33 +24: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: Prototype respects reduced motion and manual cell-time replay
+01:33 +25: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/prototype_test.dart: (tearDownAll)
+01:33 +25: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/replay_geometry_consistency_test.dart
+01:34 +25: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/replay_geometry_consistency_test.dart: Planning endpoint markers never move the physical Units or jump back on Execute
+01:35 +26: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/replay_geometry_consistency_test.dart: Every pilot success/failure render cursor matches exact core motion including all collision pairs
+01:35 +27: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/rolling_ball_test.dart
+01:36 +27: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/rolling_ball_test.dart: Ball uses both rolling axes, keeps turn orientation, and reverses exactly
+01:36 +28: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/rolling_ball_test.dart: Absolute-time rotation is stable for seeking and unit-length at all samples
+01:36 +29: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/rolling_ball_test.dart: Five procedural surface patterns render across horizontal and vertical roll
+01:37 +30: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart
+01:38 +30: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U01/U02/U03 valid input, complete gating, auto-selection undo exception and manual selection
+01:39 +31: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U02 invalid taps preserve plan; split, reverse and revisit remain legal
+01:39 +32: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U04/U05 failure stops exactly, all three pairs preserved, edit keeps old paths
+01:39 +33: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U06/U12 early removal, no filler, repeat success unlocks exactly once
+01:39 +34: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U09 pause/background/leave/resume needs explicit continuation and retains draft
+01:39 +35: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U08 reduced motion uses manual scenes and exact collision endpoint
+01:39 +36: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U10 process restart restores validated draft to planning, not autoplay
+01:39 +37: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U10 corrupt/stale draft is isolated; progress reset never deletes another store
+01:39 +38: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U11 delayed save is serialized and latest snapshot wins
+01:39 +39: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U10 saving failure remains retryable and does not discard paths
+01:39 +40: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: U12 disposed asynchronous load never updates state
+01:39 +41: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: 30/60/120 FPS cursors and large jumps share the exact stop cursor
+01:39 +42: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart
+01:41 +42: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: (setUpAll)
+01:41 +42: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 320px planning/undo/success/back with no overflow and reachable controls
+01:44 +43: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 360px planning/undo/success/back with no overflow and reachable controls
+01:44 +44: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 412px planning/undo/success/back with no overflow and reachable controls
+01:45 +45: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U07 736px planning/undo/success/back with no overflow and reachable controls
+01:46 +46: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U02 board taps another Unit start as a destination; drag does not add a command
+01:46 +47: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U04 menu path edits preserve routes after failure
+01:46 +48: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U08 reduced motion remains paused without timers and permits manual scenes
+01:47 +49: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: U09 lifecycle pauses replay; return does not start ticker automatically
+01:47 +50: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: Role palette, 6x6 cells, fixed text scaling and controls at 320px
+01:47 +51: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: Capture independent planning screens at narrow/wide and dark palette
+01:48 +52: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/widget_flow_test.dart: (tearDownAll)
+01:48 +52: All tests passed!

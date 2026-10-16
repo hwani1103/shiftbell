@@ -56,10 +56,10 @@ class SleepWidgetActionReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (!ReleaseLocalePolicy.koreanFeatures(context)) return
+        if (!SleepDetectionScheduler.isSleepDetectionEnabled(context)) return
         // ⭐ G4 #19 / G3 연결 요청 #2 - 복원이 DB를 교체하는 동안 위젯 입력으로 수면 기록을 쓰지 않음(입력은 버리고 안내)
         if (RestoreGate.shouldDefer(context, "sleepWidget")) {
-            android.widget.Toast.makeText(context, "백업 복원 중이에요. 잠시 후 다시 눌러주세요.", android.widget.Toast.LENGTH_SHORT).show()
+            android.widget.Toast.makeText(context, context.getString(R.string.sleep_widget_restore_busy), android.widget.Toast.LENGTH_SHORT).show()
             return
         }
         try {
@@ -70,7 +70,7 @@ class SleepWidgetActionReceiver : BroadcastReceiver() {
             }
 
             val now = System.currentTimeMillis()
-            val nowStr = SimpleDateFormat(ISO_FORMAT, Locale.US).format(Date(now))
+            val nowStr = SleepTimestamp.format(now)
 
             val ongoingManual = db.query(
                 "sleep_records", arrayOf("id", "start_time"),
@@ -142,7 +142,7 @@ class SleepWidgetActionReceiver : BroadcastReceiver() {
         if (durationMinutes < minMinutes) {
             db.delete("sleep_records", "id = ?", arrayOf(id.toString()))
             Log.d(TAG, "🗑️ 너무 짧아서(${durationMinutes}분) 기록 버림 (id=$id, 확정시도=$promoteToConfirmed)")
-            Toast.makeText(context, "너무 짧아서 기록하지 않았어요", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.sleep_widget_too_short), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -169,7 +169,7 @@ class SleepWidgetActionReceiver : BroadcastReceiver() {
     private fun parseIso(s: String?): Long? {
         if (s == null) return null
         return try {
-            SimpleDateFormat(ISO_FORMAT, Locale.US).parse(s)?.time
+            SleepTimestamp.parse(s)
         } catch (e: Exception) {
             null
         }

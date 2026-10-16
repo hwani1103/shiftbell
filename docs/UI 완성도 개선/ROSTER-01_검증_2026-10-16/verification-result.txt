@@ -1,0 +1,31 @@
+최종 결과 — 2026-10-16
+
+후속 완료 확인: 같은 날 다른 세션의 check_critical_release.ps1 -Build가 전체 PASS했고 dev debug APK/웹 빌드·설치까지 완료했다. 실제 critical_build.log와 APK/기존 설치 해시 일치를 ROSTER-02_전체회귀완료_교차확인_2026-10-16.txt에서 확인했다. 아래 중단/보류 설명은 당시 기록이며 최신 상태는 UI64와 ROSTER-02를 따른다.
+
+대상 기능/레이아웃: PASS
+- screen-edge-final.txt: 19검사 PASS. 기존보기 폭/정렬12 + 실제 전체 화면7팔레트 선택/복원7.
+- integration-final.txt: 32검사 PASS. 본체 게임통합4 + 전체근무표 모델/팔레트/렌더/월말28.
+- game-regression.txt: 공유 게임 UI/세션/저장/음향20검사 PASS.
+- 합계71개. 앞선 실패 로그의 성공 개수를 중복 합산하지 않는다.
+- analyze-final.txt: 대상7파일 No issues found / exit0.
+- 실제 글꼴을 로드한7팔레트×2보기14PNG. 주간·밤·화이트 화면을 직접 확인했다. 이 PNG는 표 렌더이며 전체 상단 선택 버튼의 동작/저장은 별도 전체 화면 테스트로 확인했다.
+
+필수 회귀
+- critical-no-build.txt: tools/check_critical_release.ps1을 -Build 없이 실행.
+- 번역/한국어 전용/공개 웹 원본 리소스 검사 오류0. 당시 common780키×5언어. 별도 세션의 이후 리소스 변경까지 보증하지 않으므로 최종 gate 재실행 필요.
+- Flutter 기능563검사 PASS(257+128+100+67+11).
+- 첫 번째 네이티브 기능 묶음 PASS / BUILD SUCCESSFUL. 본체 SyncPathsAudio/MainActivity도 여기서 컴파일되었다.
+- 마지막 네이티브 DB 단계는 작업 중인 calendar_tab.dart의 detail_calendar_cell.dart 미존재 오류로 Dart 재컴파일 실패. 전체 스크립트 exit1이며 gate 전체 PASS라고 기록하지 않는다. 달력 소스를 수정하거나 이전 파일로 덮어쓰지 않았다.
+- native-db-separate.txt: 같은 네이티브 DB 명령에서 -x :app:compileFlutterBuildDevDebug로 Dart 재컴파일만 제외하여 분리 실행. G0NativeMigrationTest PASS / BUILD SUCCESSFUL / exit0. XML 별도 보존.
+
+중간 실패 처리
+- 임시 Flutter sqlite3.dll 복사 충돌: 동시 root test 실행을 분리.
+- 초기31일 폭검사의 부동소수점 exact 비교: 허용오차로 수정.
+- 테스트 스케줄 fixture: 실제 myTeam 규칙/기준일과 일치시킴.
+- 게임 위젯 테스트: asset 실제 비동기 읽기 대기 후 포스터 시간을 진행하고, 지속 애니메이션을 기다리지 않도록 테스트에서 동작 줄이기를 사용. 이후 실제 진입/도움말/저장/Back PASS.
+- 기존보기 surfaceVariant의 다른 팔레트 색 잔존은 제품 코드 수정(surfaceContainerHighest) 후 모든 팔레트 날짜 배경을 검증.
+
+미실시/최종 인계
+- Shiftbell APK·웹 최종 빌드/설치/실기기 확인/release 없음.
+- 사용자가 병행 달력 작업까지 끝난 뒤 한 번 빌드하기를 요청하여 -Build는 의도적으로 보류했다.
+- 두 작업 완료 후 통합빌드_인계_2026-10-16.txt의 check_critical_release.ps1 -Build를 단독 실행한다. 실기기 잠금알람/소리 등은 자동 검사와 별도이다.

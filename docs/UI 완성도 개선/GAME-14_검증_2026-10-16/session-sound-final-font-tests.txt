@@ -1,0 +1,28 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: (setUpAll)
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:01 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:01 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +2 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +2 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/session_test.dart: Cleared level reentry resets replay and cached routes but keeps recovery [E]
+  Bad state: Invalid fixture input
+  test\support.dart 36:27      enter
+  test\session_test.dart 63:7  main.<fn>
+  
+00:03 +3 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +4 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +5 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +6 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +7 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +8 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +9 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +10 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +11 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +12 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +13 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:03 +14 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:06 +15 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Last selected route dots disappear during replay, pause and review
+00:06 +16 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Four general help pages and back navigation at 320px (true)
+00:09 +17 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Four general help pages and back navigation at 320px (false)
+00:11 +18 -1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: (tearDownAll)
+00:11 +18 -1: Some tests failed.

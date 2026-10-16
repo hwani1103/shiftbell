@@ -1,0 +1,24 @@
+기본 흰색 표시 / Android 시스템 내비게이션 검정 복구 — UI37 (2026-10-15)
+
+사용자 지시
+- 화면 색상 설정의 기본 흰색 동그라미가 파랗게 보이는 문제 수정.
+- 앱 하단 탭 아래의 Android 홈/뒤로/최근 앱 영역을 화면 색상과 분리해 기존처럼 검정으로 고정.
+- 실행 중인 dev에 바로 핫리로드.
+
+원인과 수정
+- originalWhite의 background/surface/soft는 이미 #FFFFFF였지만, 동그라미가 theme.palette.primary(파란 버튼 강조색)를 표시했음.
+- 색상 미리보기 동그라미는 모든 선택에서 실제 background를 표시하도록 변경. 흰 원의 경계가 사라지지 않도록 팔레트 border 역할을 사용. 버튼 강조색을 흰색으로 바꾸지는 않음.
+- AppUiSystemBars가 최신 Android에서 시스템 내비게이션 영역에 palette.background를 사용해 앱 하단 탭과 경계가 흐려졌음.
+- 공통 withBlackNavigation을 통해 시스템 바/구분선은 검정,시스템 버튼은 밝게,내비게이션 contrast scrim은 비활성으로 고정.
+- AppUiThemeScope가 화면 색상을 사용하지 않는 경로(메인 다크 복구/기존 탭)에서도 같은 시스템 바 정책을 적용. 상태표시줄은 기존 팔레트/아이콘 정책 유지.
+- 화면 색상 저장/달력 선택/근무색/DB/알람/권한 및 설정 복귀 흐름 변경 없음. Android native 변경/기기 시스템 설정 변경 없음.
+
+검증/적용
+- 기존5검사 PASS: app_ui_system_bars_test 2,app_ui_theme_scope_lifecycle_test 1,settings_theme_selector_test 2. 원본 로그 artifacts/screen_color_navigation_2026_10_15/targeted_tests.log.
+- dev 핫리로드 성공: Reloaded 8 of2160 libraries in6,418ms (compile5245ms,reload259ms,reassemble152ms).
+- VM getVM PID3907과 adb의 dev PID3907이 일치함을 확인. 제품판 PID11697과 구분.
+- 최초 읽기 전용 화면 확인에서 제품판이 전면으로 관측되어 dev MainActivity를 한 번 앞으로 요청함. 후속 캡처 시점에도 dev 전면 조건을 충족하지 않아 캡처/픽셀 확인은 생략함. 시스템 바의 실제 스크린샷 PASS로 표현하지 않음.
+- 사용자 flutter run 및 기존 attach 세션 유지. APK/웹/release 재빌드 및 prod 배포 없음. 화면 모양은 dev 앱에서 사용자 관찰로 확인.
+- 수정 직전4파일/해시: artifacts/screen_color_navigation_2026_10_15/before/ 및 before_manifest.json.
+
+후속 UI38: 사용자 기기에서 색상 속성만으로는 검정 배경이 보이지 않음을 확인. AppContentFrame에서 실제 하단 시스템 안전 영역을 검정으로 그리는 보완 후 사용자 해결 확인. UI37 자동 검사/핫리로드 성공만으로 실제 배경까지 확인됐다고 보지 않는다.

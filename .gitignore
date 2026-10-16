@@ -104,3 +104,8 @@ __pycache__/
 
 # Machine-local Android CLI executable used for device verification
 /.tools/android-cli/
+
+# Local OS caches, nested build outputs and a separate dashboard worktree.
+/%SystemDrive%/
+/examples/**/artifacts/
+/work/dashboard-language-release/

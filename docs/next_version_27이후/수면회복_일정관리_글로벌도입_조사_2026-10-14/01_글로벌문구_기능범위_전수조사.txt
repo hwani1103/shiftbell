@@ -1,0 +1,68 @@
+수면·회복 / 일정관리 글로벌 도입 — 문구·기능 범위 조사
+조사일: 2026-10-14 KST. 현재 작업 트리 기준. 구현·번역 반영·배포는 하지 않음.
+
+1. 조사 방법과 범위
+lib, Android main, web의 비생성 소스와 ko/en/de/pt/hi ARB, 한국어 전용 JSON/XML을 검색하고 실제 진입/저장/알림 경로를 읽었다. 과거 docs는 당시 증거로 보존한다. 공통문구_5언어_대조.tsv는 현재 한국어와 외국어 4종의 원문 및 호출 위치다. 한국어전용_전체키_범위.tsv는 196개 키 전체를 포함해 제외 기능도 누락 없이 남겼다. 전체_언급_검색.tsv와 전체_언어게이트.tsv는 주석을 포함한 검색 증거이며 모두 사용자에게 표시되는 문구라는 의미는 아니다. 수면일정_하드코딩_문구후보.tsv의 446행은 소스 문장/조립 템플릿 후보다. 여러 줄 문장·분기·로그가 포함되어 '완성 문장 446개'라고 세면 안 된다.
+현재 외국어는 영어·독일어·브라질 포르투갈어·힌디어다. release_locale.dart에는 영어 지역 US/GB/ZA/IN/AE/PH 및 de-DE/pt-BR/hi-IN이 있다. 8개 외국 국가와 4개 외국 언어는 다른 축이다.
+
+2. 먼저 분리해야 하는 기능 계약
+현재 context.usesKoreanFeatures 및 native ReleaseLocalePolicy.koreanFeatures는 언어==ko 여부다. 국가==한국 조건이 아니다. 이를 true로 넓히면 두 탭뿐 아니라 친구 공유·달력 표현 등까지 열린다.
+제안: supportsPersonalSchedule / supportsSleepRecovery를 별도 capability로 만든다. 친구 공유, 한국 달력 테마 범위, 한국 공휴일 동기화, 알람 이력 표현 등 나머지 언어 차이는 유지한다. 두 capability와 사용자의 탭 ON/OFF를 따로 판단한다.
+일정관리(개인 시간대별 일정)와 일정공유(친구 근무표 공유)는 이름만 비슷하고 다른 기능이다. 이번에 친구 공유를 외국어에 제공한다고 고지하면 안 된다. 전체근무표와 메모·OT는 이미 외국어에 있는 기능이므로 새 기능처럼 재분류하지 않는다.
+
+3. 화면별 변경 준비 목록
+A. 첫 실행 소개
+- onboardingWelcomePopupBody: 한국어의 일정 관리/알림, 수면·회복 소개 2행만 외국어에 추가. 친구 공유 행/카카오 문의는 복사 금지. 선택형 기능임을 짧게 명시.
+- onboardingScheduleTabPopupTitle/Body, onboardingConditionTabPopupTitle/Body: 전용 JSON에서 공통 번역으로 옮길 대상. 실제 설정의 활성화 후 안내 흐름과 명칭 일치.
+B. 설정·하단 탭·숨기기
+- navScheduleManagement, settingsScheduleTabReenableTitle/Subtitle, settingsScheduleFeatureDescription.
+- settingsConditionFeatureTitle/Subtitle/Description 및 main.dart 하드코딩 수면·회복 탭 명칭.
+- settingsEnableFeatureConfirm/Action, settingsEnablingFeature, settingsEnableFeatureFailed, settingsEnableFeatureHideHint.
+- disableTabButtonLabel/DialogBody, scheduleTabDisableExtraNotice, scheduleTabSyncFailed.
+- 단순 노출만 아니라 main.dart의 _tabs, visible indices, 위젯/알림 intent 처리, 활성화 팝업, preload/resume refresh를 같이 검토.
+C. 일정관리 본체
+- 새 일정/수정/삭제, 내용·시간·알림, 정시/N분 전, 과거시각, 저장은 됐으나 예약 실패, 중복 시각/시간대 개수 제한, 분류 중/시간축/튜토리얼/빈 상태/오류/접근성 라벨.
+- schedule_management_tab.dart의 _handleSave 외국어 return 제거만으로 끝내지 말고 분류 정책을 분리. 현재는 외국어 도형 순환 코드가 살아 있는 것이 아님.
+- 25종 의미 카테고리와 기타 10개 도형: 도움말은 실제 채택한 분류 정책에 맞춰 작성. 번호/도형 순환에는 '내용을 이해하여 아이콘 자동 선택'이라고 쓰지 않음.
+- DateFormat이 ko_KR 이외를 en_US로 취급하는 경로, 주아체 고정 fontIndex=5, 날짜·12/24시·글꼴(특히 힌디어)도 변경 준비 대상.
+D. 수면·회복 본체
+- condition_tab.dart, sleep_calendar_full_screen.dart, sleep_edit_dialog.dart, sleep_format_util.dart.
+- 진행 중/확인 대기/맞아요/기록하지 않기/시각 수정/확정/삭제/겹침/미래 시간/전체보기/주 수면/낮잠/표본 부족/근무 유형 평균.
+- recovery_briefing_engine.dart: 상황 6종, 사실, 추천 행동, 판단 범위 전체. condition_rule_engine.dart와 shift_time_category.dart의 라벨·판정 근거도 포함.
+- evidence_database.dart 및 evidence_library_section.dart: 14개 근거자료 제목·요약·적용 한계·연구값과 앱 자체 임계값 구분. URL/연도/저자/논문명은 원문 보존.
+- EnglishConditionTab은 UnavailableFeature만 반환하는 호환용 껍데기. english_sleep_copy/english_recovery_summary는 현행 한국어 브리핑과 동일한 전체 기능 번역본이 아니며 현재 release 진입점으로 재사용 불가.
+E. 근무시간 설정
+- workHoursDefaultDurationDesc: 수면·회복 분석에도 사용된다는 설명 추가. 출퇴근 시각 미설정 안내 및 해당 화면으로 가는 링크 문구 일치. 다른 급여·OT/공휴일 계약은 유지.
+F. 도움말
+- helpScheduleTab* 7키(섹션+3쌍), helpCondition* 7키, helpSleep* 7키: 세 섹션만 새 capability로 공개. 친구 공유 섹션 및 친구 연결 문제 항목은 계속 제외.
+- helpScheduleTabAutoCategoryBody는 결정된 외국어 아이콘 정책으로 별도 작성.
+- helpBackupDataStorageBody: 일정/수면의 기기 저장과 로컬 백업을 추가하되 친구 공유 문단은 복사하지 않음. 현재 외국어의 Analytics/광고 예외 설명은 유지.
+- helpCalendarHomeWidget*, helpTroubleshootWidget*: 기존 달력 위젯 설명에 수면 위젯이 섞이지 않는지 분리 확인. 수면 위젯은 전용 항목으로 추가.
+- helpBackupRestoreOldBackupFail*는 한국어 전용이지만 두 기능에만 국한된 도움말이 아님. 이번 도입과 자동으로 묶어 공개하지 않음.
+G. 백업·복원·데이터 삭제
+- settingsRestoreFromBackupWarningBody뿐 아니라 settingsRestoreFromBackupConfirmBody, backupRestoreFoundDesc, restoreInterruptedDesc 및 설정의 백업/복원 설명도 함께 검토.
+- 외국어는 알람 이력 병합/울림·스누즈 보존을 명시하는 더 구체적인 문구가 있다. 한국어의 '모든 데이터 완전히 덮어쓰기'를 통째로 옮기면 기존의 정확한 설명을 잃는다. 여기에 personal events / sleep records만 추가.
+- 데이터 보존/백업에 수면 및 일정이 들어감을 명시하되 언어 변경/탭 숨기기를 데이터 삭제처럼 설명하지 않음.
+H. 개인정보처리방침(공통 ARB)
+- privacyNoCollectionBody: 로컬 일정·수면, 화면 켜짐 여부·충전 상태를 이용한 기기 내 자동 추정 설명 추가. '전혀 수집하지 않음' 같은 절대 표현으로 바꾸지 않음.
+- privacyAnalyticsBody: 일정·수면 기능 사용 횟수, 수면 원문/일정 내용·시간의 미전송 경계. native 위젯 기록을 모두 같은 이벤트로 집계한다고 약속하면 안 됨.
+- privacyDataRetentionBody: 로컬 DB와 비암호화 백업에 두 기능 데이터 포함, 앱 삭제 후 Download 파일 잔존, 사용자 삭제·기존 데이터 보존. 외국어의 기존 이메일 30일 보관·진단 파일 문단 유지.
+- privacyAdsBody: 수면/일정 내용도 광고 요청에 넣지 않는다는 실제 계약에 맞춰 문장 확장 검토.
+- privacyPermissionsBody: 일정 알림/자동 수면 추정에서 기존 알림·정확한 알람 사용을 설명. 새 센서/Health Connect/위치 권한을 쓴다고 쓰지 않음. 채널 차단과 앱 알림 차단을 동일시하지 않음.
+- privacyFirebaseBody: 친구 공유·한국 공휴일 문단을 추가하지 않음. 이번 두 기능은 로컬 기능이므로 Firebase에 수면 데이터를 저장한다고 고지하면 잘못이다.
+- privacyIntro/Children/Contact/EffectiveDate: 두 기능 도입 버전에 맞게 적용일·일반 건강안내 성격 검토. 외국어 문의 방식은 기존 유지.
+I. 앱 밖 소개와 웹
+- updateReleaseNoteBody: 실제 출시 버전에서 두 기능 추가를 설명. 과거 한국어 릴리스 노트 전체 복사 금지.
+- publicWebIntroBody: 앱 소개의 두 기능 언급 후보. 웹에서도 수면기록/개인일정 편집을 제공한다는 의미가 되지 않게 'Android 앱에서' 구분.
+- lib/web_main.dart /privacy는 같은 PrivacyPolicyScreen/ARB를 사용. 공개 다국어 친구 근무표 뷰어는 현재 계약대로 유지하며, 앱 전용 capability로 공개 뷰어를 차단하지 않음.
+- 외부 GitHub Pages 방침 https://hwani1103.github.io/shiftbell-privacy/ 도 함께 갱신해야 한다. 기존 2026-10-12 원장에는 외국어 페이지의 한국어 전용/과거 기능 부록이 명시되어 있음. 도입 후에는 현재 제공 설명과 잔여 전용기능 부록을 분리.
+- 이번 web 도구는 위 공개 주소 조회 실패. 로컬 10/12 배포 원장까지 확인했으며 현재 게시 본문 일치는 미확인. 스토어 Console 현재 본문/국가별 스크린샷도 직접 조회하지 않았으므로 출시 직전 대조 필요.
+J. Android
+- values/korean_only.xml 원문 10개를 부록 XML로 보존. channel_schedule_notify, 수면 위젯 이름·브랜드·설명·버튼·탭 OFF/근무 없음/미설정/정보 없음 전부 번역.
+- SleepWidgetActionReceiver의 복원 중/너무 짧은 기록 Toast, SleepWidgetProvider의 시간 표현 및 fallback, ScheduleNotificationReceiver의 시간 헤드라인/채널 이름까지 포함.
+- ReleaseLocalePolicy.syncSleepWidget, SleepDetectionScheduler, SleepWidgetProvider/ActionReceiver, ScheduleNotificationScheduler의 locale guard, Manifest 초기 disabled와 재부팅/언어전환/업데이트/딥링크 동작 동시 변경 필요.
+- 앱의 토글 ON만 바꾸면 native는 계속 외국어 예약/위젯을 차단한다.
+
+4. 구현 때 지켜야 할 리소스 구조
+두 기능 키만 검토 후 공통 ARB로 이관하여 ko/en/de/pt/hi를 모두 채운다. 친구공유 등 남은 한국어 전용키는 그대로 둔다. KoreanOnlyCopy/generated 번역 파일 직접 수정 금지. tools/generate_korean_only_copy.py 및 flutter gen-l10n 등 기존 생성기를 사용하고 공통 키·변수·누락 검사 유지. foreign ARB에 빈 문자열 또는 한국어 fallback을 넣지 않음.
+이번 기록은 조사 산출물이며 실제 앱 리소스/기능 범위를 변경하지 않았음. 구현 시에는 tools/check_critical_release.ps1 -Build 필수(dev debug+웹). 명시 승인 없는 release 빌드 금지. 외국어 미제공을 검사하는 기존 테스트는 두 기능만 새 제공 계약으로 바꾸고 친구공유/공개 웹 경계 검사는 유지.

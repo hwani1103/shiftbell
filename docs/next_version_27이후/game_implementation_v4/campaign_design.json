@@ -1,0 +1,3917 @@
+{
+  "humanPlaytest": "NOT_TESTED",
+  "difficulty": "relative authoring targets, not measured ratings",
+  "levels": [
+    {
+      "id": "L01",
+      "source": "previous-L01",
+      "targetDifficulty": "2–3",
+      "concept": "첫 합류"
+    },
+    {
+      "id": "L02",
+      "source": "previous-L02",
+      "targetDifficulty": "2–3",
+      "concept": "같은 자리, 같은 순간"
+    },
+    {
+      "id": "L03",
+      "source": "previous-L03",
+      "targetDifficulty": "2–3",
+      "concept": "길이 겹쳐도"
+    },
+    {
+      "id": "L04",
+      "source": "previous-L10",
+      "targetDifficulty": "2–3",
+      "concept": "앞사람 따라가기"
+    },
+    {
+      "id": "L05",
+      "source": "previous-L07",
+      "targetDifficulty": "2–3",
+      "concept": "돌아가는 이유"
+    },
+    {
+      "id": "L06",
+      "source": {
+        "seed": 271014,
+        "attempt": 5270
+      },
+      "targetDifficulty": "3–4",
+      "metrics": {
+        "units": 2,
+        "temporalChoices": {
+          "A": 7,
+          "B": 5
+        },
+        "temporalCombinations": 35,
+        "distinctSolutions": 10,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 5,
+        "constraintBits": 1.8073549220576042,
+        "score": 5.613309714925922,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                2
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L07",
+      "source": {
+        "seed": 271014,
+        "attempt": 1242
+      },
+      "targetDifficulty": "3–4",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 3,
+          "B": 4,
+          "C": 6
+        },
+        "temporalCombinations": 72,
+        "distinctSolutions": 10,
+        "minimumExtraDistance": 0,
+        "minimumDetouringUnits": 0,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 6,
+        "constraintBits": 2.84799690655495,
+        "score": 5.901598607949728,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                3
+              ],
+              [
+                4,
+                5
+              ],
+              [
+                2,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                5
+              ],
+              [
+                2,
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L08",
+      "source": {
+        "seed": 271014,
+        "attempt": 6026
+      },
+      "targetDifficulty": "3–4",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 2,
+          "B": 4,
+          "C": 7
+        },
+        "temporalCombinations": 56,
+        "distinctSolutions": 5,
+        "minimumExtraDistance": 0,
+        "minimumDetouringUnits": 0,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 7,
+        "constraintBits": 3.4854268271702415,
+        "score": 6.308442072226609,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                1
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L09",
+      "source": {
+        "seed": 271013,
+        "attempt": 771
+      },
+      "targetDifficulty": "3–4",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 3,
+          "B": 2,
+          "C": 3
+        },
+        "temporalCombinations": 18,
+        "distinctSolutions": 6,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 7,
+        "constraintBits": 1.5849625007211563,
+        "score": 7.053233125324521,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                3,
+                3
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                2,
+                2
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L10",
+      "source": {
+        "seed": 271014,
+        "attempt": 6536
+      },
+      "targetDifficulty": "3–4",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 3,
+          "B": 6,
+          "C": 3
+        },
+        "temporalCombinations": 54,
+        "distinctSolutions": 12,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 6,
+        "constraintBits": 2.1699250014423126,
+        "score": 7.196466250649041,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                2
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                3,
+                2
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                1,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              1,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L11",
+      "source": {
+        "seed": 271014,
+        "attempt": 8631
+      },
+      "targetDifficulty": "4–5",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 8,
+          "B": 3,
+          "C": 1
+        },
+        "temporalCombinations": 24,
+        "distinctSolutions": 6,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 7,
+        "constraintBits": 2.0,
+        "score": 7.240000000000001,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                5,
+                5
+              ],
+              [
+                0,
+                5
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                3
+              ],
+              [
+                0,
+                3
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              5
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L12",
+      "source": {
+        "seed": 271014,
+        "attempt": 7406
+      },
+      "targetDifficulty": "4–5",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 14,
+          "B": 1,
+          "C": 10
+        },
+        "temporalCombinations": 140,
+        "distinctSolutions": 16,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 7,
+        "constraintBits": 3.129283016944967,
+        "score": 7.748177357625235,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                3,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                5,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                3
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                5,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              5,
+              4
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L13",
+      "source": {
+        "seed": 271014,
+        "attempt": 5202
+      },
+      "targetDifficulty": "4–5",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 3,
+          "B": 3,
+          "C": 4
+        },
+        "temporalCombinations": 36,
+        "distinctSolutions": 3,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 10,
+        "constraintBits": 3.5849625007211565,
+        "score": 8.31323312532452,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                5,
+                2
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                0,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                0,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                2
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                0,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              5,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              0,
+              4
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L14",
+      "source": {
+        "seed": 271014,
+        "attempt": 2836
+      },
+      "targetDifficulty": "4–5",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 11,
+          "B": 17,
+          "C": 5
+        },
+        "temporalCombinations": 935,
+        "distinctSolutions": 27,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 8,
+        "constraintBits": 5.113935052611531,
+        "score": 8.76127077367519,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                3
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                5,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                5,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                4
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                5,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L15",
+      "source": {
+        "seed": 271014,
+        "attempt": 3342
+      },
+      "targetDifficulty": "4–5",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 24,
+          "B": 5,
+          "C": 6
+        },
+        "temporalCombinations": 720,
+        "distinctSolutions": 16,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 10,
+        "constraintBits": 5.491853096329675,
+        "score": 9.171333893348354,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                5,
+                5
+              ],
+              [
+                6,
+                5
+              ],
+              [
+                1,
+                5
+              ],
+              [
+                1,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                5
+              ],
+              [
+                1,
+                5
+              ],
+              [
+                1,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                5
+              ],
+              [
+                1,
+                5
+              ],
+              [
+                1,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              5,
+              5
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              1,
+              4
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L16",
+      "source": {
+        "seed": 271014,
+        "attempt": 8923
+      },
+      "targetDifficulty": "5–6",
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 5,
+          "B": 3,
+          "C": 7,
+          "D": 4
+        },
+        "temporalCombinations": 420,
+        "distinctSolutions": 48,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 11,
+        "constraintBits": 3.129283016944967,
+        "score": 9.528177357625236,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                3,
+                5
+              ],
+              [
+                4,
+                5
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                5,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                3
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                5,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                3
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                5,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                5,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              5,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L17",
+      "source": {
+        "seed": 271014,
+        "attempt": 5581
+      },
+      "targetDifficulty": "5–6",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 4,
+          "B": 5,
+          "C": 6
+        },
+        "temporalCombinations": 120,
+        "distinctSolutions": 3,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 11,
+        "constraintBits": 5.321928094887363,
+        "score": 10.114867642699314,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                3,
+                4
+              ],
+              [
+                3,
+                1
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                3,
+                1
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                4
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                0,
+                1
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L18",
+      "source": {
+        "seed": 271014,
+        "attempt": 7363
+      },
+      "targetDifficulty": "5–6",
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 30,
+          "B": 7,
+          "C": 1,
+          "D": 3
+        },
+        "temporalCombinations": 630,
+        "distinctSolutions": 15,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 11,
+        "constraintBits": 5.392317422778761,
+        "score": 10.546542840250442,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                3,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                3
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                3,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                3,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                4,
+                1
+              ],
+              [
+                3,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              3,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              3,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L19",
+      "source": {
+        "seed": 271014,
+        "attempt": 2157
+      },
+      "targetDifficulty": "5–6",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 4,
+          "B": 7,
+          "C": 21
+        },
+        "temporalCombinations": 588,
+        "distinctSolutions": 8,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 10,
+        "constraintBits": 6.199672344836364,
+        "score": 11.089852555176364,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                6,
+                2
+              ],
+              [
+                6,
+                1
+              ],
+              [
+                7,
+                1
+              ],
+              [
+                7,
+                7
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                3,
+                6
+              ],
+              [
+                3,
+                5
+              ],
+              [
+                7,
+                5
+              ],
+              [
+                7,
+                7
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                7,
+                2
+              ],
+              [
+                7,
+                7
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ],
+            [
+              7,
+              1
+            ],
+            [
+              7,
+              7
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              6
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              7,
+              5
+            ],
+            [
+              7,
+              7
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              7,
+              2
+            ],
+            [
+              7,
+              7
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L20",
+      "source": {
+        "seed": 271014,
+        "attempt": 5586
+      },
+      "targetDifficulty": "5–6",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 8,
+          "B": 4,
+          "C": 17
+        },
+        "temporalCombinations": 544,
+        "distinctSolutions": 2,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 11,
+        "constraintBits": 8.08746284125034,
+        "score": 11.359358278562654,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                3
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                3
+              ],
+              [
+                2,
+                3
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                4
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                1,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L21",
+      "source": {
+        "seed": 271014,
+        "attempt": 5963
+      },
+      "targetDifficulty": "6–7",
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 3,
+          "B": 4,
+          "C": 3,
+          "D": 3
+        },
+        "temporalCombinations": 108,
+        "distinctSolutions": 3,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 19,
+        "constraintBits": 5.169925001442312,
+        "score": 12.30646625064904,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                5
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                3,
+                2
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                4,
+                5
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                2,
+                5
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                0,
+                2
+              ],
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L22",
+      "source": {
+        "seed": 271014,
+        "attempt": 602
+      },
+      "targetDifficulty": "6–7",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 41,
+          "B": 23,
+          "C": 3
+        },
+        "temporalCombinations": 2829,
+        "distinctSolutions": 4,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 12,
+        "constraintBits": 9.466076461396254,
+        "score": 12.799734407628314,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                6,
+                2
+              ],
+              [
+                6,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                3,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                6,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                6,
+                2
+              ],
+              [
+                6,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L23",
+      "source": {
+        "seed": 271014,
+        "attempt": 2893
+      },
+      "targetDifficulty": "6–7",
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 1,
+          "B": 17,
+          "C": 20,
+          "D": 7
+        },
+        "temporalCombinations": 2380,
+        "distinctSolutions": 6,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 12,
+        "constraintBits": 8.63178335747415,
+        "score": 13.024302510863366,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                2,
+                4
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                5,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                2
+              ],
+              [
+                5,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                3,
+                2
+              ],
+              [
+                5,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                3,
+                4
+              ],
+              [
+                3,
+                2
+              ],
+              [
+                5,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L24",
+      "source": {
+        "seed": 271014,
+        "attempt": 2859
+      },
+      "targetDifficulty": "6–7",
+      "metrics": {
+        "units": 5,
+        "temporalChoices": {
+          "A": 3,
+          "B": 2,
+          "C": 3,
+          "D": 6,
+          "E": 3
+        },
+        "temporalCombinations": 324,
+        "distinctSolutions": 48,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 0,
+        "minimumTotalCommands": 18,
+        "constraintBits": 2.7548875021634687,
+        "score": 13.999699375973561,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                0
+              ],
+              [
+                3,
+                0
+              ],
+              [
+                3,
+                1
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                5
+              ],
+              [
+                3,
+                5
+              ],
+              [
+                3,
+                1
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                0
+              ],
+              [
+                3,
+                0
+              ],
+              [
+                3,
+                1
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                5,
+                0
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "E",
+            "endpoints": [
+              [
+                1,
+                0
+              ],
+              [
+                3,
+                0
+              ],
+              [
+                3,
+                1
+              ],
+              [
+                5,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              5
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              5,
+              0
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "E",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L25",
+      "source": {
+        "seed": 271014,
+        "attempt": 3782
+      },
+      "targetDifficulty": "6–7",
+      "metrics": {
+        "units": 3,
+        "temporalChoices": {
+          "A": 36,
+          "B": 8,
+          "C": 9
+        },
+        "temporalCombinations": 2592,
+        "distinctSolutions": 2,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 14,
+        "constraintBits": 10.339850002884624,
+        "score": 14.33293250129808,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                0,
+                0
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                3,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                1
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                5,
+                3
+              ],
+              [
+                3,
+                3
+              ],
+              [
+                3,
+                5
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                5,
+                1
+              ],
+              [
+                5,
+                4
+              ],
+              [
+                3,
+                4
+              ],
+              [
+                3,
+                5
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              1
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              5
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L26",
+      "source": {
+        "seed": 271014,
+        "attempt": 3563
+      },
+      "targetDifficulty": "7–8",
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 4,
+          "B": 27,
+          "C": 16,
+          "D": 17
+        },
+        "temporalCombinations": 29376,
+        "distinctSolutions": 16,
+        "minimumExtraDistance": 4,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 15,
+        "constraintBits": 10.842350343413809,
+        "score": 15.079057654536214,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                5,
+                4
+              ],
+              [
+                5,
+                2
+              ],
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                0,
+                2
+              ],
+              [
+                1,
+                2
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                1,
+                1
+              ],
+              [
+                1,
+                0
+              ],
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              5,
+              4
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L27",
+      "source": {
+        "seed": 271014,
+        "attempt": 6134
+      },
+      "targetDifficulty": "7–8",
+      "metrics": {
+        "units": 5,
+        "temporalChoices": {
+          "A": 20,
+          "B": 11,
+          "C": 14,
+          "D": 3,
+          "E": 4
+        },
+        "temporalCombinations": 36960,
+        "distinctSolutions": 6,
+        "minimumExtraDistance": 2,
+        "minimumDetouringUnits": 1,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 17,
+        "constraintBits": 12.588714635582264,
+        "score": 15.804921586012018,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                6,
+                6
+              ],
+              [
+                5,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                6,
+                6
+              ],
+              [
+                5,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                5,
+                3
+              ],
+              [
+                5,
+                4
+              ],
+              [
+                6,
+                4
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                5,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                4,
+                2
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                5,
+                6
+              ]
+            ]
+          },
+          {
+            "unitId": "E",
+            "endpoints": [
+              [
+                4,
+                0
+              ],
+              [
+                4,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                6,
+                6
+              ],
+              [
+                5,
+                6
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "E",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L28",
+      "source": {
+        "seed": 271014,
+        "attempt": 3958
+      },
+      "targetDifficulty": "7–8",
+      "metrics": {
+        "units": 4,
+        "temporalChoices": {
+          "A": 7,
+          "B": 7,
+          "C": 17,
+          "D": 19
+        },
+        "temporalCombinations": 15827,
+        "distinctSolutions": 22,
+        "minimumExtraDistance": 8,
+        "minimumDetouringUnits": 3,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 14,
+        "constraintBits": 9.490668580171835,
+        "score": 16.850800861077325,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                0
+              ],
+              [
+                2,
+                0
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                0,
+                1
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                2,
+                4
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                2,
+                3
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                1,
+                4
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                4,
+                4
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              4
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              1,
+              4
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L29",
+      "source": {
+        "seed": 271013,
+        "attempt": 14
+      },
+      "targetDifficulty": "7–8",
+      "metrics": {
+        "units": 5,
+        "temporalChoices": {
+          "A": 8,
+          "B": 18,
+          "C": 9,
+          "D": 6,
+          "E": 3
+        },
+        "temporalCombinations": 23328,
+        "distinctSolutions": 18,
+        "minimumExtraDistance": 8,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 1,
+        "minimumTotalCommands": 15,
+        "constraintBits": 10.339850002884624,
+        "score": 17.952932501298083,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                4,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                1,
+                4
+              ],
+              [
+                1,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                2,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          },
+          {
+            "unitId": "E",
+            "endpoints": [
+              [
+                6,
+                2
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              4
+            ],
+            [
+              1,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "E",
+          "endpoints": [
+            [
+              6,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L30",
+      "source": {
+        "seed": 271014,
+        "attempt": 389
+      },
+      "targetDifficulty": "7–8",
+      "metrics": {
+        "units": 5,
+        "temporalChoices": {
+          "A": 9,
+          "B": 9,
+          "C": 7,
+          "D": 35,
+          "E": 2
+        },
+        "temporalCombinations": 39690,
+        "distinctSolutions": 1,
+        "minimumExtraDistance": 6,
+        "minimumDetouringUnits": 2,
+        "minimumReversingUnits": 2,
+        "minimumTotalCommands": 18,
+        "constraintBits": 15.276487941887197,
+        "score": 19.634419573849236,
+        "witness": [
+          {
+            "unitId": "A",
+            "endpoints": [
+              [
+                1,
+                3
+              ],
+              [
+                1,
+                1
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "B",
+            "endpoints": [
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "C",
+            "endpoints": [
+              [
+                7,
+                0
+              ],
+              [
+                7,
+                1
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "D",
+            "endpoints": [
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          },
+          {
+            "unitId": "E",
+            "endpoints": [
+              [
+                2,
+                2
+              ],
+              [
+                2,
+                1
+              ],
+              [
+                4,
+                1
+              ],
+              [
+                4,
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              7,
+              0
+            ],
+            [
+              7,
+              1
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "E",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              4,
+              0
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

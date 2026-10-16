@@ -69,10 +69,16 @@ bool isBackupPreferenceKey(String key) =>
 enum BackupPrefType { boolean, integer, real, string, stringList }
 
 const Map<String, BackupPrefType> kBackupPreferenceTypes = {
+  'all_shifts_layout': BackupPrefType.string,
+  'shiftbell.syncPaths.progress.v1': BackupPrefType.string,
   'default_snooze_minutes': BackupPrefType.integer,
   'schedule_tab_enabled': BackupPrefType.boolean,
   'condition_tab_enabled': BackupPrefType.boolean,
+  'sleep_global_enabled_v1': BackupPrefType.boolean,
   'calendar_theme_id': BackupPrefType.string,
+  'app_ui_preview_theme': BackupPrefType.string,
+  'calendar_main_merge_v1': BackupPrefType.boolean,
+  'calendar_main_before_merge': BackupPrefType.string,
   'work_hours_period_mode': BackupPrefType.string,
   'work_hours_payday_cutoff_day': BackupPrefType.integer,
   'work_hours_cutoff_anchor': BackupPrefType.string,

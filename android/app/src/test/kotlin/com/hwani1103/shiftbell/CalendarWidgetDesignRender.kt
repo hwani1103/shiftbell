@@ -22,7 +22,7 @@ class CalendarWidgetDesignRender {
     @Test fun renderOnly() {
         val app = ApplicationProvider.getApplicationContext<Context>()
         for (tag in listOf("ko-KR", "de-DE", "hi-IN")) for (single in listOf(false,true))
-            for (hour in listOf(12,22)) for (height in if(single) listOf(102) else listOf(200,228,300)) {
+            for (hour in listOf(12,22)) for (height in if(single) listOf(102) else listOf(200,228,350,420,500,700)) {
             val ctx = app.createConfigurationContext(Configuration(app.resources.configuration).apply {
                 setLocale(Locale.forLanguageTag(tag)); densityDpi = 320
             })
@@ -33,7 +33,7 @@ class CalendarWidgetDesignRender {
             val sample = when(tag) { "ko-KR" -> listOf("약속시간변경", "운동", "장보기")
                 "hi-IN" -> listOf("मुलाकात", "व्यायाम", "खरीदारी")
                 else -> listOf("Besprechung", "Training", "Einkaufen") }
-            val notes = (0..20).associate { i -> CalendarWidgetProvider.dateKeyFor((start.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH,i) }) to sample.take(i%4) }
+            val notes = (0..41).associate { i -> CalendarWidgetProvider.dateKeyFor((start.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH,i) }) to sample }
             val root = CalendarWidgetProvider.buildRemoteViews(ctx,single,now,data,notes,320f,heightDp=height.toFloat()).apply(ctx,FrameLayout(ctx))
             repeat(2) {
                 root.measure(View.MeasureSpec.makeMeasureSpec(640,View.MeasureSpec.EXACTLY),View.MeasureSpec.makeMeasureSpec(height*2,View.MeasureSpec.EXACTLY))
@@ -41,7 +41,7 @@ class CalendarWidgetDesignRender {
             }
             val bitmap = Bitmap.createBitmap(640,height*2,Bitmap.Config.ARGB_8888)
             root.draw(Canvas(bitmap))
-            val file = File("../../artifacts/calendar_widget_design_v2/"+tag+(if(single) "-week" else "-three")+"-"+hour+"-"+height+".png")
+            val file = File("../../artifacts/widget_month_2026_10_16/render/"+tag+(if(single) "-week" else "-multi")+"-"+hour+"-"+height+".png")
             file.parentFile?.mkdirs(); file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG,100,it) }
         }
     }

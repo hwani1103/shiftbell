@@ -1,0 +1,44 @@
+달력 월 스와이프 — 표 경계 동행 및 중복 갱신 개선 (2026-10-16)
+
+범위/이전 기준
+- 사용자 신고: dev 테마 작업 뒤 심플라인·다크그리드·매거진의 표가 고정된 채 데이터만 이동. 기존 출시 prod에도 좌우 스와이프가 미세하게 끊긴다는 관찰.
+- UI47~59와 기존 미커밋 작업을 보존. 이번 변경 직전 파일은 artifacts/calendar_swipe_2026_10_16/before/에 보존.
+- 현재 브랜치 dev. main/출시 설치본 변경·release 빌드·배포 없음.
+
+원인과 구현
+1. UI52의 CalendarDateGrid를 CalendarTab 바깥 Stack/Positioned.fill에서 그려 PageView 밖에 고정됐음. 적용 대상은 minimal/boldGrid/editorial. 메인 테마의 TableBorder는 이미 월 페이지에 속해 있었음.
+- CalendarDateGridBorder를 TableCalendar.calendarStyle.tableBorder로 연결. 기존 CalendarDateGrid의 경계 규격을 실제 월 Table의 좌표로 그린다. 셀 전체 fit와 분리하고, 마지막 줄의 날짜 칸까지만 닫는 기존 계약 유지.
+- 날짜·요일·선은 함께 이동. 고정된 하단 동작 버튼/요약 영역 계약 유지. 타이포·셀 비율·근무색·DB 변경 없음.
+2. onPageChanged는 손을 놓기 전/페이지 경계 통과 시점에도 호출된다. 기존에는 부모 CalendarTab setState와 메모/OT DB 조회를 즉시 실행했고 조회 결과가 같아도 각각 새 Map 상태를 발행했다.
+- 내부 TableCalendar 이동은 유지하고, 외곽 헤더/요약과 월 조회는 수평 ScrollEnd 이후 한 번 실행. 중첩 스크롤은 제외하고 빠른 재드래그 때 최신 월만 적용.
+- MemoNotifier/OvertimeNotifier는 값이 같으면 상태 발행 생략. 메모는 조회 범위에서 삭제된 행도 제거하며 범위 밖 값은 보존한다.
+3. _lineHeightOf가 날짜 셀마다 같은 TextPainter 측정을 반복하고 dispose하지 않았음.
+- 최종 TextStyle+TextScaler별 높이 캐시 최대128, 측정 후 painter dispose. 글꼴/크기/leading/배율 변화는 다른 키로 재측정. 레이아웃 공식/폰트 크기 변경 없음.
+- main 소스(version1.0.24+27)에서도 즉시 월 갱신/반복 텍스트 측정 경로 확인. 출시 설치본의 예전 대비 회귀 시점을 단정하지 않는다.
+
+검증 (진행/최종 결과는 아래 추가)
+- test/calendar_app_frame_test.dart: 한글10개·영어7개(해외 추가2개 포함)·de/pt/hi 대표3개=20 PASS. 실제 좌우 드래그, 월 복귀, 모든 팔레트 전환, 기존 근무색/치수 및 광고 슬롯 보존 확인.
+- 초기 테스트의 첫 drag move는 제스처 slop 소진만 해서 이동값0으로 실패. 추가 초기 이동 후 본 드래그를 검사하도록 수정. 수정 뒤 위20 PASS.
+- 메모/OT 같은 값 재조회 시 알림0·수정/삭제 반영, 기존 DST OT11개, 복구 뒤로가기4개와 표 경계4개는 대상 실행에서 통과. 최종 별도 로그로 연결 예정.
+- 변경5파일 분석: error/warning0, 기존 info107개. 전체 무경고 PASS로 확대하지 않음.
+- 호스트 중간 프레임 PNG: artifacts/calendar_swipe_2026_10_16/host/. 표 경계가 월 페이지와 함께 이동함을 확인.
+- 필수 -Build 첫 실행은 동시 호스트 검사와 Windows SQLite DLL 복사 충돌로 중단. 제품 테스트 실패와 구분. 단독 재실행 진행.
+- 실기기 SM-S948N(R5KL20DHWAE) dev debug 전후 동일4회 스와이프 계측. before_*_timeline.json은 수정 전 설치본. debug 값은 release 프레임 보장이 아님.
+
+최종 자동 검사/산출물
+- check_critical_release.ps1 -Build 단독 재실행 exit0: Flutter563검사, native 기능·권한·언어·DB이관, dev debug APK, JS웹 빌드 PASS. critical_build_retry.log 참조. Android release 미실행. 웹 wasm dry-run 기존 비호환 경고와 CupertinoIcons 경고는 JS웹 성공과 구분.
+- 최종 대상22검사 PASS(targeted_final_retry.log): 기존 표 픽셀4+TableBorder 픽셀 동등성1, 메모/OT 중복갱신2, 복구화면 내비게이션4, 기존 OT 날짜/DST11.
+- 마지막 ScrollEnd scheduleFrame 보완 뒤 영향 한글3테마 추가 드래그/팔레트 검사 PASS(gesture_final.log). 앞선20개 전체 결과 보존.
+- 최종 검사 중 동시 별도 작업의 sync_path_core/ui 로컬 패키지 및 l10n 생성값 미해석으로 복구화면 검사 로딩 실패1회. 기존 코드 보존·현재 pubspec에 맞춘 pub get 후22 PASS. 달력 제품 실패와 구분.
+- APK artifacts/calendar_swipe_2026_10_16/app-dev-debug.apk, SHA256 7e2ce23e4332710ce9b1b9206e3f112a1fa6a639043da6a0076193da69b94ccd. SM-S948N dev에 install -r -t 성공. 빌드 이후 별도 작업의 새 기능 코드는 이 APK에 포함 완료로 주장하지 않는다.
+- 설치 전/후18테이블 quick_check OK.17테이블 동일. shift_schedule은 shift_colors만 변경, preferences는 calendar_theme_id(materialCard→initialBadge) 및 자동백업 시각/해시 변경. 이 검증의 probe는 setTheme/DB쓰기/복구를 실행하지 않았고 원인 단정 없이 최신 사용자 선택을 보존했다. 데이터/테마 전부 exact보존이라고 표현하지 않는다. 비교 원본 data_comparison.json.
+
+실기기 성능 비교
+- dev 프로세스 재시작/정상 attach 후4테마 동일 제스처(각4회) 계측 완료. before/after_*_timeline.json 및 *_frame_summary.json. VM timeline Frame b/e 차이, 단위ms.
+- 심플라인 p99 59.822→43.575, 최대95.200→89.638,16.67ms 초과6→6.
+- 다크그리드 p99 76.586→1.704, 최대97.205→87.564, 초과6→3.
+- 매거진 p99 54.790→35.710, 최대68.721→45.999, 초과7→6.
+- 소프트카드 p99 44.009→38.273, 최대62.282→48.242, 초과6→6.
+- debug 단일 비교의 느린 구간 감소 확인. 모든 끊김 제거/출시 release 프레임 보장/정확한 과거 회귀 시점 증명은 아니다. 중간 사용자 선택 변화(위 shift_colors)도 존재하므로 통제된 제품 벤치마크나 전체 동일데이터 주장으로 확대하지 않는다.
+
+- 실기기 세 테마 이동 중 캡처 after_minimal/boldGrid/editorial_moving.png. 날짜 셀 경계가 함께 좌우 이동함을 확인. 계측용 일시 테마 선택은 원래 initialBadge로 되돌렸다. 정상 dev 재실행 완료.

@@ -1,0 +1,118 @@
+ M .github/workflows/dashboard-sync.yml
+ M AGENTS.md
+ M admin_dashboard/README.md
+ M admin_dashboard/public/assets/app.css
+ M admin_dashboard/public/assets/js/labels.js
+ M admin_dashboard/public/assets/js/main.js
+ M admin_dashboard/public/assets/js/mock.js
+ M admin_dashboard/public/assets/js/operations.js
+ M admin_dashboard/public/assets/js/views.js
+ M admin_dashboard/sync/lib/ga4.mjs
+ M admin_dashboard/sync/lib/operations.mjs
+ M admin_dashboard/sync/lib/sync-policy.mjs
+ M admin_dashboard/sync/lib/transform.mjs
+ M admin_dashboard/sync/sync.mjs
+ M admin_dashboard/sync/test/operations.test.mjs
+ M admin_dashboard/sync/test/sync-policy.test.mjs
+ M android/app/build.gradle.kts
+ M android/app/src/main/res/drawable-v21/launch_background.xml
+ M android/app/src/main/res/drawable/launch_background.xml
+ M android/app/src/main/res/values/colors.xml
+ M docs/next_version/dev_출시전_핵심코어_체크리스트.txt
+ M docs/next_version/전체근무표_이관_긴급후속_2026-10-12.txt
+ M lib/l10n/app_de.arb
+ M lib/l10n/app_en.arb
+ M lib/l10n/app_hi.arb
+ M lib/l10n/app_ko.arb
+ M lib/l10n/app_pt.arb
+ M lib/providers/work_hours_settings_provider.dart
+ M lib/screens/all_alarms_history_view.dart
+ M lib/screens/calendar_tab.dart
+ M lib/screens/next_alarm_tab.dart
+ M lib/screens/onboarding_screen.dart
+ M lib/screens/permission_intro_screen.dart
+ M lib/screens/schedule_management_tab.dart
+ M lib/screens/work_hours_settings_screen.dart
+ M lib/services/app_analytics.dart
+ M lib/services/permission_service.dart
+ M lib/widgets/alarm_time_editor.dart
+ M lib/widgets/app_shift_chip.dart
+ M lib/widgets/day_offset_chip.dart
+ M lib/widgets/friend_web_calendar.dart
+ M lib/widgets/global_concept_calendar_cell.dart
+ M lib/widgets/permission_panel.dart
+ M lib/widgets/permission_warning_banner.dart
+ M lib/widgets/shift_label_layout.dart
+ M lib/widgets/team_assignment_grid.dart
+ M lib/widgets/wide_calendar_cell.dart
+ M test/alarm_time_format_test.dart
+ M test/all_shifts_name_layout_test.dart
+ M test/app_analytics_test.dart
+ M test/english_release_layout_test.dart
+ M test/friend_web_calendar_test.dart
+ M test/onboarding_alarm_edit_flow_test.dart
+ M test/onboarding_foldable_layout_test.dart
+ M test/onboarding_pattern_feedback_test.dart
+ M test/permission_intro_layout_test.dart
+ M test/permission_intro_navigation_test.dart
+ M test/ultra_calendar_cell_test.dart
+ M tools/check_critical_release.ps1
+?? admin_dashboard/sync/lib/report-values.mjs
+?? admin_dashboard/sync/lib/unknown-countries.mjs
+?? admin_dashboard/sync/test/country-groups.test.mjs
+?? admin_dashboard/sync/test/empty-dimensions.test.mjs
+?? admin_dashboard/tools/growth-language-check.mjs
+?? android/app/src/main/res/values-night-v31/
+?? android/app/src/main/res/values-v31/
+?? "docs/UI 완성도 개선/06_공통디자인_결정안_2026-10-12.txt"
+?? "docs/UI 완성도 개선/07_온보딩1차_적용검증_2026-10-12.txt"
+?? "docs/UI 완성도 개선/08_온보딩수정_공통근무칩_2026-10-12.txt"
+?? "docs/UI 완성도 개선/09_온보딩밀도_오늘선택모드_2026-10-12.txt"
+?? "docs/UI 완성도 개선/10_온보딩일관성_패턴고정카드_알람설정_2026-10-12.txt"
+?? "docs/UI 완성도 개선/11_온보딩_패턴완성흐름_알람편집_2026-10-12.txt"
+?? "docs/UI 완성도 개선/12_다음수정_타이포위계_단계표시_인덱스_버튼상태_2026-10-12.txt"
+?? "docs/UI 완성도 개선/13_온보딩_타이포위계_공통칩_완료_2026-10-12.txt"
+?? "docs/UI 완성도 개선/14_첫실행_권한화면_순간표시_원인조사_2026-10-12.txt"
+?? "docs/UI 완성도 개선/15_권한첫프레임_실기기검증_2026-10-13.txt"
+?? "docs/UI 완성도 개선/16_권한최초조회_화면깜빡임_수정검증_2026-10-13.txt"
+?? "docs/UI 완성도 개선/17_온보딩_근무명선택_패턴확정_안내강조_2026-10-13.txt"
+?? "docs/UI 완성도 개선/18_대시보드_갱신중단_원인조사_2026-10-13.txt"
+?? "docs/UI 완성도 개선/19_메인달력_배너_자동갱신_확인_2026-10-13.txt"
+?? "docs/UI 완성도 개선/20_시스템스플래시_공통핵심색_안내지속모션_2026-10-13.txt"
+?? "docs/UI 완성도 개선/21_스플래시_온보딩_블루팔레트_2026-10-13.txt"
+?? "docs/UI 완성도 개선/22_오늘선택_앰버강조_지속모션강화_2026-10-13.txt"
+?? "docs/UI 완성도 개선/23_고정스플래시_런타임팔레트_다크확장계약_2026-10-13.txt"
+?? "docs/UI 완성도 개선/24_시간별5개팔레트_자동고정_온보딩미리보기_2026-10-13.txt"
+?? "docs/UI 완성도 개선/25_저녁팔레트_밝기완화_2026-10-13.txt"
+?? "docs/UI 완성도 개선/26_저녁중간밝기_5개테마_근무칩역할_2026-10-13.txt"
+?? "docs/UI 완성도 개선/27_저녁네이비_흰색텍스트_2026-10-13.txt"
+?? docs/next_version/대시보드_국가언어_알람생성_2026-10-12.txt
+?? docs/next_version/대시보드_국가언어_통합정정_2026-10-12.txt
+?? docs/next_version_27이후/
+?? examples/
+?? lib/providers/app_ui_theme_preview_provider.dart
+?? lib/theme/app_ui_theme.dart
+?? lib/theme/app_ui_time_palettes.dart
+?? lib/widgets/app_ui_components.dart
+?? lib/widgets/app_ui_theme_preview.dart
+?? lib/widgets/app_ui_theme_scope.dart
+?? lib/widgets/shift_chip_label.dart
+?? packages/
+?? test/onboarding_alarm_density_test.dart
+?? test/onboarding_common_ui_flow_test.dart
+?? test/onboarding_compact_pattern_layout_test.dart
+?? test/onboarding_dark_palette_test.dart
+?? test/onboarding_five_theme_preview_test.dart
+?? test/onboarding_name_selection_test.dart
+?? test/onboarding_staged_pattern_flow_test.dart
+?? test/onboarding_typography_roles_test.dart
+?? test/permission_initial_snapshot_test.dart
+?? test/shift_chip_sizing_test.dart
+?? work/dashboard-language-release/
+?? work/design-preview/common-ui-foundation-320.png
+?? work/design-preview/common-ui-foundation-736.png
+?? work/design-preview/common-ui-foundation-check.json
+?? work/design-preview/common-ui-foundation-check.mjs
+?? work/design-preview/common-ui-foundation-preview.html
+?? work/design-preview/common-ui-foundation-script.js
+?? work/design-preview/common-ui-foundation.html

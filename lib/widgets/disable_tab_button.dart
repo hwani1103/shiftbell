@@ -1,3 +1,5 @@
+import '../widgets/app_ui_feedback.dart';
+import 'app_ui_components.dart';
 import '../widgets/unavailable_feature.dart';
 // lib/widgets/disable_tab_button.dart
 //
@@ -18,14 +20,14 @@ Future<bool> setTabEnabledWithFeedback(
   BuildContext context,
   Future<void> Function() setEnabled,
 ) async {
-  if (!context.usesKoreanFeatures) return false;
+  if (!context.supportsSleepFeatures) return false;
   try {
     await setEnabled();
     return true;
   } on StateError {
-    if (context.mounted && context.usesKoreanFeatures) {
+    if (context.mounted && context.supportsSleepFeatures) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.koOnly.scheduleTabSyncFailed)),
+        AppUiSnackBar(content: Text(context.l10n.scheduleTabSyncFailed)),
       );
     }
     return false;
@@ -67,23 +69,25 @@ class DisableTabButton extends ConsumerWidget {
     final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => !context.usesKoreanFeatures ? const UnavailableFeature() : AlertDialog(
-        title: Text(KoreanOnlyCopy.fromLocalizations(l10n).disableTabButtonLabel(tabLabel)),
-        content: Text(
-          '${KoreanOnlyCopy.fromLocalizations(l10n).disableTabDialogBody}'
-          '${extraNotice != null ? '\n$extraNotice' : ''}',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.commonOk),
-          ),
-        ],
-      ),
+      builder: (context) => !context.supportsSleepFeatures
+          ? const UnavailableFeature()
+          : AlertDialog(
+              title: Text(l10n.disableTabButtonLabel(tabLabel)),
+              content: Text(
+                '${l10n.disableTabDialogBody}'
+                '${extraNotice != null ? '\n$extraNotice' : ''}',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(l10n.commonCancel),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(l10n.commonOk),
+                ),
+              ],
+            ),
     );
     if (confirmed != true) return;
     final changed = await setTabEnabledWithFeedback(
@@ -103,44 +107,17 @@ class DisableTabButton extends ConsumerWidget {
   // 옅은 빨강 배경(shade50) + 테두리(shade200) + 아이콘/텍스트(shade400)를 씀.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     return Padding(
       padding: EdgeInsets.only(top: topSpacing),
       child: Align(
         alignment: Alignment.centerRight,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _confirm(context, ref),
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.red.shade200, width: 1),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.visibility_off_outlined,
-                      size: 16, color: Colors.red.shade400),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      context.koOnly.disableTabButtonLabel(tabLabel),
-                      softWrap: true,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.red.shade400,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        child: AppUiButton(
+          action: AppUiAction.danger,
+          compact: true,
+          icon: Icons.visibility_off_outlined,
+          label: context.l10n.disableTabButtonLabel(tabLabel),
+          onPressed: () => _confirm(context, ref),
         ),
       ),
     );

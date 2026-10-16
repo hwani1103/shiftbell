@@ -1,0 +1,170 @@
+{
+  "L01": {
+    "titleKo": "첫 합류",
+    "titleEn": "First meeting",
+    "hintsKo": [
+      "막힌 칸을 지나갈 수 없어요.",
+      "꺾을 곳을 먼저 골라 보세요.",
+      "각 길을 가운데 도착점까지 이어 주세요."
+    ],
+    "hintsEn": [
+      "Walls block your path.",
+      "Choose where to turn first.",
+      "Connect both paths to the goal."
+    ]
+  },
+  "L02": {
+    "titleKo": "같은 때, 같은 자리",
+    "titleEn": "Same moment, same place",
+    "hintsKo": [
+      "꺾는 자리가 같으면 어떻게 될까요?",
+      "같은 곳에 함께 도착하는 길을 찾아보세요.",
+      "한 길은 먼저 아래로, 다른 길은 먼저 옆으로 보내 보세요."
+    ],
+    "hintsEn": [
+      "What if both units turn in the same cell?",
+      "Find the place where both arrive together.",
+      "Send one unit down first and the other sideways."
+    ]
+  },
+  "L03": {
+    "titleKo": "교차해도 괜찮아",
+    "titleEn": "Crossing is okay",
+    "hintsKo": [
+      "길이 겹쳐도 지나가는 시점은 다를 수 있어요.",
+      "한 칸마다 같은 시간이 걸려요.",
+      "교차점까지 각 Unit이 몇 칸 가는지 세어 보세요."
+    ],
+    "hintsEn": [
+      "Crossing paths can pass at different times.",
+      "Every cell takes the same time.",
+      "Count each path to the crossing."
+    ]
+  },
+  "L04": {
+    "titleKo": "하나뿐인 입구",
+    "titleEn": "One entrance",
+    "hintsKo": [
+      "도착점까지 걸리는 시간은 이동한 칸 수에 따라 달라져요.",
+      "아래쪽 길에는 위로 돌아갈 여유가 있어요.",
+      "A는 가운데 세로길을 위아래로 돌아, B가 먼저 지나가게 해 보세요."
+    ],
+    "hintsEn": [
+      "Travel time follows the total cell distance.",
+      "The lower path has room for a detour.",
+      "Send A up and back down the middle corridor so B passes first."
+    ]
+  },
+  "L05": {
+    "titleKo": "서로 다른 꺾임",
+    "titleEn": "Different turns",
+    "hintsKo": [
+      "서로 마주 오는 길부터 살펴보세요.",
+      "같은 칸에서 꺾을 필요는 없어요.",
+      "위쪽 Unit은 위 가로길, 아래쪽 Unit은 아래 가로길을 사용해 보세요."
+    ],
+    "hintsEn": [
+      "Look at the paths moving toward each other.",
+      "They do not have to turn in the same cell.",
+      "Use separate horizontal corridors."
+    ]
+  },
+  "L06": {
+    "titleKo": "조금 돌아가기",
+    "titleEn": "A short detour",
+    "hintsKo": [
+      "곧장 가는 두 길은 교차점에 동시에 도착해요.",
+      "직선 경로를 나누기만 하면 지나가는 시점은 같아요.",
+      "A를 오른쪽 한 칸 보낸 뒤 시작점으로 되돌려 보세요."
+    ],
+    "hintsEn": [
+      "Direct paths reach the crossing together.",
+      "Splitting a straight line does not change its timing.",
+      "Send A one cell right, then back to its start."
+    ]
+  },
+  "L07": {
+    "titleKo": "돌아가도 괜찮아",
+    "titleEn": "Going back is okay",
+    "hintsKo": [
+      "처음부터 도착점 쪽으로 갈 필요는 없어요.",
+      "반대쪽의 빈 칸도 사용할 수 있어요.",
+      "한 Unit을 바깥으로 먼저 보냈다가 돌아오게 해 보세요."
+    ],
+    "hintsEn": [
+      "The first move can go away from the goal.",
+      "The empty outer cell is useful too.",
+      "Move one unit outward, then bring it back."
+    ]
+  },
+  "L08": {
+    "titleKo": "세 길의 약속",
+    "titleEn": "Three paths together",
+    "hintsKo": [
+      "새로 합류한 길도 함께 보세요.",
+      "아래 두 Unit이 같은 세로길을 고르면 만날 수 있어요.",
+      "가장 아래 Unit은 오른쪽에서 위로 올라오는 길을 찾아보세요."
+    ],
+    "hintsEn": [
+      "Look at the new path too.",
+      "The lower units may meet in the same column.",
+      "Move the lowest unit up from the right."
+    ]
+  },
+  "L09": {
+    "titleKo": "길은 같아도 때는 다르게",
+    "titleEn": "Same path, different time",
+    "hintsKo": [
+      "한 칸씩 같은 속도로 이동하니 출발 직후를 살펴보세요.",
+      "가운데 Unit이 먼저 좁은 길로 빠져나갈 수 있어요.",
+      "양쪽 Unit은 각각 한 번 되돌아간 뒤 Goal로 보내 보세요."
+    ],
+    "hintsEn": [
+      "All units move at one constant speed. Watch the first cells.",
+      "The middle unit can leave through the narrow passage first.",
+      "Let the outer units turn back once before heading to the goal."
+    ]
+  },
+  "L10": {
+    "titleKo": "먼저 간 자리",
+    "titleEn": "After the leader",
+    "hintsKo": [
+      "앞의 Unit이 떠난 자리는 나중에 써도 괜찮아요.",
+      "같은 방향으로 같은 속도라면 뒤에서 따라잡지 않아요.",
+      "앞뒤 간격을 유지한 채 같은 통로를 사용해 보세요."
+    ],
+    "hintsEn": [
+      "Use a cell after the leader has left.",
+      "Equal speed preserves the gap in the same direction.",
+      "Follow through the corridor while keeping that gap."
+    ]
+  },
+  "L11": {
+    "titleKo": "넓어진 합류",
+    "titleEn": "A wider meeting",
+    "hintsKo": [
+      "같은 통로만 고집하지 않아도 돼요.",
+      "각 Unit이 꺾는 높이를 비교해 보세요.",
+      "아래 Unit과 가운데 Unit이 서로 다른 가로길을 사용하게 해 보세요."
+    ],
+    "hintsEn": [
+      "You can choose different corridors.",
+      "Compare the heights of each turn.",
+      "Use different rows for the lower and middle units."
+    ]
+  },
+  "L12": {
+    "titleKo": "열린 입구의 순서",
+    "titleEn": "Open entrances",
+    "hintsKo": [
+      "윗길의 새 통로도 사용할 수 있어요.",
+      "C가 아래로 바로 내려오면 A와 마주칠 수 있어요.",
+      "C를 윗길에서 왼쪽으로 보내고 A와 B는 아래의 서로 다른 입구를 사용해 보세요."
+    ],
+    "hintsEn": [
+      "The upper corridor offers a new route.",
+      "C can collide with A if it moves straight down.",
+      "Send C left along the upper row and use separate lower entrances for A and B."
+    ]
+  }
+}

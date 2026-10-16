@@ -26,6 +26,7 @@ import androidx.core.app.NotificationCompat
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.hwani1103.shiftbell/alarm"
     private var methodChannel: MethodChannel? = null
+    private var syncPathsAudio: SyncPathsAudio? = null
     private val notificationPermissionRequest = NotificationPermissionRequest()
 
     companion object {
@@ -287,6 +288,8 @@ override fun onConfigurationChanged(newConfig: android.content.res.Configuration
     super.onConfigurationChanged(newConfig)
     NotificationLocale.refresh(this)
     InAppAlarmController.changed()
+    SleepWidgetProvider.requestUpdate(applicationContext)
+    Thread { SleepDetectionScheduler.ensureScheduled(applicationContext) }.start()
 }
 
 override fun onNewIntent(intent: Intent) {
@@ -369,10 +372,13 @@ override fun onNewIntent(intent: Intent) {
     
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        syncPathsAudio?.dispose()
+        syncPathsAudio = SyncPathsAudio(this, flutterEngine.dartExecutor.binaryMessenger, lifecycle)
         
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
         methodChannel?.setMethodCallHandler { call, result ->
             when (call.method) {
+                "getPlatformSdkInt" -> result.success(Build.VERSION.SDK_INT)
                 "isTabletLayoutDevice" -> {
                     // Positive device category only: unfolded phones must keep
                     // their existing keyboard and sheet layout.
@@ -676,6 +682,7 @@ override fun onNewIntent(intent: Intent) {
                 // 동일 패턴). 위젯이 홈 화면에 없으면 SleepWidgetProvider.requestUpdate()
                 // 내부에서 조용히 아무 것도 안 함.
                 "refreshSleepWidget" -> {
+                    Thread { SleepDetectionScheduler.ensureScheduled(applicationContext) }.start()
                     SleepWidgetProvider.requestUpdate(applicationContext)
                     result.success(null)
                 }
@@ -702,7 +709,8 @@ override fun onNewIntent(intent: Intent) {
                     CalendarWidgetHolidays.saveOverrides(
                         applicationContext,
                         call.argument<List<String>>("add") ?: emptyList(),
-                        call.argument<List<String>>("remove") ?: emptyList()
+                        call.argument<List<String>>("remove") ?: emptyList(),
+                        call.argument<Map<String, String>>("names") ?: emptyMap()
                     )
                     result.success(null)
                 }

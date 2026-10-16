@@ -1,0 +1,10 @@
+00:00 +0: loading test/timed_gates_test.dart
+00:00 +0: Earlier collision wins; earlier door wins; simultaneous events retained
+00:00 +1: Other ball opens gate, duration does not alter speed
+00:00 +2: Expiry is exclusive and stops all playback at exact door time
+00:00 +3: Simultaneous trigger is applied before gate check
+00:00 +4: Straight command splitting cannot double-activate or change timer
+00:00 +5: Repeated crossing refreshes and independent gates stay isolated
+00:00 +6: Future triggers cannot unlock an earlier visit
+00:00 +7: Parser rejects invalid gate contracts
+00:00 +8: All tests passed!

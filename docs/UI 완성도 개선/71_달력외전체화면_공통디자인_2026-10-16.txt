@@ -1,0 +1,77 @@
+UI71 — 달력 테마 외 전체 앱 화면의 공통 디자인 (구현·검증·최종 dev 설치 완료)
+
+요청 원문: artifacts/ui71_all_layout_2026_10_16/request.txt.
+기준: UI01 전수 원장, UI06/12/13 공통 규칙, UI70 다음 알람, THEME-01 팔레트.
+기존 미커밋 lib/test와 tracked diff는 artifacts/ui71_all_layout_2026_10_16/before/ 및 tracked_before.patch에 보존.
+
+범위: 설정 전체/하위 편집, 날짜 상세/메모/알람 팝업, 일정관리/수면회복/공유/도움말/복원 및 공통 버튼/피드백/로딩.
+온보딩과 달력 테마 자체는 기준으로 보존. 전체근무표 본문은 색상만 확인하고 생성/편집은 대상.
+기능/버튼/순서/기존 picker 조작 유지. 한국어 수면 UTC 표시와 해외 전용 UI를 구분하며 저장 시각의 정확성은 보존.
+한글 전용 일정관리/친구공유와 공개 다국어 웹 경계 유지.
+모든 수정 후 dev debug+웹 통합 검사/빌드, 연결 폰 데이터 보존 설치/시각 확인, dev 커밋/푸시 요청 포함.
+release/prod/Play/공개 웹 배포 없음. 아래 최종 증거와 한계에 한정해 완료 판정한다.
+
+진행 목록
+[완료] 공통 Material 테마/버튼/카드/입력/피드백/로딩 연결
+[완료] 설정/전체근무표 생성편집/고정알람 온보딩 규격 연결
+[완료] 날짜 상세/메모/알람 팝업 세부 정리
+[완료] 일정/수면/공유/조회/복원/도움말 화면 팔레트/타이포 연결
+[완료] 수면 한국어 UTC 표시 분기 및 해외 동작 보존 확인
+[완료] 이전 인계 위젯 2실패 분류와 근무변경 표기 통합 확인
+[완료] 호스트 레이아웃/필수 회귀/단일 합본 빌드
+[완료] 폰 설치/수정 화면 검증/데이터 보존/원격 보존
+
+구현 기록
+- 공통 AppUiPalette의 Material 카드/목록/입력/피커/버튼/스낵바/표면 별칭까지 연결. 글꼴 계층은 상위 글꼴을 상속한다. AppContentFrame 배경과 앱 루트의 런타임 테마를 연결했다.
+- AppButton/AppSecondButton/AppThirdButton은 AppUiButton으로 위임. 기존 callback/활성 조건/역할/compact/padding 인자를 보존한다. 그라데이션 제거, 긴 아이콘 버튼은 줄바꿈 시에도 아이콘 옆 시작점을 유지한다.
+- AppUiSnackBar/AppUiLoading/AppUiIcons.delete로 피드백·로딩·삭제 표현을 공용화했다. 공개 웹 뷰어 로딩은 별도 웹 범위로 보존한다.
+- 고정 알람 편집/요약은 FixedAlarmEditorDialog/FixedAlarmSummaryCard로 추출해 온보딩과 설정이 공유한다. 온보딩 구조는 그대로, 설정은 세로 요약 카드로 정리. 추가/중복 검사/최대5개/취소/저장/알람종류 계약을 유지한다.
+- 설정 현재 스케줄 카드, 설정 그룹, 모든 하위 설정, 팀 생성·편집, 근무시간·OT, 이력·메모·도움말·복원·공유·일정·수면 화면을 역할색/타이포 토큰에 연결. 넓은 설정 메뉴는 같은 행의 높이를 맞추며 순서/스크롤을 보존한다.
+- 날짜 상세/메모/알람 팝업은 구성과 위치를 유지하고 공통 모달 팔레트/알림 설명 카드/버튼/칩/삭제 아이콘을 연결했다. 달력 렌더러 자체와 전체근무표 본문의 기존 레이아웃은 이번 변경 범위 밖이다.
+- 한국어 수면 편집의 UTC 줄만 숨겼다. 외국어 UTC 표시, DST gap/fold 피커 설명, 절대시각 저장/계산은 여행·기기 시간대 변경에도 필요한 정확성 계약이므로 유지한다. 일정관리/친구공유 한국어 제한과 공개 다국어 웹 의존성을 유지한다.
+- 달력 테마 선택기의 바깥 카드·타이포만 공통화했다. 미리보기 내부/공유 달력 내부는 달력 제외 범위, Sync Paths 게임 고유 보드는 기존 게임 디자인으로 보존하며 앱 진입 메뉴는 공통 설정 디자인이다.
+
+검증 중간 기록(최종 결과는 아래 후속 기록을 우선)
+- 공통 컴포넌트 동작12검사 PASS: 설정 테마 영속 선택, 온보딩 고정알람 추가/취소/5개제한, 칩 측정, 메모 편집/삭제/키보드/비활성 규칙.
+- 한국어29화면×6팔레트=174검사 PASS. 각 검사는411×891/932×704 두 폭을 렌더링한다. 이는 호스트 렌더 증거이며 실제 폴더블 완료가 아니다.
+- 수면 한/영/독3검사 PASS: 한국어UTC 없음/외국어UTC 두 시각 표시/저장 시작·종료 시각 동일.
+- 집중검사에서 독립 팝업 Provider 의존성 문제 수정. 이전 수면 레이아웃 fixture에 누락된 localization delegate 보완. 조 배정 검사의 모든 이름 동일 폰트 기대를 기존 공통칩 실측축소 계약으로 정정(셀 크기/완전표시/영역내 배치 검증 유지),69검사 PASS.
+- 외국어58화면×주간/다크=116검사 중114 PASS, 독일어 설정 버튼 줄바꿈 정렬2실패를 공통 버튼에서 수정하여 별도 재검증 진행.
+- 이전 위젯 실패: ShadowViewAnimator가 실제 애니메이션을 재생하지 않는 단언은 설정된 in/out animation/180ms 및 disabled child 계약으로 검증. 좁은 폭 메모는 기존 completeMemoPrefix 계약에 맞춰 완전한 grapheme 접두/가용폭/전체 접근성문구/실제 글자 픽셀·높이 검증 유지. 실런처 재생은 별도 미확정.
+- artifacts/ui71_all_layout_2026_10_16/에 변경 전 복사/요청원문/실행로그/렌더/일회성 스크립트 보존. 기존 경고 operations_analytics.dart의 debugSink 참조는 별도 운영 변경이며 이번 UI에서 수정하지 않았다.
+
+후속 수정·검증
+- 도움말/개인정보의 kAppBackgroundPastel 잔여와 날짜 알람 종류 helper의 바깥 달력 context 참조를 수정했다. 선택 팝업은 모달의 AppUiPalette를 사용한다. 대상6화면×6팔레트36검사 PASS(surface_final_popups.log), 최종 설정/근무시간/조편집18검사 PASS(surface_final_roles.log).
+- 영어/독일어 설정 버튼4검사 PASS(foreign_buttons_final.log), 긴 조 이름69검사 PASS(team_labels_final.log). 수면/팀/복원/팔레트/시작화면 집중 검사와 달력OT/전체근무표 검사에서 통과한 개별 항목은 targeted_final/targeted_retry 로그에 보존. 이 두 중간 실행은 전체 PASS로 기록하지 않는다.
+- 위젯 재검사 중 실제 영어250dp 메모 높이10px/문자9px/상단패딩2px의1px 잘림을 발견했다. CalendarWidgetProvider.fittedMemoFont는 실제 픽셀 높이(높이 내림/패딩 반올림)와 StaticLayout의 fallback 글자 높이로 크기를 결정한다. 내용 접두/접근성/셀 배치 계약 유지.
+- 위젯4클래스14검사 전체 PASS(widget_retry.log, widget_results/, widget_summary.json), 정적7검사 PASS(widget_source_final.log). 런처에서의 실제 월 넘김 애니메이션까지 PASS로 확대하지 않는다.
+- 첫 필수 -Build 실행은 APK 생성 전 Flutter 검사에서 중단: 넓은 설정 메뉴의 IntrinsicHeight가 긴 ListTile 부제의 실제 높이를 작게 계산하는4언어 넘침 및 근무시간 테스트의100ms 비동기 준비 가정1건. AppUiEqualHeightRow는 Table의 실제 선행 배치 후 같은 높이로 맞추며 설정 카드/상단 버튼에서 공유한다. 데이터/권한 로직 변경 없음. 테스트는 실제 안내가 준비될 때까지 유한 대기한다. 해당15검사 PASS(gate_layout_retry.log). 최종 전체 실행 결과는 아래에 기록한다.
+
+실기기 시각 검증 후 보완
+- 첫 통합 -Build 전체 PASS 및 첫 APK 설치 후 SM-S948N에서 주간/다크의 실제 설정·팝업·입력 화면을 확인했다. DB18표/Flutter 설정은 설치 직전과 설치 직후 동일했다.
+- 다크 날짜 상세 제목의 DefaultTextStyle이 바깥 달력의 검정 글자를 상속하고, OT helper가 바깥 calendar context의 색을 읽는 것을 실제 PNG에서 발견했다. 공통 showAppUiBottomSheet의 기본 글자색과 OT Consumer/버튼의 modal context를 수정했다. 날짜 셀 레이아웃/데이터 로직 변경 없음.
+- 일정/조 이름 편집의 일부 글자에 border 역할이 사용되어 다크 대비가 낮았다. 본문/보조/버튼 위 글자·위험 역할로 정정하고, 일정 시트 scrim을 Material scrim으로 연결했다.
+- 실제 S26 일정 생성 시트에서 키보드가 고정 하단 버튼을 가렸다. 기존 태블릿 viewport 계산을 공통 KeyboardSafeViewport로 확장해 폰/폴더블/태블릿의 키보드 위 가용 높이에서 배치한다. 기존 picker/스크롤 구조와 저장/알림 동작은 유지한다.
+- 수정 후 팝업 글자색/화면 생명주기/411x891·932x704·880x1408·1408x880 키보드 footer/공통 칩/스케줄 변경 레이아웃12검사 PASS(device_fix_tests_final.log). 최초 실행의 잘못된 테스트 파일명1건은 도구 실행 오류이며 해당 중간 실행을 전체 PASS로 기록하지 않는다.
+- 최종 필수 -Build 재실행 및 최종 APK 업데이트/수정 팝업 재확인은 아래 최종 증거에 연결한다. 첫 APK 결과를 최종 수정본으로 오인하지 않는다.
+- 열린 팝업 자동 테마 전환: 공통 bottom sheet의 표면을 내부 Material로 옮겨 글자와 함께 갱신한다. 다크→주간을 열린 상태에서 바꾸는2검사 PASS(live_modal_tests.log). 해당 보완은 통합 실행기의 APK 컴파일 전에 반영했다.
+- 근무색 선택 미리보기의 기존 휘도 임계값 때문에 밝은 청록/연보라 위에 흰 글자가 남는 것을 실제 화면에서 확인했다. 설정 미리보기2곳만 공통 AppUiColorMath.ink의 대비비 비교로 수정했다. 기존33색+추가7색의 값/순서/사용중 제한/저장값과 실제 달력 렌더러는 변경하지 않는다. 이 마지막 시각 보완은 필수 통합 검사 후 별도 대상 검사와 dev debug APK 빌드로 확인한다.
+
+
+최종 검증·설치 증거
+- 필수 tools/check_critical_release.ps1 -Build 최종 exit0(critical_build_device_final.log / _exit.txt). Flutter257+128+100+67+11=563 PASS, native P0 기능/DB 이관 BUILD SUCCESSFUL, dev debug 및 JS 웹 빌드 완료. wasm 사전 점검/미사용 Cupertino font 경고는 JS 웹 빌드 실패가 아니다.
+- UI 대상 검사는 위 중간/후속 기록을 따른다. 마지막 근무색 미리보기 대비 보완은 공통 팔레트/설정 선택기4검사 PASS(color_preview_tests.log), dev debug 추가 빌드 exit0(apk_preview_contrast_final.log). native/P0/출시언어 및 공개 웹 코드는 이 마지막 보완에서 변경하지 않았다.
+- 정적 분석: 최초 전체 대상 error0 및 기존 운영 debugSink warning1; 실기기 보완6파일 최종 error0/warning0(device_fix_analyze_final.log). 마지막 모달 변경은 별도2검사 및 APK 컴파일로 확인. 기존 기록/라이선스/이전 작업 로그의 공백은 임의 정리하지 않았다.
+- 최종 APK: artifacts/ui71_all_layout_2026_10_16/ShiftBell_UI71_final_dev_debug.apk
+  SHA256 f8d67ae35120527b44b7e451d93329f8a2d3c465944205e9bc0bd5d9246f0c28
+  SM-S948N(R5KL20DHWAE) dev 업데이트 설치 성공, 설치된 base.apk SHA256 일치(final_install_result.json). 실제 출시 prod와 서명/패키지가 다르다.
+- 6팔레트 설정·알람·수면·일정·공유·도움말 등 실제 화면을 순차 열어 캡처했다. 마지막 수정본에서 다크 생성/편집·날짜상세·일정/메모 키보드·색상/소리 선택 및 다른5팔레트의 수정 영향을 재확인했다. 실제 PNG/device와 *_ready/final_palette 검증 로그 보존. 최종 재확인 PNG 82개.
+- 최종 재시작된 검증 세션의 RenderFlex overflow/Unhandled Exception/EXCEPTION CAUGHT/FATAL EXCEPTION/ErrorWidget 패턴0. 프레임 중간 VM 직접 호출로 Navigator가 잠겼던 도구 실패는 device_injected_navigation_error.log에 별도 보존했다. 재시작 후 프레임 종료 callback 방식으로 검증했으며 제품 자체 경로의 PASS에 그 실패 실행을 포함하지 않았다.
+- 설치 직전/설치 직후/전체 화면 점검 완료 후 DB18표 행 지문 및 Flutter 설정 모두 동일. quick_check OK. 임시 화면 팔레트는 메모리로만 바꾸었고, 최종 앱 재시작으로 저장된 아침 고정 선택 및 실제 달력으로 복귀했다. 태블릿 충전중 화면유지15는 건드리지 않았다.
+- 최종 source manifest694파일과 APK 빌드 후 변경0(final_source_hashes.json/final_source_consistency.json). 이전 미커밋 변경을 포함한 현재 dev 작업을 함께 커밋·원격 보존한다. 커밋 식별자는 이 원장이 포함된 dev 커밋 및 artifacts/ui71_all_layout_2026_10_16/git_result.json에 연결한다.
+
+판정 한계/후속
+- 이번 사용자 범위의 공통 디자인 구현과 연결 S26 시각 검증 완료. 실제 폴더블 접힘/펼침·다른 기기 전체, 잠금 알람/제조사 설정 전수, 런처 위젯 애니메이션은 새 PASS로 처리하지 않는다.
+- 위젯14검사 PASS는 호스트/Robolectric이며 실제 런처 애니메이션 완료가 아니다. 기존 P0/Play 업데이트/출시 HOLD 등 이 작업과 무관한 잔여 판정은 보존한다.
+- 달력 디자인 셀/미리보기 내부, 공개 공유 달력 내부, Sync Paths 고유 게임 보드는 기존 계약을 유지한다. 권한·온보딩은 기준 공통 체계를 유지하고, 복원/리셋 등 데이터 변경을 수반하는 일시 화면은 호스트 검증으로 확인했다. 실제 사용자 데이터로 삭제/리셋/복원/공유 전송은 실행하지 않았다.
+- 원본 UI47~70/THEME-01/SHIFT-01/WIDGET-01 및 루트 인계서는 당시 증거로 남긴다. 이 원장은 후속 판단이다.

@@ -4,7 +4,7 @@
     <string name="alarm_type_vibration_short">Vibration</string>
     <string name="alarm_type_silent_short">lautlos</string>
     <string name="snooze_collision_message">Um %1$s ist bereits ein anderer Wecker (%2$s) gestellt. Dieser Wecker wurde ohne Schlummerfunktion beendet.</string>
-    <string name="calendar_widget_description">Schichten und Notizen für die letzte, diese und nächste Woche.</string>
+    <string name="calendar_widget_description">Je nach Größe 3 bis 6 Wochen. In der 6-Wochen-Ansicht zwischen Monaten wechseln.</string>
     <string name="app_widget_calendar_label">3-Wochen-Kalender</string>
     <string name="alarm_swipe_hint">Zum Stoppen hochwischen</string>
     <string name="alarm_snooze_label">5 Min. später</string>
@@ -59,4 +59,17 @@
     <string name="calendar_widget_week_description">Schichten und bis zu drei Notizen pro Tag für diese Woche.</string>
     <string name="widget_daytime">Tagsüber</string>
     <string name="widget_nighttime">Nachts</string>
+    <string name="app_widget_sleep_label">Schlafprotokoll</string>
+    <string name="sleep_widget_brand">ShiftBell</string>
+    <string name="sleep_widget_description">Schlafbeginn und Aufwachen per Taste erfassen.</string>
+    <string name="sleep_widget_no_shift">Keine Schicht</string>
+    <string name="sleep_widget_not_set">Nicht festgelegt</string>
+    <string name="sleep_widget_sleep">Schlafen</string>
+    <string name="sleep_widget_tab_off">Deaktiviert</string>
+    <string name="sleep_widget_unknown">Keine Angaben</string>
+    <string name="sleep_widget_wake">Aufwachen</string>
+    <string name="sleep_widget_restore_busy">Ein Backup wird wiederhergestellt. Versuche es gleich noch einmal.</string>
+    <string name="sleep_widget_too_short">Zu kurz zum Speichern</string>
+    <string name="widget_previous_month">Vorheriger Monat</string>
+    <string name="widget_next_month">Nächster Monat</string>
 </resources>

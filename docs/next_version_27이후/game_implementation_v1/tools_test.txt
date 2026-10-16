@@ -1,0 +1,10 @@
+00:00 +0: loading test\solver_test.dart
+00:00 +0: test\solver_test.dart: S01/S03/S04/S05/S06 all domains, 359 outcomes, 47 assignments and diagnostics match independent certificates
+00:00 +1: test\solver_test.dart: S02 budget exhaustion is UNKNOWN, never UNSAT or zero exactCount
+00:00 +2: test\solver_test.dart: S02 solution cap means SAT/lowerBound/truncated, not unique/exact
+00:00 +3: test\solver_test.dart: S02 domain memory budget reports UNKNOWN
+00:00 +4: test\solver_test.dart: Exhaustive no-solution level is UNSAT despite individual reachability
+00:00 +5: test\solver_test.dart: S08 deterministic order, immutable results, cache-free equivalence
+00:00 +6: test\solver_test.dart: Budgets are bounded before allocating any search space
+00:00 +7: test\solver_test.dart: S01 certificate mismatch fails closed
+00:00 +8: All tests passed!

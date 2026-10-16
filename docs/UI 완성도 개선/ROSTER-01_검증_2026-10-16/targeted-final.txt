@@ -1,0 +1,82 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간, 야간] Size(320.0, 568.0)
+00:06 +1: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간, 야간] Size(806.0, 895.0)
+00:07 +2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간, 야간] Size(1280.0, 800.0)
+00:08 +3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간근무, 야간, 특별연장근무] Size(320.0, 568.0)
+00:09 +4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간근무, 야간, 특별연장근무] Size(806.0, 895.0)
+00:10 +5: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간근무, 야간, 특별연장근무] Size(1280.0, 800.0)
+00:11 +6: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Day, Night Duty, WWWWWWWWWW] Size(320.0, 568.0)
+00:13 +7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Day, Night Duty, WWWWWWWWWW] Size(806.0, 895.0)
+00:14 +8: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Day, Night Duty, WWWWWWWWWW] Size(1280.0, 800.0)
+00:16 +9: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Afternoon Shift, Sleepover Shift, WWWWWWWWWWWWWWWW] Size(320.0, 568.0)
+00:17 +10: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Afternoon Shift, Sleepover Shift, WWWWWWWWWWWWWWWW] Size(806.0, 895.0)
+00:19 +11: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Afternoon Shift, Sleepover Shift, WWWWWWWWWWWWWWWW] Size(1280.0, 800.0)
+00:20 +12: loading C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart
+00:34 +12: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: (setUpAll)
+00:35 +12: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Layout choice survives a new provider container and latest rapid tap wins
+00:35 +13: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for dawn
+00:35 +14: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn overview preserves names/colors and fits 360px
+00:44 +15: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: dawn timeline preserves names/colors and fits 360px
+00:49 +16: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for morning
+00:49 +17: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: morning overview preserves names/colors and fits 360px
+00:52 +18: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: morning timeline preserves names/colors and fits 360px
+00:57 +19: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for daytime
+00:57 +20: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: daytime overview preserves names/colors and fits 360px
+01:01 +21: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: daytime timeline preserves names/colors and fits 360px
+01:04 +22: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for evening
+01:04 +23: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: evening overview preserves names/colors and fits 360px
+01:08 +24: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: evening timeline preserves names/colors and fits 360px
+01:11 +25: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for night
+01:11 +26: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: night overview preserves names/colors and fits 360px
+01:17 +27: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: night timeline preserves names/colors and fits 360px
+01:21 +28: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: Readable non-shift roles for originalWhite
+01:21 +29: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: originalWhite overview preserves names/colors and fits 360px
+01:23 +30: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: originalWhite timeline preserves names/colors and fits 360px
+01:27 +31: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-02-01 00:00:00.000 at 320.0 has exactly real days and no overflow
+01:28 +32: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-02-01 00:00:00.000 at 800.0 has exactly real days and no overflow
+01:30 +33: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2028-02-01 00:00:00.000 at 320.0 has exactly real days and no overflow
+01:32 +34: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2028-02-01 00:00:00.000 at 800.0 has exactly real days and no overflow
+01:34 +35: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-04-01 00:00:00.000 at 320.0 has exactly real days and no overflow
+01:36 +36: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: 2026-04-01 00:00:00.000 at 800.0 has exactly real days and no overflow
+01:37 +37: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_overview_test.dart: (tearDownAll)
+01:38 +37: loading C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart
+01:44 +37: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: (setUpAll)
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\roster_screen_ed72fa73\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+01:47 +37 -1: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: (setUpAll) [E]
+  Null check operator used on a null value
+  package:shiftbell/services/database_service.dart 670:49  DatabaseService.saveTeamScheduleConfig.<fn>
+  
+01:47 +37 -1: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: (tearDownAll)
+01:47 +37 -1: loading C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart
+01:53 +37 -1: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Independent progress key round-trips without touching schedule preferences
+01:53 +38 -1: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Host effects release on route disposal and ignore later plays
+01:53 +39 -1: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "SyncPathGameApp": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart:72:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1682:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart line 72
+The test description was:
+  Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games
+════════════════════════════════════════════════════════════════════════════════════════════════════
+02:02 +39 -2: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games [E]
+  Test failed. See exception logs above.
+  The test description was: Menu opens integrated game, Lv1 teaches only page1, back returns to mini-games
+  
+02:02 +39 -2: C:/Users/Administrator/Desktop/shiftbell/test/sync_paths_integration_test.dart: Only game assets and production entry are connected
+02:03 +40 -2: Some tests failed.

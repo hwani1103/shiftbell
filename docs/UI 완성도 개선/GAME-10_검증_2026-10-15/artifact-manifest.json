@@ -1,0 +1,34 @@
+{
+  "date": "2026-10-15",
+  "testsPassed": 9,
+  "analyze": "PASS",
+  "androidDevDebug": "PASS",
+  "webDebug": "PASS",
+  "deviceInstalled": false,
+  "files": [
+    {
+      "path": "examples/sync_path_lab/artifacts/game10/app-dev-debug.apk",
+      "sha256": "e4b87558dbc5f91d57d4d56f39c045e27d218a1b141c6a7b9fa2aaa9cec53d32"
+    },
+    {
+      "path": "examples/sync_path_lab/build/web/main.dart.js",
+      "sha256": "d8e66623829afbda4d04c0643215e67a465bc9b8d5f971231d1775816b0339c6"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/board.dart",
+      "sha256": "8a51472e1609482c084a4fdfc1d9535c392182557b8762d67584ce1e3da48026"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/session.dart",
+      "sha256": "cca2a0d79a86a3ea7663f766c5024ece81fb7b1f811f5fdec67ceb0a245399d9"
+    },
+    {
+      "path": "packages/sync_path_ui/lib/src/skin.dart",
+      "sha256": "1212f6e817be8089fe5430e67a4fbac1e688436bbdd2da8fa12e17e067065d8f"
+    },
+    {
+      "path": "packages/sync_path_ui/assets/fonts/GameSansSubset.ttf",
+      "sha256": "d036fbd8c6be8248195f372693e79315a6b610f275b29eb493fa840c61ba0740"
+    }
+  ]
+}

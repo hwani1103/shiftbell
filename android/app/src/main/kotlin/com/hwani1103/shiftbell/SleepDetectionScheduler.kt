@@ -27,22 +27,19 @@ object SleepDetectionScheduler {
     private const val REQUEST_CODE = 0x53_4C_45_50 // "SLEP"의 대략적 hex, 다른 알람과 충돌 방지용 고유 코드
     private const val SAMPLE_INTERVAL_MINUTES = 20L
 
-    // ⭐ 2026-09-22(영어화 P0-2) - 수면·회복 탭(Flutter condition_tab.dart)은 한국어 로케일에서만
-    // 존재하고(main.dart _showConditionTab) 그 탭이 꺼져 있으면(설정 → "수면·회복 화면 사용하지
-    // 않기") 기록을 볼 방법도 없다. 그런데 이 스케줄러는 그 둘과 무관하게 항상 20분마다 기기를
-    // 깨워 sleep_records에 기록해 왔음 - 영어 사용자는 자기가 쓰지도 보지도 못하는 기능이 매일 밤
-    // 배터리를 쓰고 데이터를 쌓고 있었던 것(개인정보처리방침에도 없는 상태로 수집되는 셈). 로케일이
-    // 한국어가 아니거나 탭이 꺼져 있으면 예약하지 않고, 이미 잡혀 있던 다음 체크도 취소한다.
-    // SleepWidgetProvider.isConditionTabEnabled와 같은 파일/키를 읽음(Flutter shared_preferences
-    // 플러그인 - DP 아닌 일반 prefs). 최초 잠금 해제 전에는 설정을 읽을 수 없으므로
-    // 감지를 보류한다. BOOT_COMPLETED에서 실제 설정으로 다시 예약한다. 기본값 true로
-    // 우회하면 사용자가 탭을 꺼 둔 경우에도 수면을 수집할 수 있으므로 추측하지 않는다.
+    // Sleep is available in every release language. Korean users retain the
+    // existing preference; other languages require the separate explicit opt-in.
+    // Before the first unlock, credential-protected settings are unavailable,
+    // so defer detection instead of assuming consent. Disabled choices also
+    // cancel the next check in ensureScheduled.
     fun isSleepDetectionEnabled(context: Context): Boolean {
-        if (!ReleaseLocalePolicy.koreanFeatures(context)) return false
+        if (!ReleaseLocalePolicy.sleepFeatures(context)) return false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
             !context.getSystemService(UserManager::class.java).isUserUnlocked) return false
         val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-        return prefs.getBoolean("flutter.condition_tab_enabled", true)
+        return if (ReleaseLocalePolicy.koreanFeatures(context))
+            prefs.getBoolean("flutter.condition_tab_enabled", true)
+        else prefs.getBoolean("flutter.sleep_global_enabled_v1", false)
     }
 
     fun ensureScheduled(context: Context) {

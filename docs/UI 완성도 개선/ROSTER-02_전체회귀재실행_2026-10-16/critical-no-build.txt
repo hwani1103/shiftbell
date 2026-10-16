@@ -1,0 +1,300 @@
+Generated 5 localized manifests and browser metadata bootstrap.
+PASS: 8 web locale/fallback cases and language-change checks; no layout validation.
+National holiday source and Dart/native parity: OK
+Because l10n.yaml exists, the options defined there will be used instead.
+To use the command line arguments, delete the l10n.yaml file in the Flutter project.
+
+
+{
+  "errors": [],
+  "languages": {
+    "en": {
+      "arb_messages": 782,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": []
+    },
+    "pt": {
+      "arb_messages": 782,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "splashTitle",
+        "sleepText053",
+        "alarmVolume",
+        "commonOk",
+        "themeLabPreviewSheetTitle",
+        "sleepText076",
+        "uiThemeAutomatic",
+        "sleepText075",
+        "calendarOtTotal",
+        "commonAm",
+        "commonPrevious",
+        "sleepText077",
+        "defaultSnoozeMinutes",
+        "appTitle",
+        "alarmDurationMinutes",
+        "commonPm"
+      ]
+    },
+    "de": {
+      "arb_messages": 782,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "alarmVibration",
+        "splashTitle",
+        "sleepText053",
+        "commonOk",
+        "themeLabPreviewSheetTitle",
+        "uiThemeAutomatic",
+        "commonAm",
+        "appTitle",
+        "commonPm"
+      ]
+    },
+    "hi": {
+      "arb_messages": 782,
+      "android_strings": 66,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "splashTitle",
+        "sleepText053",
+        "themeLabPreviewSheetTitle",
+        "commonAm",
+        "appTitle",
+        "commonPm"
+      ]
+    }
+  },
+  "limits": "Structure only. ICU generation, semantic review and device layout review are separate.",
+  "korean_preserved_scoped_messages": 169,
+  "native_korean_only_messages": 1
+}
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: missing choices: existing=false
+00:00 +1: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: stored/restored choice false survives existing=false
+00:00 +2: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: stored/restored choice true survives existing=false
+00:00 +3: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: missing choices: existing=true
+00:00 +4: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: stored/restored choice false survives existing=true
+00:00 +5: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: stored/restored choice true survives existing=true
+00:00 +6: C:/Users/Administrator/Desktop/shiftbell/test/optional_features_defaults_test.dart: existing user who reset their schedule keeps the old visible default
+00:01 +7: C:/Users/Administrator/Desktop/shiftbell/test/sleep_estimate_minimum_test.dart: automatic estimates crossing midnight require five hours, both ongoing and ended
+00:02 +8: C:/Users/Administrator/Desktop/shiftbell/test/sleep_estimate_minimum_test.dart: manual naps still appear and confirmed automatic history stays outside pending cards
+00:02 +9: C:/Users/Administrator/Desktop/shiftbell/test/sleep_release_cases_test.dart: explicit sleep attribution and average policy ledger
+00:03 +10: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: (setUpAll)
+00:03 +10: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 0 / sleep 0: five-language parity
+00:04 +11: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 0 / sleep 119: five-language parity
+00:04 +12: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 0 / sleep 120: five-language parity
+00:04 +13: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 0 / sleep 480: five-language parity
+00:04 +14: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 0: five-language parity
+00:05 +15: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 119: five-language parity
+00:05 +16: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +17: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +18: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +19: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +20: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +21: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +22: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +23: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +24: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +25: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +26: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +27: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 120: five-language parity
+00:05 +28: C:/Users/Administrator/Desktop/shiftbell/test/sleep_wall_time_test.dart: America/Sao_Paulo 2026-03-08T02:30:00
+00:05 +29: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 480: five-language parity
+00:05 +30: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 480: five-language parity
+00:05 +31: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 480: five-language parity
+00:05 +32: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 6 / sleep 480: five-language parity
+00:05 +33: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 0: five-language parity
+00:05 +34: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 119: five-language parity
+00:05 +35: C:/Users/Administrator/Desktop/shiftbell/test/sleep_instant_storage_test.dart: New York spring
+00:06 +36: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +37: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +38: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +39: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +40: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +41: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +42: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +43: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +44: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +45: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +46: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 120: five-language parity
+00:06 +47: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 10 / sleep 480: five-language parity
+00:06 +48: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 16 / sleep 0: five-language parity
+00:06 +49: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 16 / sleep 119: five-language parity
+00:06 +50: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 16 / sleep 120: five-language parity
+00:06 +51: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 16 / sleep 480: five-language parity
+00:06 +52: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 0: five-language parity
+00:06 +53: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 119: five-language parity
+00:07 +54: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:07 +55: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:07 +56: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:07 +57: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:07 +58: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:07 +59: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:07 +60: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:07 +61: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:07 +62: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:07 +63: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 120: five-language parity
+00:07 +64: C:/Users/Administrator/Desktop/shiftbell/test/night_shift_sleep_attribution_test.dart: 연속 야간 - 아침 회복수면과 출근 전 수면의 분리(사용자 신고 항목 5) 오늘이 휴무면 경계는 예전처럼 21시 - 아침 회복수면은 어제, 그날 밤 취침은 오늘
+00:07 +65: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 480: five-language parity
+00:07 +66: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 480: five-language parity
+00:07 +67: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 18 / sleep 480: five-language parity
+00:07 +68: C:/Users/Administrator/Desktop/shiftbell/test/night_shift_sleep_attribution_test.dart: 수면량 문구 - "출근 전 7시간"이 아니라 "지난 24시간"(사용자 신고 항목 2) 실제로 부족하면(2시간만 잠) 여전히 권장 7시간보다 적다고 알린다
+00:07 +69: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 0: five-language parity
+00:07 +70: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 0: five-language parity
+00:07 +71: C:/Users/Administrator/Desktop/shiftbell/test/night_shift_sleep_attribution_test.dart: 근무시간을 하나도 입력하지 않아도 수면 사실은 계속 나온다(항목 3)
+00:07 +72: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:07 +73: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:07 +74: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:07 +75: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:07 +76: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:07 +77: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:07 +78: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:07 +79: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:07 +80: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:07 +81: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 119: five-language parity
+00:07 +82: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 120: five-language parity
+00:07 +83: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 0 / hour 23 / sleep 480: five-language parity
+00:08 +84: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: 저장된 일정관리 탭 설정(false)을 Native로 보낸다
+00:08 +85: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: 저장된 일정관리 탭 설정(false)을 Native로 보낸다
+00:08 +86: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 0 / sleep 119: five-language parity
+00:08 +87: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 0 / sleep 119: five-language parity
+00:08 +88: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 0 / sleep 119: five-language parity
+00:08 +89: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: T11-07 Native 동기화 실패 시 일정 탭 로컬 상태와 prefs를 바꾸지 않는다
+⚠️ 일정관리 탭 설정 Native 동기화 실패: PlatformException(injected, null, null, null)
+00:08 +90: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 0 / sleep 120: five-language parity
+00:08 +91: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:08 +92: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:08 +93: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:08 +94: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:09 +95: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:09 +96: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:09 +97: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:09 +98: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:09 +99: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:09 +100: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:10 +101: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:10 +102: C:/Users/Administrator/Desktop/shiftbell/test/release_audit/g1/g1_schedule_tab_sync_test.dart: C-03 탭 전환 StateError를 SnackBar로 안내하고 후속 동작을 막는다
+00:10 +103: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 120: five-language parity
+00:10 +104: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 16 / sleep 480: five-language parity
+00:10 +105: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 0: five-language parity
+00:10 +106: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 119: five-language parity
+00:10 +107: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 120: five-language parity
+00:10 +108: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 18 / sleep 480: five-language parity
+00:11 +109: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 0: five-language parity
+00:11 +110: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 119: five-language parity
+00:11 +111: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 120: five-language parity
+00:11 +112: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 1 / hour 23 / sleep 480: five-language parity
+00:11 +113: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 0: five-language parity
+00:11 +114: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 119: five-language parity
+00:11 +115: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 120: five-language parity
+00:12 +116: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 0 / sleep 480: five-language parity
+00:12 +117: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 6 / sleep 0: five-language parity
+00:12 +118: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 6 / sleep 119: five-language parity
+00:12 +119: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 6 / sleep 120: five-language parity
+00:12 +120: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 6 / sleep 480: five-language parity
+00:12 +121: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 10 / sleep 0: five-language parity
+00:12 +122: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 10 / sleep 119: five-language parity
+00:12 +123: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 10 / sleep 120: five-language parity
+00:13 +124: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 10 / sleep 480: five-language parity
+00:13 +125: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 16 / sleep 0: five-language parity
+00:13 +126: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 16 / sleep 119: five-language parity
+00:13 +127: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 16 / sleep 120: five-language parity
+00:13 +128: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 16 / sleep 480: five-language parity
+00:13 +129: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 18 / sleep 0: five-language parity
+00:13 +130: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 18 / sleep 119: five-language parity
+00:13 +131: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 18 / sleep 120: five-language parity
+00:14 +132: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 18 / sleep 480: five-language parity
+00:14 +133: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 23 / sleep 0: five-language parity
+00:14 +134: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 23 / sleep 119: five-language parity
+00:14 +135: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 23 / sleep 120: five-language parity
+00:14 +136: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 2 / hour 23 / sleep 480: five-language parity
+00:14 +137: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 0: five-language parity
+00:14 +138: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 119: five-language parity
+00:15 +139: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 120: five-language parity
+00:15 +140: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 0 / sleep 480: five-language parity
+00:15 +141: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 6 / sleep 0: five-language parity
+00:15 +142: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 6 / sleep 119: five-language parity
+00:15 +143: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 6 / sleep 120: five-language parity
+00:16 +144: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 6 / sleep 480: five-language parity
+00:16 +145: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 10 / sleep 0: five-language parity
+00:16 +146: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 10 / sleep 119: five-language parity
+00:16 +147: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 10 / sleep 120: five-language parity
+00:16 +148: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 10 / sleep 480: five-language parity
+00:17 +149: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 16 / sleep 0: five-language parity
+00:17 +150: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 16 / sleep 119: five-language parity
+00:17 +151: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 16 / sleep 120: five-language parity
+00:17 +152: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 16 / sleep 480: five-language parity
+00:17 +153: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 18 / sleep 0: five-language parity
+00:17 +154: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 18 / sleep 119: five-language parity
+00:17 +155: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 18 / sleep 120: five-language parity
+00:18 +156: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 18 / sleep 480: five-language parity
+00:18 +157: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 23 / sleep 0: five-language parity
+00:18 +158: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 23 / sleep 119: five-language parity
+00:18 +159: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 23 / sleep 120: five-language parity
+00:18 +160: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 3 / hour 23 / sleep 480: five-language parity
+00:19 +161: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 0 / sleep 0: five-language parity
+00:19 +162: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 0 / sleep 119: five-language parity
+00:19 +163: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 0 / sleep 120: five-language parity
+00:19 +164: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 0 / sleep 480: five-language parity
+00:19 +165: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 6 / sleep 0: five-language parity
+00:19 +166: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 6 / sleep 119: five-language parity
+00:19 +167: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 6 / sleep 120: five-language parity
+00:20 +168: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 6 / sleep 480: five-language parity
+00:20 +169: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 10 / sleep 0: five-language parity
+00:20 +170: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 10 / sleep 119: five-language parity
+00:20 +171: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 10 / sleep 120: five-language parity
+00:20 +172: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 10 / sleep 480: five-language parity
+00:21 +173: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 16 / sleep 0: five-language parity
+00:21 +174: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 16 / sleep 119: five-language parity
+00:21 +175: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 16 / sleep 120: five-language parity
+00:21 +176: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 16 / sleep 480: five-language parity
+00:21 +177: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 18 / sleep 0: five-language parity
+00:21 +178: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 18 / sleep 119: five-language parity
+00:22 +179: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 18 / sleep 120: five-language parity
+00:22 +180: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 18 / sleep 480: five-language parity
+00:22 +181: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 23 / sleep 0: five-language parity
+00:22 +182: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 23 / sleep 119: five-language parity
+00:22 +183: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 23 / sleep 120: five-language parity
+00:23 +184: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 4 / hour 23 / sleep 480: five-language parity
+00:23 +185: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 0 / sleep 0: five-language parity
+00:23 +186: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 0 / sleep 119: five-language parity
+00:23 +187: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 0 / sleep 120: five-language parity
+00:23 +188: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 0 / sleep 480: five-language parity
+00:23 +189: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 6 / sleep 0: five-language parity
+00:23 +190: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 6 / sleep 119: five-language parity
+00:24 +191: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 6 / sleep 120: five-language parity
+00:24 +192: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 6 / sleep 480: five-language parity
+00:24 +193: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 10 / sleep 0: five-language parity
+00:24 +194: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 10 / sleep 119: five-language parity
+00:24 +195: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 10 / sleep 120: five-language parity
+00:24 +196: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 10 / sleep 480: five-language parity
+00:25 +197: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 16 / sleep 0: five-language parity
+00:25 +198: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 16 / sleep 119: five-language parity
+00:25 +199: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 16 / sleep 120: five-language parity
+00:25 +200: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 16 / sleep 480: five-language parity
+00:25 +201: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 18 / sleep 0: five-language parity
+00:25 +202: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 18 / sleep 119: five-language parity
+00:25 +203: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 18 / sleep 120: five-language parity
+00:26 +204: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 18 / sleep 480: five-language parity
+00:26 +205: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 23 / sleep 0: five-language parity
+00:26 +206: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 23 / sleep 119: five-language parity
+00:26 +207: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 23 / sleep 120: five-language parity
+00:26 +208: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 5 / hour 23 / sleep 480: five-language parity
+00:26 +209: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 0 / sleep 0: five-language parity
+00:27 +210: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 0 / sleep 119: five-language parity
+00:28 +211: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 0 / sleep 120: five-language parity
+00:29 +212: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 0 / sleep 480: five-language parity
+00:30 +213: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 6 / sleep 0: five-language parity
+00:31 +214: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 6 / sleep 119: five-language parity
+00:32 +215: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 6 / sleep 120: five-language parity
+00:33 +216: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 6 / sleep 480: five-language parity
+00:34 +217: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 10 / sleep 0: five-language parity
+00:34 +218: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 10 / sleep 119: five-language parity
+00:35 +219: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 10 / sleep 120: five-language parity
+00:37 +220: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 10 / sleep 480: five-language parity
+00:37 +221: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 16 / sleep 0: five-language parity
+00:38 +222: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 16 / sleep 119: five-language parity
+00:39 +223: C:/Users/Administrator/Desktop/shiftbell/test/sleep_global_parity_test.dart: pattern 6 / hour 16 / sleep 120: five-language parity

@@ -1,0 +1,11 @@
+GAME-01 독립 UI 후속 원장
+범위: packages/sync_path_ui 및 examples/sync_path_lab만. 교대시계 기존 화면/공통 AppUi 토큰/테마 코드 변경 없음.
+사용자 요청: 칸당 동일 속도, 12레벨 필요 수정, 임시 에셋/방향 모션/선택 강조/간단한 경로 표시/DEV 빌드.
+역할 색/타이포/간격/반경/버튼은 게임 GameSkin/GameMetrics를 공유한다. 독립 패키지라 기존 앱 provider import 없음.
+선택 유닛1.13배/링/화살표, 방향별 몸체+Idle/Walk/Start/Stop/Goal/Collision, 대기/리뷰 유한 모션 lifecycle 정리.
+선택 경로 강조와 나머지 옅은 선, 꺾임의 작은 점으로 표시를 단순화했다.
+한글/영문 문구와 폰트 번들 유지. 유효성/종점/경로 snapshot을 재사용해 장식 프레임에 불필요한 계산을 줄였다.
+동작 줄이기/배경 전환/일시정지/종료에 ticker 정지, renderer 소유 이미지 정리.
+320/412 실제 widget raster 화면과 기존320/360/412/736 입력/화면 회귀 확인.
+증거: docs/next_version_27이후/game_implementation_v3/의 검사 로그, ui_previews, level_verification.json.
+전체 기존 앱 UI 적용 완료를 의미하지 않는다. 저사양 실기기/FPS/미술 완성도/사람 난이도는 후속 검증이다.

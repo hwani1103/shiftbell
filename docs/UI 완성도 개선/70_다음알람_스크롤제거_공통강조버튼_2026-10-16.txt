@@ -1,0 +1,19 @@
+UI70 — 다음 알람 세로 스크롤 / 공통 버튼 강조 (진행 중)
+
+원인
+THEME-01 팔레트/공통 버튼 적용 이후에도 일반 폰은 AdaptiveHeroViewport의 SingleChildScrollView와 고정238.w 링, 큰 위아래 간격을 유지했다. 공통 버튼48dp 최소높이를 포함한 실제 콘텐츠 합계가 남은 높이를 넘으면 실제 스크롤이 생겼다. 기존24px 이하만 막는 physics는 레이아웃 초과를 해결하지 못했다.
+
+수정
+- 일반 폰은 유한 높이 Column으로 바꾸고 링만 Flexible로 줄인다. 날짜/시간/설명/버튼 글자는 원래 크기, 버튼 최소높이48 유지. 간격은 공통 AppUiMetrics의 pagePadding/gap/compactCardPadding/dialogActionGap 사용.
+- 폴더블/넓은 화면의 기존 조합과 fit 경로 유지. obsolete 미세스크롤 차단 physics 제거.
+- AppUiButton에 emphasized 선택 인자(기본false). secondary는 primary/onPrimary, danger는 danger/onDanger의 채움 역할 사용. onDanger는 공통 색 계산의 ink(danger). 화면별 고정색/팔레트별 분기 없음. 두 알람 버튼만 opt-in. 기존 다른 화면 버튼 기본 표현 보존.
+- 알람 삭제/종류변경/권한 상태/카드 갱신 흐름 변경 없음.
+
+검증
+- 6개 팔레트 대비/실제 화면/목록/빈상태12검사 PASS. 실제 폰 논리크기411.43x891.43 및 하단탭64 포함. 주 화면 Scrollable 없음, 두 버튼 화면 안에 있고 드래그로 위치가 변하지 않음. 버튼 실제 배경 역할 확인, 글자 대비4.5 이상. ot_alarm_test.log 및 next_alarm_*_tab.png.
+- 좁은창/폴더블/외국어 후속 검사와 합본 설치는 진행 중.
+
+후속 자동 검사 완료 / 빌드 보류
+- 좁은 폰·폴더블 논리 크기 행렬의 실제 알람 화면1검사 PASS(alarm_fold_layout.log). 영어US/GB·기본/스누즈·폰/폴더블4검사 PASS(alarm_foreign_layout_retry.log). 테스트의 오래된 KoreanOnlyCopy 도움말 키 참조는 현행 common l10n 조회로 교정했으며 생산 번역 구조 변경 없음.
+- 공통 강조 버튼6개 팔레트 글자 대비4.5 이상, 버튼 최소높이48, 스크롤 없음 및 버튼 화면 안쪽 확인은 호스트 검사이다. 물리 기기 확인으로 확대하지 않는다.
+- 집중79/정적 분석0error0warning 완료. 사용자 추가 수정 후 합본 빌드 지시로 새 APK/설치 및 실제 기기 확인은 보류. 알람 기능/P0 흐름 변경 없음.

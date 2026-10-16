@@ -1,0 +1,3785 @@
+{
+  "levels": [
+    {
+      "id": "L51",
+      "safeDistinct": 7,
+      "safeRaw": 9,
+      "pairChecks": 10,
+      "portalContactPairs": 0,
+      "checkedBasePlans": 7,
+      "essentialGateRejectedPlans": {},
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L52",
+      "safeDistinct": 6,
+      "safeRaw": 17,
+      "pairChecks": 18,
+      "portalContactPairs": 9,
+      "checkedBasePlans": 6,
+      "essentialGateRejectedPlans": {},
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L53",
+      "safeDistinct": 1,
+      "safeRaw": 2,
+      "pairChecks": 9,
+      "portalContactPairs": 6,
+      "checkedBasePlans": 1,
+      "essentialGateRejectedPlans": {},
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L54",
+      "safeDistinct": 20,
+      "safeRaw": 30,
+      "pairChecks": 71,
+      "portalContactPairs": 13,
+      "checkedBasePlans": 20,
+      "essentialGateRejectedPlans": {},
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L55",
+      "safeDistinct": 13,
+      "safeRaw": 38,
+      "pairChecks": 101,
+      "portalContactPairs": 40,
+      "checkedBasePlans": 13,
+      "essentialGateRejectedPlans": {},
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L56",
+      "safeDistinct": 1,
+      "safeRaw": 2,
+      "pairChecks": 32,
+      "portalContactPairs": 18,
+      "checkedBasePlans": 1,
+      "essentialGateRejectedPlans": {},
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L57",
+      "safeDistinct": 7,
+      "safeRaw": 110,
+      "pairChecks": 231,
+      "portalContactPairs": 14,
+      "checkedBasePlans": 7,
+      "essentialGateRejectedPlans": {},
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              0
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              1
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              5
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              0
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L58",
+      "safeDistinct": 3,
+      "safeRaw": 5,
+      "pairChecks": 211,
+      "portalContactPairs": 1,
+      "checkedBasePlans": 3,
+      "essentialGateRejectedPlans": {},
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L59",
+      "safeDistinct": 2,
+      "safeRaw": 8,
+      "pairChecks": 185,
+      "portalContactPairs": 17,
+      "checkedBasePlans": 2,
+      "essentialGateRejectedPlans": {},
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              1,
+              2
+            ],
+            [
+              1,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L60",
+      "safeDistinct": 1,
+      "safeRaw": 15,
+      "pairChecks": 204,
+      "portalContactPairs": 21,
+      "checkedBasePlans": 16,
+      "essentialGateRejectedPlans": {
+        "1": 15
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L61",
+      "safeDistinct": 9,
+      "safeRaw": 14,
+      "pairChecks": 956,
+      "portalContactPairs": 0,
+      "checkedBasePlans": 71,
+      "essentialGateRejectedPlans": {
+        "1": 62
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              3
+            ],
+            [
+              6,
+              3
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L62",
+      "safeDistinct": 1,
+      "safeRaw": 1,
+      "pairChecks": 207,
+      "portalContactPairs": 56,
+      "checkedBasePlans": 68,
+      "essentialGateRejectedPlans": {
+        "1": 67
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L63",
+      "safeDistinct": 5,
+      "safeRaw": 5,
+      "pairChecks": 108,
+      "portalContactPairs": 4,
+      "checkedBasePlans": 57,
+      "essentialGateRejectedPlans": {
+        "1": 52
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L64",
+      "safeDistinct": 12,
+      "safeRaw": 22,
+      "pairChecks": 432,
+      "portalContactPairs": 84,
+      "checkedBasePlans": 26,
+      "essentialGateRejectedPlans": {
+        "1": 14
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L65",
+      "safeDistinct": 3,
+      "safeRaw": 23,
+      "pairChecks": 313,
+      "portalContactPairs": 6,
+      "checkedBasePlans": 37,
+      "essentialGateRejectedPlans": {
+        "1": 34
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              3,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L66",
+      "safeDistinct": 2,
+      "safeRaw": 6,
+      "pairChecks": 573,
+      "portalContactPairs": 5,
+      "checkedBasePlans": 60,
+      "essentialGateRejectedPlans": {
+        "1": 8,
+        "2": 7
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L67",
+      "safeDistinct": 1,
+      "safeRaw": 1,
+      "pairChecks": 1181,
+      "portalContactPairs": 57,
+      "checkedBasePlans": 98,
+      "essentialGateRejectedPlans": {
+        "1": 9,
+        "2": 7
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              5,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L68",
+      "safeDistinct": 6,
+      "safeRaw": 6,
+      "pairChecks": 1014,
+      "portalContactPairs": 147,
+      "checkedBasePlans": 106,
+      "essentialGateRejectedPlans": {
+        "1": 79,
+        "2": 2
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L69",
+      "safeDistinct": 1,
+      "safeRaw": 4,
+      "pairChecks": 2166,
+      "portalContactPairs": 68,
+      "checkedBasePlans": 452,
+      "essentialGateRejectedPlans": {
+        "1": 9,
+        "2": 23
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L70",
+      "safeDistinct": 2,
+      "safeRaw": 4,
+      "pairChecks": 1908,
+      "portalContactPairs": 9,
+      "checkedBasePlans": 268,
+      "essentialGateRejectedPlans": {
+        "1": 85,
+        "2": 14
+      },
+      "allSolutionsUsePortal": true,
+      "allGatesRequireCooperation": true,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              4
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        }
+      ],
+      "closedFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              4
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        }
+      ],
+      "collisionFailure": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              4
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "oracle": "independent half-time occupancy, instantaneous entry and exit, declarative gate windows"
+}

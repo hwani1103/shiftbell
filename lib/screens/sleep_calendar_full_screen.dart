@@ -1,3 +1,5 @@
+import '../widgets/app_ui_feedback.dart';
+import '../theme/app_ui_theme.dart';
 import '../l10n/l10n_extensions.dart';
 import '../widgets/unavailable_feature.dart';
 // lib/screens/sleep_calendar_full_screen.dart
@@ -24,15 +26,15 @@ import '../models/sleep_record.dart';
 import '../providers/condition_provider.dart';
 import '../services/condition/sleep_day_slots.dart';
 import '../services/database_service.dart';
-import '../theme/app_colors.dart';
 import '../utils/sleep_format_util.dart';
 import '../widgets/sleep_edit_dialog.dart';
 
 class SleepCalendarFullScreen extends StatelessWidget {
   const SleepCalendarFullScreen({super.key});
   @override
-  Widget build(BuildContext context) => context.usesKoreanFeatures
-      ? const _KoreanSleepCalendarFullScreen() : const UnavailableFeature();
+  Widget build(BuildContext context) => context.supportsSleepFeatures
+      ? const _KoreanSleepCalendarFullScreen()
+      : const UnavailableFeature();
 }
 
 class _KoreanSleepCalendarFullScreen extends ConsumerStatefulWidget {
@@ -74,14 +76,14 @@ class _SleepCalendarFullScreenState
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     final analyzer = ref.watch(conditionAnalyzerProvider);
     final schedule = analyzer?.schedule;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppUiPalette.of(context).surface,
       appBar: AppBar(
-        title: const Text('수면 기록 전체보기'),
+        title: Text(context.l10n.sleepText051),
         centerTitle: true,
       ),
       body: Column(
@@ -97,7 +99,7 @@ class _SleepCalendarFullScreenState
               future: _recordsFuture,
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: AppUiLoading());
                 }
                 final now = DateTime.now();
                 final lastOfMonth = DateTime(_month.year, _month.month + 1, 0);
@@ -111,9 +113,10 @@ class _SleepCalendarFullScreenState
                     analyzer: analyzer);
 
                 if (days.isEmpty) {
-                  return const Center(
-                      child: Text('이 달에는 표시할 날짜가 없어요.',
-                          style: TextStyle(color: Colors.black45)));
+                  return Center(
+                      child: Text(context.l10n.sleepText052,
+                          style: TextStyle(
+                              color: AppUiPalette.of(context).secondaryText)));
                 }
                 return _SleepMonthList(
                     days: days, schedule: schedule, onChanged: _reload);
@@ -139,7 +142,7 @@ class _MonthNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
@@ -148,15 +151,17 @@ class _MonthNavBar extends StatelessWidget {
           IconButton(onPressed: onPrev, icon: const Icon(Icons.chevron_left)),
           Expanded(
             child: Text(
-              '${month.year}년 ${month.month}월',
+              context.l10n.sleepText053(
+                  (month.year).toString(), (month.month).toString()),
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              style: const TextStyle(
+                  fontSize: AppFontSize.section, fontWeight: FontWeight.w700),
             ),
           ),
           IconButton(
             onPressed: canGoNext ? onNext : null,
             icon: Icon(Icons.chevron_right,
-                color: canGoNext ? null : Colors.black26),
+                color: canGoNext ? null : AppUiPalette.of(context).border),
           ),
         ],
       ),
@@ -201,7 +206,7 @@ class _SleepMonthListState extends State<_SleepMonthList> {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     // ⭐ 2026-09-01 후속5 - "맨 아래 항목이 잘 안 보인다"는 피드백 - 이 리스트가
     // Scaffold body에 그대로 얹혀서 하단 시스템 제스처 영역을 안 피했었음.
     // MediaQuery.padding.bottom(제스처 내비게이션 바 등 하단 안전영역)을 기존
@@ -239,17 +244,18 @@ class _SleepDayListRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color:
-            _isToday ? kAppMainAccent.withOpacity(0.05) : Colors.grey.shade50,
+        color: _isToday
+            ? AppUiPalette.of(context).primary.withOpacity(0.05)
+            : AppUiPalette.of(context).soft,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
             color: _isToday
-                ? kAppMainAccent.withOpacity(0.35)
-                : Colors.grey.shade200),
+                ? AppUiPalette.of(context).primary.withOpacity(0.35)
+                : AppUiPalette.of(context).border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,18 +264,19 @@ class _SleepDayListRow extends ConsumerWidget {
             children: [
               // ⭐ 2026-09-01 후속5 - "8/1 (토)만 진하다"는 피드백으로 날짜를 더
               // 눈에 띄게(14→16sp) 키움 - 나머지 텍스트 크기는 그대로 유지.
-              Text(fmtDateWeekday(day.date),
+              Text(fmtDateWeekday(day.date, localizations: context.l10n),
                   style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w700)),
+                      fontSize: AppFontSize.section,
+                      fontWeight: FontWeight.w700)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   shiftName,
                   // ⭐ 2026-09-01 후속5 - 근무명(야간/휴무/주간 등)이 너무 흐리다는
                   // 피드백으로 black54 → black87 + 약간의 굵기로 진하게 함.
-                  style: const TextStyle(
-                      fontSize: 13,
-                      color: Colors.black87,
+                  style: TextStyle(
+                      fontSize: AppFontSize.body,
+                      color: AppUiPalette.of(context).text,
                       fontWeight: FontWeight.w500),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -321,6 +328,22 @@ class _SleepDayListRow extends ConsumerWidget {
               );
             },
           ),
+          // Extra naps remain visible/editable, matching the totals used in averages.
+          for (final record in day.allNaps.skip(2)) ...[
+            const SizedBox(height: 7),
+            _SlotChip(
+              cardDate: day.date,
+              category: SleepSlotCategory.nap2,
+              record: record,
+              onTap: () async {
+                await handleSleepSlotTap(context, ref,
+                    date: day.date,
+                    category: SleepSlotCategory.nap2,
+                    record: record);
+                onChanged();
+              },
+            ),
+          ],
         ],
       ),
     );
@@ -344,7 +367,7 @@ class _SlotChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.supportsSleepFeatures) return const UnavailableFeature();
     final r = record;
     return InkWell(
       borderRadius: BorderRadius.circular(8),
@@ -353,9 +376,9 @@ class _SlotChip extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppUiPalette.of(context).surface,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: AppUiPalette.of(context).border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,45 +387,52 @@ class _SlotChip extends StatelessWidget {
             // ⭐ 2026-09-01 후속5 - "주 수면/낮잠/+기록"이 다 너무 흐리다는 피드백으로
             // 라벨(black38→black87)/빈 칸 placeholder(black38→black54) 모두 진하게.
             Text(
-              category.label,
-              style: const TextStyle(
-                  fontSize: 10,
-                  color: Colors.black87,
+              (category == SleepSlotCategory.main
+                  ? context.l10n.sleepText042
+                  : context.l10n.sleepText043),
+              style: TextStyle(
+                  fontSize: AppFontSize.meta,
+                  color: AppUiPalette.of(context).text,
                   fontWeight: FontWeight.w600),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             if (r == null)
-              const Text('+ 기록',
+              Text(context.l10n.sleepText049,
                   style: TextStyle(
-                      fontSize: 12.5,
-                      color: Colors.black54,
+                      fontSize: AppFontSize.body,
+                      color: AppUiPalette.of(context).secondaryText,
                       fontWeight: FontWeight.w500))
             else ...[
               Builder(builder: (context) {
-          if (!context.usesKoreanFeatures) return const UnavailableFeature();
+                if (!context.supportsSleepFeatures)
+                  return const UnavailableFeature();
                 // ⭐ 2026-09-13(사용자 요청) - condition_tab.dart의 _SleepSlotCell과
                 // 동일한 이유(야간 근무 회복수면은 카드 날짜와 실제 취침 날짜가
                 // 다를 수 있음) - 다르면 "M/D " 접두어를 붙임.
                 final timeText = r.end != null
-                    ? '${fmtTimeOnly(r.start)} - ${fmtTimeOnly(r.end!)}'
-                    : '${fmtTimeOnly(r.start)}~ 진행 중';
+                    ? '${fmtTimeOnly(r.start, localizations: context.l10n)} - ${fmtTimeOnly(r.end!, localizations: context.l10n)}'
+                    : context.l10n.sleepText054(
+                        (fmtTimeOnly(r.start, localizations: context.l10n))
+                            .toString());
                 final startsOnDifferentDate = !_isSameDate(r.start, cardDate);
                 final displayText = startsOnDifferentDate
-                    ? '${r.start.month}/${r.start.day} $timeText'
+                    ? '${fmtShortSleepDate(r.start, localizations: context.l10n)} $timeText'
                     : timeText;
                 return Text(
                   displayText,
                   style: const TextStyle(
-                      fontSize: 12.5, fontWeight: FontWeight.w600),
+                      fontSize: AppFontSize.body, fontWeight: FontWeight.w600),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 );
               }),
               if (r.durationMinutes != null)
                 Text(
-                  '(${fmtSleepDuration(Duration(minutes: r.durationMinutes!), r.source)})',
-                  style: const TextStyle(fontSize: 11, color: Colors.black45),
+                  '(${fmtSleepDuration(Duration(minutes: r.durationMinutes!), r.source, localizations: context.l10n)})',
+                  style: TextStyle(
+                      fontSize: AppFontSize.meta,
+                      color: AppUiPalette.of(context).secondaryText),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

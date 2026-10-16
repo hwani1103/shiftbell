@@ -1,0 +1,9 @@
+ACCEPT 88 moves 9 domains [5, 7, 103, 27] safe 4 extra 6 score 28.3
+ACCEPT 89 moves 9 domains [54, 18, 165, 8] safe 1 extra 8 score 36.5
+ACCEPT 90 moves 9 domains [49, 210, 170, 284] safe 22 extra 8 score 39.5
+ACCEPT 91 moves 10 domains [29, 108, 31, 4] safe 1 extra 18 score 43.9
+SEARCH 92 10 2000 seconds 190
+ACCEPT 92 moves 10 domains [7, 5, 30, 117] safe 14 extra 10 score 31.7
+ACCEPT 93 moves 10 domains [4, 119, 132, 4] safe 4 extra 12 score 36.5
+ACCEPT 94 moves 10 domains [33, 128, 3, 105] safe 1 extra 12 score 40.9
+SEARCH 95 10 2000 seconds 540

@@ -46,12 +46,12 @@ class EnglishReleaseTest {
         assertTrue(ReleaseLocalePolicy.isCalendarRedDay(context("ko-KR"), koreanHoliday))
     }
 
-    @Test fun sleepWidgetCanBeHiddenAndRestoredWithoutDisablingTheCalendar() {
+    @Test fun sleepWidgetIsAvailableInBothLanguagesWithoutDisablingTheCalendar() {
         val en = context("en-US")
         val ko = context("ko-KR")
         val component = ComponentName(en, SleepWidgetProvider::class.java)
         ReleaseLocalePolicy.syncSleepWidget(en)
-        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+        assertEquals(PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
             en.packageManager.getComponentEnabledSetting(component))
         ReleaseLocalePolicy.syncSleepWidget(ko)
         assertEquals(PackageManager.COMPONENT_ENABLED_STATE_ENABLED,

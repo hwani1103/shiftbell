@@ -1,0 +1,1956 @@
+{
+  "levels": [
+    {
+      "id": "L51",
+      "score": 3.534472562339343,
+      "distinctSolutions": 7,
+      "rawSolutions": 9,
+      "rawDomains": [
+        1,
+        12
+      ],
+      "temporalDomains": [
+        1,
+        10
+      ],
+      "baseSolutions": 7,
+      "constraintBits": 0.5145731728297582,
+      "minimumExtraDistance": 0,
+      "conflictParticipation": [
+        1,
+        1
+      ],
+      "minimumPortalUsers": 2,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              0
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ]
+          ]
+        }
+      ],
+      "attempt": 35
+    },
+    {
+      "id": "L52",
+      "score": 5.090225625468752,
+      "distinctSolutions": 6,
+      "rawSolutions": 17,
+      "rawDomains": [
+        4,
+        10
+      ],
+      "temporalDomains": [
+        3,
+        6
+      ],
+      "baseSolutions": 6,
+      "constraintBits": 1.584962500721156,
+      "minimumExtraDistance": 2,
+      "conflictParticipation": [
+        1,
+        1
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              1
+            ]
+          ]
+        }
+      ],
+      "attempt": 36
+    },
+    {
+      "id": "L53",
+      "score": 5.880451250937502,
+      "distinctSolutions": 1,
+      "rawSolutions": 2,
+      "rawDomains": [
+        4,
+        4
+      ],
+      "temporalDomains": [
+        3,
+        3
+      ],
+      "baseSolutions": 1,
+      "constraintBits": 3.169925001442312,
+      "minimumExtraDistance": 2,
+      "conflictParticipation": [
+        1,
+        1
+      ],
+      "minimumPortalUsers": 2,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              3
+            ],
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              0
+            ]
+          ]
+        }
+      ],
+      "attempt": 1770
+    },
+    {
+      "id": "L54",
+      "score": 7.2850063248061945,
+      "distinctSolutions": 20,
+      "rawSolutions": 30,
+      "rawDomains": [
+        4,
+        8,
+        8
+      ],
+      "temporalDomains": [
+        3,
+        5,
+        7
+      ],
+      "baseSolutions": 20,
+      "constraintBits": 2.3923174227787602,
+      "minimumExtraDistance": 3,
+      "conflictParticipation": [
+        2,
+        2,
+        2
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              3,
+              0
+            ]
+          ]
+        }
+      ],
+      "attempt": 49
+    },
+    {
+      "id": "L55",
+      "score": 8.129720508014485,
+      "distinctSolutions": 13,
+      "rawSolutions": 38,
+      "rawDomains": [
+        10,
+        5,
+        10
+      ],
+      "temporalDomains": [
+        8,
+        3,
+        7
+      ],
+      "baseSolutions": 13,
+      "constraintBits": 3.691877704637668,
+      "minimumExtraDistance": 3,
+      "conflictParticipation": [
+        2,
+        2,
+        2
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              3,
+              0
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              1,
+              3
+            ]
+          ]
+        }
+      ],
+      "attempt": 203
+    },
+    {
+      "id": "L56",
+      "score": 9.53,
+      "distinctSolutions": 1,
+      "rawSolutions": 2,
+      "rawDomains": [
+        2,
+        5,
+        5
+      ],
+      "temporalDomains": [
+        2,
+        4,
+        4
+      ],
+      "baseSolutions": 1,
+      "constraintBits": 5.0,
+      "minimumExtraDistance": 4,
+      "conflictParticipation": [
+        2,
+        2,
+        2
+      ],
+      "minimumPortalUsers": 2,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              2
+            ]
+          ]
+        }
+      ],
+      "attempt": 660
+    },
+    {
+      "id": "L57",
+      "score": 10.165149438745598,
+      "distinctSolutions": 7,
+      "rawSolutions": 110,
+      "rawDomains": [
+        30,
+        15,
+        7
+      ],
+      "temporalDomains": [
+        15,
+        9,
+        4
+      ],
+      "baseSolutions": 7,
+      "constraintBits": 6.269460674993227,
+      "minimumExtraDistance": 3,
+      "conflictParticipation": [
+        2,
+        2,
+        2
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              3
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              3,
+              3
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              0
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              4
+            ]
+          ]
+        }
+      ],
+      "attempt": 373
+    },
+    {
+      "id": "L58",
+      "score": 12.070066516129152,
+      "distinctSolutions": 3,
+      "rawSolutions": 5,
+      "rawDomains": [
+        23,
+        9,
+        8
+      ],
+      "temporalDomains": [
+        13,
+        7,
+        6
+      ],
+      "baseSolutions": 3,
+      "constraintBits": 7.507794640198696,
+      "minimumExtraDistance": 5,
+      "conflictParticipation": [
+        2,
+        2,
+        2
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              4,
+              2
+            ]
+          ]
+        }
+      ],
+      "attempt": 941
+    },
+    {
+      "id": "L59",
+      "score": 12.325933583075773,
+      "distinctSolutions": 2,
+      "rawSolutions": 8,
+      "rawDomains": [
+        32,
+        13,
+        5
+      ],
+      "temporalDomains": [
+        19,
+        7,
+        2
+      ],
+      "baseSolutions": 2,
+      "constraintBits": 7.05528243550119,
+      "minimumExtraDistance": 6,
+      "conflictParticipation": [
+        2,
+        2,
+        2
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              3,
+              0
+            ],
+            [
+              4,
+              0
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              3
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        }
+      ],
+      "attempt": 165
+    },
+    {
+      "id": "L60",
+      "score": 13.764780699337443,
+      "distinctSolutions": 1,
+      "rawSolutions": 15,
+      "rawDomains": [
+        9,
+        7,
+        31
+      ],
+      "temporalDomains": [
+        7,
+        4,
+        16
+      ],
+      "baseSolutions": 16,
+      "constraintBits": 8.807354922057604,
+      "minimumExtraDistance": 4,
+      "conflictParticipation": [
+        2,
+        2,
+        2
+      ],
+      "minimumPortalUsers": 2,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              0,
+              3
+            ]
+          ]
+        }
+      ],
+      "attempt": 39
+    },
+    {
+      "id": "L61",
+      "score": 15.53346511796845,
+      "distinctSolutions": 9,
+      "rawSolutions": 14,
+      "rawDomains": [
+        40,
+        16,
+        53
+      ],
+      "temporalDomains": [
+        22,
+        8,
+        26
+      ],
+      "baseSolutions": 71,
+      "constraintBits": 8.989946335336077,
+      "minimumExtraDistance": 7,
+      "conflictParticipation": [
+        2,
+        2,
+        2
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              3
+            ],
+            [
+              5,
+              1
+            ],
+            [
+              5,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              5,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              2,
+              5
+            ]
+          ]
+        }
+      ],
+      "attempt": 311
+    },
+    {
+      "id": "L62",
+      "score": 16.18568320121245,
+      "distinctSolutions": 1,
+      "rawSolutions": 1,
+      "rawDomains": [
+        11,
+        12,
+        11
+      ],
+      "temporalDomains": [
+        9,
+        7,
+        9
+      ],
+      "baseSolutions": 68,
+      "constraintBits": 9.147204924942228,
+      "minimumExtraDistance": 8,
+      "conflictParticipation": [
+        2,
+        2,
+        2
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              5
+            ]
+          ]
+        }
+      ],
+      "attempt": 179
+    },
+    {
+      "id": "L63",
+      "score": 17.561874865666972,
+      "distinctSolutions": 5,
+      "rawSolutions": 5,
+      "rawDomains": [
+        6,
+        3,
+        13,
+        3
+      ],
+      "temporalDomains": [
+        3,
+        3,
+        9,
+        3
+      ],
+      "baseSolutions": 57,
+      "constraintBits": 5.602884408718419,
+      "minimumExtraDistance": 12,
+      "conflictParticipation": [
+        2,
+        3,
+        2,
+        3
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              1
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              4,
+              4
+            ]
+          ]
+        }
+      ],
+      "attempt": 19
+    },
+    {
+      "id": "L64",
+      "score": 18.4959088266812,
+      "distinctSolutions": 12,
+      "rawSolutions": 22,
+      "rawDomains": [
+        11,
+        11,
+        11,
+        11
+      ],
+      "temporalDomains": [
+        9,
+        9,
+        9,
+        7
+      ],
+      "baseSolutions": 26,
+      "constraintBits": 8.732167425663384,
+      "minimumExtraDistance": 10,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "minimumPortalUsers": 3,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              6
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              6,
+              3
+            ]
+          ]
+        }
+      ],
+      "attempt": 63
+    },
+    {
+      "id": "L65",
+      "score": 19.660012649612387,
+      "distinctSolutions": 3,
+      "rawSolutions": 23,
+      "rawDomains": [
+        11,
+        10,
+        11,
+        15
+      ],
+      "temporalDomains": [
+        7,
+        6,
+        7,
+        9
+      ],
+      "baseSolutions": 37,
+      "constraintBits": 9.784634845557521,
+      "minimumExtraDistance": 10,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              5,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              5,
+              6
+            ]
+          ]
+        }
+      ],
+      "attempt": 54
+    },
+    {
+      "id": "L66",
+      "score": 20.844710837420486,
+      "distinctSolutions": 2,
+      "rawSolutions": 6,
+      "rawDomains": [
+        9,
+        8,
+        25,
+        15
+      ],
+      "temporalDomains": [
+        7,
+        6,
+        15,
+        12
+      ],
+      "baseSolutions": 60,
+      "constraintBits": 11.884170519108435,
+      "minimumExtraDistance": 8,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              3,
+              5
+            ],
+            [
+              3,
+              4
+            ],
+            [
+              3,
+              1
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              1,
+              1
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              3
+            ],
+            [
+              5,
+              1
+            ]
+          ]
+        }
+      ],
+      "attempt": 183
+    },
+    {
+      "id": "L67",
+      "score": 21.617142988410624,
+      "distinctSolutions": 1,
+      "rawSolutions": 1,
+      "rawDomains": [
+        27,
+        115,
+        11,
+        2
+      ],
+      "temporalDomains": [
+        17,
+        39,
+        7,
+        2
+      ],
+      "baseSolutions": 98,
+      "constraintBits": 13.180219982170192,
+      "minimumExtraDistance": 7,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              4,
+              6
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              4
+            ],
+            [
+              6,
+              6
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        }
+      ],
+      "attempt": 106
+    },
+    {
+      "id": "L68",
+      "score": 23.594710837420486,
+      "distinctSolutions": 6,
+      "rawSolutions": 6,
+      "rawDomains": [
+        24,
+        20,
+        6,
+        25
+      ],
+      "temporalDomains": [
+        15,
+        14,
+        6,
+        18
+      ],
+      "baseSolutions": 106,
+      "constraintBits": 11.884170519108435,
+      "minimumExtraDistance": 13,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "minimumPortalUsers": 2,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              0,
+              3
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              4,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              2
+            ],
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              3,
+              4
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              5,
+              0
+            ]
+          ]
+        }
+      ],
+      "attempt": 699
+    },
+    {
+      "id": "L69",
+      "score": 24.670902501875005,
+      "distinctSolutions": 1,
+      "rawSolutions": 4,
+      "rawDomains": [
+        102,
+        37,
+        30,
+        3
+      ],
+      "temporalDomains": [
+        48,
+        18,
+        16,
+        3
+      ],
+      "baseSolutions": 452,
+      "constraintBits": 15.339850002884624,
+      "minimumExtraDistance": 10,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "minimumPortalUsers": 2,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              6,
+              0
+            ],
+            [
+              0,
+              5
+            ],
+            [
+              0,
+              4
+            ],
+            [
+              0,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              6,
+              2
+            ],
+            [
+              4,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              6,
+              0
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              2,
+              2
+            ],
+            [
+              2,
+              4
+            ],
+            [
+              4,
+              4
+            ],
+            [
+              4,
+              6
+            ],
+            [
+              2,
+              6
+            ]
+          ]
+        }
+      ],
+      "attempt": 133
+    },
+    {
+      "id": "L70",
+      "score": 24.318389231572247,
+      "distinctSolutions": 2,
+      "rawSolutions": 4,
+      "rawDomains": [
+        10,
+        4,
+        59,
+        53
+      ],
+      "temporalDomains": [
+        9,
+        3,
+        33,
+        33
+      ],
+      "baseSolutions": 268,
+      "constraintBits": 13.843675740880375,
+      "minimumExtraDistance": 12,
+      "conflictParticipation": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "minimumPortalUsers": 1,
+      "witness": [
+        {
+          "unitId": "A",
+          "endpoints": [
+            [
+              1,
+              2
+            ],
+            [
+              6,
+              2
+            ],
+            [
+              3,
+              2
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "B",
+          "endpoints": [
+            [
+              5,
+              4
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              4,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "C",
+          "endpoints": [
+            [
+              0,
+              5
+            ],
+            [
+              2,
+              5
+            ],
+            [
+              2,
+              6
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        },
+        {
+          "unitId": "D",
+          "endpoints": [
+            [
+              4,
+              2
+            ],
+            [
+              5,
+              2
+            ],
+            [
+              5,
+              3
+            ],
+            [
+              3,
+              3
+            ]
+          ]
+        }
+      ],
+      "attempt": 932
+    }
+  ]
+}

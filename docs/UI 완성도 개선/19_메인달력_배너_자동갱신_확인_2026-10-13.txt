@@ -1,0 +1,26 @@
+메인 달력 앵커드 어댑티브 배너 자동 갱신 확인 — 2026-10-13
+
+AdMob 실제 설정 (사용자가 기존 계정 로그인 후 읽기 확인)
+- 앱: 교대시계 - 교대근무표·달력·자동알람 / Android.
+- 광고 단위: shiftbell_banner, ca-app-pub-4221257132708373/4998796297. 앱의 배너 광고 단위는 목록상1개.
+- 광고 단위 설정 → 고급 설정 → 자동 새로고침.
+- Google 최적화 radio Value1. 맞춤120초 radio0. 사용중지됨 radio0.
+- 즉 자동 갱신 활성, Google 최적화 선택. 고정120초가 아님.
+- 설정 값을 바꾸지 않았으며 저장하지 않고 취소로 닫음. AdMob 계정/광고설정 변경 없음.
+- 참고 URL https://admob.google.com/v2/apps/5831097474/adunits/4998796297/edit
+
+앱 코드 확인
+- AdService.sizeForSlot: getAnchoredAdaptiveBannerAdSize(orientation,width).
+- main.dart: 공통 BannerAdSlot을 탭 콘텐츠 밖에 유지, 달력/일정/컨디션에서 표시, 다른 탭은 Offstage.
+- BannerAdSlot: size/consent 변경 등에만 앱이 새로운 BannerAd.load를 호출. 주기적인 수동 Timer는 없고 SDK의 AdMob 자동 갱신을 사용하는 구조. 초기load1번이라는 주석은 앱의 직접load호출 설명이지 SDK자동갱신을 끄는 설정이 아님.
+- 공식 Flutter문서: SDK가AdMob UI의새로고침설정을따르며 자동갱신은배너가화면에보일때 수행됨. https://developers.google.com/admob/flutter/banner
+- Google최적화는고정초수를명시하지않고운영데이터로계산. https://support.google.com/admob/answer/3245199?hl=en
+
+현재 코드의 실패 후 복구 보완점
+- lib/widgets/banner_ad_slot.dart onAdFailedToLoad(120행 부근): ad.dispose, _bannerAd=null, _isLoaded=false.
+- _scheduleSize는 폭/방향 동일이면return, 실패시 별도재시도예약 없음. 따라서 실패 후 현재폐기된인스턴스는 SDK자동갱신을 계속할수없으며, 크기/동의변경·화면재생성 등 새로드계기가 필요.
+- 같은 실패처리가 게시기준 main에도 존재함. 정상로드중자동갱신활성 여부와 실패후복구 한계를 구분함.
+- 실제prod 광고 노출을 여러회 생성하거나 광고클릭을 하지 않았으며 자동갱신 주기실측은 미수행. 이번근거는 실제AdMob설정과 코드/공식문서.
+- 배너코드수정/실광고설정변경/prod빌드·배포 없음.
+
+2026-10-13 사용자 분류 변경: 기능·운영 후속 기록은 docs/next_version_27이후/로 연결한다. AD-01 광고 실패 재시도는 새 폴더01번 원장에 수정 대기로 기록. 이번에는 광고 코드 수정 없음. 본 원장은 당시 조사 증거로 보존한다.

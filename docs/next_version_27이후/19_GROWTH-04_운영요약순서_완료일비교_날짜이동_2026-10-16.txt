@@ -1,0 +1,27 @@
+19_GROWTH-04 운영요약 순서·완료일 비교·날짜 화살표 (2026-10-16)
+
+사용자 요청
+- 운영요약 맨 위 DAU, 그 아래 매일 확인하는 핵심 지표.
+- 기능 사용 비교는 어제/오늘 선택 제거, 그제/어제로 고정.
+- 신규 설치는 어제 기본, 드롭다운 대신 < > 버튼으로 하루씩 이동.
+- Firebase 추가 요청 없이 적용 후 재배포.
+
+구현
+- overview 조합 순서 변경. 핵심 지표의 오늘 DAU 대기 문구도 제거하고 완료일만 표시.
+- comparisonRows는 항상 pulse.today-2, pulse.today-1만 비교. 오늘 이벤트는 비교/순위 합산에서 제외.
+- 신규 날짜 버튼은 pulse.from~어제로 제한. 양 끝에서 이전/다음 비활성화.
+- 날짜 버튼/전체 보기 핸들러는 메모리 docs와 ui 상태로 renderApp만 실행한다. loadData 호출 없음.
+- store.js/GA4 수집/워크플로/Firestore 문서 수/갱신 주기 변경 없음. 기존6문서 조회 유지.
+- 이번 작업은 별도 수동 GA4 재집계 없이 Hosting만 배포. Android 앱 빌드 없음.
+- 기존 dev 미커밋 작업 보존, 배포 작업폴더 main 9c4cc74에 대상6파일만 커밋.
+
+검증
+- 변경 관련 pulse 검사6개 PASS. 기존 검사를 새 완료일 비교·날짜 경계에 맞춰 갱신.
+- 전체 public JS 문법 및 대시보드 build PASS.
+- 브라우저 카드 순서 DAU→핵심지표→기능→신규 설치 확인.
+- 어제10/15→이전10/14→다음10/15 확인, 어제에서 다음 버튼 비활성 확인.
+-390px 다크 화면 날짜 버튼 배치/가로 넘침 없음 확인. 날짜 범위 끝 비활성 검증.
+- build e0bb2df0639ed0a9. 운영 Hosting 결과는 아래 후속 검증으로 연결.
+- 증거: artifacts/dashboard_pulse_followup_2026_10_16/date-buttons.jpg (검증용 모의 데이터 화면에서 날짜 버튼만 캡처).
+
+최종: Firebase Hosting deploy complete. 운영 build-info e0bb2df0639ed0a9 일치 PASS. deployment-verification.json에 시각/버전 증거 저장.

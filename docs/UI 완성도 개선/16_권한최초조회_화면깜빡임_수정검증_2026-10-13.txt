@@ -1,0 +1,37 @@
+권한 최초 조회 UI 수정 — 2026-10-13
+
+사용자 범위: dev만 수정하고 테스트, prod 변경 금지.
+브랜치 dev. main 기준0b0e05625502f21cf49057cf5e2ee7c173b93000 유지. prod 빌드/설치/배포/커밋/푸시 없음.
+
+변경
+- PermissionController에 최초 조회 완료 여부(hasLoaded) 추가. 조회 오류로 unknown이 반환돼도 완료 여부와 허용 상태를 구분한다. 오래된 조회 결과는 기존대로 버리며 완료 표시도 마지막 유효 조회에만 적용된다.
+- 공통 PermissionPanel은 최초 조회가 끝나기 전 임시 unknown 카드를 그리지 않는다. 후속 resume 조회 중에는 기존 UI를 유지한다.
+- PermissionIntroScreen은 최초 조회 중 전체 안내/설정/나중에 버튼을 Offstage로 숨기면서 Panel 상태는 유지한다. 실제 미허용/unknown 상태가 준비되면 한 번에 표시한다.
+- 모두 허용이면 다음 목적지가 준비되는 동안 안내 화면을 노출하지 않는다. 자동 진행 시 두 번째 실제 권한 재검증은 유지.
+- 설정 이동 성공을 허용으로 취급하지 않음. unknown/denied/notApplicable 및 앱 알림/알람 채널 분리 유지. native/DB/언어 키/색상/글꼴/간격 변경 없음.
+
+검증 (진행)
+- fix_target_recheck.log: 56 PASS. 느린 첫 조회2초/조회 실패 후 unknown/설정 복귀 회복/모두 허용 후 재확인 대기/후속 resume UI 유지/다국어48크기조건/타이포 역할 및 칩 포함.
+- 첫 대상 검사 중 기존 레이아웃 fixture가 비동기 조회를 mock하지 않고 임시 카드 표시에 의존하여 실패. 실제 denied 상태를 명시한 fixture 및 공통 버튼 finder로 보완 후 전부 PASS. 초기 테스트 binding 누락도 수정 후 PASS.
+- 새 permission_initial_snapshot_test.dart를 check_critical_release.ps1 필수 Flutter 검사 목록에 연결.
+- 필수 check_critical_release.ps1 -Build 및 정적 분석 진행. 빌드 후 동일 기기의 임시 미허용 조건/모두허용 첫진입 녹화 예정.
+- 실기기 신규 설치/제조사/잠금 알람 전수 PASS로 확대하지 않는다.
+
+증거 경로: artifacts/startup_device_2026-10-13/fix_*.log, artifacts/onboarding_round7/.
+
+사용자 후속 확인: 최초 4개 카드 → 필요한 항목만 남기는 로직을 확인했고, 다른 온보딩 화면으로 보였다는 관찰은 잘못 본 것 같다고 정정함. 별도 흰 화면 단계를 추가하지 않고 최초 조회 전 안내 내용 미노출 방식으로 계속 검증한다.
+
+최종 검증 결과
+- tools/check_critical_release.ps1 -Build: 마지막 P0 automated checks passed. Flutter343 PASS, native 권한/언어/알람 및 native DB 이관 BUILD SUCCESSFUL, dev debug APK/JS 웹 빌드 성공. release 빌드/웹 배포 없음.
+- 정적 분석: fix_analyze_verified.log, fix_analyze_verified_exit.txt 실제 native exit0 (--no-fatal-infos). error/warning 없음, info10개. PowerShell은 stderr 스타일 요약을 NativeCommandError로 출력하므로 실제 종료 코드를 별도 저장했다. 별도 node 직접 실행 시도는 SDK lockfile 쓰기 권한 부족으로 실패했으며 성공 증거로 사용하지 않음.
+- dev APK: artifacts/onboarding_round7/ShiftBell_permission_first_frame_dev_debug.apk
+- SHA256 C2CFA67EDE9867F16857BBFEF69EFA27FEA44599B410CC23A7B380B817325B9E. 설치된 base.apk 해시 일치.
+
+실기기 수정 후 (같은 SM_S948N/Android16)
+1. 최초 진입 플래그 일시false + 오버레이 미허용: 첫 권한 UI부터 오버레이 카드1개만 표시. 초기4개 카드 장면 없음. fix_debug_missing_overlay_permission_entry.mp4/.png. UI대기 프레임2192.9ms → 준비된1개 카드2251.6ms. 별도 흰 화면 라우트나 타이머 지연을 추가하지 않았다.
+2. 최초 진입 플래그 일시false + 모두허용: 권한 제목/카드/나중에 버튼이 노출되지 않고 기존 복구 안내 목적지로 진행. fix_debug_all_granted_permission_entry.mp4/.png.
+3. 각 촬영 후 환경 설정 원본 바이트 일치, permissions_requested=true 및 SYSTEM_ALERT_WINDOW=allow 원복 확인. 원래 데이터 삭제 없음. 최신 수정 debug APK가 기기에 남아 있음.
+- 실기기 증거는 위 두 초기 권한 경로에 한정. 신규설치 OS 기본 권한 상태, release/prod 실행, 잠금 알람/OEM전수 테스트로 확대하지 않음.
+- main hash0b0e05625502f21cf49057cf5e2ee7c173b93000 재확인. 정식 앱 설치/권한/데이터 조작 및 운영 배포/커밋/푸시 없음.
+
+실행기 종료 코드 구분: 외부 PowerShell 래퍼는 stderr 출력으로 exit1을 반환했다. 내부 각 Flutter/native/build 단계의 종료값을 확인하는 실행기에서는 실패 throw 없이 최종 P0 automated checks passed까지 도달했다. 위 PASS는 기능 검사 및 빌드 단계 결과이며 외부 프로세스 exit0으로 표현하지 않는다. 이전 15번 profile 래퍼와 같은 구분으로 보존한다.

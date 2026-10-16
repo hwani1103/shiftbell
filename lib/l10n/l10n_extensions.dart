@@ -17,6 +17,10 @@ extension AppLocalizationsX on BuildContext {
   /// Release scope follows the resolved app language, not the user's location.
   bool get usesKoreanFeatures => Localizations.localeOf(this).languageCode == 'ko';
 
+  /// Sleep/recovery is available in every released app language.
+  /// Personal schedules and sharing continue to use usesKoreanFeatures.
+  bool get supportsSleepFeatures => true;
+
   /// Native/database exception messages may contain Korean implementation text.
   /// Keep those details in diagnostics and Korean UI; use localized copy abroad.
   String localizedErrorDetail(Object error) =>

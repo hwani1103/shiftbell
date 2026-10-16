@@ -1,0 +1,12 @@
+{
+  "rejections": {
+    "too_few_deep_starts": 92,
+    "bounded_search_limit": 24,
+    "too_few_route_choices": 1
+  },
+  "success": [
+    43.266713629491,
+    52.466404452109934,
+    45.12020336897507
+  ]
+}

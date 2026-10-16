@@ -98,7 +98,7 @@ const List<Evidence> kEvidenceDatabase = [
   ),
   Evidence(
     id: 'EVIDENCE-007',
-    source: 'AASM, Management of Shift Work Disorder — Clinical Practice Guideline (2025)',
+    source: 'AASM, Management of Shift Work Disorder — Clinical Practice Guideline, public-comment draft (May 2025)',
     topic: '야간근무 전 낮잠',
     finding: '졸림을 겪는 교대근무 수면장애 성인에서 야간근무 전 낮잠을 조건부로 '
         '권장(단, 가이드라인 스스로 "근거 수준 매우 낮음"이라고 명시). 낮잠 직후 '

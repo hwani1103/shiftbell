@@ -1,0 +1,12 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: (setUpAll)
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:11 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Zero hearts blocks board, selection, undo and go until recovery
+00:13 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Last non-goal endpoint shows red counter and undo restores it
+00:13 +3: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Failure prioritizes fresh restart; partial edit remains in menu
+00:14 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Failure prioritizes fresh restart; partial edit remains in menu
+00:15 +5: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Four general help pages and back navigation at 320px (true)
+00:18 +6: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Four general help pages and back navigation at 320px (true)
+00:20 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: Four general help pages and back navigation at 320px (false)
+00:24 +8: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: (tearDownAll)
+00:24 +8: All tests passed!

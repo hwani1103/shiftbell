@@ -1,0 +1,73 @@
+달력 셀 읽기용 팔레트 / 한글 전체 테마 (2026-10-13)
+
+사용자 승인과 범위
+- 수정 전 상태를 보존하고, 기존 달력 표시로 돌아갈 여지를 남겨 구현 요청.
+- 최초 mainWhite/mainDark부터 적용하던 중 사용자가 한글판 전체 테마로 확대 지시.
+- 한글판 선택 가능 10개 디자인에 적용. 언더라인/매거진도 이번 지시로 포함한다.
+- 외국어 달력 내부 및 디자인 선택 미리보기는 기존 상태 유지. 기존 UI30 외곽 적용은 유지.
+
+복구 기준
+- artifacts/calendar_cells_checkpoint_2026_10_13/workspace_before.zip: 수정 직전 tracked/untracked 소스 1698개 보존.
+- manifest.json: 각 파일 SHA256, head.txt/status.txt/tracked.patch/main_reference.txt 함께 보존.
+- 기존 dev APK: artifacts/calendar_app_frame/ShiftBell_CalendarFrame_dev_debug.apk 보존.
+- tools/build_calendar_theme_preview.ps1 -Mode reading|frame|legacy 로 dev debug만 빌드 가능.
+  reading: 이번 한글 전체 달력 셀 적용(기본값).
+  frame: UI30 외곽만 연결하고 셀 내부는 기존 표시. 범례 두 디자인도 UI30처럼 제외.
+  legacy: 달력 외곽 공통 프레임도 해제하고 기존 달력 표현 경로 사용.
+- legacy는 달력 표시의 복구 옵션이며 앱 전체를 prod 바이너리로 되돌린다는 뜻이 아니다.
+  main 기준은 0f421f3a1fdc922bde0e365b6d7b950a1c49db2a에 기록. main/prod 변경 없음.
+  전체 소스 복구 시 압축을 현재 작업에 덮어쓰지 말고 별도 폴더에 풀어 manifest와 후속 변경을 비교한다.
+
+설계
+- CalendarReadingPalette: 기존 달력의 light/dark 성격 유지, 시간대 배경의 색조를 읽기용 표면으로 변환.
+  카드형/다이어리/굵은 격자는 표면 밝기와 종이색 혼합을 공통 프로필로 관리.
+- 날짜/보조/인접 월/공휴일/오늘/선택/메모/선 역할을 중앙에서 결정.
+- CalendarContrast: 최종 합성 배경의 상대 휘도 대비로 칩 글자색을 흑/백 선택.
+  셀과 칩의 구분이 부족할 때만 경계 보완. CalendarShiftMarker는 삼각형 사선까지 보호.
+- 저장된 근무색/사용자 지정색 및 DB 버전 변경 없음. 근무색 캐시/native 위젯 변경 없음.
+- 메인/기존 개별 셀/넓은 화면 셀에 같은 규칙 전달. 달력 전체 ColorScheme 교체 없이 대상 역할만 연결.
+- palette/design 변경 단위로 읽기용 팔레트 캐시. 셀마다 대비 계산 전체를 반복하지 않음.
+- 언더라인/매거진의 헤더 동작 보존(TODAY/전체 근무표/일정 공유)과 범례 시인성 확인.
+- 시스템 스플래시, 알람/권한/광고 로딩 동작은 변경하지 않음.
+
+검증 진행
+- 자동 대비 검사 3건: 모든 enum 디자인 x 5개 시간대, 선택 배경, 투명/동일/흑백/기본 근무색,
+  사용자 지정색 보존 확인. PASS.
+- 400x850 한국어10/영어7/기타3 화면 검사 및 메모3개 상태 진행 중.
+- 초기 범례2개 화면 검사에서 공통 헤더의 기존 action 누락 발견 후 보완.
+- 좁은/넓은 화면, 복구 옵션 및 최종 빌드 결과는 후속으로 덧붙인다.
+- 사용자 연결 해제 요청에 따라 실기기 설치/검증은 하지 않음.
+검증 후속
+- artifacts/calendar_cells_final_matrix.log: 23 PASS (대비3 + 기본 화면20).
+  한국어10개는 셀 색조 전환 확인, 영어7/독일어1/포르투갈어1/힌디어1 내부 픽셀 보존 확인.
+  날짜 2개에 메모 3개씩 추가한 조건. Today 동작과 광고 slot probe mount1 확인.
+- artifacts/calendar_cells_compact.log: 320x640 한글10 PASS.
+- artifacts/calendar_cells_wide.log: 800x850 한글10 PASS.
+- artifacts/calendar_cells_frame_rollback.log 및 legacy_rollback.log: 각4 PASS.
+  mainWhite/mainDark/underline/editorial에서 복구 모드 별 기존 팔레트 독립성 확인.
+- 초기 검사 중 단위검사 fixture의 인자 누락은 수정 후 위 최종 23 PASS로 대체.
+- 호스트 이미지에서 메인 다크의 칩 경계, 메모3개, 다이어리와 범례 디자인의 날짜/근무 배치를 확인.
+  일부 serif/테스트 기본 폰트의 글리프 표현은 호스트 fixture 제약으로 실기기 글꼴 PASS와 구분한다.
+- 이전 APK SHA256 보존 확인: E6D026C1D36CF5FBED7070E8276AF923DD5EFD2EA565AB5485765BB03D6DA9B6.
+- 소스 보존 ZIP SHA256: 22391DAF3BCC8848F572CC459542E437D2BF5439900F9D8DEB9C676BA3E99BDA.
+- 공통 모션/크기 계약을 유지하며 읽기 색 계산만 palette/design 변경 단위로 캐시.
+- 음력의 보조 글자색과 펼친 언더라인의 얇은 표시 경계는 최종 소스에서 추가 보완.
+  마지막 대상 검사와 필수 -Build 결과는 아래에 연결한다.
+최종 완료 (2026-10-13)
+- tools/check_critical_release.ps1 -Build exit0 / P0 automated checks passed.
+  Flutter344개 및 Android native 기능/DB 검사 통과. dev debug APK와 JavaScript 웹 빌드 성공.
+  증거: artifacts/calendar_cells_critical_build.log / calendar_cells_critical_build_exit.txt.
+- 최종 추가 보완: 적응형 칩 테두리는 dimensions=0인 paint-only Border로 그려서
+  내부 여백과 자동 축소 글자 크기를 바꾸지 않는다. 실제 Container 자식 크기 비교 PASS.
+- 최종 대비/배치4검사 PASS: artifacts/calendar_cells_final_contrast.log.
+  최종 넓은 mainDark/underline2 PASS, 좁은 materialCard/diary2 PASS:
+  artifacts/calendar_cells_final_wide_markers.log / calendar_cells_final_compact_markers.log.
+  이 검사들은 음력 역할색과 얇은 표시 경계, paint-only 보완까지 포함한 최종 소스로 실행했다.
+- 대상 정적 분석: error0/warning0, 기존 및 스타일 정보성 항목136개. 전체 lint0로 기록하지 않음.
+- 최종 APK: artifacts/calendar_cells_preview/ShiftBell_Calendar_reading_dev_debug.apk
+  SHA256: 46422D5200E2609AC690F9A39EEC0B5FA8A6C253B9E10735CE1B3AC59C333E95
+- 기존 UI30 APK와 수정 전 소스 보존본 유지. main/prod/release/AAB 변경 및 웹 배포 없음.
+- 실기기 설치/검증 미실행. 호스트/자동 검사 결과를 실기기 PASS로 표현하지 않는다.
+- 이번 완료는 한글판 달력 읽기 색과 대비 연결이며, 앱 전체 글꼴/레이아웃 중앙화 완료는 아니다.
+- 사용자 최종 요청: 모든 작업과 기록을 마친 후 PC 종료. 결과 저장 후 종료 명령 실행 예정.
+PC 종료: 사용자 요청에 따라 모든 검사/저장 완료 후 shutdown /s /t 60 명령 성공. 실기기 설치 없음.

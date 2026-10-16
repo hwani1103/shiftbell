@@ -1,0 +1,6988 @@
+{
+  "schemaVersion": 1,
+  "ruleSetId": "constant-cell-speed-v2",
+  "packId": "dev-campaign-50-gates",
+  "revision": 1,
+  "levels": [
+    {
+      "id": "L01",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".###.",
+        ".###.",
+        ".....",
+        "#####",
+        "#####"
+      ],
+      "goal": [
+        2,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 2,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L02",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".....",
+        ".....",
+        ".....",
+        ".....",
+        "....."
+      ],
+      "goal": [
+        2,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 2,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L03",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".....",
+        ".###.",
+        "...#.",
+        ".#.#.",
+        "....."
+      ],
+      "goal": [
+        3,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L04",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "######",
+        "######",
+        "##.###",
+        ".#..##",
+        "......",
+        "#..#.."
+      ],
+      "goal": [
+        4,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L05",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "..#.#.",
+        "......",
+        "....##",
+        ".#.###",
+        "##.###",
+        "#...##"
+      ],
+      "goal": [
+        2,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L06",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        "...#.",
+        "#.#..",
+        "....#",
+        "###..",
+        "###.."
+      ],
+      "goal": [
+        3,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L07",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "###...",
+        "...#..",
+        "......",
+        "#.###.",
+        "#.##..",
+        ".....#"
+      ],
+      "goal": [
+        5,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L08",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "....##",
+        "#....#",
+        "##....",
+        "##.##.",
+        "#...#.",
+        "#.#..#"
+      ],
+      "goal": [
+        2,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L09",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        "##.#.#.",
+        "...#...",
+        ".#####.",
+        ".#.....",
+        ".#.###.",
+        "...#..."
+      ],
+      "goal": [
+        4,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L10",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "......",
+        "..##.#",
+        "....##",
+        "..#..#",
+        "#....#",
+        "..#.##"
+      ],
+      "goal": [
+        3,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L11",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".#.#.#.",
+        ".#.....",
+        ".#.###.",
+        "...#.#.",
+        "####.#.",
+        "......."
+      ],
+      "goal": [
+        4,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L12",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "#....#",
+        "#....#",
+        "#...##",
+        "..####",
+        "#...##",
+        "##..##"
+      ],
+      "goal": [
+        2,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L13",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "#..###",
+        "...###",
+        "...###",
+        "....##",
+        ".#..##",
+        "..#.##"
+      ],
+      "goal": [
+        0,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L14",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "####.#",
+        "##....",
+        "###...",
+        "##...#",
+        "##..#.",
+        "##...."
+      ],
+      "goal": [
+        2,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            5,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L15",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "###..##",
+        "###...#",
+        "##...##",
+        "##..###",
+        "#..####",
+        "....###",
+        "##..###"
+      ],
+      "goal": [
+        3,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L16",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "#....#",
+        "...#..",
+        "......",
+        "##..#.",
+        "#..#..",
+        "#####."
+      ],
+      "goal": [
+        5,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L17",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".######",
+        "..#####",
+        "#..#..#",
+        "#.##...",
+        "..##.##",
+        ".....##",
+        ".#.#..."
+      ],
+      "goal": [
+        0,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            2,
+            6
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L18",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#...",
+        ".#####.",
+        ".......",
+        ".#.#.##",
+        ".#.#.#.",
+        ".#.#.#.",
+        "......."
+      ],
+      "goal": [
+        6,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            6
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L19",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#.....",
+        "....#..",
+        "...#...",
+        "...#..#",
+        "#.#..#.",
+        ".......",
+        ".###..#"
+      ],
+      "goal": [
+        2,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            4,
+            2
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            6,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L20",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".###.#.",
+        ".#.....",
+        "##.###.",
+        ".....#.",
+        ".###.#.",
+        "......."
+      ],
+      "goal": [
+        6,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L21",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".##..##",
+        "..##.##",
+        "...#.##",
+        "#....#.",
+        "##.#...",
+        "##.#..#",
+        "#.....#"
+      ],
+      "goal": [
+        4,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            6,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L22",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".#####.",
+        ".#.#...",
+        ".#.#.#.",
+        ".....#.",
+        ".###.#.",
+        ".#...#."
+      ],
+      "goal": [
+        3,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            6,
+            1
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            0,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L23",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".#.#.##",
+        ".....#.",
+        "##.#.#.",
+        "...#.#.",
+        ".#.###.",
+        "......."
+      ],
+      "goal": [
+        4,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            0,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L24",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#...",
+        ".###.##",
+        "...#...",
+        ".#.#.#.",
+        ".#...#.",
+        ".#.###.",
+        "......."
+      ],
+      "goal": [
+        4,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            6
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            6
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L25",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "#.#...",
+        "#.#...",
+        "#.#.#.",
+        "#.....",
+        "#.#..#",
+        "....##"
+      ],
+      "goal": [
+        1,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            4,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L26",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#...",
+        "##.#.##",
+        "...#...",
+        ".#.###.",
+        ".......",
+        ".###.#.",
+        "...#..."
+      ],
+      "goal": [
+        2,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            5,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            6,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L27",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "###.###",
+        "#...###",
+        ".#...##",
+        "...#..#",
+        ".#....#",
+        "##.#...",
+        "#####.."
+      ],
+      "goal": [
+        1,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            0,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L28",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".######",
+        "...####",
+        ".##..##",
+        ".#.#..#",
+        ".....#.",
+        ".#.....",
+        "#...#.."
+      ],
+      "goal": [
+        5,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            6,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            6
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L29",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...####",
+        "..###.#",
+        "..##...",
+        "#.....#",
+        "..#....",
+        "....##.",
+        "#.#.#.."
+      ],
+      "goal": [
+        6,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            0,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L30",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#...##",
+        "..#.###",
+        "#....#.",
+        "#......",
+        "##.###.",
+        "...####",
+        "#....##"
+      ],
+      "goal": [
+        0,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            1
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            5,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal"
+      ]
+    },
+    {
+      "id": "L31",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "######.",
+        "######.",
+        "#####..",
+        "..##.#.",
+        ".......",
+        "..###.#",
+        ".######"
+      ],
+      "goal": [
+        6,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            4
+          ],
+          "door": [
+            3,
+            4
+          ],
+          "openFor": 4
+        }
+      ]
+    },
+    {
+      "id": "L32",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "#######",
+        "#.#####",
+        "..####.",
+        ".####..",
+        "...##..",
+        ".#.....",
+        "##.###."
+      ],
+      "goal": [
+        5,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            5
+          ],
+          "door": [
+            5,
+            5
+          ],
+          "openFor": 4
+        }
+      ]
+    },
+    {
+      "id": "L33",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        "##.##",
+        "...#.",
+        "#....",
+        "..##.",
+        ".#..."
+      ],
+      "goal": [
+        1,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            3,
+            4
+          ],
+          "door": [
+            4,
+            2
+          ],
+          "openFor": 4
+        }
+      ]
+    },
+    {
+      "id": "L34",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#.....",
+        ".#####.",
+        ".....#.",
+        "####.#.",
+        "...#...",
+        ".#.#.#.",
+        ".#....."
+      ],
+      "goal": [
+        6,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            6
+          ],
+          "door": [
+            6,
+            0
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L35",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".#####.",
+        "...#.#.",
+        "##.#.#.",
+        ".#.....",
+        ".#.#.##",
+        "......."
+      ],
+      "goal": [
+        3,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            1
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            6,
+            2
+          ],
+          "door": [
+            2,
+            6
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L36",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "..#..#",
+        "..#..#",
+        "...#..",
+        ".#...#",
+        "#.....",
+        "#...#."
+      ],
+      "goal": [
+        2,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            1
+          ],
+          "door": [
+            4,
+            2
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L37",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".#####.",
+        ".....#.",
+        ".###.#.",
+        ".....#.",
+        ".#.#.#.",
+        "...#..."
+      ],
+      "goal": [
+        6,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            2
+          ],
+          "door": [
+            0,
+            4
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L38",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".#.###.",
+        ".#.....",
+        "##.###.",
+        ".#...#.",
+        ".#.#.#.",
+        "...#..."
+      ],
+      "goal": [
+        4,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            6
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            5,
+            6
+          ],
+          "door": [
+            2,
+            2
+          ],
+          "openFor": 6
+        }
+      ]
+    },
+    {
+      "id": "L39",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "#.....#",
+        ".##..#.",
+        ".....#.",
+        ".###...",
+        "##....#",
+        "..#..##",
+        "......."
+      ],
+      "goal": [
+        5,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            6
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            1
+          ],
+          "door": [
+            3,
+            6
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L40",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "#######",
+        "...####",
+        "....#.#",
+        "..#...#",
+        "#......",
+        "...#...",
+        "#..###."
+      ],
+      "goal": [
+        1,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            5,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            3
+          ],
+          "door": [
+            5,
+            4
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L41",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".....",
+        ".#.##",
+        ".....",
+        "##.#.",
+        "....."
+      ],
+      "goal": [
+        3,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            1
+          ],
+          "door": [
+            2,
+            2
+          ],
+          "openFor": 6
+        }
+      ]
+    },
+    {
+      "id": "L42",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#...",
+        ".###.#.",
+        ".....#.",
+        ".#.#.#.",
+        ".#...#.",
+        ".#.###.",
+        "......."
+      ],
+      "goal": [
+        6,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            4,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            3
+          ],
+          "door": [
+            4,
+            1
+          ],
+          "openFor": 3
+        },
+        {
+          "id": "2",
+          "trigger": [
+            2,
+            6
+          ],
+          "door": [
+            6,
+            0
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L43",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".#####.",
+        ".#...#.",
+        ".#.#.#.",
+        "...#...",
+        ".#####.",
+        ".#....."
+      ],
+      "goal": [
+        4,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            5,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            6,
+            4
+          ],
+          "door": [
+            0,
+            2
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            0,
+            6
+          ],
+          "door": [
+            4,
+            4
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L44",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#...",
+        ".#.###.",
+        ".#.....",
+        ".#.#.#.",
+        ".#...#.",
+        ".#.###.",
+        "......."
+      ],
+      "goal": [
+        1,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            4,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            0,
+            6
+          ],
+          "door": [
+            2,
+            2
+          ],
+          "openFor": 3
+        },
+        {
+          "id": "2",
+          "trigger": [
+            0,
+            4
+          ],
+          "door": [
+            2,
+            4
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L45",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".###.#.",
+        "...#.#.",
+        ".#.#.##",
+        ".......",
+        "##.###.",
+        "......."
+      ],
+      "goal": [
+        4,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            2,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            3,
+            6
+          ],
+          "door": [
+            5,
+            6
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            2,
+            4
+          ],
+          "door": [
+            4,
+            4
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L46",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".....#.",
+        "###....",
+        ".......",
+        ".#.....",
+        "#..#.#.",
+        "...##..",
+        "...####"
+      ],
+      "goal": [
+        4,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            2,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            4
+          ],
+          "door": [
+            6,
+            3
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            3,
+            3
+          ],
+          "door": [
+            6,
+            1
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L47",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#...",
+        ".#.#.#.",
+        ".#.....",
+        ".#.####",
+        ".#.....",
+        ".###.#.",
+        "......."
+      ],
+      "goal": [
+        2,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            1
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            5,
+            4
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            5,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            6
+          ],
+          "door": [
+            2,
+            4
+          ],
+          "openFor": 4
+        },
+        {
+          "id": "2",
+          "trigger": [
+            3,
+            6
+          ],
+          "door": [
+            6,
+            2
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L48",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "......#",
+        "..#....",
+        ".#.#..#",
+        "#....##",
+        "#.#...#",
+        "#..#.##",
+        "#.#####"
+      ],
+      "goal": [
+        5,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            4
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            5,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            0
+          ],
+          "door": [
+            0,
+            0
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            4,
+            3
+          ],
+          "door": [
+            4,
+            2
+          ],
+          "openFor": 4
+        }
+      ]
+    },
+    {
+      "id": "L49",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "###..##",
+        "####.##",
+        "#....#.",
+        ".......",
+        "#....#.",
+        "...#...",
+        "##..#.."
+      ],
+      "goal": [
+        6,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            5,
+            6
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            5,
+            3
+          ],
+          "door": [
+            6,
+            3
+          ],
+          "openFor": 6
+        },
+        {
+          "id": "2",
+          "trigger": [
+            3,
+            3
+          ],
+          "door": [
+            6,
+            4
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L50",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#...",
+        "##.#.#.",
+        ".....#.",
+        ".#.#.##",
+        ".......",
+        ".#.###.",
+        ".#....."
+      ],
+      "goal": [
+        5,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            6
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            2,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            4
+          ],
+          "door": [
+            2,
+            4
+          ],
+          "openFor": 6
+        },
+        {
+          "id": "2",
+          "trigger": [
+            0,
+            5
+          ],
+          "door": [
+            4,
+            1
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L51",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "..#..#",
+        ".#.#.#",
+        "...#.#",
+        ".#.#.#",
+        ".....#",
+        "...#.."
+      ],
+      "goal": [
+        2,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            4,
+            4
+          ],
+          "exit": [
+            1,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L52",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "######.",
+        "######.",
+        "###....",
+        "##.##.#",
+        "#.....#",
+        "##.####",
+        "#######"
+      ],
+      "goal": [
+        6,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            4
+          ],
+          "exit": [
+            4,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L53",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        "....#",
+        ".#..#",
+        "##.##",
+        "#....",
+        "##.##"
+      ],
+      "goal": [
+        2,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            3
+          ],
+          "exit": [
+            0,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L54",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".....",
+        "##.#.",
+        "...#.",
+        ".#.#.",
+        "....."
+      ],
+      "goal": [
+        3,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            0,
+            4
+          ],
+          "exit": [
+            1,
+            0
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L55",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        "##..#",
+        "#...#",
+        ".#...",
+        ".....",
+        "..#.."
+      ],
+      "goal": [
+        1,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            1
+          ],
+          "exit": [
+            3,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L56",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "####.#",
+        "#.##..",
+        "...##.",
+        "......",
+        "....#.",
+        "..##.."
+      ],
+      "goal": [
+        5,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 3,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            0,
+            3
+          ],
+          "exit": [
+            5,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L57",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#..#",
+        ".#....#",
+        "##.####",
+        "##.....",
+        "##.#.#.",
+        "####...",
+        "#####.#"
+      ],
+      "goal": [
+        2,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            4,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            3,
+            3
+          ],
+          "exit": [
+            2,
+            1
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L58",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".....",
+        "#...#",
+        "..##.",
+        ".....",
+        "#.##."
+      ],
+      "goal": [
+        4,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            1,
+            0
+          ],
+          "exit": [
+            0,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L59",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "##...#",
+        "#..###",
+        "....##",
+        "..#..#",
+        "#.#.##",
+        "....##"
+      ],
+      "goal": [
+        0,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            4,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            4,
+            0
+          ],
+          "exit": [
+            3,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L60",
+      "revision": 1,
+      "width": 5,
+      "height": 5,
+      "rows": [
+        ".#...",
+        ".#.##",
+        ".#...",
+        ".#.#.",
+        "....."
+      ],
+      "goal": [
+        0,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            3
+          ],
+          "exit": [
+            0,
+            0
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            0,
+            2
+          ],
+          "door": [
+            2,
+            4
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L61",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "#.#...#",
+        "......#",
+        ".##.#.#",
+        "####...",
+        "###.#..",
+        "##.....",
+        "#..###."
+      ],
+      "goal": [
+        2,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            5,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            1,
+            1
+          ],
+          "exit": [
+            3,
+            4
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            3,
+            5
+          ],
+          "door": [
+            4,
+            5
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L62",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#...",
+        ".###.#.",
+        ".....#.",
+        ".#.###.",
+        ".#.....",
+        ".###.#.",
+        "......."
+      ],
+      "goal": [
+        0,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            4,
+            4
+          ],
+          "exit": [
+            3,
+            6
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            2
+          ],
+          "door": [
+            0,
+            6
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L63",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".#.###.",
+        ".....#.",
+        "####.#.",
+        ".....#.",
+        "##.#.#.",
+        "......."
+      ],
+      "goal": [
+        4,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            6,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            2
+          ],
+          "exit": [
+            5,
+            6
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            5
+          ],
+          "door": [
+            6,
+            5
+          ],
+          "openFor": 4
+        }
+      ]
+    },
+    {
+      "id": "L64",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".....#.",
+        ".#.#.#.",
+        "...#.#.",
+        ".#.#.#.",
+        "...#...",
+        ".#.###.",
+        ".#....."
+      ],
+      "goal": [
+        6,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            0,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            4
+          ],
+          "exit": [
+            6,
+            1
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            0,
+            0
+          ],
+          "door": [
+            2,
+            2
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L65",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#...",
+        ".#.###.",
+        ".#...#.",
+        ".###.#.",
+        "...#...",
+        ".#.#.##",
+        ".#....."
+      ],
+      "goal": [
+        5,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            1
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            2,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            0
+          ],
+          "exit": [
+            6,
+            4
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            0,
+            2
+          ],
+          "door": [
+            4,
+            5
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L66",
+      "revision": 1,
+      "width": 6,
+      "height": 6,
+      "rows": [
+        "#####.",
+        "..#...",
+        "....#.",
+        ".#...#",
+        ".#...#",
+        "..#..."
+      ],
+      "goal": [
+        5,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            0,
+            3
+          ],
+          "exit": [
+            3,
+            1
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            5
+          ],
+          "door": [
+            0,
+            2
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            3,
+            2
+          ],
+          "door": [
+            3,
+            3
+          ],
+          "openFor": 4
+        }
+      ]
+    },
+    {
+      "id": "L67",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#...",
+        ".#.###.",
+        ".#.....",
+        ".###.#.",
+        ".#...#.",
+        ".###.#.",
+        "......."
+      ],
+      "goal": [
+        5,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            0,
+            1
+          ],
+          "exit": [
+            6,
+            4
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            0
+          ],
+          "door": [
+            4,
+            6
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            6,
+            2
+          ],
+          "door": [
+            6,
+            3
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L68",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "##.....",
+        "...####",
+        "...####",
+        "......#",
+        ".#..#.#",
+        "#....##",
+        "##.####"
+      ],
+      "goal": [
+        5,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            4
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            4
+          ],
+          "exit": [
+            3,
+            0
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            3
+          ],
+          "door": [
+            4,
+            0
+          ],
+          "openFor": 5
+        },
+        {
+          "id": "2",
+          "trigger": [
+            3,
+            4
+          ],
+          "door": [
+            4,
+            3
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L69",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#...#.",
+        ".#.#.#.",
+        "...#...",
+        "##.###.",
+        ".......",
+        ".###.##",
+        "......."
+      ],
+      "goal": [
+        2,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            5,
+            2
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 5,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            6,
+            0
+          ],
+          "exit": [
+            0,
+            6
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            2
+          ],
+          "door": [
+            2,
+            4
+          ],
+          "openFor": 3
+        },
+        {
+          "id": "2",
+          "trigger": [
+            4,
+            4
+          ],
+          "door": [
+            1,
+            6
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L70",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".######",
+        "..####.",
+        ".......",
+        "..#...#",
+        ".##.#..",
+        "...####",
+        ".#..###"
+      ],
+      "goal": [
+        3,
+        3
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            6,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 4,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            6
+          ],
+          "exit": [
+            5,
+            3
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            0,
+            3
+          ],
+          "door": [
+            2,
+            2
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            5,
+            2
+          ],
+          "door": [
+            4,
+            3
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L71",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#.#.#.",
+        ".#.#.#.",
+        ".......",
+        ".#.#.#.",
+        "#...##.",
+        "..#..#.",
+        "#..#..."
+      ],
+      "goal": [
+        3,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            2,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            0
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            4,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 6,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            1
+          ],
+          "door": [
+            3,
+            4
+          ],
+          "openFor": 4
+        },
+        {
+          "id": "2",
+          "trigger": [
+            1,
+            4
+          ],
+          "door": [
+            2,
+            2
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L72",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "....#.#",
+        "#.#....",
+        "#..#.#.",
+        "..##.##",
+        ".#.....",
+        ".##.##.",
+        "#....#."
+      ],
+      "goal": [
+        0,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            6,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 6,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            1,
+            6
+          ],
+          "exit": [
+            1,
+            0
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            1
+          ],
+          "door": [
+            3,
+            6
+          ],
+          "openFor": 1
+        },
+        {
+          "id": "2",
+          "trigger": [
+            4,
+            6
+          ],
+          "door": [
+            3,
+            0
+          ],
+          "openFor": 4
+        }
+      ]
+    },
+    {
+      "id": "L73",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#..#..",
+        "...#..#",
+        ".##..#.",
+        "..#....",
+        ".#.#.##",
+        ".......",
+        "#.#.#.."
+      ],
+      "goal": [
+        5,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            5,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 6,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            5,
+            1
+          ],
+          "exit": [
+            1,
+            6
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            5
+          ],
+          "door": [
+            5,
+            5
+          ],
+          "openFor": 4
+        },
+        {
+          "id": "2",
+          "trigger": [
+            4,
+            1
+          ],
+          "door": [
+            4,
+            4
+          ],
+          "openFor": 1
+        }
+      ]
+    },
+    {
+      "id": "L74",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "#.....#",
+        ".###.#.",
+        ".......",
+        ".###.#.",
+        "......#",
+        ".##.#..",
+        "...##.."
+      ],
+      "goal": [
+        1,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            6,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 6,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            0,
+            2
+          ],
+          "door": [
+            0,
+            4
+          ],
+          "openFor": 5
+        },
+        {
+          "id": "2",
+          "trigger": [
+            4,
+            2
+          ],
+          "door": [
+            2,
+            4
+          ],
+          "openFor": 1
+        }
+      ]
+    },
+    {
+      "id": "L75",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#.#.",
+        "#.#....",
+        "...#.##",
+        ".#.#...",
+        ".#...#.",
+        "...#...",
+        ".#..##."
+      ],
+      "goal": [
+        1,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            4,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 6,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            5,
+            3
+          ],
+          "exit": [
+            2,
+            3
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            0,
+            4
+          ],
+          "door": [
+            2,
+            2
+          ],
+          "openFor": 3
+        },
+        {
+          "id": "2",
+          "trigger": [
+            4,
+            5
+          ],
+          "door": [
+            4,
+            3
+          ],
+          "openFor": 1
+        }
+      ]
+    },
+    {
+      "id": "L76",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "#.#...#",
+        "....##.",
+        "#.#..#.",
+        ".#..##.",
+        "..#....",
+        "#.##.#.",
+        "......."
+      ],
+      "goal": [
+        5,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            4,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 7,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            6,
+            4
+          ],
+          "door": [
+            4,
+            5
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            2,
+            6
+          ],
+          "door": [
+            6,
+            5
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L77",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#.#.#.",
+        ".#.#...",
+        ".....#.",
+        "#.#.#.#",
+        ".#.....",
+        "...#.#.",
+        "..#...#"
+      ],
+      "goal": [
+        0,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            4
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 7,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            0,
+            5
+          ],
+          "exit": [
+            5,
+            4
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            3,
+            2
+          ],
+          "door": [
+            3,
+            3
+          ],
+          "openFor": 1
+        },
+        {
+          "id": "2",
+          "trigger": [
+            3,
+            4
+          ],
+          "door": [
+            5,
+            1
+          ],
+          "openFor": 1
+        }
+      ]
+    },
+    {
+      "id": "L78",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "..#.#..",
+        ".#...#.",
+        "..#.#..",
+        "#...#.#",
+        "..#....",
+        "#..#.#.",
+        "#...#.."
+      ],
+      "goal": [
+        6,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            4,
+            1
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            2,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 7,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            3,
+            0
+          ],
+          "exit": [
+            3,
+            1
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            4
+          ],
+          "door": [
+            3,
+            3
+          ],
+          "openFor": 5
+        },
+        {
+          "id": "2",
+          "trigger": [
+            5,
+            4
+          ],
+          "door": [
+            3,
+            2
+          ],
+          "openFor": 1
+        }
+      ]
+    },
+    {
+      "id": "L79",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "..#.#.#",
+        "#......",
+        ".#.#.#.",
+        "....#..",
+        "#.#.##.",
+        ".....#.",
+        ".#.#..."
+      ],
+      "goal": [
+        0,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            1
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            6,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 7,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            1
+          ],
+          "door": [
+            2,
+            3
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            2,
+            5
+          ],
+          "door": [
+            3,
+            5
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L80",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "#.#.#..",
+        "..#.##.",
+        "#......",
+        "..#.##.",
+        ".#..#..",
+        ".#.#.#.",
+        "#..#..."
+      ],
+      "goal": [
+        6,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            2,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 7,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            3,
+            2
+          ],
+          "exit": [
+            5,
+            0
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            6,
+            5
+          ],
+          "door": [
+            4,
+            2
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            1,
+            3
+          ],
+          "door": [
+            6,
+            0
+          ],
+          "openFor": 1
+        }
+      ]
+    },
+    {
+      "id": "L81",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "..#.#..",
+        ".#...#.",
+        "..##...",
+        "#....#.",
+        "..##..#",
+        "#...#..",
+        "..#..#."
+      ],
+      "goal": [
+        1,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            6
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            4,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 8,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            5
+          ],
+          "exit": [
+            0,
+            4
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            0,
+            2
+          ],
+          "door": [
+            3,
+            3
+          ],
+          "openFor": 1
+        },
+        {
+          "id": "2",
+          "trigger": [
+            1,
+            2
+          ],
+          "door": [
+            2,
+            3
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L82",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "#.#..#.",
+        "....#..",
+        ".#.#..#",
+        "#...#.#",
+        "..#....",
+        ".#..##.",
+        "..#...#"
+      ],
+      "goal": [
+        1,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            3
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            4,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            0,
+            6
+          ]
+        }
+      ],
+      "maxCommands": 8,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            3,
+            5
+          ],
+          "door": [
+            0,
+            4
+          ],
+          "openFor": 1
+        },
+        {
+          "id": "2",
+          "trigger": [
+            5,
+            6
+          ],
+          "door": [
+            5,
+            2
+          ],
+          "openFor": 1
+        }
+      ]
+    },
+    {
+      "id": "L83",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "..####.",
+        "...##..",
+        "#.#...#",
+        "...##..",
+        ".##....",
+        "....#.#",
+        ".#.#..."
+      ],
+      "goal": [
+        2,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            1
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            5,
+            2
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            6,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 8,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            5,
+            1
+          ],
+          "exit": [
+            1,
+            0
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            5,
+            6
+          ],
+          "door": [
+            0,
+            5
+          ],
+          "openFor": 4
+        },
+        {
+          "id": "2",
+          "trigger": [
+            0,
+            4
+          ],
+          "door": [
+            5,
+            4
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L84",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "..#....",
+        ".#..#.#",
+        "...#...",
+        ".##..#.",
+        "#.#.#..",
+        ".....#.",
+        "..#.#.."
+      ],
+      "goal": [
+        2,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            6,
+            4
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            3,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 8,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            5
+          ],
+          "exit": [
+            6,
+            6
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            6,
+            0
+          ],
+          "door": [
+            6,
+            2
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            5,
+            0
+          ],
+          "door": [
+            6,
+            3
+          ],
+          "openFor": 4
+        }
+      ]
+    },
+    {
+      "id": "L85",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#...#.",
+        "..#.#..",
+        "#....#.",
+        ".#.#...",
+        "....###",
+        "#.#....",
+        "##..#.#"
+      ],
+      "goal": [
+        1,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            5,
+            6
+          ]
+        }
+      ],
+      "maxCommands": 8,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            2,
+            0
+          ],
+          "exit": [
+            3,
+            6
+          ]
+        },
+        {
+          "id": "2",
+          "entry": [
+            6,
+            2
+          ],
+          "exit": [
+            3,
+            0
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            4
+          ],
+          "door": [
+            2,
+            3
+          ],
+          "openFor": 1
+        },
+        {
+          "id": "2",
+          "trigger": [
+            5,
+            5
+          ],
+          "door": [
+            2,
+            4
+          ],
+          "openFor": 5
+        }
+      ]
+    },
+    {
+      "id": "L86",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "....#..",
+        "#.#...#",
+        "...##..",
+        ".#...#.",
+        "..#.#..",
+        ".#..###",
+        "..#...."
+      ],
+      "goal": [
+        0,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            5,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 9,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            1
+          ],
+          "door": [
+            2,
+            2
+          ],
+          "openFor": 5
+        },
+        {
+          "id": "2",
+          "trigger": [
+            2,
+            0
+          ],
+          "door": [
+            3,
+            6
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L87",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "..#....",
+        "#...##.",
+        "..#.#..",
+        "#.##..#",
+        ".....#.",
+        ".#.#...",
+        ".#..#.."
+      ],
+      "goal": [
+        3,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            6
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            6,
+            4
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            5,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 9,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            5
+          ],
+          "door": [
+            5,
+            3
+          ],
+          "openFor": 1
+        },
+        {
+          "id": "2",
+          "trigger": [
+            6,
+            0
+          ],
+          "door": [
+            3,
+            1
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L88",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "##.##..",
+        "#...#..",
+        "..#...#",
+        ".#..#.#",
+        "#..#...",
+        "..#..#.",
+        "#..#.#."
+      ],
+      "goal": [
+        6,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            0,
+            2
+          ]
+        }
+      ],
+      "maxCommands": 9,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            4,
+            2
+          ],
+          "exit": [
+            3,
+            5
+          ]
+        },
+        {
+          "id": "2",
+          "entry": [
+            0,
+            5
+          ],
+          "exit": [
+            1,
+            1
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            5,
+            2
+          ],
+          "door": [
+            5,
+            0
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            2,
+            1
+          ],
+          "door": [
+            5,
+            3
+          ],
+          "openFor": 5
+        }
+      ]
+    },
+    {
+      "id": "L89",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "..#..#.",
+        ".#..#..",
+        "..#..#.",
+        ".#..#..",
+        "..#...#",
+        "...##..",
+        ".#....."
+      ],
+      "goal": [
+        4,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            4
+          ]
+        }
+      ],
+      "maxCommands": 9,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            4,
+            0
+          ],
+          "exit": [
+            6,
+            3
+          ]
+        },
+        {
+          "id": "2",
+          "entry": [
+            1,
+            2
+          ],
+          "exit": [
+            6,
+            1
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            3,
+            6
+          ],
+          "door": [
+            6,
+            2
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            0,
+            2
+          ],
+          "door": [
+            4,
+            6
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L90",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".......",
+        ".#.#.#.",
+        "#..#.##",
+        "..#....",
+        ".#..##.",
+        "#..#...",
+        "..#...."
+      ],
+      "goal": [
+        2,
+        4
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            1,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            1
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            2,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 9,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            1
+          ],
+          "door": [
+            5,
+            0
+          ],
+          "openFor": 3
+        },
+        {
+          "id": "2",
+          "trigger": [
+            6,
+            0
+          ],
+          "door": [
+            1,
+            0
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L91",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "..#.#..",
+        ".#...#.",
+        "..##...",
+        "#..#.#.",
+        ".#.....",
+        "...##.#",
+        "#.#...."
+      ],
+      "goal": [
+        3,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 10,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            6,
+            1
+          ],
+          "door": [
+            4,
+            3
+          ],
+          "openFor": 3
+        },
+        {
+          "id": "2",
+          "trigger": [
+            4,
+            2
+          ],
+          "door": [
+            5,
+            2
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L92",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "#..#...",
+        "..#..#.",
+        ".##.#.#",
+        ".......",
+        "#.#.#.#",
+        "...#..#",
+        ".#..#.."
+      ],
+      "goal": [
+        2,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            3,
+            6
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            0
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            2,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            6,
+            6
+          ]
+        }
+      ],
+      "maxCommands": 10,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            3
+          ],
+          "door": [
+            3,
+            3
+          ],
+          "openFor": 1
+        },
+        {
+          "id": "2",
+          "trigger": [
+            1,
+            1
+          ],
+          "door": [
+            4,
+            3
+          ],
+          "openFor": 5
+        }
+      ]
+    },
+    {
+      "id": "L93",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#...#.",
+        "...#.#.",
+        ".#..#..",
+        "..#...#",
+        "##.#.##",
+        "......#",
+        "..#.#.."
+      ],
+      "goal": [
+        6,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            2,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            1,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            0,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 10,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            3,
+            3
+          ],
+          "door": [
+            4,
+            4
+          ],
+          "openFor": 5
+        },
+        {
+          "id": "2",
+          "trigger": [
+            3,
+            2
+          ],
+          "door": [
+            1,
+            5
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L94",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#.#...",
+        ".....#.",
+        "#.#.#..",
+        "##....#",
+        "#..#.#.",
+        ".#.##..",
+        "......#"
+      ],
+      "goal": [
+        6,
+        1
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            5
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            6,
+            4
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            5,
+            5
+          ]
+        }
+      ],
+      "maxCommands": 10,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            6,
+            0
+          ],
+          "door": [
+            5,
+            3
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            1,
+            6
+          ],
+          "door": [
+            2,
+            6
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L95",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "##.....",
+        "#..#.#.",
+        "..#..#.",
+        ".#.#..#",
+        "....#..",
+        ".##...#",
+        "...#..#"
+      ],
+      "goal": [
+        2,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            0
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            2
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            4,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 10,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            2
+          ],
+          "door": [
+            1,
+            1
+          ],
+          "openFor": 2
+        },
+        {
+          "id": "2",
+          "trigger": [
+            4,
+            3
+          ],
+          "door": [
+            5,
+            5
+          ],
+          "openFor": 2
+        }
+      ]
+    },
+    {
+      "id": "L96",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".#.#...",
+        ".....#.",
+        "#.##..#",
+        "#...#..",
+        "..#.#.#",
+        ".#.#...",
+        "...#.#."
+      ],
+      "goal": [
+        0,
+        5
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            5,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            6,
+            5
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            4,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            6,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 11,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            4,
+            2
+          ],
+          "exit": [
+            0,
+            0
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            5,
+            0
+          ],
+          "door": [
+            2,
+            1
+          ],
+          "openFor": 3
+        },
+        {
+          "id": "2",
+          "trigger": [
+            2,
+            3
+          ],
+          "door": [
+            4,
+            1
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L97",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "..#..#.",
+        ".#..#..",
+        "...##.#",
+        ".#.....",
+        "..#.##.",
+        "#.#..#.",
+        "...#..#"
+      ],
+      "goal": [
+        5,
+        6
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            1,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            6,
+            1
+          ]
+        }
+      ],
+      "maxCommands": 11,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            2,
+            2
+          ],
+          "door": [
+            6,
+            4
+          ],
+          "openFor": 1
+        },
+        {
+          "id": "2",
+          "trigger": [
+            6,
+            3
+          ],
+          "door": [
+            2,
+            3
+          ],
+          "openFor": 1
+        }
+      ]
+    },
+    {
+      "id": "L98",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        "...#.#.",
+        ".#...#.",
+        ".#.##..",
+        "..###.#",
+        "#..#...",
+        ".#...#.",
+        "...#..."
+      ],
+      "goal": [
+        4,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            6
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            5,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            5
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            4,
+            6
+          ]
+        }
+      ],
+      "maxCommands": 12,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            6,
+            2
+          ],
+          "exit": [
+            0,
+            3
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            6
+          ],
+          "door": [
+            4,
+            4
+          ],
+          "openFor": 1
+        },
+        {
+          "id": "2",
+          "trigger": [
+            0,
+            2
+          ],
+          "door": [
+            5,
+            2
+          ],
+          "openFor": 1
+        }
+      ]
+    },
+    {
+      "id": "L99",
+      "revision": 1,
+      "width": 7,
+      "height": 7,
+      "rows": [
+        ".....#.",
+        "..##...",
+        ".#..#.#",
+        "...#.#.",
+        "#.#....",
+        "....##.",
+        "#.#..#."
+      ],
+      "goal": [
+        6,
+        0
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            6,
+            4
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            4
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            3,
+            6
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            6,
+            3
+          ]
+        }
+      ],
+      "maxCommands": 12,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "endpoint-portals",
+        "timed-gates"
+      ],
+      "portals": [
+        {
+          "id": "1",
+          "entry": [
+            0,
+            5
+          ],
+          "exit": [
+            3,
+            5
+          ]
+        }
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            1,
+            5
+          ],
+          "door": [
+            4,
+            4
+          ],
+          "openFor": 1
+        },
+        {
+          "id": "2",
+          "trigger": [
+            2,
+            0
+          ],
+          "door": [
+            0,
+            0
+          ],
+          "openFor": 3
+        }
+      ]
+    },
+    {
+      "id": "L100",
+      "revision": 1,
+      "width": 8,
+      "height": 8,
+      "rows": [
+        "#..#....",
+        "..#..#.#",
+        "#.#.#...",
+        "...#.##.",
+        ".#.#....",
+        "#....#.#",
+        "#.#.#...",
+        "...#..#."
+      ],
+      "goal": [
+        3,
+        2
+      ],
+      "units": [
+        {
+          "id": "A",
+          "start": [
+            4,
+            7
+          ]
+        },
+        {
+          "id": "B",
+          "start": [
+            3,
+            6
+          ]
+        },
+        {
+          "id": "C",
+          "start": [
+            0,
+            3
+          ]
+        },
+        {
+          "id": "D",
+          "start": [
+            1,
+            0
+          ]
+        }
+      ],
+      "maxCommands": 14,
+      "requiredMechanics": [
+        "straight-motion",
+        "absorbing-shared-goal",
+        "timed-gates"
+      ],
+      "gates": [
+        {
+          "id": "1",
+          "trigger": [
+            4,
+            5
+          ],
+          "door": [
+            2,
+            3
+          ],
+          "openFor": 3
+        },
+        {
+          "id": "2",
+          "trigger": [
+            5,
+            4
+          ],
+          "door": [
+            4,
+            4
+          ],
+          "openFor": 2
+        }
+      ]
+    }
+  ]
+}

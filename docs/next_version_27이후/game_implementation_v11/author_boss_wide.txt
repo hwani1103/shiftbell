@@ -1,0 +1,6 @@
+READY 95 score 54.99
+READY 97 score 62.56
+BEST 99 53.95 extra 20 domains [772, 15, 13, 772]
+BEST 100 47.76 extra 20 domains [123, 6, 21, 65]
+SEARCH {95: 12, 96: 360, 97: 12, 98: 360, 99: 348, 100: 348} seconds 164
+SEARCH {95: 12, 96: 720, 97: 12, 98: 720, 99: 708, 100: 708} seconds 312

@@ -1,0 +1,318 @@
+{
+  "level": {
+    "id": "L98",
+    "revision": 1,
+    "width": 7,
+    "height": 7,
+    "rows": [
+      "....#..",
+      "#.#....",
+      "...#.#.",
+      ".#.#..#",
+      ".#..##.",
+      "..#....",
+      "#...#.#"
+    ],
+    "goal": [
+      6,
+      4
+    ],
+    "units": [
+      {
+        "id": "A",
+        "start": [
+          0,
+          0
+        ]
+      },
+      {
+        "id": "B",
+        "start": [
+          3,
+          1
+        ]
+      },
+      {
+        "id": "C",
+        "start": [
+          6,
+          0
+        ]
+      },
+      {
+        "id": "D",
+        "start": [
+          2,
+          0
+        ]
+      }
+    ],
+    "maxCommands": 12,
+    "requiredMechanics": [
+      "straight-motion",
+      "absorbing-shared-goal",
+      "timed-gates"
+    ],
+    "gates": [
+      {
+        "id": "1",
+        "trigger": [
+          1,
+          0
+        ],
+        "door": [
+          3,
+          0
+        ],
+        "openFor": 1
+      },
+      {
+        "id": "2",
+        "trigger": [
+          4,
+          5
+        ],
+        "door": [
+          3,
+          4
+        ],
+        "openFor": 1
+      }
+    ]
+  },
+  "design": {
+    "id": "L98",
+    "score": 55.86843384655207,
+    "canonicalDomains": [
+      569,
+      125,
+      6,
+      624
+    ],
+    "canonicalSolutions": 2,
+    "baseSolutions": 900,
+    "minimumRequiredMaxCommands": 12,
+    "minimumTotalCommands": 46,
+    "minimumExtraDistance": 20,
+    "constraintBits": 26.988433846552073,
+    "conflictParticipation": [
+      3,
+      3,
+      3,
+      3
+    ],
+    "gateRemovalAdds": [
+      2,
+      532
+    ],
+    "witness": [
+      {
+        "unitId": "A",
+        "endpoints": [
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            3,
+            6
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            6,
+            4
+          ]
+        ]
+      },
+      {
+        "unitId": "B",
+        "endpoints": [
+          [
+            4,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            6,
+            4
+          ]
+        ]
+      },
+      {
+        "unitId": "C",
+        "endpoints": [
+          [
+            6,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            6,
+            4
+          ]
+        ]
+      },
+      {
+        "unitId": "D",
+        "endpoints": [
+          [
+            3,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            4
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            3,
+            5
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            6,
+            4
+          ]
+        ]
+      }
+    ],
+    "seed": 58902389,
+    "attempts": 2390,
+    "author": "boss100-wide-combinations-v6"
+  }
+}

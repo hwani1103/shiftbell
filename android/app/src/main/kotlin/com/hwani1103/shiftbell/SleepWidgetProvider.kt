@@ -95,8 +95,8 @@ class SleepWidgetProvider : AppWidgetProvider() {
 
         private fun buildRemoteViews(context: Context, widthDp: Int, heightDp: Int): RemoteViews {
             // A previously pinned widget may receive updates after locale changes.
-            // Do not inflate its Korean-only layout in a foreign locale.
-            if (!ReleaseLocalePolicy.koreanFeatures(context)) {
+            // The sleep layout has resources for every release language.
+            if (!ReleaseLocalePolicy.sleepFeatures(context)) {
                 return RemoteViews(context.packageName, R.layout.unavailable_feature_widget).apply {
                     val open = Intent(context, MainActivity::class.java).putExtra("openTab", 2)
                     setOnClickPendingIntent(R.id.unavailable_widget_title, PendingIntent.getActivity(
@@ -104,6 +104,16 @@ class SleepWidgetProvider : AppWidgetProvider() {
                 }
             }
             val views = RemoteViews(context.packageName, R.layout.sleep_widget)
+            // Launcher RemoteViews may be reapplied using the host's locale.
+            // Write app-localized content and reset every state on each update.
+            views.setTextViewText(R.id.sleep_button_sleep, context.getString(R.string.sleep_widget_sleep))
+            views.setTextViewText(R.id.sleep_button_wake, context.getString(R.string.sleep_widget_wake))
+            views.setContentDescription(R.id.sleep_brand_icon, context.getString(R.string.sleep_widget_brand))
+            views.setContentDescription(R.id.sleep_widget_root, context.getString(R.string.app_widget_sleep_label))
+            views.setViewVisibility(R.id.sleep_shift_label, android.view.View.GONE)
+            for (id in intArrayOf(R.id.sleep_widget_root, R.id.sleep_button_sleep, R.id.sleep_button_wake)) {
+                views.setBoolean(id, "setEnabled", true)
+            }
 
             // The two rows and columns are equal. Leave 15% of the top cell
             // above/below its artwork; the bottom buttons fill their cells.
@@ -182,14 +192,17 @@ class SleepWidgetProvider : AppWidgetProvider() {
         // 이건 Device Protected가 필요 없는 일반 홈 화면 위젯이라 평범한
         // SharedPreferences를 그대로 읽어도 됨(잠금 해제 전 알람처럼 반드시
         // 동작해야 하는 경로가 아님).
-        private fun isConditionTabEnabled(context: Context): Boolean {
-            if (!ReleaseLocalePolicy.koreanFeatures(context)) return false
-            val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            return prefs.getBoolean("flutter.condition_tab_enabled", true)
-        }
+        private fun isConditionTabEnabled(context: Context): Boolean =
+            SleepDetectionScheduler.isSleepDetectionEnabled(context)
 
         private fun renderDisabled(context: Context, views: RemoteViews) {
             views.setFloat(R.id.sleep_widget_root, "setAlpha", 0.4f)
+            // Reapply does not clear old listeners just because a new RemoteViews
+            // omits them. Explicitly remove each action and disable its view.
+            for (id in intArrayOf(R.id.sleep_widget_root, R.id.sleep_button_sleep, R.id.sleep_button_wake)) {
+                views.setOnClickPendingIntent(id, null)
+                views.setBoolean(id, "setEnabled", false)
+            }
             // ⭐ 2026-09-18 - 상태 줄이 없어졌으니, "왜 흐릿한지"는 근무명 자리에 대신 적는다.
             // 2026-09-22 - 평소엔 라벨이 없어서(레이아웃에서 gone) 이 경우에만 보이게 한다.
             views.setTextViewText(R.id.sleep_shift_label, context.getString(R.string.sleep_widget_tab_off))
@@ -199,9 +212,7 @@ class SleepWidgetProvider : AppWidgetProvider() {
             views.setInt(R.id.sleep_button_sleep, "setBackgroundResource", R.drawable.sleep_widget_button_bg_inactive)
             views.setInt(R.id.sleep_button_wake, "setBackgroundResource", R.drawable.sleep_widget_button_bg_inactive)
             // ⭐ onClickPendingIntent를 아예 안 걸어서(버튼/루트 전부) 탭해도
-            // 반응이 없게 함 - RemoteViews는 매번 새로 만드므로 이전 갱신 때
-            // 걸어둔 PendingIntent가 남아있을 걱정 없음(buildRemoteViews는
-            // 항상 새 RemoteViews 인스턴스에서 시작).
+            // 반응이 없게 함 - 위에서 기존 클릭 리스너까지 명시적으로 제거한다.
         }
 
         private fun openConditionTabPendingIntent(context: Context): PendingIntent {

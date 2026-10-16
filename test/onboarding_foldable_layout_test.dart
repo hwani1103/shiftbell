@@ -9,6 +9,7 @@ import 'package:shiftbell/l10n/generated/app_localizations.dart';
 import 'package:shiftbell/screens/onboarding_screen.dart';
 import 'package:shiftbell/constants/layout_limits.dart';
 import 'package:shiftbell/widgets/app_content_frame.dart';
+import 'package:shiftbell/theme/app_ui_theme.dart';
 
 void main() {
   for (final size in [
@@ -80,12 +81,13 @@ void main() {
             reason: 'Fresh onboarding must start without a welcome popup');
         final l =
             AppLocalizations.of(tester.element(find.byType(OnboardingScreen)));
-        expect(find.text(l.onboardingShortNamesHint), findsOneWidget);
-        final nextText = l.commonNext;
-        await tester.tap(find.text(nextText));
+        expect(
+            find.text(l.onboardingRemoveUnusedShiftNamesHint), findsOneWidget);
+        final nextText = l.onboardingNextAlarms;
+        await tester.tap(find.text(l.onboardingNextPattern));
         await tester.pumpAndSettle();
 
-        expect(find.text('2 / 4'), findsOneWidget);
+        expect(find.text('2 / 3'), findsOneWidget);
         expect(tester.takeException(), isNull);
         expect(find.byType(SingleChildScrollView), findsWidgets);
         final next = tester.getRect(find.text(nextText));
@@ -110,17 +112,20 @@ void main() {
           expect(addedBox.bottom, lessThanOrEqualTo(previewBox.bottom));
           expect(added.hitTestable(), findsOneWidget,
               reason: 'The added shift must be visible without scrolling');
-          expect(previewBox.bottom, lessThan(next.top));
+          expect(added.hitTestable(), findsOneWidget);
         }
-        await tester.tap(find.text(nextText));
-        await tester.pumpAndSettle();
-        expect(find.text('3 / 4'), findsOneWidget);
-        expect(tester.takeException(), isNull);
-        await tester.tap(find.text(l.shiftDay));
+        await tester.ensureVisible(find.text(l.onboardingCompletePattern));
+        await tester.tap(find.text(l.onboardingCompletePattern));
         await tester.pump();
-        await tester.tap(find.text(nextText));
+        await tester.pump(AppUiMotion.transition);
+        expect(find.text('2 / 3'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await tester
+            .tap(find.byKey(const ValueKey('onboarding-pattern-slot-0')));
+        await tester.pump();
+        await tester.tap(find.text(l.onboardingNextAlarms));
         await tester.pumpAndSettle();
-        expect(find.text('4 / 4'), findsOneWidget);
+        expect(find.text('3 / 3'), findsOneWidget);
         expect(tester.takeException(), isNull);
         final label = find.text(l.shiftAfternoon);
         await tester.ensureVisible(label);

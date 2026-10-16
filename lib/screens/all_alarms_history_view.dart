@@ -1,3 +1,6 @@
+import '../widgets/app_ui_feedback.dart';
+import '../widgets/app_ui_components.dart';
+import '../theme/app_ui_theme.dart';
 import '../utils/alarm_wall_time.dart';
 import '../utils/alarm_clock_label.dart';
 import 'package:intl/intl.dart';
@@ -42,7 +45,6 @@ class AlarmWithHistory {
     required this.isFuture,
     this.dayOffset = 0,
   });
-
 }
 
 class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
@@ -64,7 +66,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       final now = DateTime.now();
 
       // 1. 생성 원장으로 출처를 먼저 확정. 스누즈도 같은 원본 ID를 유지한다.
-      final creationLogs = await DatabaseService.instance.getAlarmCreationLog(limit: 5000);
+      final creationLogs =
+          await DatabaseService.instance.getAlarmCreationLog(limit: 5000);
       String keyFor(int id, DateTime date, String time) =>
           '${id}_${date.millisecondsSinceEpoch ~/ 1000}';
 
@@ -75,7 +78,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       final Map<String, AlarmWithHistory> alarmMap = {};
 
       for (var history in allHistory) {
-        final key = keyFor(history.alarmId, history.scheduledDate, history.scheduledTime);
+        final key = keyFor(
+            history.alarmId, history.scheduledDate, history.scheduledTime);
 
         // 이미 존재하면 최신 이력으로 업데이트 (created_at DESC로 정렬되어 첫 번째가 최신)
         if (!alarmMap.containsKey(key)) {
@@ -84,7 +88,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
             time: history.scheduledTime,
             shiftType: history.shiftType,
             latestHistory: history,
-            isFuture: history.scheduledDate.isAfter(DateTime(now.year, now.month, now.day)),
+            isFuture: history.scheduledDate
+                .isAfter(DateTime(now.year, now.month, now.day)),
             dayOffset: history.dayOffset,
           );
         }
@@ -142,7 +147,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
   }
 
   String _formatDateTime(BuildContext context, DateTime date, String time) {
-    time = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    time =
+        '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     if (!context.usesKoreanFeatures) {
       return '${DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(date)} $time';
     }
@@ -188,7 +194,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
 
     switch (history.dismissType) {
       case 'swiped':
-        return Colors.green.shade600;
+        return AppUiPalette.of(context).success;
       case 'snoozed':
         return colorScheme.tertiary;
       case 'timeout':
@@ -217,7 +223,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
             Text(
               context.l10n.alarmHistoryTestOnlyWarning,
               style: TextStyle(
-                fontSize: 15.sp,
+                fontSize: AppFontSize.control,
                 fontWeight: FontWeight.bold,
                 color: colorScheme.error,
               ),
@@ -257,13 +263,15 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         await _loadData();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.alarmHistoryDeletedToast)),
+            AppUiSnackBar(content: Text(context.l10n.alarmHistoryDeletedToast)),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.alarmHistoryDeleteFailed(context.localizedErrorDetail(e)))),
+            AppUiSnackBar(
+                content: Text(context.l10n.alarmHistoryDeleteFailed(
+                    context.localizedErrorDetail(e)))),
           );
         }
       }
@@ -292,7 +300,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       // 여백이 맞았지만 뷰포트 자체는 화면 맨 밑까지 그대로라 - 스크롤 중간에
       // 화면 맨 아래에 걸리는 카드는 네비게이션 바 밑에 깔려서 그려지고 있었음.
       // SafeArea는 뷰포트 자체를 줄여주므로 이 문제를 근본적으로 해결함.
-      body: AdaptiveFormBody(child: SafeArea(
+      body: AdaptiveFormBody(
+          child: SafeArea(
         top: false,
         child: Column(
           children: [
@@ -304,13 +313,15 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                   AppSecondButton(
                     variant: AppSecondButtonVariant.danger,
                     compact: true,
-                    onPressed: _alarmsWithHistory.isEmpty ? null : _deleteAllHistory,
+                    onPressed:
+                        _alarmsWithHistory.isEmpty ? null : _deleteAllHistory,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.delete_sweep_outlined, size: 13.sp),
                         SizedBox(width: 3.w),
-                        Text(context.l10n.alarmHistoryDeleteAllTitle, style: TextStyle(fontSize: 12.sp)),
+                        Text(context.l10n.alarmHistoryDeleteAllTitle,
+                            style: TextStyle(fontSize: AppFontSize.meta)),
                       ],
                     ),
                   ),
@@ -326,7 +337,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
 
   Widget _buildBody(BuildContext context, ColorScheme colorScheme) {
     return _isLoading
-        ? Center(child: CircularProgressIndicator())
+        ? Center(child: AppUiLoading())
         : _alarmsWithHistory.isEmpty
             ? Center(
                 child: Padding(
@@ -343,7 +354,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                       Text(
                         context.l10n.alarmHistoryEmpty,
                         style: TextStyle(
-                          fontSize: 16.sp,
+                          fontSize: AppFontSize.section,
                           color: colorScheme.onSurfaceVariant,
                         ),
                       ),
@@ -352,114 +363,128 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                 ),
               )
             : ListView.builder(
-                  padding: EdgeInsets.all(16.w),
-                  itemCount: _alarmsWithHistory.length,
-                  itemBuilder: (context, index) {
-                    final alarmWithHistory = _alarmsWithHistory[index];
-                    final history = alarmWithHistory.latestHistory;
-                    final historyText = _getHistoryText(history, context);
-                    final historyColor = _getHistoryColor(history, context);
-                    final isFuture = alarmWithHistory.isFuture;
+                padding: EdgeInsets.all(AppUiMetrics.gap),
+                itemCount: _alarmsWithHistory.length,
+                itemBuilder: (context, index) {
+                  final alarmWithHistory = _alarmsWithHistory[index];
+                  final history = alarmWithHistory.latestHistory;
+                  final historyText = _getHistoryText(history, context);
+                  final historyColor = _getHistoryColor(history, context);
+                  final isFuture = alarmWithHistory.isFuture;
 
-                    return Card(
-                      margin: EdgeInsets.only(bottom: 12.h),
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        side: BorderSide(
-                          color: isFuture ? colorScheme.primary.withOpacity(0.3) : colorScheme.outline,
-                          width: 1,
-                        ),
+                  return Card(
+                    margin: EdgeInsets.only(bottom: 12.h),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppUiMetrics.controlRadius),
+                      side: BorderSide(
+                        color: isFuture
+                            ? colorScheme.primary.withOpacity(0.3)
+                            : colorScheme.outline,
+                        width: 1,
                       ),
-                      child: Padding(
-                        padding: EdgeInsets.all(16.w),
-                        child: Row(
-                          children: [
-                            // 날짜/시간 & 근무명
-                            Expanded(
-                              flex: 3,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _formatDateTime(context, alarmWithHistory.date, alarmWithHistory.time),
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: isFuture ? colorScheme.primary : colorScheme.onSurface,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(AppUiMetrics.gap),
+                      child: Row(
+                        children: [
+                          // 날짜/시간 & 근무명
+                          Expanded(
+                            flex: 3,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _formatDateTime(
+                                      context,
+                                      alarmWithHistory.date,
+                                      alarmWithHistory.time),
+                                  style: TextStyle(
+                                    fontSize: AppFontSize.body,
+                                    fontWeight: FontWeight.bold,
+                                    color: isFuture
+                                        ? colorScheme.primary
+                                        : colorScheme.onSurface,
                                   ),
-                                  if (alarmClockLabel(context, alarmWithHistory.date) case final String occurrence)
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 3.h),
-                                      child: Text(occurrence, style: TextStyle(
-                                        fontSize: 12.sp, color: colorScheme.onSurfaceVariant)),
-                                    ),
-                                  if (alarmWithHistory.shiftType != null) ...[
-                                    SizedBox(height: 4.h),
-                                    // ⭐ 근무명 옆에 전날/당일/다음날 Chip - 같은 근무라도
-                                    // 어느 오프셋으로 만든 알람이었는지 이력에서 구분되게 함.
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            alarmWithHistory.shiftType!,
-                                            style: TextStyle(
-                                              fontSize: 12.sp,
-                                              color: colorScheme.onSurfaceVariant,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 6.w),
-                                          DayOffsetBadge(dayOffset: alarmWithHistory.dayOffset),
-                                      ],
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: 12.w),
-                            // 이력
-                            Expanded(
-                              flex: 2,
-                              child: historyText.isEmpty
-                                  ? Text(
-                                      '-',
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                      textAlign: TextAlign.right,
-                                    )
-                                  : Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                                      decoration: BoxDecoration(
-                                        color: historyColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(6.r),
-                                        border: Border.all(color: historyColor.withOpacity(0.3), width: 1),
-                                      ),
-                                      child: Text(
-                                        historyText,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (alarmClockLabel(
+                                        context, alarmWithHistory.date)
+                                    case final String occurrence)
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 3.h),
+                                    child: Text(occurrence,
                                         style: TextStyle(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: historyColor,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
+                                            fontSize: AppFontSize.meta,
+                                            color:
+                                                colorScheme.onSurfaceVariant)),
+                                  ),
+                                if (alarmWithHistory.shiftType != null) ...[
+                                  SizedBox(height: 4.h),
+                                  // ⭐ 근무명 옆에 전날/당일/다음날 Chip - 같은 근무라도
+                                  // 어느 오프셋으로 만든 알람이었는지 이력에서 구분되게 함.
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Flexible(
+                                        child: AppUiShiftChip(
+                                            name: alarmWithHistory.shiftType!,
+                                            size: AppChipSize.compact),
                                       ),
-                                    ),
+                                      SizedBox(width: 6.w),
+                                      DayOffsetBadge(
+                                          dayOffset:
+                                              alarmWithHistory.dayOffset),
+                                    ],
+                                  ),
+                                ],
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                          SizedBox(width: 12.w),
+                          // 이력
+                          Expanded(
+                            flex: 2,
+                            child: historyText.isEmpty
+                                ? Text(
+                                    '-',
+                                    style: TextStyle(
+                                      fontSize: AppFontSize.body,
+                                      fontWeight: FontWeight.w600,
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  )
+                                : Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 10.w, vertical: 6.h),
+                                    decoration: BoxDecoration(
+                                      color: historyColor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(6.r),
+                                      border: Border.all(
+                                          color: historyColor.withOpacity(0.3),
+                                          width: 1),
+                                    ),
+                                    child: Text(
+                                      historyText,
+                                      style: TextStyle(
+                                        fontSize: AppFontSize.meta,
+                                        fontWeight: FontWeight.w600,
+                                        color: historyColor,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                );
+                    ),
+                  );
+                },
+              );
   }
 }

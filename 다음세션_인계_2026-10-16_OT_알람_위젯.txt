@@ -1,0 +1,105 @@
+다음 세션 인계 — OT / 다음 알람 / 전체근무표 / 달력 위젯
+작성: 2026-10-16 KST, UI69/70 통합 담당 세션
+작업 폴더: C:\Users\Administrator\Desktop\shiftbell (dev 브랜치)
+
+0. 가장 최근 사용자 지시 — 이전 빌드 지시보다 우선
+- 추가 대규모 작업은 새 세션에서 시작할 예정. 기존 작업/못한 부분을 인계하라고 요청했다.
+- 지금은 APK 빌드·설치하지 않는다. 추가 수정까지 모아서 한 번에 빌드한다.
+- 기존 debug 설치 지시는 있었으나 마지막 빌드 보류가 우선한다. 이번 요청을 새 빌드 허가로 해석하지 않는다.
+- release는 명시 요청 전 실행하지 않는다. 통합할 때 기본 dev debug.
+- 다른 세션 달력 위젯은 완료됐으면 포함, 미완료면 본 작업까지만 빌드하라는 조건. 소스 인계는 완료되어 포함 대상으로 검사했으나 아래 2개 검사가 아직 실패하므로 검증 완료로 간주하지 않는다.
+- 새 대규모 작업의 구체적 내용은 아직 전달받지 않았다. 다음 사용자 지시를 먼저 확인한다.
+
+1. 시작 전 읽을 문서 / 보존
+- AGENTS.md, docs/next_version/dev_출시전_핵심코어_체크리스트.txt.
+- docs/UI 완성도 개선/12_다음수정_타이포위계_단계표시_인덱스_버튼상태_2026-10-12.txt (13번에서 후속 완료된 당시 이력).
+- 달력 배치 수정 시47번 조사, UI59 규격 및 이후60~70 원장. 현재 규칙은 가장 최신 사용자 합의가 우선.
+- 원문: 바탕화면 OT보는방법.txt. 이번 폴더 artifacts/calendar_ot_2026_10_16/OT보는방법_요청원문.txt에도 보존.
+- 루트 통합빌드_인계_2026-10-16.txt는 누적 이력. 마지막 보류/검증 상태를 확인한다.
+- 다른 세션 포함 미커밋 파일이 매우 많다. git reset/clean/checkout로 원복하거나 전부 자신의 변경으로 커밋하지 않는다. 소스는 이미 공유 작업 트리에 저장되어 있어 cherry-pick할 필요 없다.
+- 새 작업 원장은 docs/UI 완성도 개선/의 후속 번호로 작성. 과거 기록 덮어쓰지 않는다.
+
+2. 이번 세션 소스 수정 완료 (아직 새 APK에 없음)
+A. 전체근무표 두 줄의8번째 날짜 가림/남는 폭
+- lib/screens/all_shifts_view.dart, lib/widgets/all_shifts_timeline_metrics.dart.
+- floor로7열까지만 그리던 축소 viewport 제거. 오른쪽 ABCD 직전까지 실제 사용 가능 폭을 사용하고 가장 가까운 완전 열 수로 stride를 맞춘다.
+- phone 기본 단계는 위1~8/아래16~23이 완전히 들어오는 계산. 긴 이름 확장 단계는7열이 될 수 있으나 빈 띠 없이 채운다.
+- 칩 폭은 선호 크기와 stride를 분리해 무작정 확대하지 않는다. 이전 둥근칩/두 단계/텍스트 확대/한 화면 보기 보존.
+- ROSTER-05 원장의 마지막 후속. artifacts/roster_swipe_2026_10_16/viewport_fix_test_retry.log 22 PASS.
+
+B. 날짜별 OT / 음력 이동 / 장식
+- 신규 lib/utils/calendar_cell_annotations.dart, lib/theme/calendar_overtime_layout.dart, lib/widgets/calendar_overtime_label.dart.
+- 연결 lib/screens/calendar_tab.dart, lib/widgets/contract_calendar_cell.dart, lib/widgets/detail_calendar_cell.dart.
+- 기본 '+ 1h 30m', 정시 '+ 1h', 분만 '+ 30m'; 월 OT와 동일하게 수동+설정 켜진 근무변경 증가분. 날짜별 캐시, 데이터/설정 바뀌면 갱신. DB 변경 없음.
+- 음력 수→화→목→월→금. 공휴일/OT 피하고 주말에는 안 보임. 모두 막히면 해당 주 생략. 목적지의 실제 음력 날짜.
+- 기본 음력/공휴일 슬롯에 OT. 공휴일+OT+메모0~2개는 맨 위 메모 슬롯, 메인 OT는 무배경/일반 텍스트 메모 테마 OT는 배경으로 구별.
+- 공휴일+OT+3메모는 날짜/메모 조금, 공휴일/OT 더 줄여 holiday 바로 아래 OT. 날짜>메모>공휴일=OT. 글자 높이 반올림 안전 여백으로 누락 방지.
+- 다크그리드/다이어리/언더라인/매거진은 세로 여유 사용해 메모를 아래로 이동.
+- 이벤트는 날짜 오른쪽, 실제 폭 측정으로 '+ 1h 30m' → '+1h 30m' → '+1h30m' → '1h30m', 마지막만 필요 시 축소.
+- 일반 폰 다이어리 오늘 근무 왼쪽 비대칭 둥근 날짜 테두리 복원. 매거진 좌상단 삼각형/우측 날짜 복원. 폴더블 장식 유지.
+- 한글 실제 읽기 달력 범위. 미리보기/외국어/복구 모드 범위 확대 안 함.
+- UI69 원장 상세.
+
+C. 다음 알람 스크롤 / 버튼 색
+- lib/screens/next_alarm_tab.dart, lib/widgets/adaptive_layout.dart.
+- 원인은 SingleChildScrollView + 고정 크기 링 + 큰 간격 + 최소48dp 버튼 합계가 화면 높이 초과. 일반 폰은 유한 높이 Column, 링만 Flexible. 공통 간격 토큰 사용. 날짜/시간/버튼 글씨 크기와 버튼 최소높이 유지.
+- 폴더블 기존 fit 조합 유지. 미세 스크롤만 막던 physics 삭제.
+- lib/widgets/app_ui_components.dart AppUiButton emphasized opt-in, lib/theme/app_ui_theme.dart onDanger 공통 역할.
+- 두 버튼 채움색은 secondary primary/onPrimary, danger danger/onDanger.6팔레트 공유. 화면별 고정색 없음. 다른 버튼 기본값 유지.
+- 알람 삭제/예약/권한 흐름 수정 없음. UI70 원장.
+
+3. 자동 검사 완료 증거 (artifacts/calendar_ot_2026_10_16/)
+- focused_final.log:79 PASS, OT9테마/공백 단계/기존 셀/알람/근무표/캐시.
+- calendar_integration_test.log:43 PASS, 실제 CalendarTab/월 이동/한글·외국어/OT 월합계 일치.
+- ot_live_reload.log:1 PASS, OT 추가·제거 즉시 갱신 및 음력 복원.
+- alarm_fold_layout.log:1 PASS, 여러 폰·폴더블 논리 크기.
+- alarm_foreign_layout_retry.log:4 PASS, 영어US/GB 기본/스누즈/폰·폴더블. 구 KoreanOnlyCopy 테스트 참조만 현행 common l10n으로 교정.
+- ot_alarm_test.log:22 PASS 초기 집중 검사. 각 재실행은 중복되므로 전부 더해 고유 검사 수로 표시하지 않는다.
+- analyze_final.log:error0/warning0/info116. no issues라고 쓰지 않는다.
+- renders/ 및 next_alarm_*_tab.png: 호스트 렌더. 메모3개/OT/공휴일 경계와6팔레트 버튼 글자 대비4.5 이상 확인. 물리기기 PASS 아님.
+- source_pre_build.json: 핵심18소스 SHA256. 14:41경 재확인 당시 변경 없음. source_handoff.json도 인계 시 저장.
+
+4. 달력 위젯 — 인계 받은 내용과 미완료 검사 (중요)
+원장: docs/UI 완성도 개선/WIDGET-01_3~6주_공휴일_월이동_2026-10-16.txt.
+- 다른 세션 구현: 기존 달력 위젯3~6주,6주는42칸 월/이전다음/로컬 인접월 캐시. 한국어3~6주 공휴일명, 외국어 숫자 빨강,1주 유지. 비공개 receiver/immutable PendingIntent.180ms fade 및 동작 줄이기.
+- 통합 세션 수정 파일: CalendarWidgetProvider.kt, CalendarWidgetMonthsTest.kt, CalendarWidgetsTest.kt.
+- provider 정보 없는 Robolectric createWidget fixture 문제: 실제 provider ComponentName/initialLayout로 addBoundWidget 등록하도록 수정. 실제 receiver의 미등록/다른 위젯 차단 방어는 유지. 이 검사는 현재 PASS.
+- 높이262dp로 렌더하면서 buildRemoteViews 기본228dp로 계산하던 테스트: heightDp102/262 명시. 원래 검정 픽셀 가시성 단언 유지. ko-KR-three PNG는 실제 메모 글리프 확인됨.
+- 생산 애니메이션 현재: 일반 갱신은 추가 setDisplayedChild 없음, animate일 때0→1 선택. SDK ViewAnimator의 animateFirstView=false 첫 전환 억제 가능성을 보고 보완했으나 실기기 효과는 미확인.
+- 가장 최신 native4클래스 검사 완료시각14:42:48,14개 중12PASS/2FAIL. widget_third_results/ XML 보존. 첫/두번째 결과도 widget_first_results/,widget_second_results/에 보존.
+  1) CalendarWidgetMonthsTest.pageTransitionRespectsDisabledSystemAnimations line144 assertNotNull(currentView.animation) 실패.
+     조사 완료: Robolectric4.14.1 ShadowViewAnimator.setDisplayedChild는 currentChild와 자식 visibility만 바꾸며 실제 showOnly/startAnimation을 호출하지 않는다. 따라서 새로 추가한 animation 존재 단언은 이 환경에서 유효하지 않다. 증거 ShadowViewAnimator.txt(javap 출력; 끝의 파일접근 경고와 종료코드도 보존). 다음 세션에서 실제 프레임워크 호출 검증 가능한 테스트를 사용하거나, 호스트는 선택/리소스/설정 계약을 검사하고 애니메이션 체감은 실기기로 분리할 것. 생산 버그가 재현됐다고 과장하지 않는다.
+  2) CalendarWidgetsTest.fullShiftNamesAndThreeNotesFitWithEqualGuttersInEveryLanguage line112 기대'Memo one'/실제'Memo '.
+     첫 좁은폭/단일주 조합에서 기존 full-string 단언과 completeMemoPrefix 결과가 충돌한 것으로 추정하나 정확한 tag/width/single 및 이전버전 비교 미완료. 메모 비어버림/줄 겹침/폭 잘림이 실제 문제인지, 정상 완전글자 prefix를 잘못 기대한 테스트인지 먼저 확인. 문자열 단언을 이유 없이 완화하지 않는다. 현재 크기 계산과1주 유지 계약도 확인.
+- CalendarWidgetDesignRender1 및 Refresh1 PASS. artifacts/widget_month_2026_10_16/render/42PNG. 최신 ko-KR500dp6주 및262dp3주 대표 렌더 검토, 날짜/공휴일/3메모 표시됨. 전 언어/런처 물리 검증 아님.
+- 과거 artifacts/calendar_widgets_2026_10_09/의 일부 PNG가 기존 테스트 출력 경로 때문에 이번 검사에서 덮여 FOLLOWUP_RENDER_NOTE.txt로 정정. 원장/문서는 보존. 이후 출력은 이번 widget_regression/으로 변경.
+- 위젯 관련 첫 조사에서 메모 픽셀 실패를 애니메이션 때문으로 추정한 설명은 틀렸음. 후속 원장에 정정했고, 최신 사실은 위 항목을 따른다.
+
+5. 빌드 / 설치 현황
+- 이번 APK/웹 빌드 및 설치 없음. critical_build.log 미생성.
+- 사용자 보류 후 자동 파이프라인 PowerShell PID7376만 중단. 진행 중 Gradle 위젯 검사는 완료됐고 GradleWrapper19592/테스트13936 종료 확인. 활성 빌드/검사 작업 없음(Gradle daemon 자체는 남을 수 있음).
+- artifacts/calendar_ot_2026_10_16/build_integrated.ps1는 이제 명시적 -Build가 없으면4클래스 검사까지만 실행한다. 기본 실행으로 APK가 생성되지 않도록 가드 확인. 실패 로그 덮어쓰지 않도록 재실행 전에 파일명 변경 권장.
+- 현재 build/app/outputs/flutter-apk/app-dev-debug.apk는 이전 합본과 해시 동일:
+  fa83819d92625f143cec24e1258bac731d84025e8b3ff782a496ecb9ac65d3c6
+  보존 APK artifacts/roster_swipe_2026_10_16/ShiftBell_roster_grid_palette_integrated_dev_debug.apk.
+- 이 이전 APK에는 UI68 다크그리드/ROSTER05 두 단계·스와이프/THEME01 팔레트가 있음. 이번8번째열 가림 수정, 날짜별OT, 다음알람 수정, 새 위젯은 없음.
+- 연결된 폰 SM-S948N R5KL20DHWAE. package com.hwani1103.shiftbell.dev. 마지막 연결 확인14:35경. 현재 연결 여부 다시 확인.
+- 이전 설치/데이터 보존 기록은 roster_swipe 및calendar_month_feedback 폴더. 새 실행이나 새 설치로 오인하지 않는다.
+
+6. 다음 순서 (새 사용자 작업과 합쳐 조정)
+1) 이 문서/AGENTS/새 사용자 요구 읽기. 기존 소스 보존, 새 작업 구현.
+2) 위젯 위2실패를 먼저 분류하고 필요한 수정/적절한 단위검사. 사용자 조건대로 검증이 끝난 위젯을 합본에 포함; 불완전 위젯을 임의로 이전 상태로 덮어쓰지 말고 인계 범위를 분명히 할 것.
+3) 사용자가 합본 빌드 재개를 지시한 뒤 변경 영향 검증. 이미 PASS인 UI 검사는 변경 영향 없으면 무조건 전수 반복하지 않음.
+4) native 위젯/리소스가 포함되므로 필수 tools/check_critical_release.ps1 -Build 실행 필요. -Build는 dev debug+공개웹. -Release 사용 금지. Flutter/Gradle 동시 실행 피함(과거 Windows sqlite DLL 잠금).
+5) 빌드 성공 APK 별도 경로 보존+SHA256. 설치 직전 폰 데이터 스냅샷 후 adb install -r -t, 정상 실행/설치 APK 해시 확인.
+6) 물리 검증: 두줄 기본1~8/16~23, 한 화면 보기 유지/월 이동,10/16 소프트카드3메모,10/28 OT2h30m+3메모 및10/27 음력, 다크그리드 대체공휴일 전체/휴무 흰글자, 다이어리/매거진 장식, 다음알람 스크롤 없음/두버튼 가시성. 위젯은 실제 런처3~6주/월 이동/동작 줄이기 별도. P0 잠금알람 실측 PASS로 확대하지 않음.
+7) DB18표/설정 비교하고 임시 테마 복원, 후속 원장/체크리스트 영향 ID/통합 인계 최신화.
+
+7. 재사용 가능한 실기기 도구 (아직 이번 APK로 실행 안 함)
+- artifacts/calendar_ot_2026_10_16/snapshot.py <folder>, compare_data.py <after> [before]. 설치 바로 전 새 snapshot 필수. device_before_build는 과거14시대 조회 증거일 뿐 설치 직전이 아님.
+- connect_vm.py: 앱 pid/logcat VM URI 조회, adb2269forward, vm_after.json.
+- calendar_device_probe.mjs <stage> <wsUri>: 테마 provider를 메모리에서만 임시 변경, minimal/materialCard/boldGrid/diary/editorial 캡처,10/28 OT+메모3/27음력 조회, finally 원래테마 복원. Flutter attach의 표현식 컴파일 서비스가 있어야 evaluate 가능. 캘린더 탭이 mounted여야 함.
+- 실제 폰 DB 테스트 자료를 만들지 않아도 기존10/28 OT150분/메모3개가 있음. 변경됐을 수 있으므로 재조회. 공휴일+OT충돌은 호스트 검사로 우선.
+- 예전 Flutter attach PID16944/18380은 이전 VM URL의 낡은 연결일 수 있음. 새 세션에서 정확한 명령줄/소유 작업 확인 후에만 정리. 다른 세션 프로세스 종료 금지.
+- 실행 도구 기본 sandbox exec는 환경 setup refresh 오류가 있어 require_escalated로 실행했음. 기기 설정/데이터 초기화는 하지 않았다.
+- 태블릿 R54Y800G39V의 stay_on_while_plugged_in=15 유지, 임의 원복 금지.

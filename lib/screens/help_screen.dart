@@ -1,3 +1,4 @@
+import '../theme/app_ui_theme.dart';
 import '../widgets/adaptive_layout.dart';
 import '../widgets/permission_panel.dart';
 // lib/screens/help_screen.dart
@@ -17,7 +18,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
-import '../theme/app_colors.dart';
 
 typedef HelpTextOf = String Function(AppLocalizations l10n);
 
@@ -53,239 +53,260 @@ class HelpSection {
 // ⭐ 순서 = 사용자가 앱을 처음 접했을 때 흐름(시작하기 → 근무 관리 → 알람 →
 // 달력/위젯 → 일정관리 → 컨디션 → 수면 → 친구공유 → 백업 → 문제해결)을 그대로 따름.
 List<HelpSection> get _helpSections => [
-  HelpSection(
-    icon: Icons.rocket_launch_outlined,
-    titleKey: (l10n) => l10n.helpStartSectionTitle,
-    topics: [
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpTroubleshootAlarmIssueTitle,
-        bodyKey: (l10n) => l10n.helpTroubleshootAlarmIssueBody,
+      HelpSection(
+        icon: Icons.rocket_launch_outlined,
+        titleKey: (l10n) => l10n.helpStartSectionTitle,
+        topics: [
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpTroubleshootAlarmIssueTitle,
+            bodyKey: (l10n) => l10n.helpTroubleshootAlarmIssueBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpStartOnboardingTitle,
+            bodyKey: (l10n) => l10n.helpStartOnboardingBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpStartScheduleTypesTitle,
+            bodyKey: (l10n) => l10n.helpStartScheduleTypesBody,
+          ),
+        ],
       ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpStartOnboardingTitle,
-        bodyKey: (l10n) => l10n.helpStartOnboardingBody,
+      HelpSection(
+        icon: Icons.badge_outlined,
+        titleKey: (l10n) => l10n.helpShiftSectionTitle,
+        topics: [
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpShiftIrregularAssignTitle,
+            bodyKey: (l10n) => l10n.helpShiftIrregularAssignBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpShiftChangeShiftTitle,
+            bodyKey: (l10n) => l10n.helpShiftChangeShiftBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpShiftShiftColorsTitle,
+            bodyKey: (l10n) => l10n.helpShiftShiftColorsBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpShiftAllShiftsTitle,
+            bodyKey: (l10n) => l10n.helpShiftAllShiftsBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpShiftTeamChangeTitle,
+            bodyKey: (l10n) => l10n.helpShiftTeamChangeBody,
+          ),
+        ],
       ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpStartScheduleTypesTitle,
-        bodyKey: (l10n) => l10n.helpStartScheduleTypesBody,
+      HelpSection(
+        icon: Icons.alarm_outlined,
+        titleKey: (l10n) => l10n.helpAlarmSectionTitle,
+        topics: [
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpAlarmTemplatesTitle,
+            bodyKey: (l10n) => l10n.helpAlarmTemplatesBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpAlarmSoundVolumeTitle,
+            bodyKey: (l10n) => l10n.helpAlarmSoundVolumeBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpAlarmAlarmHistoryTitle,
+            bodyKey: (l10n) => l10n.helpAlarmAlarmHistoryBody,
+          ),
+          // ⭐ 2026-09-04 - 전체_코드_점검_리포트_2026-09-04.md의 H2(알람 갱신
+          // 트랜잭션 중 OS 알람 호출) 항목은 코드 수정은 보류하기로 했지만, 사용자가
+          // 알아두면 스스로 대처 가능한 내용이라 도움말에만 추가.
+        ],
       ),
-    ],
-  ),
-  HelpSection(
-    icon: Icons.badge_outlined,
-    titleKey: (l10n) => l10n.helpShiftSectionTitle,
-    topics: [
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpShiftIrregularAssignTitle,
-        bodyKey: (l10n) => l10n.helpShiftIrregularAssignBody,
+      HelpSection(
+        icon: Icons.calendar_month_outlined,
+        titleKey: (l10n) => l10n.helpCalendarSectionTitle,
+        topics: [
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpCalendarThemesTitle,
+            bodyKey: (l10n) => l10n.helpCalendarThemesBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpCalendarOtTitle,
+            bodyKey: (l10n) => l10n.helpCalendarOtBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpCalendarWorkHoursPayTitle,
+            bodyKey: (l10n) => l10n.helpCalendarWorkHoursPayBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpCalendarHomeWidgetTitle,
+            bodyKey: (l10n) => l10n.helpCalendarHomeWidgetBody,
+          ),
+        ],
       ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpShiftChangeShiftTitle,
-        bodyKey: (l10n) => l10n.helpShiftChangeShiftBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpShiftShiftColorsTitle,
-        bodyKey: (l10n) => l10n.helpShiftShiftColorsBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpShiftAllShiftsTitle,
-        bodyKey: (l10n) => l10n.helpShiftAllShiftsBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpShiftTeamChangeTitle,
-        bodyKey: (l10n) => l10n.helpShiftTeamChangeBody,
-      ),
-    ],
-  ),
-  HelpSection(
-    icon: Icons.alarm_outlined,
-    titleKey: (l10n) => l10n.helpAlarmSectionTitle,
-    topics: [
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpAlarmTemplatesTitle,
-        bodyKey: (l10n) => l10n.helpAlarmTemplatesBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpAlarmSoundVolumeTitle,
-        bodyKey: (l10n) => l10n.helpAlarmSoundVolumeBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpAlarmAlarmHistoryTitle,
-        bodyKey: (l10n) => l10n.helpAlarmAlarmHistoryBody,
-      ),
-      // ⭐ 2026-09-04 - 전체_코드_점검_리포트_2026-09-04.md의 H2(알람 갱신
-      // 트랜잭션 중 OS 알람 호출) 항목은 코드 수정은 보류하기로 했지만, 사용자가
-      // 알아두면 스스로 대처 가능한 내용이라 도움말에만 추가.
-    ],
-  ),
-  HelpSection(
-    icon: Icons.calendar_month_outlined,
-    titleKey: (l10n) => l10n.helpCalendarSectionTitle,
-    topics: [
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpCalendarThemesTitle,
-        bodyKey: (l10n) => l10n.helpCalendarThemesBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpCalendarOtTitle,
-        bodyKey: (l10n) => l10n.helpCalendarOtBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpCalendarWorkHoursPayTitle,
-        bodyKey: (l10n) => l10n.helpCalendarWorkHoursPayBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpCalendarHomeWidgetTitle,
-        bodyKey: (l10n) => l10n.helpCalendarHomeWidgetBody,
-      ),
-    ],
-  ),
-  HelpSection(
-    icon: Icons.checklist_outlined,
-    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabSectionTitle,
-    koreanOnly: true,
-    topics: [
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabWhatIsItTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabWhatIsItBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabCreateEditTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabCreateEditBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabAutoCategoryTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabAutoCategoryBody,
-        // 자동분류 모델이 한국어 전용 - 영어에서는 분류 없이 기본 도형 아이콘만 순서대로 붙음
+      HelpSection(
+        icon: Icons.checklist_outlined,
+        titleKey: (l10n) =>
+            KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabSectionTitle,
         koreanOnly: true,
+        topics: [
+          HelpTopic(
+            titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpScheduleTabWhatIsItTitle,
+            bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpScheduleTabWhatIsItBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpScheduleTabCreateEditTitle,
+            bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpScheduleTabCreateEditBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpScheduleTabAutoCategoryTitle,
+            bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpScheduleTabAutoCategoryBody,
+            // 자동분류 모델이 한국어 전용 - 영어에서는 분류 없이 기본 도형 아이콘만 순서대로 붙음
+            koreanOnly: true,
+          ),
+        ],
       ),
-    ],
-  ),
-  HelpSection(
-    icon: Icons.self_improvement_outlined,
-    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSectionTitle,
-    koreanOnly: true,
-    topics: [
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionWhatIsItTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionWhatIsItBody,
+      HelpSection(
+        icon: Icons.self_improvement_outlined,
+        titleKey: (l10n) => l10n.helpConditionSectionTitle,
+        koreanOnly: false,
+        topics: [
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpConditionWhatIsItTitle,
+            bodyKey: (l10n) => l10n.helpConditionWhatIsItBody,
+          ),
+          // ⭐ 2026-09-04 v2 - 컨디션 판정 로직 개편(evidence 6종 판정 반영)에 맞춰
+          // 근거자료 12개 전체를 도움말 한곳에서 볼 수 있게 신설(사용자 요청).
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpConditionEvidenceListTitle,
+            bodyKey: (l10n) => l10n.helpConditionEvidenceListBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpConditionSetupNeededTitle,
+            bodyKey: (l10n) => l10n.helpConditionSetupNeededBody,
+          ),
+        ],
       ),
-      // ⭐ 2026-09-04 v2 - 컨디션 판정 로직 개편(evidence 6종 판정 반영)에 맞춰
-      // 근거자료 12개 전체를 도움말 한곳에서 볼 수 있게 신설(사용자 요청).
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionEvidenceListTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionEvidenceListBody,
+      HelpSection(
+        icon: Icons.bedtime_outlined,
+        titleKey: (l10n) => l10n.helpSleepSectionTitle,
+        koreanOnly: false,
+        topics: [
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpSleepWidgetTitle,
+            bodyKey: (l10n) => l10n.helpSleepWidgetBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpSleepAutoDetectTitle,
+            bodyKey: (l10n) => l10n.helpSleepAutoDetectBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpSleepMiniCalendarTitle,
+            bodyKey: (l10n) => l10n.helpSleepMiniCalendarBody,
+          ),
+        ],
       ),
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSetupNeededTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSetupNeededBody,
-      ),
-    ],
-  ),
-  HelpSection(
-    icon: Icons.bedtime_outlined,
-    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepSectionTitle,
-    koreanOnly: true,
-    topics: [
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepWidgetTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepWidgetBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepAutoDetectTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepAutoDetectBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepMiniCalendarTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepMiniCalendarBody,
-      ),
-    ],
-  ),
-  HelpSection(
-    icon: Icons.group_outlined,
-    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendSectionTitle,
-    koreanOnly: true,
-    topics: [
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendWhatIsItTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendWhatIsItBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendShareCodeTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendShareCodeBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendViewFriendTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendViewFriendBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendReinstallNoteTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendReinstallNoteBody,
-      ),
-    ],
-  ),
-  HelpSection(
-    icon: Icons.backup_outlined,
-    titleKey: (l10n) => l10n.helpBackupSectionTitle,
-    topics: [
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpBackupDataStorageTitle,
-        bodyKey: (l10n) => l10n.helpBackupDataStorageBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpBackupAutoBackupTitle,
-        bodyKey: (l10n) => l10n.helpBackupAutoBackupBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpBackupRestoreTitle,
-        bodyKey: (l10n) => l10n.helpBackupRestoreBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpBackupRestoreManualTitle,
-        bodyKey: (l10n) => l10n.helpBackupRestoreManualBody,
-      ),
-      // ⭐ 2026-09-04 - 전체_코드_점검_리포트_2026-09-04.md M10(복구 부분실패
-      // 격리 없음) 항목은 코드 수정은 보류하기로 했지만, 예방 차원에서 사용자가
-      // 알아두면 도움되는 내용이라 도움말에만 추가.
-      HelpTopic(
+      HelpSection(
+        icon: Icons.group_outlined,
+        titleKey: (l10n) =>
+            KoreanOnlyCopy.fromLocalizations(l10n).helpFriendSectionTitle,
         koreanOnly: true,
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpBackupRestoreOldBackupFailTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpBackupRestoreOldBackupFailBody,
+        topics: [
+          HelpTopic(
+            titleKey: (l10n) =>
+                KoreanOnlyCopy.fromLocalizations(l10n).helpFriendWhatIsItTitle,
+            bodyKey: (l10n) =>
+                KoreanOnlyCopy.fromLocalizations(l10n).helpFriendWhatIsItBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) =>
+                KoreanOnlyCopy.fromLocalizations(l10n).helpFriendShareCodeTitle,
+            bodyKey: (l10n) =>
+                KoreanOnlyCopy.fromLocalizations(l10n).helpFriendShareCodeBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpFriendViewFriendTitle,
+            bodyKey: (l10n) =>
+                KoreanOnlyCopy.fromLocalizations(l10n).helpFriendViewFriendBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpFriendReinstallNoteTitle,
+            bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpFriendReinstallNoteBody,
+          ),
+        ],
       ),
-    ],
-  ),
-  HelpSection(
-    icon: Icons.help_outline,
-    titleKey: (l10n) => l10n.helpTroubleshootSectionTitle,
-    topics: [
-      HelpTopic(titleKey: (l10n) => l10n.helpDiagnosticTitle,
-        bodyKey: (l10n) => l10n.helpDiagnosticBody),
-      // ⭐ 2026-09-13 - 강제 종료 시 알람이 취소되는 OS 동작 + 그 이후 "다시
-      // 실행하기 전에 시각이 지난 알람은 복원 안 됨"이라는 타이밍 리스크를
-      // 정확히 안내(실기기/에뮬레이터 양쪽에서 실측 확인된 내용 - 세션 기록
-      // 참고). 코드 수정은 검토 후 보류함(AlarmRefreshUtil의 "오늘 이미
-      // 갱신됨" 중복 방지 로직을 건드리는 변경이라, 과거 이 영역에서 반복됐던
-      // 사고 이력을 고려해 위험도 대비 이득이 낮다고 판단) - 안내로 대체.
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpTroubleshootForceStopTitle,
-        bodyKey: (l10n) => l10n.helpTroubleshootForceStopBody,
+      HelpSection(
+        icon: Icons.backup_outlined,
+        titleKey: (l10n) => l10n.helpBackupSectionTitle,
+        topics: [
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpBackupDataStorageTitle,
+            bodyKey: (l10n) => l10n.helpBackupDataStorageBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpBackupAutoBackupTitle,
+            bodyKey: (l10n) => l10n.helpBackupAutoBackupBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpBackupRestoreTitle,
+            bodyKey: (l10n) => l10n.helpBackupRestoreBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpBackupRestoreManualTitle,
+            bodyKey: (l10n) => l10n.helpBackupRestoreManualBody,
+          ),
+          // ⭐ 2026-09-04 - 전체_코드_점검_리포트_2026-09-04.md M10(복구 부분실패
+          // 격리 없음) 항목은 코드 수정은 보류하기로 했지만, 예방 차원에서 사용자가
+          // 알아두면 도움되는 내용이라 도움말에만 추가.
+          HelpTopic(
+            koreanOnly: true,
+            titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpBackupRestoreOldBackupFailTitle,
+            bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpBackupRestoreOldBackupFailBody,
+          ),
+        ],
       ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpTroubleshootWidgetIssueTitle,
-        bodyKey: (l10n) => l10n.helpTroubleshootWidgetIssueBody,
+      HelpSection(
+        icon: Icons.help_outline,
+        titleKey: (l10n) => l10n.helpTroubleshootSectionTitle,
+        topics: [
+          HelpTopic(
+              titleKey: (l10n) => l10n.helpDiagnosticTitle,
+              bodyKey: (l10n) => l10n.helpDiagnosticBody),
+          // ⭐ 2026-09-13 - 강제 종료 시 알람이 취소되는 OS 동작 + 그 이후 "다시
+          // 실행하기 전에 시각이 지난 알람은 복원 안 됨"이라는 타이밍 리스크를
+          // 정확히 안내(실기기/에뮬레이터 양쪽에서 실측 확인된 내용 - 세션 기록
+          // 참고). 코드 수정은 검토 후 보류함(AlarmRefreshUtil의 "오늘 이미
+          // 갱신됨" 중복 방지 로직을 건드리는 변경이라, 과거 이 영역에서 반복됐던
+          // 사고 이력을 고려해 위험도 대비 이득이 낮다고 판단) - 안내로 대체.
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpTroubleshootForceStopTitle,
+            bodyKey: (l10n) => l10n.helpTroubleshootForceStopBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpTroubleshootWidgetIssueTitle,
+            bodyKey: (l10n) => l10n.helpTroubleshootWidgetIssueBody,
+          ),
+          HelpTopic(
+            titleKey: (l10n) => l10n.helpTroubleshootBackupFileMissingTitle,
+            bodyKey: (l10n) => l10n.helpTroubleshootBackupFileMissingBody,
+          ),
+          HelpTopic(
+            koreanOnly: true,
+            titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpTroubleshootFriendDisconnectedTitle,
+            bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n)
+                .helpTroubleshootFriendDisconnectedBody,
+          ),
+        ],
       ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpTroubleshootBackupFileMissingTitle,
-        bodyKey: (l10n) => l10n.helpTroubleshootBackupFileMissingBody,
-      ),
-      HelpTopic(
-        koreanOnly: true,
-        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpTroubleshootFriendDisconnectedTitle,
-        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpTroubleshootFriendDisconnectedBody,
-      ),
-    ],
-  ),
-];
+    ];
 
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
@@ -332,24 +353,31 @@ class _HelpScreenState extends State<HelpScreen> {
               final matched = s.topics
                   .where((t) => t.titleKey(l10n).toLowerCase().contains(query))
                   .toList();
-              return HelpSection(icon: s.icon, titleKey: s.titleKey,
-                  koreanOnly: s.koreanOnly, topics: matched);
+              return HelpSection(
+                  icon: s.icon,
+                  titleKey: s.titleKey,
+                  koreanOnly: s.koreanOnly,
+                  topics: matched);
             })
             .where((s) => s.topics.isNotEmpty)
             .toList();
 
     return Scaffold(
-      backgroundColor: kAppBackgroundPastel,
+      backgroundColor: AppUiPalette.of(context).background,
       appBar: AppBar(
         title: Text(l10n.settingsHelp),
-        actions: [IconButton(icon: const Icon(Icons.lock_clock),
-          tooltip: l10n.permissionSettingsTitle,
-          onPressed: () => showPermissionSettings(context))],
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0.5,
+        actions: [
+          IconButton(
+              icon: const Icon(Icons.lock_clock),
+              tooltip: l10n.permissionSettingsTitle,
+              onPressed: () => showPermissionSettings(context))
+        ],
+        backgroundColor: AppUiPalette.of(context).surface,
+        foregroundColor: AppUiPalette.of(context).text,
+        elevation: 0,
       ),
-      body: AdaptiveFormBody(child: SafeArea(
+      body: AdaptiveFormBody(
+          child: SafeArea(
         top: false,
         child: Column(
           children: [
@@ -360,21 +388,25 @@ class _HelpScreenState extends State<HelpScreen> {
                 onChanged: (v) => setState(() => _query = v),
                 decoration: InputDecoration(
                   hintText: l10n.helpSearchHint,
-                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  prefixIcon: Icon(Icons.search,
+                      color: AppUiPalette.of(context).secondaryText),
                   suffixIcon: _query.isEmpty
                       ? null
                       : IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          icon: Icon(Icons.clear,
+                              color: AppUiPalette.of(context).secondaryText),
                           onPressed: () => setState(() {
                             _searchController.clear();
                             _query = '';
                           }),
                         ),
                   filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16.w),
+                  fillColor: AppUiPalette.of(context).surface,
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 0, horizontal: 16.w),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius:
+                        BorderRadius.circular(AppUiMetrics.controlRadius),
                     borderSide: BorderSide.none,
                   ),
                 ),
@@ -385,13 +417,16 @@ class _HelpScreenState extends State<HelpScreen> {
                   ? Center(
                       child: Text(
                         l10n.helpEmptySearchResult,
-                        style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+                        style: TextStyle(
+                            fontSize: AppFontSize.body,
+                            color: AppUiPalette.of(context).secondaryText),
                       ),
                     )
                   : ListView.builder(
                       padding: EdgeInsets.only(bottom: 24.h),
                       itemCount: visibleSections.length,
-                      itemBuilder: (context, i) => _SectionBlock(section: visibleSections[i]),
+                      itemBuilder: (context, i) =>
+                          _SectionBlock(section: visibleSections[i]),
                     ),
             ),
           ],
@@ -415,14 +450,15 @@ class _SectionBlock extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(20.w, 20.h, 16.w, 8.h),
           child: Row(
             children: [
-              Icon(section.icon, size: 18.sp, color: kAppMainAccent),
+              Icon(section.icon,
+                  size: 18.sp, color: AppUiPalette.of(context).primary),
               SizedBox(width: 8.w),
               Text(
                 section.titleKey(l10n),
                 style: TextStyle(
-                  fontSize: 13.sp,
+                  fontSize: AppFontSize.body,
                   fontWeight: FontWeight.w700,
-                  color: kAppMainAccent,
+                  color: AppUiPalette.of(context).primary,
                   letterSpacing: 0.2,
                 ),
               ),
@@ -432,14 +468,20 @@ class _SectionBlock extends StatelessWidget {
         Container(
           margin: EdgeInsets.symmetric(horizontal: 12.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppUiPalette.of(context).surface,
             borderRadius: BorderRadius.circular(14.r),
           ),
           child: Column(
             children: [
               for (var i = 0; i < section.topics.length; i++) ...[
-                if (i > 0) Divider(height: 1, indent: 16.w, endIndent: 16.w, color: Colors.grey.shade200),
-                _TopicTile(topic: section.topics[i], koreanOnly: section.koreanOnly),
+                if (i > 0)
+                  Divider(
+                      height: 1,
+                      indent: 16.w,
+                      endIndent: 16.w,
+                      color: AppUiPalette.of(context).border),
+                _TopicTile(
+                    topic: section.topics[i], koreanOnly: section.koreanOnly),
               ],
             ],
           ),
@@ -459,8 +501,9 @@ class _TopicTile extends StatelessWidget {
     final l10n = context.l10n;
     return InkWell(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => HelpDetailScreen(
-          topic: topic, koreanOnly: koreanOnly || topic.koreanOnly)),
+        MaterialPageRoute(
+            builder: (_) => HelpDetailScreen(
+                topic: topic, koreanOnly: koreanOnly || topic.koreanOnly)),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -469,11 +512,15 @@ class _TopicTile extends StatelessWidget {
             Expanded(
               child: Text(
                 topic.titleKey(l10n),
-                style: TextStyle(fontSize: 14.5.sp, color: Colors.black87, height: 1.3),
+                style: TextStyle(
+                    fontSize: AppFontSize.control,
+                    color: AppUiPalette.of(context).text,
+                    height: 1.3),
               ),
             ),
             SizedBox(width: 8.w),
-            Icon(Icons.chevron_right, size: 20.sp, color: Colors.grey.shade400),
+            Icon(Icons.chevron_right,
+                size: 20.sp, color: AppUiPalette.of(context).border),
           ],
         ),
       ),
@@ -485,7 +532,8 @@ class _TopicTile extends StatelessWidget {
 class HelpDetailScreen extends StatelessWidget {
   final HelpTopic topic;
   final bool koreanOnly;
-  const HelpDetailScreen({super.key, required this.topic, this.koreanOnly = false});
+  const HelpDetailScreen(
+      {super.key, required this.topic, this.koreanOnly = false});
 
   @override
   Widget build(BuildContext context) {
@@ -496,8 +544,9 @@ class HelpDetailScreen extends StatelessWidget {
     final l10n = context.l10n;
     final title = topic.titleKey(l10n);
     final titleStyle = (Theme.of(context).appBarTheme.titleTextStyle ??
-            const TextStyle(fontSize: 18, fontWeight: FontWeight.w600))
-        .copyWith(color: Colors.black87);
+            const TextStyle(
+                fontSize: AppFontSize.toolbar, fontWeight: FontWeight.w600))
+        .copyWith(color: AppUiPalette.of(context).text);
     // Match the centered toolbar's leading width and title spacing so long
     // localized titles can wrap without clipping at larger system font sizes.
     final titlePainter = TextPainter(
@@ -508,12 +557,12 @@ class HelpDetailScreen extends StatelessWidget {
         maxWidth: (MediaQuery.sizeOf(context).width - 144)
             .clamp(1.0, double.infinity),
       );
-    final toolbarHeight = (titlePainter.height + 16)
-        .clamp(kToolbarHeight, double.infinity);
+    final toolbarHeight =
+        (titlePainter.height + 16).clamp(kToolbarHeight, double.infinity);
     final titleLines = titlePainter.computeLineMetrics().length;
     titlePainter.dispose();
     return Scaffold(
-      backgroundColor: kAppBackgroundPastel,
+      backgroundColor: AppUiPalette.of(context).background,
       appBar: AppBar(
         toolbarHeight: toolbarHeight,
         leadingWidth: 56,
@@ -527,35 +576,44 @@ class HelpDetailScreen extends StatelessWidget {
           softWrap: true,
           overflow: TextOverflow.visible,
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
-        elevation: 0.5,
+        backgroundColor: AppUiPalette.of(context).surface,
+        foregroundColor: AppUiPalette.of(context).text,
+        elevation: 0,
       ),
-      body: SafeArea(top: false, child: AdaptiveFormBody(child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(20.w, 20.w, 20.w, 20.w + 16.h),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14.r),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                topic.titleKey(l10n),
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: Colors.black87),
+      body: SafeArea(
+          top: false,
+          child: AdaptiveFormBody(
+              child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(20.w, 20.w, 20.w, 20.w + 16.h),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(AppUiMetrics.pagePadding),
+              decoration: BoxDecoration(
+                color: AppUiPalette.of(context).surface,
+                borderRadius: BorderRadius.circular(14.r),
               ),
-              SizedBox(height: 14.h),
-              Text(
-                topic.bodyKey(l10n),
-                style: TextStyle(fontSize: 14.5.sp, color: Colors.black87, height: 1.6),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    topic.titleKey(l10n),
+                    style: TextStyle(
+                        fontSize: AppFontSize.toolbar,
+                        fontWeight: FontWeight.w700,
+                        color: AppUiPalette.of(context).text),
+                  ),
+                  SizedBox(height: 14.h),
+                  Text(
+                    topic.bodyKey(l10n),
+                    style: TextStyle(
+                        fontSize: AppFontSize.control,
+                        color: AppUiPalette.of(context).text,
+                        height: 1.6),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ))),
+            ),
+          ))),
     );
   }
 }

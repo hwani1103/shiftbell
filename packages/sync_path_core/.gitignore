@@ -1,0 +1,4 @@
+.dart_tool/
+build/
+.pub-cache/
+tool/web_fixtures.g.dart

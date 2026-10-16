@@ -1,0 +1,27 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간, 야간] Size(320.0, 568.0)
+00:02 +1: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간, 야간] Size(806.0, 895.0)
+00:02 +2: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간, 야간] Size(1280.0, 800.0)
+00:04 +3: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간근무, 야간, 특별연장근무] Size(320.0, 568.0)
+00:05 +4: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간근무, 야간, 특별연장근무] Size(806.0, 895.0)
+00:07 +5: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [주간근무, 야간, 특별연장근무] Size(1280.0, 800.0)
+00:08 +6: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Day, Night Duty, WWWWWWWWWW] Size(320.0, 568.0)
+00:10 +7: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Day, Night Duty, WWWWWWWWWW] Size(806.0, 895.0)
+00:11 +8: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Day, Night Duty, WWWWWWWWWW] Size(1280.0, 800.0)
+00:12 +9: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Afternoon Shift, Sleepover Shift, WWWWWWWWWWWWWWWW] Size(320.0, 568.0)
+00:12 +10: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Afternoon Shift, Sleepover Shift, WWWWWWWWWWWWWWWW] Size(806.0, 895.0)
+00:13 +11: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_name_layout_test.dart: whole aligned cells [Afternoon Shift, Sleepover Shift, WWWWWWWWWWWWWWWW] Size(1280.0, 800.0)
+00:14 +12: loading C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart
+00:17 +12: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: (setUpAll)
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\roster_screen_f4c82fd1\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+00:18 +12: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen dawn: fixed buttons, saved choice and edge fill
+00:25 +13: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen morning: fixed buttons, saved choice and edge fill
+00:29 +14: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen daytime: fixed buttons, saved choice and edge fill
+00:33 +15: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen evening: fixed buttons, saved choice and edge fill
+00:37 +16: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen night: fixed buttons, saved choice and edge fill
+00:41 +17: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen originalWhite: fixed buttons, saved choice and edge fill
+00:45 +18: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: Full screen originalDark: fixed buttons, saved choice and edge fill
+00:48 +19: C:/Users/Administrator/Desktop/shiftbell/test/all_shifts_screen_test.dart: (tearDownAll)
+00:48 +19: All tests passed!

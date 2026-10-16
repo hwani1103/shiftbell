@@ -1,0 +1,27 @@
+{
+  "hintWitnessValidation": "PASS",
+  "humanDifficultyCalibrated": false,
+  "deviceInstallPerformed": false,
+  "millisecondsPerCell": 433.3333333333333,
+  "playbackRate": 1.5,
+  "androidDevDebug": "PASS",
+  "distinctSafeAssignments": 321,
+  "rotationReflectionDuplicateCheck": "PASS: 30 distinct",
+  "apkSha256": "2D42A1212D14F9C2C8783696AC47E3F768B12C8A98EE7AF1245E0251A5859DB5",
+  "analyses": "PASS: four packages",
+  "tests": {
+    "tools": 13,
+    "core": 98,
+    "total": 149,
+    "ui": 36,
+    "lab": 2
+  },
+  "version": "0.3.0+4",
+  "protectedApps": "No edits/build/install to existing ShiftBell dev/prod from this task",
+  "webDevDebug": "PASS",
+  "pairTrajectoryComparisons": 9969,
+  "packId": "dev-campaign-30",
+  "levels": 30,
+  "independentSolutionSetComparison": "PASS: all 30 levels",
+  "applicationId": "dev.shiftbell.experiments.sync_path_lab.dev"
+}

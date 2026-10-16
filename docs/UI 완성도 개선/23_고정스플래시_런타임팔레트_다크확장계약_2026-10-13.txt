@@ -1,0 +1,27 @@
+고정 스플래시 / 권한·온보딩 런타임 팔레트 계약 — 2026-10-13
+상태: 계약 기록·팔레트 주입 검사·Android 고정 리소스 컴파일 완료
+
+사용자 최종 합의
+- 스플래시 배경은 현재#EEF6FD로 Fix. 시간별 테마나 앱의 다크 팔레트 교체로 변경하지 않음.
+- 스플래시 이후 권한 안내부터 온보딩 전체는 상위 팔레트 교체로 연결.
+- 배경·표면·버튼·칩·선택 테두리/안내·기본/보조/버튼 위/비활성 텍스트·오류 등 모든 역할이 밝음/어두움에 적합한 값을 가져야 함.
+- 향후 시간별5개 테마 자동 선택을 고려하되 자동 전환 기능 자체와 후속 화면 전수 개선은 아직 구현 범위가 아님.
+
+설계/보완
+- 기존 AppUiPalette/ThemeExtension/AppTypography/AppUiTheme 역할 체계 유지. 팔레트 전체 주입을 통해 색 변경, 화면별분기/로컬 색 덮어쓰기 지양.
+- AppUiPalette.brightness를 배경에서 판정해 Material Theme 및 ColorScheme brightness를 함께 연결.
+- primary/secondary container·on-container, surface container 계층, surfaceTint/outlineVariant도 팔레트 역할에 연결. 라이트 Material의 숨은 표면색이 다크 팔레트 위에 남지 않도록 보완.
+- 활성 기본 블루 팔레트 유지. 다크 예시는 검사 fixture에만 주입하며 실제 앱에 다크를 강제하지 않음.
+- 선택 전용 앰버도 selectionOutline/선택 텍스트 역할로 관리. 다크에서는 밝은 앰버 등 해당 팔레트에 어울리는 값 주입 가능.
+- Android values/colors.xml의 app_ui_splash_background #EEF6FD 고정. 이전 Gradle 팔레트 생성/alias 연결 제거. 기존 Android12/구버전 launch resource는 같은 고정 색상 참조.
+- 앱 다른 화면 전체의 중앙화 완료를 의미하지 않음. 알람 시간 편집기는 공통 팔레트가 있는 온보딩 경로에서 공통 스타일 사용, 기존 화면의 legacy 경로는 별도 후속.
+
+검증
+- 대상8검사 PASS: 실제 다크 팔레트로 근무명·패턴·오늘 안내 및 선택칩·알람 편집 Dialog·시간 선택 Picker까지 이동. Material brightness.dark, 표면/텍스트/onPrimary/선택 강조 색 역할 확인.
+- 이전 앰버/지속 모션 대상9검사 PASS는 UI22번 원장.
+- 증거 artifacts/onboarding_palette_contract_tests.log / onboarding_palette_contract_tests_exit.txt, test/onboarding_dark_palette_test.dart.
+- 실기기 시간별/다크5종/앱 전체 전수 PASS로 확대하지 않음.
+- 연결 dev 앱은 현재 백그라운드. attach 세션의 hot reload 요청은 아직 완료 응답 미수신이며 실기기 새 강조 효과 반영 완료로 표현하지 않음.
+- 기존 패턴 보존을 위해 hot restart/앱 데이터 초기화 없이 기존 dev Activity를 다시 앞으로 가져와 hot reload 완료를 확인한다.
+
+Android 고정 리소스 후속: :app:processDevDebugResources BUILD SUCCESSFUL(1m20s), native exit0. XML/Manifest 패키징 리소스 검증이며 APK 설치·실기기 5종 테마 PASS는 아님. artifacts/onboarding_fixed_splash_resources.log / exit.txt.

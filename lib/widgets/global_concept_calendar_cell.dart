@@ -1,3 +1,7 @@
+import 'calendar_shift_change.dart';
+import '../theme/calendar_reading_palette.dart';
+import 'shift_chip_label.dart';
+import '../theme/app_ui_theme.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../models/calendar_theme.dart';
@@ -11,12 +15,16 @@ const conceptInk = Color(0xFF273653);
 /// A run is bounded by the displayed week. Calendar arithmetic avoids
 /// DST-dependent 24-hour offsets. Equal colours alone never merge two shifts.
 ({int index, int length}) calendarShiftRun(
-    DateTime day, int firstWeekday, String Function(DateTime) shiftForDate) {
+    DateTime day, int firstWeekday, String Function(DateTime) shiftForDate,
+    {bool Function(DateTime)? separatesDay}) {
   final name = shiftForDate(day);
   if (name.isEmpty || name == '미설정') return (index: 0, length: 1);
+  if (separatesDay?.call(day) == true) return (index: 0, length: 1);
   final column = (day.weekday - firstWeekday + 7) % 7;
   DateTime at(int offset) => DateTime(day.year, day.month, day.day + offset);
-  bool matches(int offset) => shiftForDate(at(offset)) == name;
+  bool matches(int offset) =>
+      separatesDay?.call(at(offset)) != true &&
+      shiftForDate(at(offset)) == name;
   var before = 0;
   var after = 0;
   while (before < column && matches(-before - 1)) {
@@ -43,9 +51,11 @@ class GlobalConceptCalendarCell extends StatelessWidget {
       required this.outside,
       required this.red,
       required this.selected,
+      this.reading,
       this.coverMemoSize = 9.3,
       this.runIndex = 0,
       this.runLength = 1});
+  final CalendarReadingPalette? reading;
   final CalendarThemeId theme;
   final DateTime date;
   final String shift;
@@ -112,31 +122,45 @@ class GlobalConceptCalendarCell extends StatelessWidget {
           Color(0xFFDEF2CF),
           Color(0xFFF3DDF0)
         ];
-        final cellTint = shift.isEmpty
-            ? const Color(0xFFF0F3F7)
-            : Color.lerp(Colors.white, shiftColor, .33)!;
+        final cellTint = reading != null
+            ? (shift.isEmpty
+                ? reading!.surface
+                : reading!.mosaicSurface(shiftColor, outside: outside))
+            : shift.isEmpty
+                ? const Color(0xFFF0F3F7)
+                : Color.lerp(Colors.white, shiftColor, .33)!;
         // Same hue as the cell, with enough saturation to separate the badge.
-        final chipColor = Color.lerp(Colors.white, shiftColor, .80)!;
+        final chipColor = reading?.mosaicChip(shiftColor) ??
+            Color.lerp(Colors.white, shiftColor, .80)!;
+        final actualSurface = mosaic
+            ? cellTint
+            : reading?.detailSurface(outside) ?? periwinkleBackground;
+        final dateInk = reading == null
+            ? conceptInk.withValues(alpha: outside ? .4 : 1)
+            : CalendarContrast.ensure(
+                outside ? reading!.outside : reading!.text, actualSurface);
         final luminance = chipColor.computeLuminance();
         final chipInk = (luminance + .05) / .05 >= 1.05 / (luminance + .05)
             ? Colors.black
             : Colors.white;
         Widget label(String text, double fontSize, Color color,
                 [bool shiftLabel = false]) =>
-            FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(text,
-                    maxLines: 1,
-                    textScaler: TextScaler.noScaling,
-                    style: TextStyle(
-                        inherit: !shiftLabel,
-                        fontSize: fontSize,
-                        leadingDistribution: shiftLabel
-                            ? TextLeadingDistribution.proportional
-                            : null,
-                        height: 1.05,
-                        fontWeight: FontWeight.w700,
-                        color: color)));
+            shiftLabel
+                ? ShiftChipLabel(label: text, color: color)
+                : FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(text,
+                        maxLines: 1,
+                        textScaler: TextScaler.noScaling,
+                        style: TextStyle(
+                            inherit: !shiftLabel,
+                            fontSize: fontSize,
+                            leadingDistribution: shiftLabel
+                                ? TextLeadingDistribution.proportional
+                                : null,
+                            height: 1.05,
+                            fontWeight: FontWeight.w700,
+                            color: color)));
         final dateSlot = KeyedSubtree(
             key: const ValueKey('concept-date'),
             child: SizedBox(
@@ -147,12 +171,14 @@ class GlobalConceptCalendarCell extends StatelessWidget {
                             horizontal: 6 * unit, vertical: 2 * unit),
                         decoration: today
                             ? BoxDecoration(
-                                color: const Color(0xFF526BAB),
+                                color:
+                                    reading?.today ?? const Color(0xFF526BAB),
                                 borderRadius: BorderRadius.circular(8 * unit),
                                 boxShadow: [
                                     BoxShadow(
-                                        color: const Color(0xFF526BAB)
-                                            .withValues(alpha: .2),
+                                        color: reading?.today ??
+                                            const Color(0xFF526BAB)
+                                                .withValues(alpha: .2),
                                         blurRadius: 4,
                                         offset: const Offset(0, 2))
                                   ])
@@ -161,11 +187,13 @@ class GlobalConceptCalendarCell extends StatelessWidget {
                             '${date.day}',
                             (split ? 18 : 16.5) * unit,
                             today
-                                ? Colors.white
+                                ? (reading?.onToday ?? Colors.white)
                                 : red
-                                    ? const Color(0xFFC43D4D)
-                                    : conceptInk.withValues(
-                                        alpha: outside ? .4 : 1))))));
+                                    ? (reading == null
+                                        ? const Color(0xFFC43D4D)
+                                        : CalendarReadingPalette.redOn(
+                                            actualSurface))
+                                    : dateInk)))));
         final shiftSlot = KeyedSubtree(
             key: const ValueKey('concept-shift'),
             child: SizedBox(
@@ -176,33 +204,53 @@ class GlobalConceptCalendarCell extends StatelessWidget {
                     : mosaic
                         ? Padding(
                             padding: EdgeInsets.symmetric(horizontal: 3 * unit),
-                            child: Container(
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: 2 * unit),
-                                decoration: BoxDecoration(
-                                    color: chipColor,
-                                    borderRadius:
-                                        BorderRadius.circular(5 * unit),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color:
-                                              chipColor.withValues(alpha: .16),
-                                          blurRadius: 3,
-                                          offset: const Offset(0, 1))
-                                    ]),
-                                child: label(shift, shiftHeight * 15 / 19,
-                                    chipInk, true)))
+                            child: CalendarShiftChange(
+                                background: chipColor,
+                                foreground: chipInk,
+                                surface: cellTint,
+                                deriveOriginalInk: true,
+                                originalBackground: (color) =>
+                                    reading?.mosaicChip(color) ??
+                                    Color.lerp(Colors.white, color, .80)!,
+                                builder: (bg, fg) => Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 2 * unit),
+                                    decoration: BoxDecoration(
+                                        color: bg,
+                                        border: reading == null
+                                            ? null
+                                            : CalendarContrast.chipOutline(
+                                                bg, cellTint),
+                                        borderRadius:
+                                            BorderRadius.circular(5 * unit),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: bg.withValues(alpha: .16),
+                                              blurRadius: 3,
+                                              offset: const Offset(0, 1))
+                                        ]),
+                                    child: label(shift, shiftHeight * 15 / 19,
+                                        fg, true))))
                         : Semantics(
                             label: runIndex == 0 ? shift : null,
-                            child: CustomPaint(
-                                painter: _RunPainter(
-                                    text: shift,
-                                    background: shiftColor,
-                                    foreground: shiftTextColor,
-                                    index: runIndex,
-                                    length: runLength,
-                                    unit: unit,
-                                    phoneLabel: phoneLabel)))));
+                            child: CalendarShiftChange(
+                                background: shiftColor,
+                                foreground: shiftTextColor,
+                                surface: actualSurface,
+                                builder: (bg, fg) => CustomPaint(
+                                    painter: _RunPainter(
+                                        text: shift,
+                                        background: bg,
+                                        foreground: fg,
+                                        outline: reading == null
+                                            ? null
+                                            : CalendarContrast.chipOutline(
+                                                    bg, actualSurface)
+                                                ?.top,
+                                        index: runIndex,
+                                        length: runLength,
+                                        unit: unit,
+                                        phoneLabel: phoneLabel))))));
         final memoSlots = memos
             .take(3)
             .toList()
@@ -218,18 +266,30 @@ class GlobalConceptCalendarCell extends StatelessWidget {
                     gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: mosaic
-                            ? [const Color(0xFFFCFDFE), const Color(0xFFEFF2F7)]
-                            : [
-                                memoColors[entry.key].withValues(alpha: .92),
-                                memoColors[entry.key].withValues(alpha: .72)
-                              ]),
+                        colors: reading != null
+                            ? [
+                                reading!.detailMemoSurface,
+                                reading!.detailMemoSurface
+                              ]
+                            : mosaic
+                                ? [
+                                    const Color(0xFFFCFDFE),
+                                    const Color(0xFFEFF2F7)
+                                  ]
+                                : [
+                                    memoColors[entry.key]
+                                        .withValues(alpha: .92),
+                                    memoColors[entry.key].withValues(alpha: .72)
+                                  ]),
                     borderRadius: BorderRadius.circular(5 * unit),
                     border: Border.all(
-                        color: Colors.white.withValues(alpha: .55), width: .6),
+                        color: reading?.detailLine ??
+                            Colors.white.withValues(alpha: .55),
+                        width: .6),
                     boxShadow: [
                       BoxShadow(
-                          color: conceptInk.withValues(alpha: .10),
+                          color: (reading?.text ?? conceptInk)
+                              .withValues(alpha: .10),
                           blurRadius: 3 * unit,
                           offset: Offset(0, 1.5 * unit))
                     ]),
@@ -238,7 +298,9 @@ class GlobalConceptCalendarCell extends StatelessWidget {
                         horizontalInset: .75,
                         textScaler: TextScaler.noScaling,
                         style: TextStyle(
-                            color: const Color(0xFF17202D),
+                            color: reading == null
+                                ? const Color(0xFF17202D)
+                                : reading!.detailMemoText,
                             fontSize: phoneLabel
                                 ? math.min(11 * unit, (memoHeight - 1.2) / 1.15)
                                 : fittedMemoSize,
@@ -247,23 +309,33 @@ class GlobalConceptCalendarCell extends StatelessWidget {
                         textAlign: TextAlign.center))))
             .toList();
         return Opacity(
-            opacity: outside && mosaic ? .38 : 1,
+            opacity: reading != null
+                ? 1
+                : outside && mosaic
+                    ? .38
+                    : 1,
             child: Container(
                 margin: EdgeInsets.symmetric(horizontal: inset, vertical: gap),
-                foregroundDecoration: selected
+                foregroundDecoration: selected || (reading != null && mosaic)
                     ? BoxDecoration(
                         borderRadius: BorderRadius.circular(10 * unit),
                         border: Border.all(
-                            color: const Color(0xFF5168AB), width: 1.5))
+                            color: selected
+                                ? reading?.selection ?? const Color(0xFF5168AB)
+                                : CalendarContrast.ensure(
+                                    reading!.detailLine, cellTint, 1.5),
+                            width: selected ? 1.5 : .6))
                     : null,
                 decoration: BoxDecoration(
+                    color: !mosaic && reading != null ? actualSurface : null,
                     borderRadius: BorderRadius.circular(10 * unit),
                     gradient: mosaic
                         ? LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                                Color.lerp(cellTint, Colors.white, .3)!,
+                                Color.lerp(cellTint,
+                                    reading?.surface ?? Colors.white, .3)!,
                                 cellTint
                               ])
                         : null,
@@ -304,12 +376,14 @@ class _RunPainter extends CustomPainter {
   _RunPainter(
       {required this.text,
       required this.background,
+      this.outline,
       required this.foreground,
       required this.index,
       required this.length,
       required this.unit,
       required this.phoneLabel});
   final String text;
+  final BorderSide? outline;
   final Color background, foreground;
   final int index, length;
   final double unit;
@@ -324,6 +398,15 @@ class _RunPainter extends CustomPainter {
         Rect.fromLTWH(left + 1.5 * unit, 0, runWidth - 3 * unit, size.height);
     canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(5 * unit)),
         Paint()..color = background);
+    if (outline != null) {
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(
+              rect.deflate(outline!.width / 2), Radius.circular(5 * unit)),
+          Paint()
+            ..color = outline!.color
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = outline!.width);
+    }
     final painter = TextPainter(
         textDirection: TextDirection.ltr,
         maxLines: 1,
@@ -331,14 +414,12 @@ class _RunPainter extends CustomPainter {
             text: text,
             style: TextStyle(
                 color: foreground,
-                fontSize: size.height * 15 / 19,
-                height: 1.05,
-                fontWeight: FontWeight.w700)))
+                fontSize: ShiftChipMetrics.maxFontSize(AppChipSize.regular),
+                height: ShiftChipMetrics.lineHeight,
+                fontWeight: FontWeight.w600)))
       ..layout();
-    final scale = math.min(
-        1.0,
-        math.min((rect.width - 6 * unit) / painter.width,
-            (size.height - 2 * unit) / painter.height));
+    final scale = ShiftChipMetrics.fitRatio(
+        painter.size, Size(rect.width - 6 * unit, size.height - 2 * unit));
     canvas.translate(left + (runWidth - painter.width * scale) / 2,
         (size.height - painter.height * scale) / 2);
     canvas.scale(scale);
@@ -350,6 +431,7 @@ class _RunPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _RunPainter old) =>
       text != old.text ||
+      outline != old.outline ||
       background != old.background ||
       foreground != old.foreground ||
       index != old.index ||

@@ -1,0 +1,26 @@
+대시보드 갱신 중단 조사 — 2026-10-13
+
+확인된 운영 실행
+- 마지막 실제 동기화 성공: 2026-10-12 20:14:50 KST, run38241379756. 로그 GA4 19일치, 최신2026-10-11, DAU122/MAU352.
+- 2026-10-13 00:20:52 KST 예약 시작/run38269560902, 00:21:09 동기화 실패. 오류 Element at index 0 should not be an empty string.
+- https://github.com/hwani1103/shiftbell/actions/runs/38269560902
+- default branch main, 실패run head0b0e056, workflow active. main 예약cron17 */3 * * * 설정 확인. 뒤의03:17/06:17/09:17 예약 실행은 조사시점 실행이력에서 발견되지 않음. 예약누락/지연의 저장소별 정확한 원인은 미확정.
+
+코드와 로컬 재현
+- 오류문구는 설치된 @google-cloud/firestore/build/src/path.js의 FieldPath 생성자가 빈 필드명에서 던지는 메시지와 일치.
+- operations.mjs countryTrend가 빈 국가명을 series의 map key로 사용함. segmentStats의 이벤트 map, transform.mjs buildEvents의 이벤트 series/totals도 빈 이름 검증 없음.
+- 각 최소 GA4 fixture에 빈 이름을 넣어 실제 SDK batch.set의 로컬 검증에서 운영 로그와 같은 오류3개 재현. commit/network write는 전혀 호출하지 않음.
+- 증거 artifacts/dashboard_sync_2026_10_13/reproduce_empty_fields.mjs, empty_field_reproduction.log, action_failure_excerpt.txt.
+- 정확히 어느 실제 GA4 필드가 비었는지는 현재 운영catch가e.message만 남겨 field path/stack이 없으므로 확정하지 않음. 서비스계정 원본키/ADC 로컬파일도 확인되지 않아 실제 새 GA4 payload를 다시 읽는 검증은 수행하지 않음.
+- sync.mjs는 summary/series/events/operations를 batch.commit 한 번으로 저장. batch.set 검증실패는 전체 저장을 중단하여 이전updatedAt와문서를 보존. 화면 새로고침/호스팅 재배포만으로 복구되지 않음.
+
+외부 예약 정보 (직접 인과와 구분)
+- GitHub 공식은 schedule 실행의 지연/누락 가능성을 명시: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule
+- 공식status에는10/12 Actions/PR/Issues 장애가 있었음: https://www.githubstatus.com/ . 저장소의 뒤예약 누락을 그 장애로 확정하지 않음. 이번00:20 run은 실제 실행됐고 실패는 수집데이터/SDK검증 경로의 오류.
+
+후속 권장
+- 국가 등의 빈 이름은 미확인 bucket으로 정규화, 빈 이벤트명은 유효성 검사와 명시적 관측으로 처리하여 빈map키 방지. 문서별field path를 사전 검증하고 로그에 남김.
+- 수정 테스트 후 수동 재집계로 현updatedAt복구, 다음 예약 발화/저장을 별도 확인.
+- 이번 요청 범위는 원인 조사: 운영 코드 수정/commit/push/수동동기화/Firestore쓰기/배포 없음. 기존미커밋 대시보드 작업 유지.
+
+2026-10-13 사용자 분류 변경: 기능·운영 후속 기록은 docs/next_version_27이후/로 연결한다. OPS-01 구현/운영 재집계/웹 배포 결과는 새 폴더02번 원장. 본 원장은 당시 조사 증거로 보존한다.

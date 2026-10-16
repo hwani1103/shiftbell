@@ -1,0 +1,30 @@
+온보딩 마무리 후속 — 2026-10-13
+
+dev 작업 트리에서 사용자 요청 문구/흐름 적용. main/prod 변경·배포·release 빌드 없음.
+1/3
+- 부가 안내: 사용되는 근무명을 선택해주세요.
+- 근무명 추가 밑 안내: 사용하지 않는 근무명은 탭하면 지워져요.
+- 약어/짧은 이름 안내는 추가 팝업에만 유지.
+- 카드 밑: 사용되는 근무명이 확정되면 아래의 다음 버튼을 눌러주세요. 카드 위 설명과 같은 AppTextRole.body/secondary, 같은 페이지 정렬과16 간격 사용.
+- 기본/추가 근무명 모두 칩 탭 삭제. 관련 패턴 슬롯·오늘 선택·불규칙 선택/임시 알람 상태 정리. 마지막 이름 삭제 가능하며 이름이0개면 다음 비활성, 다시 추가하면 복구.
+2/3
+- 제공 목록 제목: 선택된 근무명.
+- 패턴 완성 → 패턴 확정.
+- 오늘 선택 안내: 공통 section 텍스트 역할/selection 색상(활성 칩 border와 같은 상위 팔레트), 공통 AppUiAttention의 유한 밝기 효과2회, 총1.4초. 글자/카드 geometry 변형 없음. 선택 완료 시 정지. 동작 줄이기/accessibleNavigation 시 정적인 강조.
+- 공통 AppUiMotion이 전환220ms/주의 효과700ms×2회/최소불투명도.65를 관리. 기존 패턴 안내 전환과 버튼 이동도 공통 duration 사용. 안내 section 역할에 맞게 footer 예약 높이를 측정하여 패턴 침범 방지.
+언어: 공통 5ARB 문구 변경 및 새3키를 모두 번역, gen-l10n으로 생성 파일 갱신. 한국어 전용/공개 웹 뷰어 범위는 필수 실행기로 확인.
+
+추가 발견/해결
+- 작은 독일어/힌디어 알람 편집 카드에서 날짜 배지·시간·편집 아이콘 Row가 가로 넘침. Wrap과 공통 gap 기반 간격으로 좁은 폭의 줄바꿈을 허용. 삭제/시간편집/타입 기능 유지.
+
+검증
+- artifacts/onboarding_round8_verified.log: 대상79 PASS, 다국어/작은 화면/8근무×5알람/삭제 및 선택 상태 복구/유한 모션과 reduced motion/칩 자동 축소 포함. 실제글꼴 캡처 artifacts/onboarding_round8/host/ko_names.png와ko_today_selected.png 시각 확인.
+- 초기 검사에서는 새 검사 구문과 옛 제목/약어문구 기대값 및 알람 행 넘침 실패. 수정 후79 전체PASS, 임시 오류 출력 진단 변경은 원복.
+- tools/check_critical_release.ps1 -Build 및 정적 분석/최종 dev debug 빌드 진행. 완성 후 아래 추가 기록.
+
+완료 증거
+- 필수 check_critical_release.ps1 -Build: 실제 종료0, Flutter343 PASS/native 권한·언어·알람 및 native DB BUILD SUCCESSFUL/dev debug APK/JS웹 성공. 마지막P0 automated checks passed.
+- 정적 분석 실제종료0(--no-fatal-infos), error/warning 없음, info19.
+- dev APK: artifacts/onboarding_round8/ShiftBell_Onboarding_finish_dev_debug.apk
+- SHA256 1AA7F905F9CB4B23F447C336A571E1F4BEF4CD3E04633FD55C2BDF89C6B83498. aapt com.hwani1103.shiftbell.dev, version1.0.24-dev/code27, application-debuggable 확인. DB버전 변경없음. 이번APK 실기기 설치/모션 실측은 수행하지 않음(호스트검사/캡처/빌드 결과).
+- main0b0e05625502f21cf49057cf5e2ee7c173b93000 유지, prod 설치/배포/release 없음.

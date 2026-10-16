@@ -1,3 +1,4 @@
+import '../theme/app_ui_theme.dart';
 // First-use guidance: irregular shift assignment, sleep/recovery and schedules.
 // Each popup appears once, after the screen settles. Resetting a schedule does
 // not reset these preferences. The onboarding welcome popup was removed on
@@ -91,7 +92,7 @@ Future<void> maybeShowConditionTabTutorial(BuildContext context,
       context,
       shownKey: _kConditionTabTutorialShownKey,
       canShow: canShow,
-      koreanOnly: true,
+      koreanOnly: false,
       content: ConditionTabTutorialContent.new,
     );
 
@@ -137,11 +138,11 @@ class _InfoPopupCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppUiPalette.of(context).surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: AppUiPalette.of(context).text.withOpacity(0.15),
                 blurRadius: 24,
                 offset: const Offset(0, 8)),
           ],
@@ -163,10 +164,10 @@ class _InfoPopupCard extends StatelessWidget {
                       TextSpan(
                         children: wordSafeSpans(
                           content.title,
-                          const TextStyle(
-                              fontSize: 19,
+                          TextStyle(
+                              fontSize: AppFontSize.toolbar,
                               fontWeight: FontWeight.w800,
-                              color: Colors.black87),
+                              color: AppUiPalette.of(context).text),
                         ),
                       ),
                     ),
@@ -176,9 +177,11 @@ class _InfoPopupCard extends StatelessWidget {
                         children: wordSafeSpans(
                           content.body,
                           TextStyle(
-                              fontSize: 14.5,
+                              fontSize: AppFontSize.control,
                               height: 1.55,
-                              color: Colors.black.withOpacity(0.75)),
+                              color: AppUiPalette.of(context)
+                                  .text
+                                  .withOpacity(0.75)),
                         ),
                       ),
                     ),
@@ -227,8 +230,8 @@ class ConditionTabTutorialContent extends _PopupContent {
   ConditionTabTutorialContent(BuildContext context)
       : super(
           emoji: '🌙',
-          title: context.koOnly.onboardingConditionTabPopupTitle,
-          body: context.koOnly.onboardingConditionTabPopupBody,
+          title: context.l10n.onboardingConditionTabPopupTitle,
+          body: context.l10n.onboardingConditionTabPopupBody,
           buttonLabel: context.l10n.commonGotIt,
         );
 }

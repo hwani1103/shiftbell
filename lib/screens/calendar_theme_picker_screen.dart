@@ -1,3 +1,4 @@
+import '../theme/app_ui_theme.dart';
 // lib/screens/calendar_theme_picker_screen.dart
 //
 // ⭐ 설정 탭 "달력 테마" 진입점 - 실제 테마를 고르는 화면. 카드게임 같은
@@ -20,9 +21,9 @@ import '../models/calendar_theme.dart';
 import '../models/shift_schedule.dart';
 import '../providers/calendar_theme_provider.dart';
 import '../providers/schedule_provider.dart';
-import 'calendar_theme_lab_screen.dart';
 import 'calendar_tab.dart';
-import '../theme/app_theme.dart';
+import '../widgets/app_ui_theme_scope.dart';
+import '../widgets/calendar_app_frame.dart';
 import '../widgets/fold_calendar_text_scale.dart';
 
 class CalendarThemePickerScreen extends ConsumerStatefulWidget {
@@ -85,7 +86,7 @@ class _CalendarThemePickerScreenState
     return Scaffold(
       appBar: AppBar(
           title: Text(context.l10n.calendarTheme,
-              style: TextStyle(fontSize: 18.sp))),
+              style: TextStyle(fontSize: AppFontSize.toolbar))),
       // ⭐ "적용 버튼이 SafeArea를 안 받아서 제스처 네비게이션 바에 가깝다"는
       // 피드백 - body 전체를 SafeArea로 감싸서 하단 버튼이 항상 안전영역
       // 안쪽에 오게 함.
@@ -95,7 +96,8 @@ class _CalendarThemePickerScreenState
             SizedBox(height: 12.h),
             Text(
               _themes[_previewIndex].label(context),
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: AppFontSize.toolbar, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 4.h),
             Text(
@@ -163,10 +165,13 @@ class _CalendarThemePickerScreenState
                       // effectiveShiftColors()로 "테마 디폴트 위에 사용자 오버라이드
                       // (customShiftColors)만 유지해서 합친" 값을 캐시에 써서, 사용자가
                       // 지정한 근무만 테마가 바뀌어도 그 색 그대로 남게 함.
-                      final newColors = effectiveShiftColors(
-                              schedule.shiftTypes,
-                              themeId,
-                              schedule.customShiftColors)
+                      final colors = themeId == selected &&
+                              themeId == CalendarThemeId.mainWhite
+                          ? mainCalendarShiftColors(schedule.shiftTypes,
+                              schedule.shiftColors, schedule.customShiftColors)
+                          : effectiveShiftColors(schedule.shiftTypes, themeId,
+                              schedule.customShiftColors);
+                      final newColors = colors
                           .map((name, color) => MapEntry(name, color.value));
                       await ref
                           .read(scheduleProvider.notifier)
@@ -197,8 +202,9 @@ class _CalendarThemePickerScreenState
                     _themes[_previewIndex] == selected
                         ? context.l10n.themeCurrentlyApplied
                         : context.l10n.themeApplyThis,
-                    style:
-                        TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: AppFontSize.control,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -245,12 +251,12 @@ class _CalendarThemePickerScreenState
           aspectRatio: aspectRatio,
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20.r),
+              color: AppUiPalette.of(context).surface,
+              borderRadius: BorderRadius.circular(AppUiMetrics.cardRadius),
               border: Border.all(
                 color: isSelected
                     ? Theme.of(context).colorScheme.primary
-                    : Colors.grey.shade300,
+                    : AppUiPalette.of(context).border,
                 width: isSelected ? 2.5 : 1,
               ),
               boxShadow: [
@@ -276,23 +282,16 @@ class _CalendarThemePickerScreenState
                     width: deviceSize.width,
                     height: bodyHeight,
                     child: FoldCalendarTextScale(
-                        child: !{
-                      CalendarThemeId.underline,
-                      CalendarThemeId.editorial,
-                    }.contains(_themes[index])
-                            ? ProviderScope(
-                                overrides: [
-                                    calendarThemeProvider.overrideWith((ref) =>
-                                        CalendarThemeNotifier.withInitial(
-                                            _themes[index]))
-                                  ],
-                                child: Theme(
-                                    data: AppTheme.forCalendar(_themes[index]),
-                                    child: const CalendarTab(preview: true)))
-                            : CalendarThemeLabScreen(
-                                preview: true,
-                                initialPage: kAllCalendarThemeIds
-                                    .indexOf(_themes[index]))),
+                        child: ProviderScope(
+                            overrides: [
+                          calendarThemeProvider.overrideWith((ref) =>
+                              CalendarThemeNotifier.withInitial(_themes[index]))
+                        ],
+                            child: AppUiThemeScope(
+                                builder: (_) => CalendarDesignTheme(
+                                    theme: _themes[index],
+                                    child: const CalendarTab(
+                                        preview: true, currentDesign: true))))),
                   ),
                 ),
               ),

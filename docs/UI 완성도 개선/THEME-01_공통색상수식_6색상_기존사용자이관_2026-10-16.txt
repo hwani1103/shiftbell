@@ -1,0 +1,87 @@
+화면색상 공통 수식 / 다음 알람 / 6색상 / 기존 사용자 이관
+2026-10-16 후속 원장 (UI23~31, UI35~39, UI61 이후)
+
+사용자 합의
+- 권한 안내 → 온보딩 → 이미 연결된 메인 달력의 팔레트를 이번에 함께 정리한다.
+- 다음 알람은 움직이는 그라데이션을 제거하고 같은 화면색상을 따른다.
+- 자동 5번째 구간을 다크로 통합한다. 고정 선택은 새벽/아침/주간/저녁/다크/화이트 총6개이며 자동은 선택 모드다.
+- 기존 메인화이트 → 메인 + 화이트 고정, 메인다크 → 메인 + 다크 고정.
+- 그 외 기존 달력 테마 → 기존 테마 + 화이트 고정. 신규 설치만 자동 기본값.
+- 이관 뒤 사용자가 직접 바꾼 선택을 다음 실행에서 덮어쓰지 않는다.
+- 이번 작업에서는 debug/release APK, 웹 빌드 및 기기 설치를 하지 않는다.
+
+구현
+1. lib/theme/app_ui_theme.dart의 AppUiPalette.fromSeed가 16개 역할을 공통 생성한다.
+   각 화면에서 색상표를 따로 관리하지 않는다. 고정 배색을 수식으로 바꾸므로 기존 배색의 세부 색감은 바뀐다.
+   배경 기준색: 새벽 EDEDF8 / 아침 ECF8F7 / 주간 DFEDFC / 저녁354B67 / 다크1A1F2E.
+   주간은 AppUiPalette.blueSeed, 나머지는 app_ui_time_palettes.dart에서 기준색 하나씩 수정한다.
+   화이트는 주간 기준색에서 강조색을 계산하되 background/surface/soft를 흰색으로 고정한다.
+   자동 시간: 05~08 새벽,08~11 아침,11~17 주간,17~21 저녁,21~05 다크. 기존 로컬 시계·복귀 갱신 유지.
+
+2. 역할 목록과 계산 규칙
+   background: 기준색(불투명), 화이트 모드는 흰색.
+   surface: 밝은 배경에서 흰색72% 혼합, 어두운 배경에서5.5% 혼합.
+            중간 명도의 어두운 배경은 글자 대비 극성이 바뀌지 않게 검정 방향으로 혼합.
+   soft: background→surface65%, 화이트 모드는 흰색.
+   primary: 기준색 HSL의 색상각 유지, 채도 .38~.65 제한, 밝은 화면 명도 .36 / 어두운 화면 .80.
+   onPrimary: primary 위에서 대비가 더 높은 검정/흰색.
+   text: 기준색 색상각, 채도 .20, 밝은 화면 명도 .14 / 어두운 화면 .96.
+   secondaryText: text→background24% 혼합 후 대비 보정.
+   border: text→background55% 혼합 후 경계 대비 보정.
+   selectionOutline: 기준색 색상각+60도, 밝은 화면 명도 .38 / 어두운 화면 .82, 대비 보정.
+   danger: 의미색 빨강 C23749를 밝기에 맞춘 후 대비 보정. 오류 의미는 배경색으로 치환하지 않는다.
+   dangerSurface: background에 오류 빨강8% 혼합.
+   disabledSurface: background→surface40% 혼합.
+   disabledText: text→disabledSurface50% 혼합 후 대비3 이상.
+   chipSurface/chipBorder/chipText: soft/border/text를 공유.
+   AppUiColorMath는 여러 실제 배경에서 일반 글자4.5, 칩 경계3 이상의 대비를 보정한다.
+   Material의 primary/secondary/tertiary 및 container, error, inverse 색도 같은 팔레트에서 파생한다.
+
+3. 달력은 공통 기준색과 대비 계산을 공유한다.
+   CalendarContrast는 AppUiColorMath에 위임하며 alphaBlend 후 대비를 계산하는 계약을 보존한다.
+   CalendarReadingPalette의 날짜용 검정/흰색, 공휴일 빨강, 메모/카드/월 구분은 역할별 계산을 유지한다.
+   달력 진한 띠도 고정 청회색 대신 배경색→검정65%로 계산한다.
+   달력의 크기·행·글자 측정·패딩·근무명 점유율 및 저장 근무색/DB는 이번 작업에서 바꾸지 않았다.
+   공휴일/오류 등 의미색, 사용자가 저장한 근무색, 고정 시스템 스플래시 #EEF6FD는 독립 계약이다.
+
+4. 다음 알람
+   NextAlarmTab 내부와 메인 외곽/하단 탭에 AppUiThemeScope를 연결한다.
+   움직이는 그라데이션 배경을 삭제하고 clock/ring/track/date/remaining/type/empty/list/button/snackbar를 역할 색상으로 연결한다.
+   알람 목록은 별도 AppUiThemeScope를 사용하여 열린 동안 색상 선택 및 시간 구간 변경에도 대응한다.
+   알람 예약/종료/알림 권한 판정 로직은 변경하지 않았다.
+   이번 main.dart 수정은 다음 알람(index0)의 외곽 팔레트 활성화와 달력 전용 변환 조건 분리뿐이다.
+
+5. 기존 사용자 설정 이관
+   CalendarThemeMigration의 screen_palette_migration_v2 완료 표식을 마지막에 저장한다.
+   신규: 저장 테마 및 기존 권한/환영 표시가 없으면 automatic으로 시작하고 표식을 남긴다.
+   기존: mainDark는 mainWhite(표시명 메인)로 통합하고 night(다크 고정), 그 밖에는 테마 유지 + originalWhite.
+   과거 별도 고정 originalDark 값은 night로 치환한다.
+   이전 화면색상 선택기에서 직접 저장한 고정 선택은 보존한다.
+   V1에서 메인 고정 이관 후 자동으로 바꾼 기록, V2 이후 직접 고른 자동/고정 선택도 보존한다.
+   시작 시 두 provider가 동시에 요청하는 이관은 직렬화하며, 부분 저장 후 재시도 가능하다.
+   설정 저장 실패 시에도 읽을 수 있는 기존 선택을 화면에 적용하여 자동으로 잘못 전환하지 않는다.
+   locale 기본 달력은 달력 provider가 결정한다. 색상 provider가 임의로 한국 기본 달력 ID를 쓰지 않는다.
+
+검증
+- core_final.log: 팔레트 생성/36개 추가 기준색 대비/6색상 다음 알람·목록·빈 상태/열린 목록 색상 변경/
+  기존12개 테마 이관/새 설치/기존V1/반복 시작/달력 대비 총43검사 PASS.
+- connected_screens.log: 온보딩·권한 안내·설정·달력·전체근무표·시스템바·팔레트 scope 생명주기108검사 PASS.
+- 캡처: artifacts/next_alarm_palette_2026_10_16/ 의 6색상 tab/list/empty 및 onboarding/.
+  주간·저녁·다크·화이트 다음 알람과 온보딩/알람 편집 팝업의 호스트 렌더링을 시각 확인했다.
+- 정적 분석 및 필수 회귀 최종 결과는 아래 후속 결과에 기록한다.
+- 첫 연결 화면 검사 시 병행 전체근무표 파일의 임시 컴파일 오류는 해당 파일을 수정하지 않고 후속 재검사 PASS로 확인했다.
+- 필수 회귀 첫 두 시도는 Windows sqlite3.dll 사용 중 복사 실패로 중단. 다른 세션의 검사 프로세스는 중단하지 않았다.
+- APK/웹 빌드, 설치, 실기기 확인 없음. 이전 기기 PASS/출시 잔여를 이번 결과로 덮어쓰지 않는다.
+- 이미 AppUiPalette에 연결된 영역의 중앙화다. 미전환 설정 항목/수면/일정/기타 팝업까지 전 앱 완료라는 의미가 아니다.
+
+후속 결과
+- 대상151검사(43+108) PASS. 다음 알람 열린 목록의 실시간 색상 변경을 포함한 최종43검사 재실행 PASS.
+- analyze_final.log: exit0, error0/warning0. 기존 print/const/스타일 등 info39건은 범위 밖 일괄 정리를 하지 않았다.
+- 필수 check_critical_release.ps1(-Build 없이) 실행2회는 모두 Windows sqlite3.dll 파일 복사 충돌로 첫 Flutter 묶음 시작 전에 중단(exit1).
+  실행 중인 다른 세션의 all_shifts_screen_test/all_shifts_timeline_metrics 검사 프로세스가 동일 DLL을 사용함을 읽기 전용으로 확인했다.
+  해당 프로세스 종료·공용 DLL 교체·SDK 설정 변경은 하지 않았다. 전체 회귀 PASS로 기록하지 않는다.
+  생성기/common ICU/국가 공휴일 Dart-native parity/웹8 locale fallback 및 언어 변경 검사는 통과.
+  재개 방법: 다른 세션의 Flutter 검사가 모두 종료된 뒤 tools/check_critical_release.ps1을 -Build 없이 한 번 실행한다.
+- APK/debug/release/웹 빌드 및 실기기 설치는 사용자 지시에 따라 실행하지 않았다.
+- 기존 사용자 이관 후 첫 화면, 권한→온보딩6색상 및 실제 다음 알람/달력 색감의 실기기 확인은 후속이다.
+

@@ -1,0 +1,70 @@
+{
+  "modelStats": {
+    "bytes": 4407402,
+    "gzipBytes": 1124892,
+    "meta": {
+      "ngram_min": 2,
+      "ngram_max": 3,
+      "analyzer": "char_wb",
+      "sublinear_tf": true,
+      "lowercase": true,
+      "norm": "l2",
+      "vocab_size": 21462,
+      "n_classes": 19
+    },
+    "classes": [
+      "family",
+      "study",
+      "finance",
+      "etc",
+      "running",
+      "hiking",
+      "culture",
+      "beauty",
+      "health",
+      "shopping",
+      "swimming",
+      "meal",
+      "social",
+      "work",
+      "leisure",
+      "yoga",
+      "exercise",
+      "cycling",
+      "housework"
+    ],
+    "coefficientCount": 407778
+  },
+  "dataStats": [
+    {
+      "file": "boundary_cases.jsonl",
+      "bytes": 33230,
+      "lines": 202
+    },
+    {
+      "file": "eval_holdout.jsonl",
+      "bytes": 6146,
+      "lines": 116
+    },
+    {
+      "file": "pilot_dataset.jsonl",
+      "bytes": 697605,
+      "lines": 9106
+    },
+    {
+      "file": "README.md",
+      "bytes": 7113,
+      "lines": 88
+    },
+    {
+      "file": "user_batch1.jsonl",
+      "bytes": 50307,
+      "lines": 500
+    },
+    {
+      "file": "user_batch1_raw.txt",
+      "bytes": 34513,
+      "lines": 1009
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/game_final_polish_test.dart: (setUpAll)
+00:00 +0: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:03 +1: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:04 +2: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:04 +3: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:04 +4: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:04 +5: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:04 +6: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:04 +7: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:04 +8: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:08 +9: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:08 +10: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:08 +11: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:09 +12: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:09 +13: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/compact_ui_test.dart: Compact four-ball board fits 320x600; menu has help and reset; no replay UI
+00:10 +14: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal levels do not interrupt play; all four help pages stay available
+00:11 +15: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal levels do not interrupt play; all four help pages stay available
+00:12 +16: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal levels do not interrupt play; all four help pages stay available
+00:13 +17: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal levels do not interrupt play; all four help pages stay available
+00:14 +18: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal levels do not interrupt play; all four help pages stay available
+00:16 +19: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal levels do not interrupt play; all four help pages stay available
+00:19 +20: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Paused replay can restart from the game menu
+00:20 +21: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal collision stays on the contact, failure supports fresh restart
+00:21 +22: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: Portal and mixed maps render at 320x600 with stable board, light/dark/reduced motion
+00:25 +23: C:/Users/Administrator/Desktop/shiftbell/packages/sync_path_ui/test/portals_campaign_test.dart: (tearDownAll)
+00:25 +23: All tests passed!

@@ -1,0 +1,12 @@
+검증 기록 / 2026-10-14
+1. 기존13개 테스트파일:144 tests passed,exit0.
+실행: flutter test --no-pub --reporter expanded
+파일: night_shift_sleep_attribution, sleep_day_slots, sleep_overlap, sleep_opportunity, sleep_history, sleep_by_category_stats, sleep_estimate_minimum, recovery_briefing_engine, recovery_briefing_overlap_scenarios, condition_rule_engine_v2, condition_baseline_load, memo_category_classifier, optional_features_defaults (모두 test/*_test.dart)
+근거: exec session2633,최종00:22 +144 All tests passed!,exit_code0.전체콘솔출력은도구응답에서일부축약됨.이파일은실행요약이며원본전체로그가아님.
+2. 추가 귀속경계17사례: flutter test --no-pub --reporter expanded docs/next_version_27이후/수면회복_일정관리_글로벌도입_조사_2026-10-14/귀속_경계_추가검증_test.dart
+exec session70229,exit0.원본로그:귀속_경계_검증.log / 결과:귀속_경계_실행결과.json(17행).
+3. 모델크기·JSON메타데이터·학습/평가정확문장중복 검사:모델_측정.json,학습데이터_분리_점검.json.
+4. 소스와리소스전수검색:앱/Android/web의1810언급행,241언어조건행,공통65키5언어대조,한국어전용196키(두기능대상58키),관련30소스446문구후보행.후보행수는완성문장수가아님.
+5. 미실행:새APK/웹빌드,release,배포,실기기잠금/OEM/DST.기능/언어리소스구조변경이없는조사이므로이번에는check_critical_release.ps1 -Build를실행하지않음.도입구현때필수.
+환경:일반exec시작실패후Node읽기로우회.제한실행Flutter는SDK lockfile접근실패(초기로그보존).권한확장exec로기존/추가테스트정상실행.자동승인거절은없었음.
+외부공개privacy주소는web도구/직접fetch모두조회실패.현재게시본문을확인했다고기록하지않음.10/12배포원장확인.

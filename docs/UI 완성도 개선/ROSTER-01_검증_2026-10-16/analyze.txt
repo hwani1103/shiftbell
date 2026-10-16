@@ -1,0 +1,23 @@
+Analyzing 7 items...                                            
+
+   info - Statements in an if should be enclosed in a block - lib\screens\all_shifts_view.dart:299:27 - curly_braces_in_flow_control_structures
+   info - Use 'const' with the constructor to improve performance - lib\screens\all_shifts_view.dart:307:13 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\all_shifts_view.dart:308:22 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\all_shifts_view.dart:366:34 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\screens\all_shifts_view.dart:366:48 - prefer_const_constructors
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\all_shifts_view.dart:399:61 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\all_shifts_view.dart:417:66 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\all_shifts_view.dart:476:65 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\screens\all_shifts_view.dart:709:13 - curly_braces_in_flow_control_structures
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\all_shifts_view.dart:813:43 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\all_shifts_view.dart:814:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\all_shifts_view.dart:922:41 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\all_shifts_view.dart:1021:39 - deprecated_member_use
+   info - 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre - lib\screens\all_shifts_view.dart:1055:62 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\screens\mini_games_screen.dart:105:7 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\screens\mini_games_screen.dart:110:7 - curly_braces_in_flow_control_structures
+warning - Unused import: 'package:flutter/services.dart' - test\sync_paths_integration_test.dart:3:8 - unused_import
+warning - This function has a nullable return type of 'FutureOr<Object?>', but ends without returning a value - test\sync_paths_integration_test.dart:30:72 - body_might_complete_normally_nullable
+warning - This function has a nullable return type of 'FutureOr<Object?>', but ends without returning a value - test\sync_paths_integration_test.dart:49:72 - body_might_complete_normally_nullable
+
+19 issues found. (ran in 208.4s)
