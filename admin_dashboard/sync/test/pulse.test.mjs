@@ -43,6 +43,9 @@ test('feature comparison sorts by two-day total and separates unseen from observ
   assert.deepEqual(m.rows.find(r=>r.name==='memo_saved').values,[0,0]);
   assert.deepEqual(m.rows.find(r=>r.name==='all_shifts_opened').values,[null,null]);
   assert.deepEqual(comparisonRows(docs,'closed').dates,['2026-10-14','2026-10-15']);
+  docs.pulse.events=docs.pulse.events.filter(r=>r.date!=='2026-10-16');
+  assert.equal(comparisonRows(docs).pendingToday,true);
+  assert.equal(comparisonRows(docs).rows.find(r=>r.name==='schedule_created').values[1],null);
   docs.pulse.events=null;assert.equal(comparisonRows(docs).available,false);
 });
 test('optional API failure preserves unavailable states and includes current KST date',async()=>{

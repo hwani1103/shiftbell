@@ -11,10 +11,11 @@ export function pulseHero(docs, ui) {
   const p = docs.pulse, yesterday = p?.today ? dayShift(p.today, -1) : docs.summary.latest;
   const daily = p?.daily?.find(r => r.date === yesterday);
   const today = p?.daily?.find(r => r.date === p.today);
+  const todayText = today?.dau > 0 ? `${count(today.dau)}명 · 잠정` : '집계 대기';
   const ret = docs.growth?.retention?.all?.[7];
   const funnel = docs.growth?.byRange?.[ui.range]?.activation?.all;
   const tiles = [
-    ['DAU · 최근 완료일', count(daily?.dau ?? (docs.summary.latest === yesterday ? docs.summary.kpi?.dau : null)), `${esc(fmtMD(yesterday))} · ${p?.today ? esc(fmtMD(p.today)) : '오늘'} ${count(today?.dau)}명 · 잠정`],
+    ['DAU · 최근 완료일', count(daily?.dau ?? (docs.summary.latest === yesterday ? docs.summary.kpi?.dau : null)), `${esc(fmtMD(yesterday))} · ${p?.today ? esc(fmtMD(p.today)) : '오늘'} ${todayText}`],
     ['D7 재방문율', rate(ret?.rate), `${count(ret?.returned)} / ${count(ret?.size)}명 · ${range(ret)} 첫 세션`],
     ['온보딩 완료율', rate(funnel?.rate), `${count(funnel?.completed)} / ${count(funnel?.entrants)}명 · ${range(funnel)} 첫 실행`],
   ];
@@ -33,7 +34,7 @@ export function featureComparison(docs, ui) {
   const max = Math.max(1,...model.rows.flatMap(r=>r.values.map(v=>v??0)));
   const controls = `<div class="pulse-controls"><div class="seg" role="group" aria-label="기능 비교 날짜"><button data-action="feature-mode" data-key="live" aria-pressed="${ui.featureMode !== 'closed'}">어제 / 오늘</button><button data-action="feature-mode" data-key="closed" aria-pressed="${ui.featureMode === 'closed'}">그제 / 어제</button></div><button class="btn ghost sm" data-action="feature-all">${all ? '상위 15개만' : `전체 ${model.rows.length}개 보기`}</button></div>`;
   const legend = `<div class="pulse-legend"><span><i class="pulse-before"></i>${esc(fmtMD(model.dates[0]))}</span><span><i class="pulse-after"></i>${esc(fmtMD(model.dates[1]))}${ui.featureMode === 'closed' ? '' : ' · 잠정'}</span><span>실행 횟수 · 두 날짜 합계순</span></div>`;
-  const chart = rows.map((r,i) => `<div class="pulse-feature"><button class="pulse-feature-name" data-action="event" data-event="${esc(r.name)}"><span>${i+1}</span>${esc(r.label)}</button><div class="pulse-bars">${r.values.map((v,j)=>`<div class="pulse-bar-row"><div class="pulse-bar-track"><i class="${j?'pulse-after':'pulse-before'}" style="width:${v == null ? 0 : v/max*100}%"></i></div><b>${v == null ? '미관측' : count(v)}</b></div>`).join('')}</div></div>`).join('');
+  const chart = rows.map((r,i) => `<div class="pulse-feature"><button class="pulse-feature-name" data-action="event" data-event="${esc(r.name)}"><span>${i+1}</span>${esc(r.label)}</button><div class="pulse-bars">${r.values.map((v,j)=>`<div class="pulse-bar-row"><div class="pulse-bar-track"><i class="${j?'pulse-after':'pulse-before'}" style="width:${v == null ? 0 : v/max*100}%"></i></div><b>${v == null ? (j===1 && model.pendingToday ? '집계 대기' : '미관측') : count(v)}</b></div>`).join('')}</div></div>`).join('');
   return panel('어떤 기능을 얼마나 사용하나요?', '일정 생성 · 수면 기록 · 전체근무표 확인 · 메모 저장 등', controls + legend +
     (model.available ? `<div class="pulse-features">${chart}</div>` : note('기능 집계를 가져오지 못했습니다. 0회로 해석하지 마세요.')) +
     note(`오늘은 하루가 끝나지 않았고 GA4 처리 지연도 있어 전일 대비 감소율을 표시하지 않습니다. 공정한 비교는 ‘그제 / 어제’를 선택하세요. 최근 30일 동안 수집되지 않은 기능은 ‘미관측’입니다.${model.limited ? ' 현재 보고서에 집계 제한이 있습니다.' : ''}`));
